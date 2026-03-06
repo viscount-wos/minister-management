@@ -95,6 +95,19 @@ def init_db(app):
 
         db.commit()
 
+        # Schema migrations (idempotent - safe to re-run)
+        migrations = [
+            'ALTER TABLE players ADD COLUMN avatar_image TEXT DEFAULT NULL',
+            'ALTER TABLE players ADD COLUMN stove_lv INTEGER DEFAULT NULL',
+            'ALTER TABLE players ADD COLUMN stove_lv_content TEXT DEFAULT NULL',
+        ]
+        for migration in migrations:
+            try:
+                cursor.execute(migration)
+            except Exception:
+                pass  # Column already exists
+        db.commit()
+
 
 def calculate_points(player, day):
     """
@@ -190,6 +203,9 @@ def save_player(data, time_slots):
                 fire_crystals = ?,
                 refined_fire_crystals = ?,
                 fire_crystal_shards = ?,
+                avatar_image = ?,
+                stove_lv = ?,
+                stove_lv_content = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE fid = ?
         ''', (
@@ -201,6 +217,9 @@ def save_player(data, time_slots):
             data['fire_crystals'],
             data['refined_fire_crystals'],
             data['fire_crystal_shards'],
+            data.get('avatar_image'),
+            data.get('stove_lv'),
+            data.get('stove_lv_content'),
             data['fid']
         ))
 
@@ -212,8 +231,9 @@ def save_player(data, time_slots):
             INSERT INTO players (
                 fid, game_name, construction_speedups_days, research_speedups_days,
                 troop_training_speedups_days, general_speedups_days, fire_crystals,
-                refined_fire_crystals, fire_crystal_shards
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                refined_fire_crystals, fire_crystal_shards,
+                avatar_image, stove_lv, stove_lv_content
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data['fid'],
             data['game_name'],
@@ -223,7 +243,10 @@ def save_player(data, time_slots):
             data['general_speedups_days'],
             data['fire_crystals'],
             data['refined_fire_crystals'],
-            data['fire_crystal_shards']
+            data['fire_crystal_shards'],
+            data.get('avatar_image'),
+            data.get('stove_lv'),
+            data.get('stove_lv_content')
         ))
         player_id = cursor.lastrowid
 

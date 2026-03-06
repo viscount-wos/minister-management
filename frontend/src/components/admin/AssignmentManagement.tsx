@@ -21,6 +21,9 @@ interface AssignedPlayer {
   game_name: string;
   points: number;
   time_slot?: string;
+  avatar_image?: string;
+  stove_lv?: number;
+  stove_lv_content?: string;
 }
 
 interface Assignments {
@@ -72,9 +75,24 @@ function DraggablePlayer({ player, sourceSlot }: { player: AssignedPlayer; sourc
       {...listeners}
       className={`p-3 border-2 rounded-lg cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow ${PLAYER_CARD_CLASS}`}
     >
-      <div className="font-medium">{player.game_name}</div>
-      <div className="text-xs opacity-75">
-        {player.fid} • {(player.points ?? 0).toLocaleString()} pts
+      <div className="flex items-center gap-2">
+        {player.avatar_image ? (
+          <img
+            src={player.avatar_image}
+            alt=""
+            className="w-8 h-8 rounded-full border border-accent/50 flex-shrink-0"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 text-xs font-bold text-accent">
+            {player.game_name.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="font-medium truncate">{player.game_name}</div>
+          <div className="text-xs opacity-75">
+            {player.fid} • {(player.points ?? 0).toLocaleString()} pts
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -86,9 +104,24 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
     <div
       className={`p-3 border-2 rounded-lg shadow-lg ${PLAYER_CARD_CLASS}`}
     >
-      <div className="font-medium">{player.game_name}</div>
-      <div className="text-xs opacity-75">
-        {player.fid} • {(player.points ?? 0).toLocaleString()} pts
+      <div className="flex items-center gap-2">
+        {player.avatar_image ? (
+          <img
+            src={player.avatar_image}
+            alt=""
+            className="w-8 h-8 rounded-full border border-accent/50 flex-shrink-0"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 text-xs font-bold text-accent">
+            {player.game_name.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="font-medium truncate">{player.game_name}</div>
+          <div className="text-xs opacity-75">
+            {player.fid} • {(player.points ?? 0).toLocaleString()} pts
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -321,7 +354,7 @@ export default function AssignmentManagement() {
   const handleExport = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`/api/admin/export/${selectedDay}`, {
+      const response = await axios.get('/api/admin/export', {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',
       });
@@ -329,7 +362,7 @@ export default function AssignmentManagement() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${selectedDay}_assignments.xlsx`);
+      link.setAttribute('download', 'ministry_assignments.xlsx');
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -432,7 +465,7 @@ export default function AssignmentManagement() {
               </h3>
               <DroppableUnassigned isOver={overSlotId === 'unassigned'}>
                 <div className="space-y-2">
-                  {unassignedPlayers.map((player) => (
+                  {[...unassignedPlayers].sort((a, b) => (b.points ?? 0) - (a.points ?? 0)).map((player) => (
                     <div key={`player-${player.player_id}-unassigned`}>
                       <DraggablePlayer
                         player={player}

@@ -16,6 +16,9 @@ interface PlayerData {
   refined_fire_crystals: number;
   fire_crystal_shards: number;
   time_slots: string[];
+  avatar_image?: string;
+  stove_lv?: number;
+  stove_lv_content?: string;
 }
 
 export default function UpdateSubmission() {

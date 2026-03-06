@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, Download, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 interface PlayerData {
@@ -14,6 +14,9 @@ interface PlayerData {
   fire_crystals: number;
   refined_fire_crystals: number;
   fire_crystal_shards: number;
+  avatar_image?: string;
+  stove_lv?: number;
+  stove_lv_content?: string;
 }
 
 export default function PlayerForm() {
@@ -23,6 +26,7 @@ export default function PlayerForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [wosLoading, setWosLoading] = useState(false);
 
   const [playerData, setPlayerData] = useState<PlayerData>({
     fid: '',
@@ -47,6 +51,36 @@ export default function PlayerForm() {
       ...prev,
       [name]: name === 'game_name' || name === 'fid' ? value : parseFloat(value) || 0,
     }));
+  };
+
+  const handleWosLookup = async () => {
+    if (!playerData.fid.trim()) {
+      setError(t('form.enterFidFirst'));
+      return;
+    }
+
+    setWosLoading(true);
+    setError('');
+
+    try {
+      const response = await axios.post('/api/player/wos-lookup', {
+        fid: playerData.fid.trim(),
+      });
+
+      const wosData = response.data;
+      setPlayerData(prev => ({
+        ...prev,
+        game_name: wosData.nickname || prev.game_name,
+        avatar_image: wosData.avatar_image || undefined,
+        stove_lv: wosData.stove_lv || undefined,
+        stove_lv_content: wosData.stove_lv_content || undefined,
+      }));
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to look up player from WOS';
+      setError(msg);
+    } finally {
+      setWosLoading(false);
+    }
   };
 
   const toggleTimeSlot = (time: string) => {
@@ -153,6 +187,56 @@ export default function PlayerForm() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-theme-text mb-2">
+                  {t('form.playerID')} *
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    name="fid"
+                    value={playerData.fid}
+                    onChange={handleInputChange}
+                    className="flex-1 px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                    placeholder="Enter your unique Player ID"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={handleWosLookup}
+                    disabled={wosLoading || !playerData.fid.trim()}
+                    className="flex items-center gap-2 px-4 py-3 bg-success text-dark-bg rounded-lg hover:bg-success/80 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {wosLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Download className="w-5 h-5" />
+                    )}
+                    {t('form.loadFromWOS')}
+                  </button>
+                </div>
+              </div>
+
+              {/* Avatar preview after WOS lookup */}
+              {playerData.avatar_image && (
+                <div className="flex items-center gap-4 p-4 bg-dark-bg rounded-lg border border-accent/30">
+                  <img
+                    src={playerData.avatar_image}
+                    alt="Player avatar"
+                    className="w-16 h-16 rounded-full border-2 border-accent"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  {playerData.stove_lv_content && (
+                    <img
+                      src={playerData.stove_lv_content}
+                      alt={`Furnace level ${playerData.stove_lv}`}
+                      className="w-8 h-8"
+                    />
+                  )}
+                  <div className="text-theme-text font-medium">{playerData.game_name}</div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-theme-text mb-2">
                   {t('form.gameName')} *
                 </label>
                 <input
@@ -161,20 +245,6 @@ export default function PlayerForm() {
                   value={playerData.game_name}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-theme-text mb-2">
-                  {t('form.playerID')} *
-                </label>
-                <input
-                  type="text"
-                  name="fid"
-                  value={playerData.fid}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  placeholder="Enter your unique Player ID"
                   required
                 />
               </div>
@@ -315,6 +385,14 @@ export default function PlayerForm() {
             </h2>
             <div className="space-y-4">
               <div className="bg-dark-bg p-6 rounded-lg border border-theme-border">
+                {playerData.avatar_image && (
+                  <div className="flex items-center gap-3 mb-4 pb-4 border-b border-theme-border">
+                    <img src={playerData.avatar_image} alt="Avatar" className="w-12 h-12 rounded-full border-2 border-accent" />
+                    {playerData.stove_lv_content && (
+                      <img src={playerData.stove_lv_content} alt="Stove level" className="w-6 h-6" />
+                    )}
+                  </div>
+                )}
                 <h3 className="font-semibold text-lg mb-4 text-accent">Player Information</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div>

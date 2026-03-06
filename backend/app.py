@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 import os
+import hashlib
+import time as time_module
+import requests as http_requests
 from dotenv import load_dotenv
 from datetime import datetime
 import openpyxl
@@ -90,6 +93,59 @@ def get_player(fid):
         if player:
             return jsonify(player), 200
         return jsonify({'error': 'Player not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/player/wos-lookup', methods=['POST'])
+def wos_lookup():
+    """Look up player info from the WOS game API."""
+    try:
+        data = request.json
+        fid = data.get('fid', '').strip()
+
+        if not fid:
+            return jsonify({'error': 'FID is required'}), 400
+
+        # Build signed request for WOS API
+        secret = 'tB87#kPtkxqOS2'
+        ts = str(int(time_module.time() * 1e9))
+        form_data = f'fid={fid}&time={ts}'
+        sign = hashlib.md5((form_data + secret).encode()).hexdigest()
+        body = f'sign={sign}&{form_data}'
+
+        response = http_requests.post(
+            'https://wos-giftcode-api.centurygame.com/api/player',
+            data=body,
+            headers={
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Origin': 'https://wos-giftcode.centurygame.com',
+                'Referer': 'https://wos-giftcode.centurygame.com/',
+            },
+            timeout=10
+        )
+
+        result = response.json()
+
+        if result.get('code') != 0:
+            return jsonify({'error': 'Player not found in WOS'}), 404
+
+        wos_data = result['data']
+        return jsonify({
+            'success': True,
+            'fid': str(wos_data['fid']),
+            'nickname': wos_data.get('nickname', ''),
+            'kid': wos_data.get('kid'),
+            'stove_lv': wos_data.get('stove_lv'),
+            'stove_lv_content': wos_data.get('stove_lv_content', ''),
+            'avatar_image': wos_data.get('avatar_image', ''),
+        }), 200
+
+    except http_requests.exceptions.Timeout:
+        return jsonify({'error': 'WOS API timed out'}), 504
+    except http_requests.exceptions.RequestException as e:
+        return jsonify({'error': f'Failed to reach WOS API: {str(e)}'}), 502
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -226,7 +282,10 @@ def auto_assign():
                         'player_id': player['id'],
                         'fid': player['fid'],
                         'game_name': player['game_name'],
-                        'points': player['points']
+                        'points': player['points'],
+                        'avatar_image': player.get('avatar_image', ''),
+                        'stove_lv': player.get('stove_lv'),
+                        'stove_lv_content': player.get('stove_lv_content', ''),
                     })
                     assigned = True
                     break
@@ -238,7 +297,10 @@ def auto_assign():
                     'fid': player['fid'],
                     'game_name': player['game_name'],
                     'points': player['points'],
-                    'preferred_times': list(player_time_prefs)
+                    'preferred_times': list(player_time_prefs),
+                    'avatar_image': player.get('avatar_image', ''),
+                    'stove_lv': player.get('stove_lv'),
+                    'stove_lv_content': player.get('stove_lv_content', ''),
                 })
 
         # Clear existing assignments for this day
@@ -339,77 +401,151 @@ def update_assignments():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/admin/export/<day>', methods=['GET'])
-def export_assignments(day):
-    """Export assignments to Excel."""
+@app.route('/api/admin/export', methods=['GET'])
+def export_assignments():
+    """Export assignments for all days to a single Excel workbook."""
     try:
         # Simple auth check
         auth_header = request.headers.get('Authorization')
         if not auth_header or 'token' not in auth_header:
             return jsonify({'error': 'Unauthorized'}), 401
 
-        # Create workbook
         wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = f"{day.capitalize()} Assignments"
+        wb.remove(wb.active)  # Remove default sheet
 
-        # Headers
-        headers = ['Time Slot', 'Player ID (FID)', 'Game Name', 'Points']
-        ws.append(headers)
-
-        # Style headers
         header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF")
-        for cell in ws[1]:
-            cell.fill = header_fill
-            cell.font = header_font
-            cell.alignment = Alignment(horizontal='center')
+        separator_fill = PatternFill(start_color="F4B942", end_color="F4B942", fill_type="solid")
+        separator_font = Font(bold=True, color="000000")
 
-        # Get assignments
+        headers = [
+            'Time Slot', 'FID', 'Game Name',
+            'Construction (days)', 'Research (days)',
+            'Troop Training (days)', 'General (days)',
+            'Fire Crystals', 'Refined Fire Crystals',
+            'Crystal Shards', 'Points'
+        ]
+
+        col_widths = [15, 15, 25, 18, 15, 20, 15, 13, 18, 14, 12]
+
+        days = [
+            ('monday', 'Monday - Construction'),
+            ('tuesday', 'Tuesday - Research'),
+            ('thursday', 'Thursday - Troop Training'),
+        ]
+
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('''
-            SELECT
-                a.time_slot,
-                p.fid,
-                p.game_name,
-                p.*
-            FROM assignments a
-            JOIN players p ON a.player_id = p.id
-            WHERE a.day = ? AND a.is_assigned = 1
-            ORDER BY a.time_slot, a.position
-        ''', (day.lower(),))
 
-        rows = cursor.fetchall()
-        for row in rows:
-            player = dict(row)
-            points = calculate_points(player, day.lower())
-            ws.append([
-                row['time_slot'],
-                row['fid'],
-                row['game_name'],
-                points
-            ])
+        for day_key, day_title in days:
+            ws = wb.create_sheet(title=day_title)
+            ws.append(headers)
 
-        # Adjust column widths
-        ws.column_dimensions['A'].width = 15
-        ws.column_dimensions['B'].width = 20
-        ws.column_dimensions['C'].width = 30
-        ws.column_dimensions['D'].width = 15
+            # Style headers
+            for cell in ws[1]:
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = Alignment(horizontal='center')
+
+            # Get assigned players
+            cursor.execute('''
+                SELECT a.time_slot, p.*
+                FROM assignments a
+                JOIN players p ON a.player_id = p.id
+                WHERE a.day = ? AND a.is_assigned = 1
+                ORDER BY a.time_slot, a.position
+            ''', (day_key,))
+
+            assigned_rows = cursor.fetchall()
+            assigned_player_ids = set()
+
+            for row in assigned_rows:
+                player = dict(row)
+                assigned_player_ids.add(player['id'])
+                points = calculate_points(player, day_key)
+                ws.append([
+                    row['time_slot'],
+                    player['fid'],
+                    player['game_name'],
+                    player['construction_speedups_days'],
+                    player['research_speedups_days'],
+                    player['troop_training_speedups_days'],
+                    player['general_speedups_days'],
+                    player['fire_crystals'],
+                    player['refined_fire_crystals'],
+                    player['fire_crystal_shards'],
+                    points,
+                ])
+
+            # Get all players to find unassigned ones
+            cursor.execute('SELECT * FROM players ORDER BY id')
+            all_players = [dict(r) for r in cursor.fetchall()]
+            unassigned = [p for p in all_players if p['id'] not in assigned_player_ids]
+
+            # Sort unassigned by points descending
+            for p in unassigned:
+                p['_points'] = calculate_points(p, day_key)
+            unassigned.sort(key=lambda p: p['_points'], reverse=True)
+
+            if unassigned:
+                # Separator row
+                sep_row_num = ws.max_row + 2  # skip a blank row
+                ws.append([])  # blank row
+                ws.append(['UNASSIGNED PLAYERS'] + [''] * (len(headers) - 1))
+                for cell in ws[sep_row_num]:
+                    cell.fill = separator_fill
+                    cell.font = separator_font
+
+                for player in unassigned:
+                    ws.append([
+                        'Unassigned',
+                        player['fid'],
+                        player['game_name'],
+                        player['construction_speedups_days'],
+                        player['research_speedups_days'],
+                        player['troop_training_speedups_days'],
+                        player['general_speedups_days'],
+                        player['fire_crystals'],
+                        player['refined_fire_crystals'],
+                        player['fire_crystal_shards'],
+                        player['_points'],
+                    ])
+
+            # Set column widths
+            for i, width in enumerate(col_widths):
+                ws.column_dimensions[chr(65 + i)].width = width
 
         # Save to BytesIO
         output = BytesIO()
         wb.save(output)
         output.seek(0)
 
+        filename = f'ministry_assignments_{datetime.now().strftime("%Y%m%d")}.xlsx'
         return Response(
             output.getvalue(),
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            headers={
-                'Content-Disposition': f'attachment; filename={day}_assignments_{datetime.now().strftime("%Y%m%d")}.xlsx'
-            }
+            headers={'Content-Disposition': f'attachment; filename={filename}'}
         )
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/players/delete-all', methods=['DELETE'])
+def delete_all_players():
+    """Delete all players and their assignments."""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('DELETE FROM assignments')
+        cursor.execute('DELETE FROM time_preferences')
+        cursor.execute('DELETE FROM players')
+        db.commit()
+
+        return jsonify({'success': True, 'message': 'All players deleted'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

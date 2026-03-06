@@ -18,6 +18,9 @@ interface Player {
   monday_points: number;
   tuesday_points: number;
   thursday_points: number;
+  avatar_image?: string;
+  stove_lv?: number;
+  stove_lv_content?: string;
 }
 
 type SortField = 'game_name' | 'fid' | 'monday_points' | 'tuesday_points' | 'thursday_points';
@@ -33,6 +36,7 @@ export default function PlayerManagement() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
 
   useEffect(() => {
     fetchPlayers();
@@ -114,6 +118,19 @@ export default function PlayerManagement() {
     }
   };
 
+  const handleDeleteAll = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.delete('/api/admin/players/delete-all', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPlayers([]);
+      setShowDeleteAllConfirm(false);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to delete all players');
+    }
+  };
+
   const SortButton = ({ field, label }: { field: SortField; label: string }) => (
     <button
       onClick={() => handleSort(field)}
@@ -144,6 +161,15 @@ export default function PlayerManagement() {
             {t('admin.totalPlayers')}: {players.length}
           </p>
         </div>
+        {players.length > 0 && (
+          <button
+            onClick={() => setShowDeleteAllConfirm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Remove All Players
+          </button>
+        )}
       </div>
 
       {/* Search */}
@@ -195,7 +221,14 @@ export default function PlayerManagement() {
           <tbody>
             {filteredAndSortedPlayers.map((player) => (
               <tr key={player.id} className="border-b border-theme-border/50 hover:bg-dark-card-hover">
-                <td className="p-3 text-theme-text">{player.game_name}</td>
+                <td className="p-3 text-theme-text">
+                  <div className="flex items-center gap-2">
+                    {player.avatar_image ? (
+                      <img src={player.avatar_image} alt="" className="w-6 h-6 rounded-full flex-shrink-0" />
+                    ) : null}
+                    {player.game_name}
+                  </div>
+                </td>
                 <td className="p-3 text-sm text-theme-dim">{player.fid}</td>
                 <td className="p-3 text-center font-medium text-accent">
                   {player.monday_points.toLocaleString()}
@@ -366,6 +399,35 @@ export default function PlayerManagement() {
                 className="flex-1 px-4 py-3 bg-dark-bg text-theme-text rounded-lg hover:bg-dark-card-hover font-medium border border-theme-border"
               >
                 {t('common.no')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete All Confirmation Modal */}
+      {showDeleteAllConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-dark-card rounded-xl p-6 max-w-md w-full border border-theme-border">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertCircle className="w-8 h-8 text-danger" />
+              <h3 className="text-xl font-bold text-theme-text">Remove All Players?</h3>
+            </div>
+            <p className="text-theme-dim mb-6">
+              This will permanently delete all {players.length} players and their assignments. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteAll}
+                className="flex-1 px-4 py-3 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium"
+              >
+                Yes, Delete All
+              </button>
+              <button
+                onClick={() => setShowDeleteAllConfirm(false)}
+                className="flex-1 px-4 py-3 bg-dark-bg text-theme-text rounded-lg hover:bg-dark-card-hover font-medium border border-theme-border"
+              >
+                Cancel
               </button>
             </div>
           </div>
