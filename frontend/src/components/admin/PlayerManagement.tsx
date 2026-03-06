@@ -295,6 +295,40 @@ export default function PlayerManagement() {
                 ))}
               </div>
 
+              {/* Time Preferences */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-theme-text mb-2">
+                  Time Preferences (UTC)
+                </label>
+                <div className="grid grid-cols-6 gap-2">
+                  {Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`).map((time) => (
+                    <button
+                      key={time}
+                      type="button"
+                      onClick={() => {
+                        const slots = editingPlayer.time_slots || [];
+                        setEditingPlayer({
+                          ...editingPlayer,
+                          time_slots: slots.includes(time)
+                            ? slots.filter((t: string) => t !== time)
+                            : [...slots, time],
+                        });
+                      }}
+                      className={`p-2 rounded border text-sm font-medium transition-all ${
+                        (editingPlayer.time_slots || []).includes(time)
+                          ? 'bg-accent border-accent text-dark-bg'
+                          : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-theme-dim mt-2">
+                  Selected: {(editingPlayer.time_slots || []).length} time slots
+                </p>
+              </div>
+
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={handleSaveEdit}
