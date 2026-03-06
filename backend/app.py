@@ -15,7 +15,9 @@ from database import (
     save_player, delete_player, calculate_points, get_db
 )
 
-app = Flask(__name__, static_folder='static', static_url_path='')
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+
+app = Flask(__name__, static_folder=None)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 CORS(app)
 
@@ -31,13 +33,13 @@ init_db(app)
 def health_check():
     return jsonify({'status': 'healthy'}), 200
 
-# Serve React app
+# Serve React app - handles SPA routing for all non-API paths
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if path and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, 'index.html')
+    if path and os.path.exists(os.path.join(STATIC_DIR, path)):
+        return send_from_directory(STATIC_DIR, path)
+    return send_from_directory(STATIC_DIR, 'index.html')
 
 # API Routes
 
