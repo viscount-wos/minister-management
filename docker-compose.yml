@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - FLASK_ENV=development
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - ADMIN_PASSWORD=admin123
+      - MINISTER_PASSWORD=minister123
+      - DATABASE_PATH=/app/data/minister.db
+    restart: unless-stopped

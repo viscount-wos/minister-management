@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Database (will be in mounted volume)
+*.db
+*.sqlite
+*.sqlite3
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation
+README.md
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend build artifacts (built inside Docker)
+frontend/dist/
+frontend/node_modules/
