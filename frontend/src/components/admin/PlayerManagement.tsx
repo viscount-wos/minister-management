@@ -21,6 +21,7 @@ interface Player {
   avatar_image?: string;
   stove_lv?: number;
   stove_lv_content?: string;
+  alliance?: string;
 }
 
 type SortField = 'game_name' | 'fid' | 'monday_points' | 'tuesday_points' | 'thursday_points';
@@ -70,7 +71,8 @@ export default function PlayerManagement() {
     let filtered = players.filter(
       (player) =>
         player.game_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        player.fid.toLowerCase().includes(searchQuery.toLowerCase())
+        player.fid.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (player.alliance || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     filtered.sort((a, b) => {
@@ -226,7 +228,7 @@ export default function PlayerManagement() {
                     {player.avatar_image ? (
                       <img src={player.avatar_image} alt="" className="w-6 h-6 rounded-full flex-shrink-0" />
                     ) : null}
-                    {player.game_name}
+                    {player.alliance && <span className="text-accent font-medium">[{player.alliance}]</span>} {player.game_name}
                   </div>
                 </td>
                 <td className="p-3 text-sm text-theme-dim">{player.fid}</td>
@@ -287,16 +289,31 @@ export default function PlayerManagement() {
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-theme-text mb-2">Game Name</label>
-                <input
-                  type="text"
-                  value={editingPlayer.game_name}
-                  onChange={(e) =>
-                    setEditingPlayer({ ...editingPlayer, game_name: e.target.value })
-                  }
-                  className="w-full px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent"
-                />
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-theme-text mb-2">Game Name</label>
+                  <input
+                    type="text"
+                    value={editingPlayer.game_name}
+                    onChange={(e) =>
+                      setEditingPlayer({ ...editingPlayer, game_name: e.target.value })
+                    }
+                    className="w-full px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-theme-text mb-2">Alliance</label>
+                  <input
+                    type="text"
+                    value={editingPlayer.alliance || ''}
+                    onChange={(e) =>
+                      setEditingPlayer({ ...editingPlayer, alliance: e.target.value.toUpperCase().slice(0, 3) })
+                    }
+                    maxLength={3}
+                    className="w-full px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent uppercase"
+                    placeholder="TAG"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

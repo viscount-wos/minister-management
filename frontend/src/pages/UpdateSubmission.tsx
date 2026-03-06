@@ -19,6 +19,7 @@ interface PlayerData {
   avatar_image?: string;
   stove_lv?: number;
   stove_lv_content?: string;
+  alliance?: string;
 }
 
 export default function UpdateSubmission() {
@@ -62,7 +63,7 @@ export default function UpdateSubmission() {
     const { name, value } = e.target;
     setPlayerData(prev => ({
       ...prev!,
-      [name]: name === 'game_name' || name === 'fid' ? value : parseFloat(value) || 0,
+      [name]: name === 'game_name' || name === 'fid' || name === 'alliance' ? value : parseFloat(value) || 0,
     }));
   };
 
@@ -151,17 +152,33 @@ export default function UpdateSubmission() {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-accent">Player Information</h3>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.gameName')}
-                  </label>
-                  <input
-                    type="text"
-                    name="game_name"
-                    value={playerData.game_name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  />
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-theme-text mb-2">
+                      {t('form.gameName')}
+                    </label>
+                    <input
+                      type="text"
+                      name="game_name"
+                      value={playerData.game_name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-theme-text mb-2">
+                      {t('form.alliance')}
+                    </label>
+                    <input
+                      type="text"
+                      name="alliance"
+                      value={playerData.alliance || ''}
+                      onChange={(e) => setPlayerData(prev => prev ? { ...prev, alliance: e.target.value.toUpperCase().slice(0, 3) } : prev)}
+                      maxLength={3}
+                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent uppercase"
+                      placeholder={t('form.alliancePlaceholder')}
+                    />
+                  </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>

@@ -286,6 +286,7 @@ def auto_assign():
                         'avatar_image': player.get('avatar_image', ''),
                         'stove_lv': player.get('stove_lv'),
                         'stove_lv_content': player.get('stove_lv_content', ''),
+                        'alliance': player.get('alliance', ''),
                     })
                     assigned = True
                     break
@@ -301,6 +302,7 @@ def auto_assign():
                     'avatar_image': player.get('avatar_image', ''),
                     'stove_lv': player.get('stove_lv'),
                     'stove_lv_content': player.get('stove_lv_content', ''),
+                    'alliance': player.get('alliance', ''),
                 })
 
         # Clear existing assignments for this day
@@ -344,7 +346,8 @@ def get_assignments(day):
                 p.id as player_id, p.fid, p.game_name,
                 p.construction_speedups_days, p.research_speedups_days,
                 p.troop_training_speedups_days, p.general_speedups_days,
-                p.fire_crystals, p.refined_fire_crystals, p.fire_crystal_shards
+                p.fire_crystals, p.refined_fire_crystals, p.fire_crystal_shards,
+                p.avatar_image, p.stove_lv, p.stove_lv_content, p.alliance
             FROM assignments a
             JOIN players p ON a.player_id = p.id
             WHERE a.day = ?
@@ -463,10 +466,11 @@ def export_assignments():
                 player = dict(row)
                 assigned_player_ids.add(player['id'])
                 points = calculate_points(player, day_key)
+                display_name = f"[{player['alliance']}] {player['game_name']}" if player.get('alliance') else player['game_name']
                 ws.append([
                     row['time_slot'],
                     player['fid'],
-                    player['game_name'],
+                    display_name,
                     player['construction_speedups_days'],
                     player['research_speedups_days'],
                     player['troop_training_speedups_days'],
@@ -497,10 +501,11 @@ def export_assignments():
                     cell.font = separator_font
 
                 for player in unassigned:
+                    display_name = f"[{player['alliance']}] {player['game_name']}" if player.get('alliance') else player['game_name']
                     ws.append([
                         'Unassigned',
                         player['fid'],
-                        player['game_name'],
+                        display_name,
                         player['construction_speedups_days'],
                         player['research_speedups_days'],
                         player['troop_training_speedups_days'],

@@ -24,6 +24,7 @@ interface AssignedPlayer {
   avatar_image?: string;
   stove_lv?: number;
   stove_lv_content?: string;
+  alliance?: string;
 }
 
 interface Assignments {
@@ -97,7 +98,7 @@ function DraggablePlayer({ player, sourceSlot }: { player: AssignedPlayer; sourc
           )}
         </div>
         <div className="min-w-0">
-          <div className="font-medium truncate">{player.game_name}</div>
+          <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
           <div className="text-xs opacity-75">
             {player.fid} • {(player.points ?? 0).toLocaleString()} pts
           </div>
@@ -135,7 +136,7 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
           )}
         </div>
         <div className="min-w-0">
-          <div className="font-medium truncate">{player.game_name}</div>
+          <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
           <div className="text-xs opacity-75">
             {player.fid} • {(player.points ?? 0).toLocaleString()} pts
           </div>

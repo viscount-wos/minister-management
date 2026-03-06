@@ -17,6 +17,7 @@ interface PlayerData {
   avatar_image?: string;
   stove_lv?: number;
   stove_lv_content?: string;
+  alliance?: string;
 }
 
 export default function PlayerForm() {
@@ -31,6 +32,7 @@ export default function PlayerForm() {
   const [playerData, setPlayerData] = useState<PlayerData>({
     fid: '',
     game_name: '',
+    alliance: '',
     construction_speedups_days: 0,
     research_speedups_days: 0,
     troop_training_speedups_days: 0,
@@ -49,7 +51,7 @@ export default function PlayerForm() {
     const { name, value } = e.target;
     setPlayerData(prev => ({
       ...prev,
-      [name]: name === 'game_name' || name === 'fid' ? value : parseFloat(value) || 0,
+      [name]: name === 'game_name' || name === 'fid' || name === 'alliance' ? value : parseFloat(value) || 0,
     }));
   };
 
@@ -231,22 +233,41 @@ export default function PlayerForm() {
                       className="w-8 h-8"
                     />
                   )}
-                  <div className="text-theme-text font-medium">{playerData.game_name}</div>
+                  <div className="text-theme-text font-medium">
+                    {playerData.alliance && <span className="text-accent">[{playerData.alliance}] </span>}
+                    {playerData.game_name}
+                  </div>
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-theme-text mb-2">
-                  {t('form.gameName')} *
-                </label>
-                <input
-                  type="text"
-                  name="game_name"
-                  value={playerData.game_name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  required
-                />
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-theme-text mb-2">
+                    {t('form.gameName')} *
+                  </label>
+                  <input
+                    type="text"
+                    name="game_name"
+                    value={playerData.game_name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-theme-text mb-2">
+                    {t('form.alliance')}
+                  </label>
+                  <input
+                    type="text"
+                    name="alliance"
+                    value={playerData.alliance || ''}
+                    onChange={(e) => setPlayerData(prev => ({ ...prev, alliance: e.target.value.toUpperCase().slice(0, 3) }))}
+                    maxLength={3}
+                    className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent uppercase"
+                    placeholder={t('form.alliancePlaceholder')}
+                  />
+                </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
@@ -397,7 +418,10 @@ export default function PlayerForm() {
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-theme-dim">Game Name:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.game_name}</span>
+                    <span className="ml-2 font-medium text-theme-text">
+                      {playerData.alliance && <span className="text-accent">[{playerData.alliance}] </span>}
+                      {playerData.game_name}
+                    </span>
                   </div>
                   <div>
                     <span className="text-theme-dim">Player ID:</span>

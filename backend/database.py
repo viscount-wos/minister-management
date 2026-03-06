@@ -100,6 +100,7 @@ def init_db(app):
             'ALTER TABLE players ADD COLUMN avatar_image TEXT DEFAULT NULL',
             'ALTER TABLE players ADD COLUMN stove_lv INTEGER DEFAULT NULL',
             'ALTER TABLE players ADD COLUMN stove_lv_content TEXT DEFAULT NULL',
+            'ALTER TABLE players ADD COLUMN alliance TEXT DEFAULT NULL',
         ]
         for migration in migrations:
             try:
@@ -206,6 +207,7 @@ def save_player(data, time_slots):
                 avatar_image = ?,
                 stove_lv = ?,
                 stove_lv_content = ?,
+                alliance = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE fid = ?
         ''', (
@@ -220,6 +222,7 @@ def save_player(data, time_slots):
             data.get('avatar_image'),
             data.get('stove_lv'),
             data.get('stove_lv_content'),
+            data.get('alliance'),
             data['fid']
         ))
 
@@ -232,8 +235,8 @@ def save_player(data, time_slots):
                 fid, game_name, construction_speedups_days, research_speedups_days,
                 troop_training_speedups_days, general_speedups_days, fire_crystals,
                 refined_fire_crystals, fire_crystal_shards,
-                avatar_image, stove_lv, stove_lv_content
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                avatar_image, stove_lv, stove_lv_content, alliance
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data['fid'],
             data['game_name'],
@@ -246,7 +249,8 @@ def save_player(data, time_slots):
             data['fire_crystal_shards'],
             data.get('avatar_image'),
             data.get('stove_lv'),
-            data.get('stove_lv_content')
+            data.get('stove_lv_content'),
+            data.get('alliance')
         ))
         player_id = cursor.lastrowid
 
