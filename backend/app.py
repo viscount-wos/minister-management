@@ -223,6 +223,7 @@ def auto_assign():
                 if slot in assignments and len(assignments[slot]) == 0:
                     assignments[slot].append({
                         'id': player['id'],
+                        'player_id': player['id'],
                         'fid': player['fid'],
                         'game_name': player['game_name'],
                         'points': player['points']
@@ -233,6 +234,7 @@ def auto_assign():
             if not assigned:
                 unassigned.append({
                     'id': player['id'],
+                    'player_id': player['id'],
                     'fid': player['fid'],
                     'game_name': player['game_name'],
                     'points': player['points'],
