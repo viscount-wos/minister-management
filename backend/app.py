@@ -422,14 +422,14 @@ def export_assignments():
         separator_font = Font(bold=True, color="000000")
 
         headers = [
-            'Time Slot', 'FID', 'Game Name',
+            'Time Slot', 'FID', 'Alliance', 'Game Name',
             'Construction (days)', 'Research (days)',
             'Troop Training (days)', 'General (days)',
             'Fire Crystals', 'Refined Fire Crystals',
             'Crystal Shards', 'Points'
         ]
 
-        col_widths = [15, 15, 25, 18, 15, 20, 15, 13, 18, 14, 12]
+        col_widths = [15, 15, 10, 25, 18, 15, 20, 15, 13, 18, 14, 12]
 
         days = [
             ('monday', 'Monday - Construction'),
@@ -466,11 +466,11 @@ def export_assignments():
                 player = dict(row)
                 assigned_player_ids.add(player['id'])
                 points = calculate_points(player, day_key)
-                display_name = f"[{player['alliance']}] {player['game_name']}" if player.get('alliance') else player['game_name']
                 ws.append([
                     row['time_slot'],
                     player['fid'],
-                    display_name,
+                    player.get('alliance', ''),
+                    player['game_name'],
                     player['construction_speedups_days'],
                     player['research_speedups_days'],
                     player['troop_training_speedups_days'],
@@ -501,11 +501,11 @@ def export_assignments():
                     cell.font = separator_font
 
                 for player in unassigned:
-                    display_name = f"[{player['alliance']}] {player['game_name']}" if player.get('alliance') else player['game_name']
                     ws.append([
                         'Unassigned',
                         player['fid'],
-                        display_name,
+                        player.get('alliance', ''),
+                        player['game_name'],
                         player['construction_speedups_days'],
                         player['research_speedups_days'],
                         player['troop_training_speedups_days'],
