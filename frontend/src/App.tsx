@@ -16,9 +16,9 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
-        <div className="fixed top-4 right-4 z-50">
+        <header className="w-full py-3 px-4 flex justify-end">
           <LanguageSelector />
-        </div>
+        </header>
         <div className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />

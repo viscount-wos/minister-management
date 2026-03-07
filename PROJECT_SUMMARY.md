@@ -8,6 +8,8 @@ A full-stack web application for managing Whiteout Survival SVS (State vs State)
 
 ### Player Features
 - 3-page submission form (Information > Time Preferences > Review)
+- **WOS API integration** - "Load from WOS" button auto-fills game name, avatar, and furnace level
+- **Alliance tag** - 3-character tag displayed as `[TAG]` next to player names
 - Update submission using FID lookup
 - FID required for all submissions
 - Support for all speedup types and fire crystal resources
@@ -15,11 +17,12 @@ A full-stack web application for managing Whiteout Survival SVS (State vs State)
 
 ### Admin Features
 - Password-protected admin/minister access
-- Player management table with sort, search, edit, delete
+- Player management table with sort, search, edit, delete, **remove all**
+- Player avatars and furnace level icons displayed in tables and assignment cards
 - Point calculation for all three days (Monday/Tuesday/Thursday)
 - Auto-assignment algorithm based on points and time preferences
-- Drag-and-drop interface for manual adjustments
-- Excel export
+- Drag-and-drop interface for manual adjustments with avatar + alliance display
+- **Multi-day Excel export** (3 day tabs + unassigned tab, includes alliance column)
 
 ### Technical Features
 - SQLite database with persistent storage
@@ -125,6 +128,7 @@ Note: 1 day = 1440 minutes
 |--------|------|-------------|
 | POST | `/api/player/submit` | Submit or update player info |
 | GET | `/api/player/:fid` | Get player by FID |
+| POST | `/api/player/wos-lookup` | Lookup player from WOS API (returns name, avatar, furnace level) |
 | GET | `/health` | Health check |
 
 ### Admin (require Authorization header)
@@ -134,15 +138,16 @@ Note: 1 day = 1440 minutes
 | GET | `/api/admin/players` | Get all players with calculated points |
 | PUT | `/api/admin/player/:id` | Update player |
 | DELETE | `/api/admin/player/:id` | Delete player |
+| DELETE | `/api/admin/players/delete-all` | Delete all players |
 | POST | `/api/admin/assignments/auto-assign` | Run auto-assignment |
 | GET | `/api/admin/assignments/:day` | Get assignments for a day |
 | POST | `/api/admin/assignments/update` | Save manual assignments |
-| GET | `/api/admin/export/:day` | Export assignments to Excel |
+| GET | `/api/admin/export` | Export all assignments to multi-tab Excel workbook |
 
 ## Database Schema
 
 ### players
-`id`, `fid` (unique, required), `game_name`, `construction_speedups_days`, `research_speedups_days`, `troop_training_speedups_days`, `general_speedups_days`, `fire_crystals`, `refined_fire_crystals`, `fire_crystal_shards`, `created_at`, `updated_at`
+`id`, `fid` (unique, required), `game_name`, `alliance` (3-char tag), `construction_speedups_days`, `research_speedups_days`, `troop_training_speedups_days`, `general_speedups_days`, `fire_crystals`, `refined_fire_crystals`, `fire_crystal_shards`, `avatar_image` (URL from WOS API), `stove_lv` (furnace level), `stove_lv_content` (furnace icon URL), `created_at`, `updated_at`
 
 ### time_preferences
 `id`, `player_id` (FK → players), `time_slot`
@@ -221,6 +226,6 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for complete instructions covering:
 
 ---
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Last Updated**: March 2026
 **Status**: Production

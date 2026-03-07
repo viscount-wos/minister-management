@@ -78,7 +78,7 @@ export default function PlayerForm() {
         stove_lv_content: wosData.stove_lv_content || undefined,
       }));
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Failed to look up player from WOS';
+      const msg = err.response?.data?.error || t('form.wosLookupFailed');
       setError(msg);
     } finally {
       setWosLoading(false);
@@ -100,7 +100,7 @@ export default function PlayerForm() {
     }
     // FID is now required
     if (!playerData.fid || !playerData.fid.trim()) {
-      setError('Player ID (FID) is required');
+      setError(t('form.fidRequired'));
       return false;
     }
     setError('');
@@ -135,7 +135,7 @@ export default function PlayerForm() {
         navigate('/');
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'An error occurred while submitting');
+      setError(err.response?.data?.error || t('form.submitError'));
     } finally {
       setLoading(false);
     }
@@ -154,7 +154,7 @@ export default function PlayerForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 py-20">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-4xl w-full">
         {/* Progress Indicator */}
         <div className="flex items-center justify-center mb-8">
@@ -198,7 +198,7 @@ export default function PlayerForm() {
                     value={playerData.fid}
                     onChange={handleInputChange}
                     className="flex-1 px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                    placeholder="Enter your unique Player ID"
+                    placeholder={t('form.playerIDPlaceholder')}
                     required
                   />
                   <button
@@ -393,7 +393,7 @@ export default function PlayerForm() {
               ))}
             </div>
             <p className="text-sm text-theme-dim mt-4 text-center">
-              Selected: {selectedTimes.length} time slots
+              {t('form.selectedSlots', { count: selectedTimes.length })}
             </p>
           </div>
         )}
@@ -414,51 +414,51 @@ export default function PlayerForm() {
                     )}
                   </div>
                 )}
-                <h3 className="font-semibold text-lg mb-4 text-accent">Player Information</h3>
+                <h3 className="font-semibold text-lg mb-4 text-accent">{t('form.playerInfo')}</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-theme-dim">Game Name:</span>
+                    <span className="text-theme-dim">{t('form.gameName')}:</span>
                     <span className="ml-2 font-medium text-theme-text">
                       {playerData.alliance && <span className="text-accent">[{playerData.alliance}] </span>}
                       {playerData.game_name}
                     </span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">Player ID:</span>
+                    <span className="text-theme-dim">{t('form.playerID')}:</span>
                     <span className="ml-2 font-medium text-theme-text">{playerData.fid}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">Construction Speedups:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.construction_speedups_days} days</span>
+                    <span className="text-theme-dim">{t('form.constructionSpeedups')}:</span>
+                    <span className="ml-2 font-medium text-theme-text">{playerData.construction_speedups_days} {t('form.days')}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">Research Speedups:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.research_speedups_days} days</span>
+                    <span className="text-theme-dim">{t('form.researchSpeedups')}:</span>
+                    <span className="ml-2 font-medium text-theme-text">{playerData.research_speedups_days} {t('form.days')}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">Troop Speedups:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.troop_training_speedups_days} days</span>
+                    <span className="text-theme-dim">{t('form.troopSpeedups')}:</span>
+                    <span className="ml-2 font-medium text-theme-text">{playerData.troop_training_speedups_days} {t('form.days')}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">General Speedups:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.general_speedups_days} days</span>
+                    <span className="text-theme-dim">{t('form.generalSpeedups')}:</span>
+                    <span className="ml-2 font-medium text-theme-text">{playerData.general_speedups_days} {t('form.days')}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">Fire Crystals:</span>
+                    <span className="text-theme-dim">{t('form.fireCrystals')}:</span>
                     <span className="ml-2 font-medium text-theme-text">{playerData.fire_crystals}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">Refined Fire Crystals:</span>
+                    <span className="text-theme-dim">{t('form.refinedFireCrystals')}:</span>
                     <span className="ml-2 font-medium text-theme-text">{playerData.refined_fire_crystals}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">Fire Crystal Shards:</span>
+                    <span className="text-theme-dim">{t('form.fireCrystalShards')}:</span>
                     <span className="ml-2 font-medium text-theme-text">{playerData.fire_crystal_shards}</span>
                   </div>
                 </div>
               </div>
               <div className="bg-dark-bg p-6 rounded-lg border border-theme-border">
-                <h3 className="font-semibold text-lg mb-4 text-accent">Time Preferences (UTC)</h3>
+                <h3 className="font-semibold text-lg mb-4 text-accent">{t('form.timePreferences')}</h3>
                 <div className="flex flex-wrap gap-2">
                   {selectedTimes.sort().map((time) => (
                     <span
@@ -469,7 +469,7 @@ export default function PlayerForm() {
                     </span>
                   ))}
                   {selectedTimes.length === 0 && (
-                    <span className="text-theme-dim">No time preferences selected</span>
+                    <span className="text-theme-dim">{t('form.noTimeSelected')}</span>
                   )}
                 </div>
               </div>

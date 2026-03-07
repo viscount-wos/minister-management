@@ -101,9 +101,10 @@ Located in: `backend/app.py` → `/api/admin/assignments/auto-assign`
 
 **players:**
 - `id`, `fid` (unique player identifier, REQUIRED)
-- `game_name`
+- `game_name`, `alliance` (3-char tag, optional)
 - Speedups: `construction_speedups_days`, `research_speedups_days`, `troop_training_speedups_days`, `general_speedups_days`
 - Resources: `fire_crystals`, `refined_fire_crystals`, `fire_crystal_shards`
+- WOS API data: `avatar_image` (URL), `stove_lv` (furnace level int), `stove_lv_content` (furnace icon URL)
 - Timestamps: `created_at`, `updated_at`
 
 **time_preferences:**
@@ -183,6 +184,7 @@ docker compose up --build
 ### Public Endpoints
 - `POST /api/player/submit` - Submit/update player info
 - `GET /api/player/<fid>` - Get player by FID
+- `POST /api/player/wos-lookup` - Lookup player from WOS API (returns nickname, avatar, furnace level)
 - `GET /health` - Health check
 
 ### Admin Endpoints (require Authorization header)
@@ -190,10 +192,11 @@ docker compose up --build
 - `GET /api/admin/players` - Get all players with calculated points
 - `PUT /api/admin/player/<id>` - Update player
 - `DELETE /api/admin/player/<id>` - Delete player
+- `DELETE /api/admin/players/delete-all` - Delete all players
 - `POST /api/admin/assignments/auto-assign` - Run auto-assignment
 - `GET /api/admin/assignments/<day>` - Get assignments for day
 - `POST /api/admin/assignments/update` - Save manual assignments
-- `GET /api/admin/export/<day>` - Export Excel file
+- `GET /api/admin/export` - Export all-day Excel workbook (Monday, Tuesday, Thursday tabs + Unassigned)
 
 ## Common Tasks
 
@@ -368,6 +371,16 @@ GCS FUSE volume mounts require `--execution-environment gen2`. Gen1 does not sup
 - **This File**: claude.md (AI assistant context)
 
 ## Version History
+
+- **v1.1.0** (March 2026): WOS API Integration & Enhancements
+  - "Load from WOS" button auto-fills player name, avatar, and furnace level from FID
+  - Alliance tag field (3 chars max, displayed as `[TAG]` next to player names)
+  - Player avatars and furnace level icons on assignment cards and player table
+  - Multi-day Excel export (Monday/Tuesday/Thursday tabs + Unassigned tab)
+  - Alliance as separate column in Excel export
+  - "Remove All Players" button with confirmation
+  - New API endpoints: `POST /api/player/wos-lookup`, `DELETE /api/admin/players/delete-all`
+  - New DB columns: `avatar_image`, `stove_lv`, `stove_lv_content`, `alliance`
 
 - **v1.0.0** (March 2026): Initial release
   - 3-page player submission form

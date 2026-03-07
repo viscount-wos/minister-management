@@ -26,7 +26,7 @@ export default function AdminLogin() {
       // Navigate to dashboard
       navigate('/admin/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid password');
+      setError(err.response?.data?.error || t('admin.invalidPassword'));
     } finally {
       setLoading(false);
     }
@@ -50,7 +50,7 @@ export default function AdminLogin() {
           <h2 className="text-3xl font-bold text-accent mb-2">
             {t('admin.title')}
           </h2>
-          <p className="text-theme-dim">Enter your password to access the admin panel</p>
+          <p className="text-theme-dim">{t('admin.enterPassword')}</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">

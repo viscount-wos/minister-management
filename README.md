@@ -5,12 +5,14 @@ A web application for managing ministry assignments during State vs State (SVS) 
 ## Features
 
 - **Player Submission Form** - 3-step form for players to submit speedups, resources, and time preferences (FID required)
+- **WOS API Integration** - "Load from WOS" button auto-fills player name, avatar, and furnace level from FID
+- **Alliance Tag** - 3-character alliance tag displayed as `[TAG]` next to player names
 - **Player Updates** - Players update their submissions anytime using their FID
 - **Admin Panel** - Password-protected interface with:
-  - Player management (view, sort, search, edit, delete)
+  - Player management (view, sort, search, edit, delete, remove all)
   - Auto-assignment based on point calculations
-  - Drag-and-drop time slot management
-  - Excel export
+  - Drag-and-drop time slot management with player avatars and furnace level icons
+  - Multi-day Excel export (Monday, Tuesday, Thursday tabs + Unassigned tab)
 - **5 Languages** - English, Korean, Chinese, Turkish, Arabic (with RTL support)
 - **Dark Theme** - Navy and gold themed UI
 - **Dockerized** - Multi-stage Docker build for easy deployment

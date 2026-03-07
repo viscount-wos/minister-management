@@ -11,8 +11,10 @@ This application streamlines the process of assigning ministry positions during 
 1. **Navigate to the home page**
 2. **Click "Submit New Application"**
 3. **Step 1: Enter Your Information**
-   - Game Name (required)
    - Player ID/FID (required - this is your unique identifier, you'll need it to update later)
+   - Click **"Load from WOS"** to auto-fill your game name, avatar, and furnace level from the WOS API
+   - Game Name (required - auto-filled if you use Load from WOS, but editable)
+   - Alliance Tag (optional, 3 characters max - displayed as `[TAG]` next to your name)
    - All your speedups in days
    - Your fire crystals, refined fire crystals, and shards
 
@@ -22,7 +24,7 @@ This application streamlines the process of assigning ministry positions during 
    - Click any time to select/deselect
 
 5. **Step 3: Review and Confirm**
-   - Double-check all information
+   - Double-check all information (including your avatar preview and alliance tag)
    - Click "Submit" when ready
 
 6. **Success!**
@@ -52,17 +54,22 @@ This application streamlines the process of assigning ministry positions during 
 1. **Go to "Players" tab**
 2. **View all submissions** in a sortable table
    - Click column headers to sort
-   - Use search box to find specific players
+   - Use search box to find specific players (searches name, FID, and alliance tag)
    - View calculated points for each day
+   - Player avatars and alliance tags `[TAG]` are displayed next to names
 
 3. **Edit a Player**
    - Click the edit icon (pencil)
-   - Modify any information
+   - Modify any information (including alliance tag)
    - Click "Save"
 
 4. **Delete a Player**
    - Click the delete icon (trash)
    - Confirm deletion
+
+5. **Remove All Players**
+   - Click "Remove All" to clear all player data
+   - Requires confirmation (must type "DELETE" to confirm)
 
 ### Managing Assignments
 
@@ -78,6 +85,7 @@ This application streamlines the process of assigning ministry positions during 
      - Their point calculations
      - Their time preferences
      - Highest points get priority
+   - Player cards show avatar, furnace level icon, alliance tag, and points
 
 4. **Manual Adjustments:**
    - Drag and drop players between time slots
@@ -86,7 +94,12 @@ This application streamlines the process of assigning ministry positions during 
 
 5. **Export to Excel:**
    - Click "Export to Excel" button
-   - Downloads spreadsheet with all assignments
+   - Downloads a multi-tab workbook with:
+     - **Monday** tab - Construction day assignments
+     - **Tuesday** tab - Research day assignments
+     - **Thursday** tab - Troop training day assignments
+     - **Unassigned** tab - Players not assigned to any day
+   - Each tab includes: Time Slot, FID, Alliance, Game Name, all resource columns, and Points
 
 ## Point Calculation System
 

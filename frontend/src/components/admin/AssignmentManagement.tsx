@@ -225,7 +225,7 @@ export default function AssignmentManagement() {
       setAssignments(cleaned);
       setUnassignedPlayers([]);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to fetch assignments');
+      setError(err.response?.data?.error || t('admin.fetchAssignmentsError'));
     } finally {
       setLoading(false);
     }
@@ -246,7 +246,7 @@ export default function AssignmentManagement() {
       setAssignments(response.data.assignments);
       setUnassignedPlayers(response.data.unassigned);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to auto-assign');
+      setError(err.response?.data?.error || t('admin.autoAssignError'));
     } finally {
       setLoading(false);
     }
@@ -366,7 +366,7 @@ export default function AssignmentManagement() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save assignments');
+      setError(err.response?.data?.error || t('admin.saveError'));
     }
   };
 
@@ -386,7 +386,7 @@ export default function AssignmentManagement() {
       link.click();
       link.remove();
     } catch (err: any) {
-      setError('Failed to export assignments');
+      setError(t('admin.exportError'));
     }
   };
 
@@ -492,7 +492,7 @@ export default function AssignmentManagement() {
                       />
                       {player.preferred_times && player.preferred_times.length > 0 && (
                         <div className="text-xs text-theme-dim mt-1 pl-2">
-                          Wants: {player.preferred_times.join(', ')}
+                          {t('admin.wants')}: {player.preferred_times.join(', ')}
                         </div>
                       )}
                     </div>
@@ -518,7 +518,7 @@ export default function AssignmentManagement() {
 
       <div className="mt-6 p-4 bg-accent/10 border border-accent/30 rounded-lg">
         <p className="text-sm text-accent">
-          <strong>Tip:</strong> {t('admin.dragToAssign')}. Drag players from time slots to the unassigned area to remove them from the schedule.
+          <strong>{t('admin.tip')}:</strong> {t('admin.dragToAssign')}. {t('admin.dragTip')}
         </p>
       </div>
     </div>

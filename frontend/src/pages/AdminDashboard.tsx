@@ -39,7 +39,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-accent">{t('admin.title')}</h1>
-              <p className="text-theme-dim mt-1">Manage players and ministry assignments</p>
+              <p className="text-theme-dim mt-1">{t('admin.managePlayers')}</p>
             </div>
             <button
               onClick={handleLogout}

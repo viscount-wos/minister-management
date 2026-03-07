@@ -32,7 +32,7 @@ export default function Home() {
                 {t('home.submitNew')}
               </h2>
               <p className="text-theme-dim">
-                Submit your speedups and time preferences for ministry positions
+                {t('home.submitDesc')}
               </p>
             </div>
           </button>
@@ -50,7 +50,7 @@ export default function Home() {
                 {t('home.updateExisting')}
               </h2>
               <p className="text-theme-dim">
-                Update your previously submitted information
+                {t('home.updateDesc')}
               </p>
             </div>
           </button>
@@ -68,14 +68,14 @@ export default function Home() {
                 {t('admin.title')}
               </h2>
               <p className="text-theme-dim">
-                Manage players and assignments
+                {t('home.adminDesc')}
               </p>
             </div>
           </button>
         </div>
 
         <div className="mt-12 text-center text-theme-dim text-sm">
-          <p>All times are in UTC timezone</p>
+          <p>{t('home.utcNote')}</p>
         </div>
       </div>
     </div>

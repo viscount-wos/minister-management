@@ -35,7 +35,7 @@ export default function UpdateSubmission() {
 
   const handleSearch = async () => {
     if (!searchFid.trim()) {
-      setError('Please enter a Player ID');
+      setError(t('form.enterPlayerID'));
       return;
     }
 
@@ -49,7 +49,7 @@ export default function UpdateSubmission() {
       if (err.response?.status === 404) {
         setError(t('update.notFound'));
       } else {
-        setError(err.response?.data?.error || 'An error occurred');
+        setError(err.response?.data?.error || t('form.errorOccurred'));
       }
       setPlayerData(null);
     } finally {
@@ -91,7 +91,7 @@ export default function UpdateSubmission() {
         navigate('/');
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'An error occurred while updating');
+      setError(err.response?.data?.error || t('form.updateError'));
     } finally {
       setLoading(false);
     }
@@ -110,7 +110,7 @@ export default function UpdateSubmission() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 py-20">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-4xl w-full">
         <button
           onClick={() => navigate('/')}
@@ -150,7 +150,7 @@ export default function UpdateSubmission() {
           <div className="space-y-6">
             {/* Player Information */}
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-accent">Player Information</h3>
+              <h3 className="text-xl font-semibold mb-4 text-accent">{t('form.playerInfo')}</h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2">
