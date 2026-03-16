@@ -11,8 +11,10 @@ import {
   DragEndEvent,
   DragStartEvent,
 } from '@dnd-kit/core';
-import { Sparkles, Download, AlertCircle } from 'lucide-react';
+import { Sparkles, Download, AlertCircle, ToggleLeft, ToggleRight, Globe, EyeOff } from 'lucide-react';
 import axios from 'axios';
+import TimezoneSelector from '../TimezoneSelector';
+import { generateAssignmentSlots, getSlotDisplayTime, getSavedTimezone } from '../../utils/timezone';
 
 interface AssignedPlayer {
   id: number;
@@ -35,21 +37,8 @@ interface UnassignedPlayer extends AssignedPlayer {
   preferred_times: string[];
 }
 
-const DAY_TABS = [
-  { key: 'monday', label: 'Monday - Construction' },
-  { key: 'tuesday', label: 'Tuesday - Research' },
-  { key: 'thursday', label: 'Thursday - Troop Training' },
-];
-
-// Generate time slots in 30-minute increments
-const generateTimeSlots = () => {
-  const slots = [];
-  for (let hour = 0; hour < 24; hour++) {
-    slots.push(`${hour.toString().padStart(2, '0')}:00`);
-    slots.push(`${hour.toString().padStart(2, '0')}:30`);
-  }
-  return slots;
-};
+// Use the shared slot generator (23:50 through 23:50+)
+const generateTimeSlots = generateAssignmentSlots;
 
 const PLAYER_CARD_CLASS = 'bg-accent/15 border-accent/40 text-accent';
 
@@ -147,8 +136,9 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
 }
 
 // Droppable time slot container
-function DroppableSlot({ slotId, children, isOver, hasPlayer }: {
+function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer }: {
   slotId: string;
+  displayTime: string;
   children: React.ReactNode;
   isOver: boolean;
   hasPlayer: boolean;
@@ -166,7 +156,10 @@ function DroppableSlot({ slotId, children, isOver, hasPlayer }: {
           : 'border-theme-border bg-dark-bg'
       }`}
     >
-      <div className="font-semibold text-theme-dim mb-2">{slotId}</div>
+      <div className="font-semibold text-theme-dim mb-2">
+        {displayTime}
+        {slotId === '23:50+' && <span className="text-xs opacity-60 ml-1">(+1d)</span>}
+      </div>
       {children}
     </div>
   );
@@ -199,6 +192,16 @@ export default function AssignmentManagement() {
   const [unassignedPlayers, setUnassignedPlayers] = useState<UnassignedPlayer[]>([]);
   const [activePlayer, setActivePlayer] = useState<AssignedPlayer | null>(null);
   const [overSlotId, setOverSlotId] = useState<string | null>(null);
+  const [researchDay, setResearchDay] = useState<'tuesday' | 'friday'>('tuesday');
+  const [showFireCrystals, setShowFireCrystals] = useState(false);
+  const [timezone, setTimezone] = useState(getSavedTimezone);
+  const [publishedDays, setPublishedDays] = useState<string[]>([]);
+
+  const DAY_TABS = [
+    { key: 'monday', label: 'Monday - Construction' },
+    { key: researchDay, label: researchDay === 'tuesday' ? 'Tuesday - Research' : 'Friday - Research' },
+    { key: 'thursday', label: 'Thursday - Troop Training' },
+  ];
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -207,8 +210,108 @@ export default function AssignmentManagement() {
   const timeSlots = generateTimeSlots();
 
   useEffect(() => {
+    fetchResearchDay();
+    fetchFireCrystalsSetting();
+    fetchPublishedDays();
+  }, []);
+
+  useEffect(() => {
     fetchAssignments();
   }, [selectedDay]);
+
+  const fetchResearchDay = async () => {
+    try {
+      const response = await axios.get('/api/settings/research-day');
+      const day = response.data.research_day;
+      setResearchDay(day);
+      // If currently on a research day tab that changed, switch to the new one
+      if (selectedDay === 'tuesday' || selectedDay === 'friday') {
+        setSelectedDay(day);
+      }
+    } catch {
+      // Default to tuesday on error
+    }
+  };
+
+  const handleToggleResearchDay = async () => {
+    const newDay = researchDay === 'tuesday' ? 'friday' : 'tuesday';
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.put(
+        '/api/admin/settings/research-day',
+        { research_day: newDay },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setResearchDay(newDay);
+      // If currently viewing the research day tab, switch to the new key
+      if (selectedDay === researchDay) {
+        setSelectedDay(newDay);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update research day');
+    }
+  };
+
+  const fetchFireCrystalsSetting = async () => {
+    try {
+      const response = await axios.get('/api/settings/show-fire-crystals');
+      setShowFireCrystals(response.data.show_fire_crystals);
+    } catch {
+      // Default to false on error
+    }
+  };
+
+  const handleToggleFireCrystals = async () => {
+    const newValue = !showFireCrystals;
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.put(
+        '/api/admin/settings/show-fire-crystals',
+        { show_fire_crystals: newValue },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setShowFireCrystals(newValue);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update fire crystals setting');
+    }
+  };
+
+  const fetchPublishedDays = async () => {
+    try {
+      const response = await axios.get('/api/settings/published-days');
+      setPublishedDays(response.data.published_days || []);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handlePublish = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.put(
+        '/api/admin/settings/publish',
+        { day: selectedDay },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPublishedDays(response.data.published_days || []);
+    } catch (err: any) {
+      setError(err.response?.data?.error || t('admin.publishError'));
+    }
+  };
+
+  const handleUnpublish = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.put(
+        '/api/admin/settings/unpublish',
+        { day: selectedDay },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPublishedDays(response.data.published_days || []);
+    } catch (err: any) {
+      setError(err.response?.data?.error || t('admin.unpublishError'));
+    }
+  };
 
   const fetchAssignments = async () => {
     setLoading(true);
@@ -410,7 +513,7 @@ export default function AssignmentManagement() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-wrap items-center gap-4 mb-6">
         <button
           onClick={handleAutoAssign}
           disabled={loading}
@@ -426,6 +529,62 @@ export default function AssignmentManagement() {
           <Download className="w-5 h-5" />
           {t('admin.exportExcel')}
         </button>
+
+        {/* Publish / Unpublish Button */}
+        {publishedDays.includes(selectedDay) ? (
+          <button
+            onClick={handleUnpublish}
+            className="flex items-center gap-2 px-6 py-3 bg-danger/80 text-white rounded-lg hover:bg-danger font-medium transition-colors"
+          >
+            <EyeOff className="w-5 h-5" />
+            {t('admin.unpublish')}
+          </button>
+        ) : (
+          <button
+            onClick={handlePublish}
+            className="flex items-center gap-2 px-6 py-3 bg-accent/80 text-dark-bg rounded-lg hover:bg-accent font-medium transition-colors"
+          >
+            <Globe className="w-5 h-5" />
+            {t('admin.publish')}
+          </button>
+        )}
+
+        {/* Fire Crystals Toggle */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-dark-bg border border-theme-border rounded-lg">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showFireCrystals}
+              onChange={handleToggleFireCrystals}
+              className="w-4 h-4 accent-accent"
+            />
+            <span className="text-sm text-theme-dim">{t('admin.showFireCrystals')}</span>
+          </label>
+        </div>
+
+        {/* Timezone Selector */}
+        <TimezoneSelector value={timezone} onChange={setTimezone} />
+
+        {/* Research Day Toggle */}
+        <div className="flex items-center gap-2 ml-auto px-4 py-2 bg-dark-bg border border-theme-border rounded-lg">
+          <span className="text-sm text-theme-dim">{t('admin.researchDayToggle')}:</span>
+          <button
+            onClick={handleToggleResearchDay}
+            className="flex items-center gap-1.5 font-medium text-sm transition-colors"
+          >
+            {researchDay === 'tuesday' ? (
+              <>
+                <ToggleLeft className="w-6 h-6 text-accent" />
+                <span className="text-accent">{t('admin.tuesday').split(' - ')[0]}</span>
+              </>
+            ) : (
+              <>
+                <ToggleRight className="w-6 h-6 text-accent" />
+                <span className="text-accent">{t('admin.friday').split(' - ')[0]}</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -459,6 +618,7 @@ export default function AssignmentManagement() {
                     <DroppableSlot
                       key={slot}
                       slotId={slot}
+                      displayTime={getSlotDisplayTime(slot, timezone)}
                       isOver={overSlotId === slot}
                       hasPlayer={hasPlayer && activePlayer?.player_id !== slotPlayers[0]?.player_id}
                     >

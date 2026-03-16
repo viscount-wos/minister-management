@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Edit2, Trash2, X, Save, AlertCircle } from 'lucide-react';
 import axios from 'axios';
+import TimezoneSelector from '../TimezoneSelector';
+import { getSavedTimezone, generatePlayerTimeSlots, getTimezoneAbbr } from '../../utils/timezone';
+
 
 interface Player {
   id: number;
@@ -15,16 +18,18 @@ interface Player {
   refined_fire_crystals: number;
   fire_crystal_shards: number;
   time_slots: string[];
+  time_slots_by_day?: { construction: string[]; research: string[]; troop: string[] };
   monday_points: number;
-  tuesday_points: number;
+  research_points: number;
   thursday_points: number;
+  research_day?: string;
   avatar_image?: string;
   stove_lv?: number;
   stove_lv_content?: string;
   alliance?: string;
 }
 
-type SortField = 'game_name' | 'fid' | 'monday_points' | 'tuesday_points' | 'thursday_points';
+type SortField = 'game_name' | 'fid' | 'monday_points' | 'research_points' | 'thursday_points';
 type SortDirection = 'asc' | 'desc';
 
 export default function PlayerManagement() {
@@ -38,10 +43,24 @@ export default function PlayerManagement() {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [showFireCrystals, setShowFireCrystals] = useState(false);
+  const [activeTimeTab, setActiveTimeTab] = useState<'construction' | 'research' | 'troop'>('construction');
+  const [researchDay, setResearchDay] = useState('tuesday');
+  const [timezone, setTimezone] = useState(getSavedTimezone);
 
   useEffect(() => {
     fetchPlayers();
+    axios.get('/api/settings/show-fire-crystals')
+      .then(res => setShowFireCrystals(res.data.show_fire_crystals))
+      .catch(() => {});
+    axios.get('/api/settings/research-day')
+      .then(res => setResearchDay(res.data.research_day))
+      .catch(() => {});
   }, []);
+
+  const researchDayName = t(`form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
+  const dayTypeLabel = (dayType: string) =>
+    t(`form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
 
   const fetchPlayers = async () => {
     setLoading(true);
@@ -211,7 +230,7 @@ export default function PlayerManagement() {
                 <SortButton field="monday_points" label={t('admin.monday').split(' - ')[0]} />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">
-                <SortButton field="tuesday_points" label={t('admin.tuesday').split(' - ')[0]} />
+                <SortButton field="research_points" label={t(`admin.${players[0]?.research_day || 'tuesday'}`).split(' - ')[0]} />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">
                 <SortButton field="thursday_points" label={t('admin.thursday').split(' - ')[0]} />
@@ -236,7 +255,7 @@ export default function PlayerManagement() {
                   {player.monday_points.toLocaleString()}
                 </td>
                 <td className="p-3 text-center font-medium text-success">
-                  {player.tuesday_points.toLocaleString()}
+                  {player.research_points.toLocaleString()}
                 </td>
                 <td className="p-3 text-center font-medium text-accent-light">
                   {player.thursday_points.toLocaleString()}
@@ -247,7 +266,7 @@ export default function PlayerManagement() {
                 <td className="p-3">
                   <div className="flex items-center justify-center gap-2">
                     <button
-                      onClick={() => setEditingPlayer(player)}
+                      onClick={() => { setActiveTimeTab('construction'); setEditingPlayer(player); }}
                       className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
                       title={t('admin.edit')}
                     >
@@ -322,9 +341,11 @@ export default function PlayerManagement() {
                   { key: 'research_speedups_days', label: t('admin.researchDays') },
                   { key: 'troop_training_speedups_days', label: t('admin.troopDays') },
                   { key: 'general_speedups_days', label: t('admin.generalDays') },
-                  { key: 'fire_crystals', label: t('form.fireCrystals') },
-                  { key: 'refined_fire_crystals', label: t('form.refinedFireCrystals') },
-                  { key: 'fire_crystal_shards', label: t('form.fireCrystalShards') },
+                  ...(showFireCrystals ? [
+                    { key: 'fire_crystals', label: t('form.fireCrystals') },
+                    { key: 'refined_fire_crystals', label: t('form.refinedFireCrystals') },
+                    { key: 'fire_crystal_shards', label: t('form.fireCrystalShards') },
+                  ] : []),
                 ].map(({ key, label }) => (
                   <div key={key}>
                     <label className="block text-sm font-medium text-theme-text mb-2">{label}</label>
@@ -350,32 +371,73 @@ export default function PlayerManagement() {
                 <label className="block text-sm font-medium text-theme-text mb-2">
                   {t('form.timePreferences')}
                 </label>
+
+                {/* Day type tabs */}
+                <div className="flex gap-2 mb-3 border-b border-theme-border">
+                  {(['construction', 'research', 'troop'] as const).map((dayType) => {
+                    const slots = editingPlayer.time_slots_by_day?.[dayType] || [];
+                    return (
+                      <button
+                        key={dayType}
+                        type="button"
+                        onClick={() => setActiveTimeTab(dayType)}
+                        className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
+                          activeTimeTab === dayType
+                            ? 'border-accent text-accent'
+                            : 'border-transparent text-theme-dim hover:text-theme-text'
+                        }`}
+                      >
+                        {dayTypeLabel(dayType)}
+                        {slots.length > 0 && (
+                          <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-accent/20 text-accent">
+                            {slots.length}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center justify-between mb-2">
+                  <TimezoneSelector value={timezone} onChange={setTimezone} />
+                </div>
                 <div className="grid grid-cols-6 gap-2">
-                  {Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`).map((time) => (
-                    <button
-                      key={time}
-                      type="button"
-                      onClick={() => {
-                        const slots = editingPlayer.time_slots || [];
-                        setEditingPlayer({
-                          ...editingPlayer,
-                          time_slots: slots.includes(time)
-                            ? slots.filter((t: string) => t !== time)
-                            : [...slots, time],
-                        });
-                      }}
-                      className={`p-2 rounded border text-sm font-medium transition-all ${
-                        (editingPlayer.time_slots || []).includes(time)
-                          ? 'bg-accent border-accent text-dark-bg'
-                          : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  ))}
+                  {generatePlayerTimeSlots(timezone).map(({ display, utcValue }) => {
+                    const byDay = editingPlayer.time_slots_by_day || { construction: [], research: [], troop: [] };
+                    const current = byDay[activeTimeTab] || [];
+                    return (
+                      <button
+                        key={utcValue}
+                        type="button"
+                        onClick={() => {
+                          setEditingPlayer({
+                            ...editingPlayer,
+                            time_slots_by_day: {
+                              ...byDay,
+                              [activeTimeTab]: current.includes(utcValue)
+                                ? current.filter((t: string) => t !== utcValue)
+                                : [...current, utcValue],
+                            },
+                          });
+                        }}
+                        className={`p-2 rounded border text-sm font-medium transition-all ${
+                          current.includes(utcValue)
+                            ? 'bg-accent border-accent text-dark-bg'
+                            : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
+                        }`}
+                      >
+                        {display}
+                      </button>
+                    );
+                  })}
                 </div>
                 <p className="text-xs text-theme-dim mt-2">
-                  {t('form.selectedSlots', { count: (editingPlayer.time_slots || []).length })}
+                  {t('form.selectedSlots', { count: (editingPlayer.time_slots_by_day?.[activeTimeTab] || []).length })}
+                  {timezone !== 'UTC' && (
+                    <span className="ml-2 text-accent">
+                      ({t('form.timesShownIn')} {getTimezoneAbbr(timezone)})
+                    </span>
+                  )}
                 </p>
               </div>
 

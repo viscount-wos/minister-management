@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, Download, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import TimezoneSelector from '../components/TimezoneSelector';
+import { getSavedTimezone, generatePlayerTimeSlots, formatTimeInTimezone, getTimezoneAbbr } from '../utils/timezone';
 
 interface PlayerData {
   fid: string;
@@ -28,6 +30,18 @@ export default function PlayerForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [wosLoading, setWosLoading] = useState(false);
+  const [showFireCrystals, setShowFireCrystals] = useState(false);
+  const [researchDay, setResearchDay] = useState('tuesday');
+  const [timezone, setTimezone] = useState(getSavedTimezone);
+
+  useEffect(() => {
+    axios.get('/api/settings/show-fire-crystals')
+      .then(res => setShowFireCrystals(res.data.show_fire_crystals))
+      .catch(() => {});
+    axios.get('/api/settings/research-day')
+      .then(res => setResearchDay(res.data.research_day))
+      .catch(() => {});
+  }, []);
 
   const [playerData, setPlayerData] = useState<PlayerData>({
     fid: '',
@@ -42,10 +56,14 @@ export default function PlayerForm() {
     fire_crystal_shards: 0,
   });
 
-  const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
+  const [selectedTimesByDay, setSelectedTimesByDay] = useState<{
+    construction: string[];
+    research: string[];
+    troop: string[];
+  }>({ construction: [], research: [], troop: [] });
 
-  // Generate time slots from 00:00 to 23:00 in 1-hour increments
-  const timeSlots = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+  // Generate time slots: display in chosen timezone, store as UTC
+  const timeSlotOptions = generatePlayerTimeSlots(timezone);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -85,15 +103,26 @@ export default function PlayerForm() {
     }
   };
 
-  const toggleTimeSlot = (time: string) => {
-    setSelectedTimes(prev =>
-      prev.includes(time)
-        ? prev.filter(t => t !== time)
-        : [...prev, time]
-    );
+  // Map step number to day type
+  const stepDayType = { 2: 'construction', 3: 'research', 4: 'troop' } as const;
+  const researchDayName = t(`form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
+  const dayTypeLabel = (dayType: string) =>
+    t(`form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
+
+  const toggleTimeSlot = (utcValue: string) => {
+    const dayType = stepDayType[step as 2 | 3 | 4];
+    if (!dayType) return;
+    setSelectedTimesByDay(prev => ({
+      ...prev,
+      [dayType]: prev[dayType].includes(utcValue)
+        ? prev[dayType].filter(t => t !== utcValue)
+        : [...prev[dayType], utcValue],
+    }));
   };
 
-  const validateStep1 = () => {
+  const [duplicateWarning, setDuplicateWarning] = useState('');
+
+  const validateStep1 = async () => {
     if (!playerData.game_name.trim()) {
       setError(t('form.required'));
       return false;
@@ -103,12 +132,29 @@ export default function PlayerForm() {
       setError(t('form.fidRequired'));
       return false;
     }
+
+    // Check for duplicate FID or game name
+    try {
+      const res = await axios.post('/api/player/check-duplicate', {
+        fid: playerData.fid.trim(),
+        game_name: playerData.game_name.trim(),
+      });
+      if (res.data.fid_exists || res.data.name_exists) {
+        setDuplicateWarning(t('form.playerAlreadyExists'));
+        setError('');
+        return false;
+      }
+    } catch {
+      // If check fails, allow submission to proceed
+    }
+
     setError('');
+    setDuplicateWarning('');
     return true;
   };
 
-  const handleNext = () => {
-    if (step === 1 && !validateStep1()) {
+  const handleNext = async () => {
+    if (step === 1 && !(await validateStep1())) {
       return;
     }
     setStep(step + 1);
@@ -126,7 +172,8 @@ export default function PlayerForm() {
     try {
       const submitData = {
         ...playerData,
-        time_slots: selectedTimes,
+        time_slots_by_day: selectedTimesByDay,
+        timezone,
       };
 
       await axios.post('/api/player/submit', submitData);
@@ -158,7 +205,7 @@ export default function PlayerForm() {
       <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-4xl w-full">
         {/* Progress Indicator */}
         <div className="flex items-center justify-center mb-8">
-          {[1, 2, 3].map((num) => (
+          {[1, 2, 3, 4, 5].map((num) => (
             <div key={num} className="flex items-center">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
@@ -169,9 +216,9 @@ export default function PlayerForm() {
               >
                 {num}
               </div>
-              {num < 3 && (
+              {num < 5 && (
                 <div
-                  className={`w-16 h-1 mx-2 ${
+                  className={`w-8 h-1 mx-1 ${
                     step > num ? 'bg-accent' : 'bg-theme-border'
                   }`}
                 />
@@ -312,94 +359,116 @@ export default function PlayerForm() {
                     className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.generalSpeedups')}
-                  </label>
-                  <input
-                    type="number"
-                    name="general_speedups_days"
-                    value={playerData.general_speedups_days}
-                    onChange={handleInputChange}
-                    min="0"
-                    step="0.1"
-                    className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.fireCrystals')}
-                  </label>
-                  <input
-                    type="number"
-                    name="fire_crystals"
-                    value={playerData.fire_crystals}
-                    onChange={handleInputChange}
-                    min="0"
-                    className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.refinedFireCrystals')}
-                  </label>
-                  <input
-                    type="number"
-                    name="refined_fire_crystals"
-                    value={playerData.refined_fire_crystals}
-                    onChange={handleInputChange}
-                    min="0"
-                    className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.fireCrystalShards')}
-                  </label>
-                  <input
-                    type="number"
-                    name="fire_crystal_shards"
-                    value={playerData.fire_crystal_shards}
-                    onChange={handleInputChange}
-                    min="0"
-                    className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  />
-                </div>
+                {showFireCrystals && (
+                  <div>
+                    <label className="block text-sm font-medium text-theme-text mb-2">
+                      {t('form.fireCrystals')}
+                    </label>
+                    <input
+                      type="number"
+                      name="fire_crystals"
+                      value={playerData.fire_crystals}
+                      onChange={handleInputChange}
+                      min="0"
+                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                    />
+                  </div>
+                )}
+                {showFireCrystals && (
+                  <div>
+                    <label className="block text-sm font-medium text-theme-text mb-2">
+                      {t('form.refinedFireCrystals')}
+                    </label>
+                    <input
+                      type="number"
+                      name="refined_fire_crystals"
+                      value={playerData.refined_fire_crystals}
+                      onChange={handleInputChange}
+                      min="0"
+                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                    />
+                  </div>
+                )}
+                {showFireCrystals && (
+                  <div>
+                    <label className="block text-sm font-medium text-theme-text mb-2">
+                      {t('form.fireCrystalShards')}
+                    </label>
+                    <input
+                      type="number"
+                      name="fire_crystal_shards"
+                      value={playerData.fire_crystal_shards}
+                      onChange={handleInputChange}
+                      min="0"
+                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                    />
+                  </div>
+                )}
+              </div>
+              {/* General Speedups Note */}
+              <div className="mt-4 p-4 bg-accent/10 border border-accent/30 rounded-lg">
+                <p className="text-sm text-accent">
+                  <strong>💡 </strong>{t('form.generalSpeedupsNote')}
+                </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 2: Time Preferences */}
-        {step === 2 && (
-          <div>
-            <h2 className="text-3xl font-bold text-accent mb-4 text-center">
-              {t('form.step2Title')}
-            </h2>
-            <p className="text-theme-dim text-center mb-6">{t('form.selectMultiple')}</p>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-              {timeSlots.map((time) => (
-                <button
-                  key={time}
-                  onClick={() => toggleTimeSlot(time)}
-                  className={`p-3 rounded-lg border-2 transition-all font-medium ${
-                    selectedTimes.includes(time)
-                      ? 'bg-accent border-accent text-dark-bg'
-                      : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
-                  }`}
-                >
-                  {time}
-                </button>
-              ))}
+        {/* Steps 2-4: Time Preferences per day type */}
+        {(step === 2 || step === 3 || step === 4) && (() => {
+          const dayType = stepDayType[step as 2 | 3 | 4];
+          const slots = selectedTimesByDay[dayType];
+          return (
+            <div>
+              <h2 className="text-3xl font-bold text-accent mb-4 text-center">
+                {dayTypeLabel(dayType)}
+              </h2>
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <p className="text-theme-dim">{t('form.selectMultiple')}</p>
+                <TimezoneSelector value={timezone} onChange={setTimezone} />
+              </div>
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                {timeSlotOptions.map(({ display, utcValue }) => (
+                  <button
+                    key={utcValue}
+                    onClick={() => toggleTimeSlot(utcValue)}
+                    className={`p-3 rounded-lg border-2 transition-all font-medium ${
+                      slots.includes(utcValue)
+                        ? 'bg-accent border-accent text-dark-bg'
+                        : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
+                    }`}
+                  >
+                    {display}
+                    {timezone !== 'UTC' && (
+                      <span className={`block text-xs mt-0.5 ${
+                        slots.includes(utcValue) ? 'opacity-70' : 'opacity-50'
+                      }`}>
+                        {utcValue} UTC
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <p className="text-sm text-theme-dim mt-4 text-center">
+                {t('form.selectedSlots', { count: slots.length })}
+                {timezone !== 'UTC' && (
+                  <span className="ml-2 text-accent">
+                    ({t('form.timesShownIn')} {getTimezoneAbbr(timezone)})
+                  </span>
+                )}
+              </p>
+              <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded-lg">
+                <p className="text-sm text-accent text-center">
+                  <strong>⏱ </strong>{t('form.timeToleranceNote')}
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-theme-dim mt-4 text-center">
-              {t('form.selectedSlots', { count: selectedTimes.length })}
-            </p>
-          </div>
-        )}
+          );
+        })()}
 
-        {/* Step 3: Review */}
-        {step === 3 && (
+        {/* Step 5: Review */}
+        {step === 5 && (
           <div>
             <h2 className="text-3xl font-bold text-accent mb-6 text-center">
               {t('form.step3Title')}
@@ -439,41 +508,70 @@ export default function PlayerForm() {
                     <span className="text-theme-dim">{t('form.troopSpeedups')}:</span>
                     <span className="ml-2 font-medium text-theme-text">{playerData.troop_training_speedups_days} {t('form.days')}</span>
                   </div>
-                  <div>
-                    <span className="text-theme-dim">{t('form.generalSpeedups')}:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.general_speedups_days} {t('form.days')}</span>
-                  </div>
-                  <div>
-                    <span className="text-theme-dim">{t('form.fireCrystals')}:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.fire_crystals}</span>
-                  </div>
-                  <div>
-                    <span className="text-theme-dim">{t('form.refinedFireCrystals')}:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.refined_fire_crystals}</span>
-                  </div>
-                  <div>
-                    <span className="text-theme-dim">{t('form.fireCrystalShards')}:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.fire_crystal_shards}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-dark-bg p-6 rounded-lg border border-theme-border">
-                <h3 className="font-semibold text-lg mb-4 text-accent">{t('form.timePreferences')}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedTimes.sort().map((time) => (
-                    <span
-                      key={time}
-                      className="px-3 py-1 bg-accent/20 text-accent rounded-full text-sm font-medium"
-                    >
-                      {time}
-                    </span>
-                  ))}
-                  {selectedTimes.length === 0 && (
-                    <span className="text-theme-dim">{t('form.noTimeSelected')}</span>
+                  {showFireCrystals && (
+                    <div>
+                      <span className="text-theme-dim">{t('form.fireCrystals')}:</span>
+                      <span className="ml-2 font-medium text-theme-text">{playerData.fire_crystals}</span>
+                    </div>
+                  )}
+                  {showFireCrystals && (
+                    <div>
+                      <span className="text-theme-dim">{t('form.refinedFireCrystals')}:</span>
+                      <span className="ml-2 font-medium text-theme-text">{playerData.refined_fire_crystals}</span>
+                    </div>
+                  )}
+                  {showFireCrystals && (
+                    <div>
+                      <span className="text-theme-dim">{t('form.fireCrystalShards')}:</span>
+                      <span className="ml-2 font-medium text-theme-text">{playerData.fire_crystal_shards}</span>
+                    </div>
                   )}
                 </div>
               </div>
+              <div className="bg-dark-bg p-6 rounded-lg border border-theme-border">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-lg text-accent">{t('form.timePreferences')}</h3>
+                  <TimezoneSelector value={timezone} onChange={setTimezone} />
+                </div>
+                {(['construction', 'research', 'troop'] as const).map((dayType) => (
+                  <div key={dayType} className="mb-3 last:mb-0">
+                    <p className="text-sm font-medium text-theme-dim mb-1">{dayTypeLabel(dayType)}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTimesByDay[dayType].sort().map((time) => (
+                        <span
+                          key={time}
+                          className="px-3 py-1 bg-accent/20 text-accent rounded-full text-sm font-medium"
+                        >
+                          {formatTimeInTimezone(time, timezone)}
+                          {timezone !== 'UTC' && (
+                            <span className="opacity-60 ml-1 text-xs">({time} UTC)</span>
+                          )}
+                        </span>
+                      ))}
+                      {selectedTimesByDay[dayType].length === 0 && (
+                        <span className="text-theme-dim text-sm">{t('form.noTimeSelected')}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* Duplicate Warning */}
+        {duplicateWarning && (
+          <div className="mt-6 p-4 bg-warning/10 border border-warning/30 rounded-lg">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-warning flex-shrink-0" />
+              <p className="text-warning">{duplicateWarning}</p>
+            </div>
+            <button
+              onClick={() => navigate('/update')}
+              className="mt-3 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors text-sm"
+            >
+              {t('update.title')}
+            </button>
           </div>
         )}
 
@@ -494,7 +592,7 @@ export default function PlayerForm() {
             <ArrowLeft className="w-5 h-5" />
             {t('form.back')}
           </button>
-          {step < 3 ? (
+          {step < 5 ? (
             <button
               onClick={handleNext}
               className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"

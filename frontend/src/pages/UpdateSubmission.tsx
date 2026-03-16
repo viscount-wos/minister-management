@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search, ArrowLeft, Save, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import TimezoneSelector from '../components/TimezoneSelector';
+import { getSavedTimezone, generatePlayerTimeSlots, getTimezoneAbbr } from '../utils/timezone';
 
 interface PlayerData {
   id?: number;
@@ -16,6 +18,8 @@ interface PlayerData {
   refined_fire_crystals: number;
   fire_crystal_shards: number;
   time_slots: string[];
+  time_slots_by_day?: { construction: string[]; research: string[]; troop: string[] };
+  timezone?: string;
   avatar_image?: string;
   stove_lv?: number;
   stove_lv_content?: string;
@@ -30,8 +34,25 @@ export default function UpdateSubmission() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [playerData, setPlayerData] = useState<PlayerData | null>(null);
+  const [showFireCrystals, setShowFireCrystals] = useState(false);
+  const [activeTimeTab, setActiveTimeTab] = useState<'construction' | 'research' | 'troop'>('construction');
+  const [researchDay, setResearchDay] = useState('tuesday');
+  const [timezone, setTimezone] = useState(getSavedTimezone);
 
-  const timeSlots = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+  useEffect(() => {
+    axios.get('/api/settings/show-fire-crystals')
+      .then(res => setShowFireCrystals(res.data.show_fire_crystals))
+      .catch(() => {});
+    axios.get('/api/settings/research-day')
+      .then(res => setResearchDay(res.data.research_day))
+      .catch(() => {});
+  }, []);
+
+  const researchDayName = t(`form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
+  const dayTypeLabel = (dayType: string) =>
+    t(`form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
+
+  const timeSlotOptions = generatePlayerTimeSlots(timezone);
 
   const handleSearch = async () => {
     if (!searchFid.trim()) {
@@ -44,7 +65,20 @@ export default function UpdateSubmission() {
 
     try {
       const response = await axios.get(`/api/player/${searchFid}`);
-      setPlayerData(response.data);
+      const data = response.data;
+      // Ensure time_slots_by_day exists (fallback from legacy time_slots)
+      if (!data.time_slots_by_day) {
+        data.time_slots_by_day = {
+          construction: data.time_slots || [],
+          research: data.time_slots || [],
+          troop: data.time_slots || [],
+        };
+      }
+      // If player has a saved timezone, use it
+      if (data.timezone) {
+        setTimezone(data.timezone);
+      }
+      setPlayerData(data);
     } catch (err: any) {
       if (err.response?.status === 404) {
         setError(t('update.notFound'));
@@ -70,11 +104,16 @@ export default function UpdateSubmission() {
   const toggleTimeSlot = (time: string) => {
     if (!playerData) return;
 
+    const byDay = playerData.time_slots_by_day || { construction: [], research: [], troop: [] };
+    const current = byDay[activeTimeTab] || [];
     setPlayerData(prev => ({
       ...prev!,
-      time_slots: prev!.time_slots.includes(time)
-        ? prev!.time_slots.filter(t => t !== time)
-        : [...prev!.time_slots, time],
+      time_slots_by_day: {
+        ...byDay,
+        [activeTimeTab]: current.includes(time)
+          ? current.filter(t => t !== time)
+          : [...current, time],
+      },
     }));
   };
 
@@ -85,7 +124,11 @@ export default function UpdateSubmission() {
     setError('');
 
     try {
-      await axios.post('/api/player/submit', playerData);
+      await axios.post('/api/player/submit', {
+        ...playerData,
+        time_slots_by_day: playerData.time_slots_by_day,
+        timezone,
+      });
       setSuccess(true);
       setTimeout(() => {
         navigate('/');
@@ -223,80 +266,127 @@ export default function UpdateSubmission() {
                       className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.generalSpeedups')}
-                    </label>
-                    <input
-                      type="number"
-                      name="general_speedups_days"
-                      value={playerData.general_speedups_days}
-                      onChange={handleInputChange}
-                      min="0"
-                      step="0.1"
-                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.fireCrystals')}
-                    </label>
-                    <input
-                      type="number"
-                      name="fire_crystals"
-                      value={playerData.fire_crystals}
-                      onChange={handleInputChange}
-                      min="0"
-                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.refinedFireCrystals')}
-                    </label>
-                    <input
-                      type="number"
-                      name="refined_fire_crystals"
-                      value={playerData.refined_fire_crystals}
-                      onChange={handleInputChange}
-                      min="0"
-                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.fireCrystalShards')}
-                    </label>
-                    <input
-                      type="number"
-                      name="fire_crystal_shards"
-                      value={playerData.fire_crystal_shards}
-                      onChange={handleInputChange}
-                      min="0"
-                      className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                    />
-                  </div>
+                  {showFireCrystals && (
+                    <div>
+                      <label className="block text-sm font-medium text-theme-text mb-2">
+                        {t('form.fireCrystals')}
+                      </label>
+                      <input
+                        type="number"
+                        name="fire_crystals"
+                        value={playerData.fire_crystals}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                      />
+                    </div>
+                  )}
+                  {showFireCrystals && (
+                    <div>
+                      <label className="block text-sm font-medium text-theme-text mb-2">
+                        {t('form.refinedFireCrystals')}
+                      </label>
+                      <input
+                        type="number"
+                        name="refined_fire_crystals"
+                        value={playerData.refined_fire_crystals}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                      />
+                    </div>
+                  )}
+                  {showFireCrystals && (
+                    <div>
+                      <label className="block text-sm font-medium text-theme-text mb-2">
+                        {t('form.fireCrystalShards')}
+                      </label>
+                      <input
+                        type="number"
+                        name="fire_crystal_shards"
+                        value={playerData.fire_crystal_shards}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+                      />
+                    </div>
+                  )}
+                </div>
+                {/* General Speedups Note */}
+                <div className="mt-4 p-4 bg-accent/10 border border-accent/30 rounded-lg">
+                  <p className="text-sm text-accent">
+                    <strong>💡 </strong>{t('form.generalSpeedupsNote')}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Time Preferences */}
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-accent">{t('form.selectTimes')}</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-accent">{t('form.selectTimes')}</h3>
+                <TimezoneSelector value={timezone} onChange={setTimezone} />
+              </div>
+
+              {/* Day type tabs */}
+              <div className="flex gap-2 mb-4 border-b border-theme-border">
+                {(['construction', 'research', 'troop'] as const).map((dayType) => {
+                  const slots = playerData.time_slots_by_day?.[dayType] || [];
+                  return (
+                    <button
+                      key={dayType}
+                      onClick={() => setActiveTimeTab(dayType)}
+                      className={`px-4 py-3 font-medium transition-colors border-b-2 ${
+                        activeTimeTab === dayType
+                          ? 'border-accent text-accent'
+                          : 'border-transparent text-theme-dim hover:text-theme-text'
+                      }`}
+                    >
+                      {dayTypeLabel(dayType)}
+                      {slots.length > 0 && (
+                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-accent/20 text-accent">
+                          {slots.length}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                {timeSlots.map((time) => (
+                {timeSlotOptions.map(({ display, utcValue }) => (
                   <button
-                    key={time}
-                    onClick={() => toggleTimeSlot(time)}
+                    key={utcValue}
+                    onClick={() => toggleTimeSlot(utcValue)}
                     className={`p-3 rounded-lg border-2 transition-all font-medium ${
-                      playerData.time_slots?.includes(time)
+                      (playerData.time_slots_by_day?.[activeTimeTab] || []).includes(utcValue)
                         ? 'bg-accent border-accent text-dark-bg'
                         : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
                     }`}
                   >
-                    {time}
+                    {display}
+                    {timezone !== 'UTC' && (
+                      <span className={`block text-xs mt-0.5 ${
+                        (playerData.time_slots_by_day?.[activeTimeTab] || []).includes(utcValue) ? 'opacity-70' : 'opacity-50'
+                      }`}>
+                        {utcValue} UTC
+                      </span>
+                    )}
                   </button>
                 ))}
+              </div>
+              <p className="text-sm text-theme-dim mt-4 text-center">
+                {t('form.selectedSlots', { count: (playerData.time_slots_by_day?.[activeTimeTab] || []).length })}
+                {timezone !== 'UTC' && (
+                  <span className="ml-2 text-accent">
+                    ({t('form.timesShownIn')} {getTimezoneAbbr(timezone)})
+                  </span>
+                )}
+              </p>
+              <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded-lg">
+                <p className="text-sm text-accent text-center">
+                  <strong>⏱ </strong>{t('form.timeToleranceNote')}
+                </p>
               </div>
             </div>
 

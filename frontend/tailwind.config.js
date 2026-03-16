@@ -31,6 +31,10 @@ export default {
           DEFAULT: '#e74c3c',
           dark: '#c0392b',
         },
+        warning: {
+          DEFAULT: '#f39c12',
+          dark: '#d68910',
+        },
       },
     },
   },

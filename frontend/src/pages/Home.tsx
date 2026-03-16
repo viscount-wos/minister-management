@@ -1,14 +1,27 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Edit, Shield } from 'lucide-react';
+import { FileText, Edit, Shield, Calendar } from 'lucide-react';
+import axios from 'axios';
 
 export default function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [publishedDays, setPublishedDays] = useState<string[]>([]);
+
+  useEffect(() => {
+    axios.get('/api/settings/published-days')
+      .then(res => setPublishedDays(res.data.published_days || []))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
+        <div className="text-center mb-4">
+          <p className="text-2xl text-theme-text font-semibold">Welcome, 2694</p>
+        </div>
+
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-accent mb-4">
             {t('home.title')}
@@ -17,6 +30,31 @@ export default function Home() {
             {t('home.subtitle')}
           </p>
         </div>
+
+        {/* Published Schedule Links */}
+        {publishedDays.length > 0 && (
+          <div className="mb-8 space-y-3">
+            {publishedDays.map(day => (
+              <button
+                key={day}
+                onClick={() => navigate(`/schedule/${day}`)}
+                className="w-full bg-accent/10 border-2 border-accent/40 rounded-2xl p-5 hover:bg-accent/20 transition-all duration-300 group"
+              >
+                <div className="flex items-center justify-center gap-4">
+                  <Calendar className="w-7 h-7 text-accent" />
+                  <div className="text-center">
+                    <h2 className="text-lg font-bold text-accent">
+                      {t('schedule.viewSchedule')}
+                    </h2>
+                    <p className="text-theme-dim">
+                      {t(`admin.${day}`)}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="grid md:grid-cols-3 gap-6">
           {/* Submit New Application */}

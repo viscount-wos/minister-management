@@ -15,7 +15,8 @@ load_dotenv()
 
 from database import (
     init_db, get_all_players, get_player_by_fid,
-    save_player, delete_player, calculate_points, get_db
+    save_player, delete_player, calculate_points, get_db,
+    get_research_day, get_show_fire_crystals, set_setting, get_setting
 )
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
@@ -58,8 +59,11 @@ def submit_player():
             if field not in data or not data[field]:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
-        # Extract time slots
+        # Extract time slots (supports both legacy list and per-day dict)
+        time_slots_by_day = data.pop('time_slots_by_day', None)
         time_slots = data.pop('time_slots', [])
+        if time_slots_by_day:
+            time_slots = time_slots_by_day  # pass dict to save_player
 
         # Set defaults for numeric fields
         numeric_fields = [
@@ -82,6 +86,32 @@ def submit_player():
             'message': 'Player information saved successfully'
         }), 200
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/player/check-duplicate', methods=['POST'])
+def check_duplicate():
+    """Check if a player with the given FID or game name already exists."""
+    try:
+        data = request.json
+        fid = data.get('fid', '').strip()
+        game_name = data.get('game_name', '').strip()
+
+        db = get_db()
+        cursor = db.cursor()
+        result = {'fid_exists': False, 'name_exists': False}
+
+        if fid:
+            cursor.execute('SELECT id FROM players WHERE fid = ?', (fid,))
+            if cursor.fetchone():
+                result['fid_exists'] = True
+
+        if game_name:
+            cursor.execute('SELECT id FROM players WHERE LOWER(game_name) = LOWER(?)', (game_name,))
+            if cursor.fetchone():
+                result['name_exists'] = True
+
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -149,6 +179,49 @@ def wos_lookup():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/settings/research-day', methods=['GET'])
+def get_research_day_setting():
+    """Get the current research day setting (public endpoint)."""
+    return jsonify({'research_day': get_research_day()}), 200
+
+@app.route('/api/admin/settings/research-day', methods=['PUT'])
+def set_research_day_setting():
+    """Set the research day to 'tuesday' or 'friday'."""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = request.json
+        day = data.get('research_day', '').lower()
+        if day not in ('tuesday', 'friday'):
+            return jsonify({'error': 'Invalid value. Must be "tuesday" or "friday"'}), 400
+
+        set_setting('research_day', day)
+        return jsonify({'success': True, 'research_day': day}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/settings/show-fire-crystals', methods=['GET'])
+def get_fire_crystals_setting():
+    """Get whether fire crystal fields should be shown (public endpoint)."""
+    return jsonify({'show_fire_crystals': get_show_fire_crystals()}), 200
+
+@app.route('/api/admin/settings/show-fire-crystals', methods=['PUT'])
+def set_fire_crystals_setting():
+    """Toggle fire crystal fields visibility."""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = request.json
+        show = data.get('show_fire_crystals', False)
+        set_setting('show_fire_crystals', 'true' if show else 'false')
+        return jsonify({'success': True, 'show_fire_crystals': show}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():
     """Authenticate admin or minister user."""
@@ -186,10 +259,12 @@ def get_players():
         players = get_all_players()
 
         # Add calculated points for each day
+        research_day = get_research_day()
         for player in players:
             player['monday_points'] = calculate_points(player, 'monday')
-            player['tuesday_points'] = calculate_points(player, 'tuesday')
+            player['research_points'] = calculate_points(player, research_day)
             player['thursday_points'] = calculate_points(player, 'thursday')
+            player['research_day'] = research_day
 
         return jsonify(players), 200
     except Exception as e:
@@ -205,7 +280,10 @@ def update_player(player_id):
             return jsonify({'error': 'Unauthorized'}), 401
 
         data = request.json
+        time_slots_by_day = data.pop('time_slots_by_day', None)
         time_slots = data.pop('time_slots', [])
+        if time_slots_by_day:
+            time_slots = time_slots_by_day
 
         # Update player
         save_player(data, time_slots)
@@ -240,10 +318,18 @@ def auto_assign():
         data = request.json
         day = data.get('day', '').lower()
 
-        if day not in ['monday', 'tuesday', 'thursday']:
+        research_day = get_research_day()
+        valid_days = ['monday', research_day, 'thursday']
+        if day not in valid_days:
             return jsonify({'error': 'Invalid day'}), 400
 
         players = get_all_players()
+
+        # Map day to day_type for time preferences
+        day_type_map = {'monday': 'construction', 'thursday': 'troop'}
+        # Research day (tuesday or friday) maps to 'research'
+        day_type_map[research_day] = 'research'
+        day_type = day_type_map.get(day, 'construction')
 
         # Calculate points for this day
         for player in players:
@@ -252,27 +338,54 @@ def auto_assign():
         # Sort by points (descending)
         players.sort(key=lambda p: p['points'], reverse=True)
 
-        # Generate 30-minute time slots (00:00-23:30)
-        time_slots = []
-        for hour in range(24):
-            time_slots.append(f"{hour:02d}:00")
-            time_slots.append(f"{hour:02d}:30")
+        # Generate 30-minute time slots starting at 23:50 (previous day)
+        # through 23:50+ (end of day), covering ~24.5 hours.
+        # Slots: 23:50, 00:20, 00:50, 01:20, ..., 23:20, 23:50+
+        time_slots = ['23:50']
+        hour, minute = 0, 20
+        while True:
+            slot = f"{hour:02d}:{minute:02d}"
+            if slot == '23:50':
+                time_slots.append('23:50+')
+                break
+            time_slots.append(slot)
+            minute += 30
+            if minute >= 60:
+                minute -= 60
+                hour += 1
 
         # Assignment logic
         assignments = {slot: [] for slot in time_slots}
         unassigned = []
 
         for player in players:
-            player_time_prefs = set(player.get('time_slots', []))
+            # Use day-specific time preferences
+            time_slots_by_day = player.get('time_slots_by_day', {})
+            player_time_prefs = set(time_slots_by_day.get(day_type, player.get('time_slots', [])))
 
             # Find matching 30-min slots for player's hourly preferences
+            # With ±20 min tolerance, each hour H maps to 3 slots:
+            #   (H-1):50  — starts 10 min before the hour (within 20 min)
+            #   H:20      — starts 20 min after the hour (within 20 min)
+            #   H:50      — within the selected hour
             matching_slots = []
             for pref in player_time_prefs:
-                # Convert HH:00 preference to both HH:00 and HH:30 slots
                 if ':' in pref:
-                    hour = pref.split(':')[0]
-                    matching_slots.append(f"{hour}:00")
-                    matching_slots.append(f"{hour}:30")
+                    h = int(pref.split(':')[0])
+                    prev_h = (h - 1) % 24
+                    # Previous hour's :50 slot
+                    if h == 0:
+                        matching_slots.append('23:50')  # The pre-midnight slot
+                    else:
+                        matching_slots.append(f"{prev_h:02d}:50")
+                    # Current hour's :20 and :50 slots
+                    matching_slots.append(f"{h:02d}:20")
+                    # For hour 23, the :50 slot is "23:50+" (end of day),
+                    # NOT "23:50" which is the pre-midnight slot (previous day)
+                    if h == 23:
+                        matching_slots.append('23:50+')
+                    else:
+                        matching_slots.append(f"{h:02d}:50")
 
             assigned = False
             for slot in matching_slots:
@@ -431,9 +544,11 @@ def export_assignments():
 
         col_widths = [15, 15, 10, 25, 18, 15, 20, 15, 13, 18, 14, 12]
 
+        research_day = get_research_day()
+        research_label = 'Tuesday - Research' if research_day == 'tuesday' else 'Friday - Research'
         days = [
             ('monday', 'Monday - Construction'),
-            ('tuesday', 'Tuesday - Research'),
+            (research_day, research_label),
             ('thursday', 'Thursday - Troop Training'),
         ]
 
@@ -467,7 +582,7 @@ def export_assignments():
                 assigned_player_ids.add(player['id'])
                 points = calculate_points(player, day_key)
                 ws.append([
-                    row['time_slot'],
+                    '23:50 (+1d)' if row['time_slot'] == '23:50+' else row['time_slot'],
                     player['fid'],
                     player.get('alliance', ''),
                     player['game_name'],
@@ -534,6 +649,110 @@ def export_assignments():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/settings/publish', methods=['PUT'])
+def publish_schedule():
+    """Publish assignments for a day so they appear on the public page.
+    Supports multiple days — stores as comma-separated list.
+    """
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = request.json
+        day = data.get('day', '').lower()
+        research_day = get_research_day()
+        valid_days = ['monday', research_day, 'thursday']
+        if day not in valid_days:
+            return jsonify({'error': 'Invalid day'}), 400
+
+        # Add to existing published days
+        current = get_setting('published_days', '')
+        days_set = set(d for d in current.split(',') if d)
+        days_set.add(day)
+        set_setting('published_days', ','.join(sorted(days_set)))
+        return jsonify({'success': True, 'published_days': sorted(days_set)}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/admin/settings/unpublish', methods=['PUT'])
+def unpublish_schedule():
+    """Remove a specific day from published schedules."""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = request.json
+        day = data.get('day', '').lower()
+
+        current = get_setting('published_days', '')
+        days_set = set(d for d in current.split(',') if d)
+        days_set.discard(day)
+        set_setting('published_days', ','.join(sorted(days_set)))
+        return jsonify({'success': True, 'published_days': sorted(days_set)}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/published-schedule/<day>', methods=['GET'])
+def get_published_schedule(day):
+    """Get the published schedule for a specific day (public endpoint).
+    Returns only player name, alliance, and time slot — no points or resources.
+    """
+    try:
+        published_days = get_setting('published_days', '')
+        days_list = [d for d in published_days.split(',') if d]
+        if day.lower() not in days_list:
+            return jsonify({'published': False}), 200
+
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('''
+            SELECT a.time_slot, p.game_name, p.alliance
+            FROM assignments a
+            JOIN players p ON a.player_id = p.id
+            WHERE a.day = ? AND a.is_assigned = 1
+            ORDER BY a.time_slot, a.position
+        ''', (day.lower(),))
+
+        rows = cursor.fetchall()
+        assignments = {}
+        for row in rows:
+            slot = row['time_slot']
+            if slot not in assignments:
+                assignments[slot] = []
+            assignments[slot].append({
+                'game_name': row['game_name'],
+                'alliance': row['alliance'] or '',
+            })
+
+        day_labels = {
+            'monday': 'Monday - Construction',
+            'tuesday': 'Tuesday - Research',
+            'friday': 'Friday - Research',
+            'thursday': 'Thursday - Troop Training',
+        }
+
+        return jsonify({
+            'published': True,
+            'day': day.lower(),
+            'day_label': day_labels.get(day.lower(), day),
+            'assignments': assignments,
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/settings/published-days', methods=['GET'])
+def get_published_days_setting():
+    """Get which days are currently published (public endpoint)."""
+    published_days = get_setting('published_days', '')
+    days_list = [d for d in published_days.split(',') if d]
+    return jsonify({'published_days': days_list}), 200
+
 
 @app.route('/api/admin/players/delete-all', methods=['DELETE'])
 def delete_all_players():

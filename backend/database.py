@@ -51,14 +51,15 @@ def init_db(app):
             )
         ''')
 
-        # Time preferences table
+        # Time preferences table (with day_type for per-day preferences)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS time_preferences (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 time_slot TEXT NOT NULL,
+                day_type TEXT NOT NULL DEFAULT 'construction',
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
-                UNIQUE(player_id, time_slot)
+                UNIQUE(player_id, time_slot, day_type)
             )
         ''')
 
@@ -88,6 +89,14 @@ def init_db(app):
             )
         ''')
 
+        # Settings table (key-value store for app configuration)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        ''')
+
         # Create indexes for better performance
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_players_fid ON players(fid)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_time_prefs_player ON time_preferences(player_id)')
@@ -101,13 +110,105 @@ def init_db(app):
             'ALTER TABLE players ADD COLUMN stove_lv INTEGER DEFAULT NULL',
             'ALTER TABLE players ADD COLUMN stove_lv_content TEXT DEFAULT NULL',
             'ALTER TABLE players ADD COLUMN alliance TEXT DEFAULT NULL',
+            'ALTER TABLE players ADD COLUMN timezone TEXT DEFAULT NULL',
         ]
         for migration in migrations:
             try:
                 cursor.execute(migration)
             except Exception:
                 pass  # Column already exists
+
+        # Migrate time_preferences to support day_type column
+        # Check if the day_type column exists
+        cursor.execute("PRAGMA table_info(time_preferences)")
+        columns = [col['name'] for col in cursor.fetchall()]
+        if 'day_type' not in columns:
+            # Recreate table with day_type and new unique constraint
+            cursor.execute('ALTER TABLE time_preferences RENAME TO time_preferences_old')
+            cursor.execute('''
+                CREATE TABLE time_preferences (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    player_id INTEGER NOT NULL,
+                    time_slot TEXT NOT NULL,
+                    day_type TEXT NOT NULL DEFAULT 'construction',
+                    FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+                    UNIQUE(player_id, time_slot, day_type)
+                )
+            ''')
+            # Copy existing data as 'construction', then duplicate for research and troop
+            cursor.execute('''
+                INSERT INTO time_preferences (player_id, time_slot, day_type)
+                SELECT player_id, time_slot, 'construction' FROM time_preferences_old
+            ''')
+            cursor.execute('''
+                INSERT INTO time_preferences (player_id, time_slot, day_type)
+                SELECT player_id, time_slot, 'research' FROM time_preferences_old
+            ''')
+            cursor.execute('''
+                INSERT INTO time_preferences (player_id, time_slot, day_type)
+                SELECT player_id, time_slot, 'troop' FROM time_preferences_old
+            ''')
+            cursor.execute('DROP TABLE time_preferences_old')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_time_prefs_player ON time_preferences(player_id)')
+        else:
+            # Fix unique constraint: ensure it includes day_type (not just player_id, time_slot)
+            cursor.execute("SELECT sql FROM sqlite_master WHERE name='time_preferences'")
+            create_sql = cursor.fetchone()
+            if create_sql and 'UNIQUE(player_id, time_slot, day_type)' not in create_sql['sql']:
+                cursor.execute('SELECT player_id, time_slot, day_type FROM time_preferences')
+                existing_prefs = cursor.fetchall()
+                cursor.execute('DROP TABLE time_preferences')
+                cursor.execute('''
+                    CREATE TABLE time_preferences (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        player_id INTEGER NOT NULL,
+                        time_slot TEXT NOT NULL,
+                        day_type TEXT NOT NULL DEFAULT 'construction',
+                        FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+                        UNIQUE(player_id, time_slot, day_type)
+                    )
+                ''')
+                for row in existing_prefs:
+                    try:
+                        cursor.execute(
+                            'INSERT INTO time_preferences (player_id, time_slot, day_type) VALUES (?, ?, ?)',
+                            (row['player_id'], row['time_slot'], row['day_type'])
+                        )
+                    except Exception:
+                        pass  # Skip duplicates
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_time_prefs_player ON time_preferences(player_id)')
+
         db.commit()
+
+
+def get_setting(key, default=None):
+    """Get a setting value by key."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT value FROM settings WHERE key = ?', (key,))
+    row = cursor.fetchone()
+    return row['value'] if row else default
+
+
+def set_setting(key, value):
+    """Set a setting value (upsert)."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('''
+        INSERT INTO settings (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = ?
+    ''', (key, value, value))
+    db.commit()
+
+
+def get_research_day():
+    """Get the current research day setting ('tuesday' or 'friday')."""
+    return get_setting('research_day', 'tuesday')
+
+
+def get_show_fire_crystals():
+    """Get whether fire crystal fields should be shown."""
+    return get_setting('show_fire_crystals', 'false') == 'true'
 
 
 def calculate_points(player, day):
@@ -116,7 +217,7 @@ def calculate_points(player, day):
 
     Args:
         player: dict with player data
-        day: 'monday' (construction), 'tuesday' (research), or 'thursday' (troop)
+        day: 'monday' (construction), 'tuesday'/'friday' (research), or 'thursday' (troop)
 
     Returns:
         int: calculated points
@@ -133,7 +234,7 @@ def calculate_points(player, day):
         points += player['fire_crystals'] * 2000
         return int(points)
 
-    elif day.lower() == 'tuesday':
+    elif day.lower() in ('tuesday', 'friday'):
         # Research: 1 pt/min research+general, 1k/crystal shard
         points = (research_mins + general_mins)
         points += player['fire_crystal_shards'] * 1000
@@ -147,22 +248,25 @@ def calculate_points(player, day):
 
 
 def get_all_players():
-    """Get all players with their time preferences."""
+    """Get all players with their time preferences per day type."""
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('''
-        SELECT
-            p.*,
-            GROUP_CONCAT(tp.time_slot) as time_slots
-        FROM players p
-        LEFT JOIN time_preferences tp ON p.id = tp.player_id
-        GROUP BY p.id
-        ORDER BY p.created_at DESC
-    ''')
+    cursor.execute('SELECT * FROM players ORDER BY created_at DESC')
     players = []
     for row in cursor.fetchall():
         player = dict(row)
-        player['time_slots'] = player['time_slots'].split(',') if player['time_slots'] else []
+        # Get time preferences grouped by day_type
+        cursor2 = db.cursor()
+        cursor2.execute('SELECT time_slot, day_type FROM time_preferences WHERE player_id = ?', (player['id'],))
+        time_prefs = {'construction': [], 'research': [], 'troop': []}
+        all_slots = set()
+        for tp in cursor2.fetchall():
+            day_type = tp['day_type']
+            if day_type in time_prefs:
+                time_prefs[day_type].append(tp['time_slot'])
+            all_slots.add(tp['time_slot'])
+        player['time_slots'] = list(all_slots)  # backward compat
+        player['time_slots_by_day'] = time_prefs
         players.append(player)
     return players
 
@@ -175,15 +279,28 @@ def get_player_by_fid(fid):
     row = cursor.fetchone()
     if row:
         player = dict(row)
-        # Get time preferences
-        cursor.execute('SELECT time_slot FROM time_preferences WHERE player_id = ?', (player['id'],))
-        player['time_slots'] = [r['time_slot'] for r in cursor.fetchall()]
+        # Get time preferences grouped by day_type
+        cursor.execute('SELECT time_slot, day_type FROM time_preferences WHERE player_id = ?', (player['id'],))
+        time_prefs = {'construction': [], 'research': [], 'troop': []}
+        all_slots = set()
+        for tp in cursor.fetchall():
+            day_type = tp['day_type']
+            if day_type in time_prefs:
+                time_prefs[day_type].append(tp['time_slot'])
+            all_slots.add(tp['time_slot'])
+        player['time_slots'] = list(all_slots)  # backward compat
+        player['time_slots_by_day'] = time_prefs
         return player
     return None
 
 
 def save_player(data, time_slots):
-    """Save or update a player and their time preferences."""
+    """Save or update a player and their time preferences.
+
+    time_slots can be:
+      - A list of strings (legacy: same slots for all day types)
+      - A dict with keys 'construction', 'research', 'troop' mapping to lists
+    """
     db = get_db()
     cursor = db.cursor()
 
@@ -208,6 +325,7 @@ def save_player(data, time_slots):
                 stove_lv = ?,
                 stove_lv_content = ?,
                 alliance = ?,
+                timezone = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE fid = ?
         ''', (
@@ -223,6 +341,7 @@ def save_player(data, time_slots):
             data.get('stove_lv'),
             data.get('stove_lv_content'),
             data.get('alliance'),
+            data.get('timezone'),
             data['fid']
         ))
 
@@ -235,8 +354,8 @@ def save_player(data, time_slots):
                 fid, game_name, construction_speedups_days, research_speedups_days,
                 troop_training_speedups_days, general_speedups_days, fire_crystals,
                 refined_fire_crystals, fire_crystal_shards,
-                avatar_image, stove_lv, stove_lv_content, alliance
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                avatar_image, stove_lv, stove_lv_content, alliance, timezone
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data['fid'],
             data['game_name'],
@@ -250,16 +369,28 @@ def save_player(data, time_slots):
             data.get('avatar_image'),
             data.get('stove_lv'),
             data.get('stove_lv_content'),
-            data.get('alliance')
+            data.get('alliance'),
+            data.get('timezone')
         ))
         player_id = cursor.lastrowid
 
     # Insert time preferences
-    for time_slot in time_slots:
-        cursor.execute('''
-            INSERT INTO time_preferences (player_id, time_slot)
-            VALUES (?, ?)
-        ''', (player_id, time_slot))
+    if isinstance(time_slots, dict):
+        # Per-day time slots: {'construction': [...], 'research': [...], 'troop': [...]}
+        for day_type, slots in time_slots.items():
+            for time_slot in slots:
+                cursor.execute('''
+                    INSERT INTO time_preferences (player_id, time_slot, day_type)
+                    VALUES (?, ?, ?)
+                ''', (player_id, time_slot, day_type))
+    else:
+        # Legacy: same slots for all day types
+        for time_slot in time_slots:
+            for day_type in ('construction', 'research', 'troop'):
+                cursor.execute('''
+                    INSERT INTO time_preferences (player_id, time_slot, day_type)
+                    VALUES (?, ?, ?)
+                ''', (player_id, time_slot, day_type))
 
     db.commit()
     return player_id

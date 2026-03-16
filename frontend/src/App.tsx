@@ -5,6 +5,7 @@ import PlayerForm from './pages/PlayerForm';
 import UpdateSubmission from './pages/UpdateSubmission';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import PublishedSchedule from './pages/PublishedSchedule';
 import LanguageSelector from './components/LanguageSelector';
 
 function App() {
@@ -24,12 +25,13 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/submit" element={<PlayerForm />} />
             <Route path="/update" element={<UpdateSubmission />} />
+            <Route path="/schedule/:day" element={<PublishedSchedule />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
         </div>
-        <footer className="app-footer mt-auto pb-4">
-          <p>compliments of the viscount. you're welcome.</p>
+        <footer className="mt-auto pb-4 text-center">
+          <p className="text-xs italic text-theme-dim">compliments of the viscount, you're welcome 😂</p>
         </footer>
       </div>
     </Router>
