@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Edit2, Trash2, X, Save, AlertCircle } from 'lucide-react';
+import { Search, Edit2, Trash2, X, Save, AlertCircle, Download, Upload } from 'lucide-react';
 import axios from 'axios';
 import TimezoneSelector from '../TimezoneSelector';
 import { getSavedTimezone, generatePlayerTimeSlots, getTimezoneAbbr } from '../../utils/timezone';
@@ -44,6 +44,7 @@ export default function PlayerManagement() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [showFireCrystals, setShowFireCrystals] = useState(false);
+  const [importMessage, setImportMessage] = useState('');
   const [activeTimeTab, setActiveTimeTab] = useState<'construction' | 'research' | 'troop'>('construction');
   const [researchDay, setResearchDay] = useState('tuesday');
   const [timezone, setTimezone] = useState(getSavedTimezone);
@@ -152,6 +153,56 @@ export default function PlayerManagement() {
     }
   };
 
+  const handleExportJSON = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.get('/api/admin/players/export-json', {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `players_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err: any) {
+      setError(err.response?.data?.error || t('admin.exportError'));
+    }
+  };
+
+  const handleImportJSON = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data.players || !Array.isArray(data.players)) {
+        setError(t('admin.importInvalidFile'));
+        return;
+      }
+
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.post('/api/admin/players/import', data, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const { imported, updated, errors } = response.data;
+      setImportMessage(t('admin.importSuccess', { imported, updated }) + (errors > 0 ? ` (${errors} errors)` : ''));
+      await fetchPlayers();
+    } catch (err: any) {
+      if (err instanceof SyntaxError) {
+        setError(t('admin.importInvalidFile'));
+      } else {
+        setError(err.response?.data?.error || t('admin.importError'));
+      }
+    }
+    // Reset the file input
+    event.target.value = '';
+  };
+
   const SortButton = ({ field, label }: { field: SortField; label: string }) => (
     <button
       onClick={() => handleSort(field)}
@@ -182,15 +233,34 @@ export default function PlayerManagement() {
             {t('admin.totalPlayers')}: {players.length}
           </p>
         </div>
-        {players.length > 0 && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowDeleteAllConfirm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium transition-colors"
+            onClick={handleExportJSON}
+            className="flex items-center gap-2 px-4 py-2 bg-success text-dark-bg rounded-lg hover:bg-success/80 font-medium transition-colors"
           >
-            <Trash2 className="w-4 h-4" />
-            {t('admin.removeAll')}
+            <Download className="w-4 h-4" />
+            {t('admin.exportJSON')}
           </button>
-        )}
+          <label className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors cursor-pointer">
+            <Upload className="w-4 h-4" />
+            {t('admin.importJSON')}
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportJSON}
+              className="hidden"
+            />
+          </label>
+          {players.length > 0 && (
+            <button
+              onClick={() => setShowDeleteAllConfirm(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              {t('admin.removeAll')}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Search */}
@@ -206,6 +276,16 @@ export default function PlayerManagement() {
           />
         </div>
       </div>
+
+      {/* Import Success Message */}
+      {importMessage && (
+        <div className="mb-6 p-4 bg-success/10 border border-success/30 rounded-lg flex items-center justify-between">
+          <p className="text-success">{importMessage}</p>
+          <button onClick={() => setImportMessage('')} className="text-success hover:text-success/70">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (

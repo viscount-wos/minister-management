@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Search, ArrowLeft, Save, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 import TimezoneSelector from '../components/TimezoneSelector';
-import { getSavedTimezone, generatePlayerTimeSlots, getTimezoneAbbr } from '../utils/timezone';
+import { getSavedTimezone, generatePlayerTimeSlots, getTimezoneAbbr, formatTimeInTimezone } from '../utils/timezone';
 
 interface PlayerData {
   id?: number;
@@ -38,6 +38,8 @@ export default function UpdateSubmission() {
   const [activeTimeTab, setActiveTimeTab] = useState<'construction' | 'research' | 'troop'>('construction');
   const [researchDay, setResearchDay] = useState('tuesday');
   const [timezone, setTimezone] = useState(getSavedTimezone);
+  const [heatmapData, setHeatmapData] = useState<Record<string, Record<string, number>>>({});
+  const [playerAssignments, setPlayerAssignments] = useState<Record<string, {time_slot: string}[]> | null>(null);
 
   useEffect(() => {
     axios.get('/api/settings/show-fire-crystals')
@@ -45,6 +47,9 @@ export default function UpdateSubmission() {
       .catch(() => {});
     axios.get('/api/settings/research-day')
       .then(res => setResearchDay(res.data.research_day))
+      .catch(() => {});
+    axios.get('/api/time-preferences/heatmap')
+      .then(res => setHeatmapData(res.data))
       .catch(() => {});
   }, []);
 
@@ -79,6 +84,13 @@ export default function UpdateSubmission() {
         setTimezone(data.timezone);
       }
       setPlayerData(data);
+      // Fetch player's current assignments
+      try {
+        const assignRes = await axios.get(`/api/player/${searchFid}/assignments`);
+        setPlayerAssignments(assignRes.data.assignments || null);
+      } catch {
+        setPlayerAssignments(null);
+      }
     } catch (err: any) {
       if (err.response?.status === 404) {
         setError(t('update.notFound'));
@@ -119,6 +131,21 @@ export default function UpdateSubmission() {
 
   const handleUpdate = async () => {
     if (!playerData) return;
+
+    // Alliance is required
+    if (!playerData.alliance || !playerData.alliance.trim()) {
+      setError(t('form.allianceRequired'));
+      return;
+    }
+
+    // Warn if no time slots selected for any day type
+    const byDay = playerData.time_slots_by_day || { construction: [], research: [], troop: [] };
+    const totalSlots = byDay.construction.length + byDay.research.length + byDay.troop.length;
+    if (totalSlots === 0) {
+      if (!window.confirm(t('form.noTimeSlotsConfirm'))) {
+        return;
+      }
+    }
 
     setLoading(true);
     setError('');
@@ -191,6 +218,52 @@ export default function UpdateSubmission() {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Current Assignments */}
+            {playerAssignments !== null && (() => {
+              const dayOrder = researchDay === 'friday'
+                ? ['monday', 'friday', 'thursday'] as const
+                : ['monday', 'tuesday', 'thursday'] as const;
+              const dayLabels: Record<string, string> = {
+                monday: t('admin.monday'),
+                tuesday: t('admin.tuesday'),
+                friday: t('admin.friday'),
+                thursday: t('admin.thursday'),
+              };
+              return (
+                <div className="bg-success/10 border border-success/30 rounded-lg p-5">
+                  <h3 className="text-lg font-semibold text-success mb-3">{t('update.currentAssignments')}</h3>
+                  <div className="space-y-2">
+                    {dayOrder.map((day) => {
+                      const slots = playerAssignments[day] || [];
+                      return (
+                        <div key={day} className="flex items-center gap-3">
+                          <span className="font-medium text-theme-text min-w-[200px]">{dayLabels[day] || day}:</span>
+                          {slots.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {slots.map((s, i) => (
+                                <span key={i} className="px-3 py-1 bg-success/20 text-success rounded-full text-sm font-medium">
+                                  {formatTimeInTimezone(s.time_slot, timezone)}
+                                  {s.time_slot === '23:50+' && <span className="text-xs opacity-60 ml-1">(+1d)</span>}
+                                  {timezone !== 'UTC' && (
+                                    <span className="opacity-60 ml-1 text-xs">({s.time_slot} UTC)</span>
+                                  )}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-theme-dim text-sm italic">{t('update.noneAssigned')}</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-theme-dim mt-3 italic">
+                    {t('update.assignmentDisclaimer')}
+                  </p>
+                </div>
+              );
+            })()}
+
             {/* Player Information */}
             <div>
               <h3 className="text-xl font-semibold mb-4 text-accent">{t('form.playerInfo')}</h3>
@@ -210,7 +283,7 @@ export default function UpdateSubmission() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.alliance')}
+                      {t('form.alliance')} *
                     </label>
                     <input
                       type="text"
@@ -220,6 +293,7 @@ export default function UpdateSubmission() {
                       maxLength={3}
                       className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent uppercase"
                       placeholder={t('form.alliancePlaceholder')}
+                      required
                     />
                   </div>
                 </div>
@@ -328,6 +402,10 @@ export default function UpdateSubmission() {
                 <TimezoneSelector value={timezone} onChange={setTimezone} />
               </div>
 
+              <p className="text-sm text-accent text-center mb-4 font-medium">
+                {t('form.selectAllAvailable')}
+              </p>
+
               {/* Day type tabs */}
               <div className="flex gap-2 mb-4 border-b border-theme-border">
                 {(['construction', 'research', 'troop'] as const).map((dayType) => {
@@ -353,28 +431,69 @@ export default function UpdateSubmission() {
                 })}
               </div>
 
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                {timeSlotOptions.map(({ display, utcValue }) => (
-                  <button
-                    key={utcValue}
-                    onClick={() => toggleTimeSlot(utcValue)}
-                    className={`p-3 rounded-lg border-2 transition-all font-medium ${
-                      (playerData.time_slots_by_day?.[activeTimeTab] || []).includes(utcValue)
-                        ? 'bg-accent border-accent text-dark-bg'
-                        : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
-                    }`}
-                  >
-                    {display}
-                    {timezone !== 'UTC' && (
-                      <span className={`block text-xs mt-0.5 ${
-                        (playerData.time_slots_by_day?.[activeTimeTab] || []).includes(utcValue) ? 'opacity-70' : 'opacity-50'
-                      }`}>
-                        {utcValue} UTC
-                      </span>
+              {(() => {
+                const dayHeatmap = heatmapData[activeTimeTab] || {};
+                const counts = Object.values(dayHeatmap);
+                const maxCount = counts.length > 0 ? Math.max(...counts) : 0;
+                const getHeatColor = (utcVal: string) => {
+                  const count = dayHeatmap[utcVal] || 0;
+                  if (count === 0 || maxCount === 0) return undefined;
+                  const ratio = count / maxCount;
+                  if (ratio <= 0.33) return 'rgba(59, 130, 246, 0.25)';
+                  if (ratio <= 0.66) return 'rgba(245, 158, 11, 0.3)';
+                  return 'rgba(239, 68, 68, 0.3)';
+                };
+                const getHeatBorder = (utcVal: string) => {
+                  const count = dayHeatmap[utcVal] || 0;
+                  if (count === 0 || maxCount === 0) return undefined;
+                  const ratio = count / maxCount;
+                  if (ratio <= 0.33) return '2px solid rgba(59, 130, 246, 0.6)';
+                  if (ratio <= 0.66) return '2px solid rgba(245, 158, 11, 0.7)';
+                  return '2px solid rgba(239, 68, 68, 0.7)';
+                };
+                return (
+                  <>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                      {timeSlotOptions.map(({ display, utcValue }) => {
+                        const isSelected = (playerData.time_slots_by_day?.[activeTimeTab] || []).includes(utcValue);
+                        const heatBg = getHeatColor(utcValue);
+                        const heatBorder = getHeatBorder(utcValue);
+                        const count = dayHeatmap[utcValue] || 0;
+                        return (
+                          <button
+                            key={utcValue}
+                            onClick={() => toggleTimeSlot(utcValue)}
+                            className={`p-3 rounded-lg border-2 transition-all font-medium relative ${
+                              isSelected
+                                ? 'bg-accent border-accent text-dark-bg'
+                                : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
+                            }`}
+                            style={!isSelected && heatBg ? { backgroundColor: heatBg, border: heatBorder } : undefined}
+                            title={count > 0 ? `${count} applicant${count !== 1 ? 's' : ''}` : undefined}
+                          >
+                            {display}
+                            {timezone !== 'UTC' && (
+                              <span className={`block text-xs mt-0.5 ${isSelected ? 'opacity-70' : 'opacity-50'}`}>
+                                {utcValue} UTC
+                              </span>
+                            )}
+                            {isSelected && count > 0 && (
+                              <span className="absolute top-0.5 right-1 text-[10px] font-bold opacity-70">
+                                {count}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {maxCount > 0 && (
+                      <p className="text-xs text-theme-dim mt-2 text-center italic">
+                        {t('form.heatmapLegend')}
+                      </p>
                     )}
-                  </button>
-                ))}
-              </div>
+                  </>
+                );
+              })()}
               <p className="text-sm text-theme-dim mt-4 text-center">
                 {t('form.selectedSlots', { count: (playerData.time_slots_by_day?.[activeTimeTab] || []).length })}
                 {timezone !== 'UTC' && (

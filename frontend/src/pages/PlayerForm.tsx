@@ -33,6 +33,7 @@ export default function PlayerForm() {
   const [showFireCrystals, setShowFireCrystals] = useState(false);
   const [researchDay, setResearchDay] = useState('tuesday');
   const [timezone, setTimezone] = useState(getSavedTimezone);
+  const [heatmapData, setHeatmapData] = useState<Record<string, Record<string, number>>>({});
 
   useEffect(() => {
     axios.get('/api/settings/show-fire-crystals')
@@ -40,6 +41,9 @@ export default function PlayerForm() {
       .catch(() => {});
     axios.get('/api/settings/research-day')
       .then(res => setResearchDay(res.data.research_day))
+      .catch(() => {});
+    axios.get('/api/time-preferences/heatmap')
+      .then(res => setHeatmapData(res.data))
       .catch(() => {});
   }, []);
 
@@ -132,6 +136,11 @@ export default function PlayerForm() {
       setError(t('form.fidRequired'));
       return false;
     }
+    // Alliance is required
+    if (!playerData.alliance || !playerData.alliance.trim()) {
+      setError(t('form.allianceRequired'));
+      return false;
+    }
 
     // Check for duplicate FID or game name
     try {
@@ -156,6 +165,15 @@ export default function PlayerForm() {
   const handleNext = async () => {
     if (step === 1 && !(await validateStep1())) {
       return;
+    }
+    // Warn if no time slots selected on time preference steps
+    if (step >= 2 && step <= 4) {
+      const dayType = stepDayType[step as 2 | 3 | 4];
+      if (selectedTimesByDay[dayType].length === 0) {
+        if (!window.confirm(t('form.noTimeSlotsConfirm'))) {
+          return;
+        }
+      }
     }
     setStep(step + 1);
   };
@@ -303,7 +321,7 @@ export default function PlayerForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.alliance')}
+                    {t('form.alliance')} *
                   </label>
                   <input
                     type="text"
@@ -313,6 +331,7 @@ export default function PlayerForm() {
                     maxLength={3}
                     className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent uppercase"
                     placeholder={t('form.alliancePlaceholder')}
+                    required
                   />
                 </div>
               </div>
@@ -424,32 +443,76 @@ export default function PlayerForm() {
               <h2 className="text-3xl font-bold text-accent mb-4 text-center">
                 {dayTypeLabel(dayType)}
               </h2>
-              <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="flex items-center justify-center gap-4 mb-4">
                 <p className="text-theme-dim">{t('form.selectMultiple')}</p>
                 <TimezoneSelector value={timezone} onChange={setTimezone} />
               </div>
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                {timeSlotOptions.map(({ display, utcValue }) => (
-                  <button
-                    key={utcValue}
-                    onClick={() => toggleTimeSlot(utcValue)}
-                    className={`p-3 rounded-lg border-2 transition-all font-medium ${
-                      slots.includes(utcValue)
-                        ? 'bg-accent border-accent text-dark-bg'
-                        : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
-                    }`}
-                  >
-                    {display}
-                    {timezone !== 'UTC' && (
-                      <span className={`block text-xs mt-0.5 ${
-                        slots.includes(utcValue) ? 'opacity-70' : 'opacity-50'
-                      }`}>
-                        {utcValue} UTC
-                      </span>
+              <p className="text-sm text-accent text-center mb-6 font-medium">
+                {t('form.selectAllAvailable')}
+              </p>
+              {(() => {
+                const dayHeatmap = heatmapData[dayType] || {};
+                const counts = Object.values(dayHeatmap);
+                const maxCount = counts.length > 0 ? Math.max(...counts) : 0;
+                const getHeatColor = (utcVal: string) => {
+                  const count = dayHeatmap[utcVal] || 0;
+                  if (count === 0 || maxCount === 0) return undefined;
+                  const ratio = count / maxCount;
+                  if (ratio <= 0.33) return 'rgba(59, 130, 246, 0.25)';
+                  if (ratio <= 0.66) return 'rgba(245, 158, 11, 0.3)';
+                  return 'rgba(239, 68, 68, 0.3)';
+                };
+                const getHeatBorder = (utcVal: string) => {
+                  const count = dayHeatmap[utcVal] || 0;
+                  if (count === 0 || maxCount === 0) return undefined;
+                  const ratio = count / maxCount;
+                  if (ratio <= 0.33) return '2px solid rgba(59, 130, 246, 0.6)';
+                  if (ratio <= 0.66) return '2px solid rgba(245, 158, 11, 0.7)';
+                  return '2px solid rgba(239, 68, 68, 0.7)';
+                };
+                return (
+                  <>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                      {timeSlotOptions.map(({ display, utcValue }) => {
+                        const isSelected = slots.includes(utcValue);
+                        const heatBg = getHeatColor(utcValue);
+                        const heatBorder = getHeatBorder(utcValue);
+                        const count = dayHeatmap[utcValue] || 0;
+                        return (
+                          <button
+                            key={utcValue}
+                            onClick={() => toggleTimeSlot(utcValue)}
+                            className={`p-3 rounded-lg border-2 transition-all font-medium relative ${
+                              isSelected
+                                ? 'bg-accent border-accent text-dark-bg'
+                                : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
+                            }`}
+                            style={!isSelected && heatBg ? { backgroundColor: heatBg, border: heatBorder } : undefined}
+                            title={count > 0 ? `${count} applicant${count !== 1 ? 's' : ''}` : undefined}
+                          >
+                            {display}
+                            {timezone !== 'UTC' && (
+                              <span className={`block text-xs mt-0.5 ${isSelected ? 'opacity-70' : 'opacity-50'}`}>
+                                {utcValue} UTC
+                              </span>
+                            )}
+                            {isSelected && count > 0 && (
+                              <span className="absolute top-0.5 right-1 text-[10px] font-bold opacity-70">
+                                {count}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {maxCount > 0 && (
+                      <p className="text-xs text-theme-dim mt-2 text-center italic">
+                        {t('form.heatmapLegend')}
+                      </p>
                     )}
-                  </button>
-                ))}
-              </div>
+                  </>
+                );
+              })()}
               <p className="text-sm text-theme-dim mt-4 text-center">
                 {t('form.selectedSlots', { count: slots.length })}
                 {timezone !== 'UTC' && (

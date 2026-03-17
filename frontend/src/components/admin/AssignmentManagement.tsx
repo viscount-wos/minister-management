@@ -11,7 +11,7 @@ import {
   DragEndEvent,
   DragStartEvent,
 } from '@dnd-kit/core';
-import { Sparkles, Download, AlertCircle, ToggleLeft, ToggleRight, Globe, EyeOff } from 'lucide-react';
+import { Sparkles, Download, AlertCircle, ToggleLeft, ToggleRight, Globe, EyeOff, Lock, Unlock } from 'lucide-react';
 import axios from 'axios';
 import TimezoneSelector from '../TimezoneSelector';
 import { generateAssignmentSlots, getSlotDisplayTime, getSavedTimezone } from '../../utils/timezone';
@@ -27,6 +27,7 @@ interface AssignedPlayer {
   stove_lv?: number;
   stove_lv_content?: string;
   alliance?: string;
+  is_sticky?: boolean;
 }
 
 interface Assignments {
@@ -43,7 +44,7 @@ const generateTimeSlots = generateAssignmentSlots;
 const PLAYER_CARD_CLASS = 'bg-accent/15 border-accent/40 text-accent';
 
 // Draggable player card
-function DraggablePlayer({ player, sourceSlot }: { player: AssignedPlayer; sourceSlot: string }) {
+function DraggablePlayer({ player, sourceSlot, onToggleLock }: { player: AssignedPlayer; sourceSlot: string; onToggleLock?: (player: AssignedPlayer, slot: string) => void }) {
   const dragId = `player-${player.player_id}-${sourceSlot}`;
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: dragId,
@@ -63,7 +64,9 @@ function DraggablePlayer({ player, sourceSlot }: { player: AssignedPlayer; sourc
       style={style}
       {...attributes}
       {...listeners}
-      className={`p-3 border-2 rounded-lg cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow ${PLAYER_CARD_CLASS}`}
+      className={`p-3 border-2 rounded-lg cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow relative ${
+        player.is_sticky ? 'bg-amber-500/15 border-amber-500/50 text-accent' : PLAYER_CARD_CLASS
+      }`}
     >
       <div className="flex items-center gap-2">
         <div className="relative flex-shrink-0">
@@ -86,12 +89,26 @@ function DraggablePlayer({ player, sourceSlot }: { player: AssignedPlayer; sourc
             />
           )}
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
           <div className="text-xs opacity-75">
             {player.fid} • {(player.points ?? 0).toLocaleString()} pts
           </div>
         </div>
+        {sourceSlot !== 'unassigned' && onToggleLock && (
+          <button
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              onToggleLock(player, sourceSlot);
+            }}
+            className={`flex-shrink-0 p-1 rounded transition-colors ${
+              player.is_sticky ? 'text-amber-500 hover:text-amber-400' : 'text-theme-dim hover:text-accent opacity-40 hover:opacity-100'
+            }`}
+            title={player.is_sticky ? 'Click to unlock' : 'Click to lock'}
+          >
+            {player.is_sticky ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -411,18 +428,18 @@ export default function AssignmentManagement() {
 
         // Put existing player where the moved player came from
         if (sourceSlot === 'unassigned') {
-          // Move existing player to unassigned
-          newUnassigned.push({ ...existingPlayer, time_slot: undefined, preferred_times: [] } as UnassignedPlayer);
+          // Move existing player to unassigned (clear sticky)
+          newUnassigned.push({ ...existingPlayer, time_slot: undefined, preferred_times: [], is_sticky: false } as UnassignedPlayer);
           // Remove moved player from unassigned
           const idx = newUnassigned.findIndex((p) => p.player_id === movedPlayer.player_id);
           if (idx !== -1) newUnassigned.splice(idx, 1);
         } else {
-          // Swap: put existing player in source slot
+          // Swap: put existing player in source slot (keep its sticky status)
           newAssignments[sourceSlot] = [{ ...existingPlayer, time_slot: sourceSlot }];
         }
 
-        // Put moved player in target slot
-        newAssignments[targetSlot] = [{ ...movedPlayer, time_slot: targetSlot }];
+        // Put moved player in target slot - mark as sticky (manual move)
+        newAssignments[targetSlot] = [{ ...movedPlayer, time_slot: targetSlot, is_sticky: true }];
 
         setAssignments(newAssignments);
         setUnassignedPlayers(newUnassigned);
@@ -447,14 +464,26 @@ export default function AssignmentManagement() {
 
     // Add to new location
     if (targetSlot === 'unassigned') {
-      newUnassigned.push({ ...movedPlayer, time_slot: undefined, preferred_times: [] } as UnassignedPlayer);
+      // Moving to unassigned clears sticky
+      newUnassigned.push({ ...movedPlayer, time_slot: undefined, preferred_times: [], is_sticky: false } as UnassignedPlayer);
     } else {
-      newAssignments[targetSlot] = [{ ...movedPlayer, time_slot: targetSlot }];
+      // Manual move to a slot = sticky
+      newAssignments[targetSlot] = [{ ...movedPlayer, time_slot: targetSlot, is_sticky: true }];
     }
 
     setAssignments(newAssignments);
     setUnassignedPlayers(newUnassigned);
     saveAssignments(newAssignments);
+  };
+
+  const handleToggleLock = (player: AssignedPlayer, slot: string) => {
+    const newAssignments = { ...assignments };
+    const slotPlayers = newAssignments[slot] || [];
+    if (slotPlayers.length > 0 && slotPlayers[0].player_id === player.player_id) {
+      newAssignments[slot] = [{ ...slotPlayers[0], is_sticky: !slotPlayers[0].is_sticky }];
+      setAssignments(newAssignments);
+      saveAssignments(newAssignments);
+    }
   };
 
   const saveAssignments = async (assignmentsToSave: Assignments) => {
@@ -628,6 +657,7 @@ export default function AssignmentManagement() {
                             key={`player-${player.player_id}-${slot}`}
                             player={player}
                             sourceSlot={slot}
+                            onToggleLock={handleToggleLock}
                           />
                         ))}
                       </div>

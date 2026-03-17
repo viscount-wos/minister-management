@@ -111,6 +111,7 @@ def init_db(app):
             'ALTER TABLE players ADD COLUMN stove_lv_content TEXT DEFAULT NULL',
             'ALTER TABLE players ADD COLUMN alliance TEXT DEFAULT NULL',
             'ALTER TABLE players ADD COLUMN timezone TEXT DEFAULT NULL',
+            'ALTER TABLE assignments ADD COLUMN is_sticky BOOLEAN DEFAULT 0',
         ]
         for migration in migrations:
             try:
@@ -394,6 +395,25 @@ def save_player(data, time_slots):
 
     db.commit()
     return player_id
+
+
+def get_time_preference_counts():
+    """Get count of players preferring each time slot, grouped by day_type.
+    Returns: { 'construction': {'00:00': 3, ...}, 'research': {...}, 'troop': {...} }
+    """
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('''
+        SELECT day_type, time_slot, COUNT(*) as count
+        FROM time_preferences
+        GROUP BY day_type, time_slot
+    ''')
+    result = {'construction': {}, 'research': {}, 'troop': {}}
+    for row in cursor.fetchall():
+        day_type = row['day_type']
+        if day_type in result:
+            result[day_type][row['time_slot']] = row['count']
+    return result
 
 
 def delete_player(player_id):

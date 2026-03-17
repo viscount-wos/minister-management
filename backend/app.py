@@ -16,8 +16,10 @@ load_dotenv()
 from database import (
     init_db, get_all_players, get_player_by_fid,
     save_player, delete_player, calculate_points, get_db,
-    get_research_day, get_show_fire_crystals, set_setting, get_setting
+    get_research_day, get_show_fire_crystals, set_setting, get_setting,
+    get_time_preference_counts
 )
+import json
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 
@@ -54,9 +56,9 @@ def submit_player():
         data = request.json
 
         # Validate required fields
-        required_fields = ['fid', 'game_name']
+        required_fields = ['fid', 'game_name', 'alliance']
         for field in required_fields:
-            if field not in data or not data[field]:
+            if field not in data or not str(data[field]).strip():
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
         # Extract time slots (supports both legacy list and per-day dict)
@@ -354,11 +356,53 @@ def auto_assign():
                 minute -= 60
                 hour += 1
 
+        # Fetch sticky assignments BEFORE clearing
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('''
+            SELECT a.player_id, a.time_slot, p.fid, p.game_name,
+                   p.avatar_image, p.stove_lv, p.stove_lv_content, p.alliance,
+                   p.construction_speedups_days, p.research_speedups_days,
+                   p.troop_training_speedups_days, p.general_speedups_days,
+                   p.fire_crystals, p.refined_fire_crystals, p.fire_crystal_shards
+            FROM assignments a
+            JOIN players p ON a.player_id = p.id
+            WHERE a.day = ? AND a.is_sticky = 1
+        ''', (day,))
+        sticky_rows = cursor.fetchall()
+        sticky_slots = {}  # time_slot -> player data
+        sticky_player_ids = set()
+        for row in sticky_rows:
+            row_dict = dict(row)
+            row_dict['points'] = calculate_points(row_dict, day)
+            sticky_slots[row['time_slot']] = {
+                'id': row['player_id'],
+                'player_id': row['player_id'],
+                'fid': row['fid'],
+                'game_name': row['game_name'],
+                'points': row_dict['points'],
+                'avatar_image': row_dict.get('avatar_image') or '',
+                'stove_lv': row_dict.get('stove_lv'),
+                'stove_lv_content': row_dict.get('stove_lv_content') or '',
+                'alliance': row_dict.get('alliance') or '',
+                'is_sticky': True,
+            }
+            sticky_player_ids.add(row['player_id'])
+
         # Assignment logic
         assignments = {slot: [] for slot in time_slots}
         unassigned = []
 
+        # Pre-fill sticky assignments
+        for slot, player_data in sticky_slots.items():
+            if slot in assignments:
+                assignments[slot].append(player_data)
+
         for player in players:
+            # Skip players that are sticky-assigned
+            if player['id'] in sticky_player_ids:
+                continue
+
             # Use day-specific time preferences
             time_slots_by_day = player.get('time_slots_by_day', {})
             player_time_prefs = set(time_slots_by_day.get(day_type, player.get('time_slots', [])))
@@ -400,6 +444,7 @@ def auto_assign():
                         'stove_lv': player.get('stove_lv'),
                         'stove_lv_content': player.get('stove_lv_content', ''),
                         'alliance': player.get('alliance', ''),
+                        'is_sticky': False,
                     })
                     assigned = True
                     break
@@ -416,20 +461,19 @@ def auto_assign():
                     'stove_lv': player.get('stove_lv'),
                     'stove_lv_content': player.get('stove_lv_content', ''),
                     'alliance': player.get('alliance', ''),
+                    'is_sticky': False,
                 })
 
-        # Clear existing assignments for this day
-        db = get_db()
-        cursor = db.cursor()
+        # Clear existing non-sticky assignments for this day, then clear sticky too (we'll re-insert all)
         cursor.execute('DELETE FROM assignments WHERE day = ?', (day,))
 
-        # Save new assignments
+        # Save new assignments (including sticky ones)
         for time_slot, slot_players in assignments.items():
             for position, player in enumerate(slot_players):
                 cursor.execute('''
-                    INSERT INTO assignments (player_id, day, time_slot, position, is_assigned)
-                    VALUES (?, ?, ?, ?, 1)
-                ''', (player['id'], day, time_slot, position))
+                    INSERT INTO assignments (player_id, day, time_slot, position, is_assigned, is_sticky)
+                    VALUES (?, ?, ?, ?, 1, ?)
+                ''', (player['id'], day, time_slot, position, 1 if player.get('is_sticky') else 0))
 
         db.commit()
 
@@ -455,7 +499,7 @@ def get_assignments(day):
         cursor = db.cursor()
         cursor.execute('''
             SELECT
-                a.id, a.time_slot, a.position, a.is_assigned,
+                a.id, a.time_slot, a.position, a.is_assigned, a.is_sticky,
                 p.id as player_id, p.fid, p.game_name,
                 p.construction_speedups_days, p.research_speedups_days,
                 p.troop_training_speedups_days, p.general_speedups_days,
@@ -506,9 +550,11 @@ def update_assignments():
             if slot_players:
                 player = slot_players[0]  # Only take first player per slot
                 cursor.execute('''
-                    INSERT INTO assignments (player_id, day, time_slot, position, is_assigned)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (player['player_id'], day, time_slot, 0, player.get('is_assigned', True)))
+                    INSERT INTO assignments (player_id, day, time_slot, position, is_assigned, is_sticky)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (player['player_id'], day, time_slot, 0,
+                      player.get('is_assigned', True),
+                      1 if player.get('is_sticky') else 0))
 
         db.commit()
 
@@ -752,6 +798,158 @@ def get_published_days_setting():
     published_days = get_setting('published_days', '')
     days_list = [d for d in published_days.split(',') if d]
     return jsonify({'published_days': days_list}), 200
+
+
+@app.route('/api/time-preferences/heatmap', methods=['GET'])
+def get_heatmap():
+    """Get time preference counts per slot per day_type (public endpoint)."""
+    try:
+        counts = get_time_preference_counts()
+        return jsonify(counts), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/player/<fid>/assignments', methods=['GET'])
+def get_player_assignments(fid):
+    """Get a player's current assignments by FID (public endpoint).
+    Returns only day and time_slot — no points or resource data.
+    """
+    try:
+        player = get_player_by_fid(fid)
+        if not player:
+            return jsonify({'error': 'Player not found'}), 404
+
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('''
+            SELECT day, time_slot
+            FROM assignments
+            WHERE player_id = ? AND is_assigned = 1
+            ORDER BY day, time_slot
+        ''', (player['id'],))
+
+        assignments = {}
+        for row in cursor.fetchall():
+            day = row['day']
+            if day not in assignments:
+                assignments[day] = []
+            assignments[day].append({'time_slot': row['time_slot']})
+
+        return jsonify({'assignments': assignments}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/admin/players/export-json', methods=['GET'])
+def export_players_json():
+    """Export all players as JSON (admin auth required)."""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        players = get_all_players()
+
+        # Clean up internal fields for export
+        export_players = []
+        for p in players:
+            export_players.append({
+                'fid': p['fid'],
+                'game_name': p['game_name'],
+                'alliance': p.get('alliance', ''),
+                'construction_speedups_days': p['construction_speedups_days'],
+                'research_speedups_days': p['research_speedups_days'],
+                'troop_training_speedups_days': p['troop_training_speedups_days'],
+                'general_speedups_days': p['general_speedups_days'],
+                'fire_crystals': p['fire_crystals'],
+                'refined_fire_crystals': p['refined_fire_crystals'],
+                'fire_crystal_shards': p['fire_crystal_shards'],
+                'avatar_image': p.get('avatar_image', ''),
+                'stove_lv': p.get('stove_lv'),
+                'stove_lv_content': p.get('stove_lv_content', ''),
+                'timezone': p.get('timezone', ''),
+                'time_slots_by_day': p.get('time_slots_by_day', {}),
+            })
+
+        export_data = {
+            'version': 1,
+            'exported_at': datetime.now().isoformat(),
+            'players': export_players,
+        }
+
+        output = json.dumps(export_data, indent=2)
+        filename = f'players_backup_{datetime.now().strftime("%Y%m%d")}.json'
+        return Response(
+            output,
+            mimetype='application/json',
+            headers={'Content-Disposition': f'attachment; filename={filename}'}
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/admin/players/import', methods=['POST'])
+def import_players_json():
+    """Import players from JSON (admin auth required). Upserts by FID."""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = request.json
+        if not data or 'players' not in data:
+            return jsonify({'error': 'Invalid format: expected {players: [...]}'}), 400
+
+        imported = 0
+        updated = 0
+        errors = 0
+
+        for p in data['players']:
+            try:
+                fid = p.get('fid', '').strip()
+                if not fid:
+                    errors += 1
+                    continue
+
+                # Check if player exists
+                existing = get_player_by_fid(fid)
+
+                player_data = {
+                    'fid': fid,
+                    'game_name': p.get('game_name', 'Unknown'),
+                    'alliance': p.get('alliance', ''),
+                    'construction_speedups_days': float(p.get('construction_speedups_days', 0)),
+                    'research_speedups_days': float(p.get('research_speedups_days', 0)),
+                    'troop_training_speedups_days': float(p.get('troop_training_speedups_days', 0)),
+                    'general_speedups_days': float(p.get('general_speedups_days', 0)),
+                    'fire_crystals': int(p.get('fire_crystals', 0)),
+                    'refined_fire_crystals': int(p.get('refined_fire_crystals', 0)),
+                    'fire_crystal_shards': int(p.get('fire_crystal_shards', 0)),
+                    'avatar_image': p.get('avatar_image', ''),
+                    'stove_lv': p.get('stove_lv'),
+                    'stove_lv_content': p.get('stove_lv_content', ''),
+                    'timezone': p.get('timezone', ''),
+                }
+
+                time_slots = p.get('time_slots_by_day', p.get('time_slots', []))
+                save_player(player_data, time_slots)
+
+                if existing:
+                    updated += 1
+                else:
+                    imported += 1
+            except Exception:
+                errors += 1
+
+        return jsonify({
+            'success': True,
+            'imported': imported,
+            'updated': updated,
+            'errors': errors,
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/admin/players/delete-all', methods=['DELETE'])

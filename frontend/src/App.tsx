@@ -6,6 +6,8 @@ import UpdateSubmission from './pages/UpdateSubmission';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import PublishedSchedule from './pages/PublishedSchedule';
+import PlayerGuide from './pages/PlayerGuide';
+import AdminGuide from './pages/AdminGuide';
 import LanguageSelector from './components/LanguageSelector';
 
 function App() {
@@ -28,6 +30,8 @@ function App() {
             <Route path="/schedule/:day" element={<PublishedSchedule />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/guide" element={<PlayerGuide />} />
+            <Route path="/admin/guide" element={<AdminGuide />} />
           </Routes>
         </div>
         <footer className="mt-auto pb-4 text-center">

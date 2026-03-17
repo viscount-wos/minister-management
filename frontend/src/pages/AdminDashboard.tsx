@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LogOut, Users, Calendar } from 'lucide-react';
+import { LogOut, Users, Calendar, HelpCircle } from 'lucide-react';
 import PlayerManagement from '../components/admin/PlayerManagement';
 import AssignmentManagement from '../components/admin/AssignmentManagement';
 
@@ -41,13 +41,22 @@ export default function AdminDashboard() {
               <h1 className="text-3xl font-bold text-accent">{t('admin.title')}</h1>
               <p className="text-theme-dim mt-1">{t('admin.managePlayers')}</p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              {t('admin.logout')}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/admin/guide')}
+                className="flex items-center gap-2 px-4 py-2 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 transition-colors"
+              >
+                <HelpCircle className="w-5 h-5" />
+                {t('adminGuide.linkText')}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                {t('admin.logout')}
+              </button>
+            </div>
           </div>
 
           {/* Tab Navigation */}

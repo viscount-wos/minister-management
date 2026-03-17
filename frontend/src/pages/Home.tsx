@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Edit, Shield, Calendar } from 'lucide-react';
+import { FileText, Edit, Shield, Calendar, HelpCircle } from 'lucide-react';
 import axios from 'axios';
 
 export default function Home() {
@@ -112,7 +112,17 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="mt-12 text-center text-theme-dim text-sm">
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => navigate('/guide')}
+            className="inline-flex items-center gap-2 text-accent hover:text-accent-dim transition-colors text-sm font-medium"
+          >
+            <HelpCircle className="w-4 h-4" />
+            {t('playerGuide.linkText')}
+          </button>
+        </div>
+
+        <div className="mt-4 text-center text-theme-dim text-sm">
           <p>{t('home.utcNote')}</p>
         </div>
       </div>
