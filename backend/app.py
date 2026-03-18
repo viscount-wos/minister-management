@@ -3,9 +3,10 @@ from flask_cors import CORS
 import os
 import hashlib
 import time as time_module
+import logging
 import requests as http_requests
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timezone
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 from io import BytesIO
@@ -21,6 +22,14 @@ from database import (
 )
 import json
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
+
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 
 app = Flask(__name__, static_folder=None)
@@ -30,6 +39,20 @@ CORS(app)
 # Admin credentials
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 MINISTER_PASSWORD = os.getenv('MINISTER_PASSWORD', 'minister123')
+
+# WOS API secret (move to env var for security)
+WOS_API_SECRET = os.getenv('WOS_API_SECRET', 'tB87#kPtkxqOS2')
+
+# Valid auth tokens
+VALID_TOKENS = {'admin-token', 'minister-token'}
+
+
+def check_admin_auth():
+    """Validate admin authentication. Returns None if valid, or error response tuple if invalid."""
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or auth_header not in VALID_TOKENS:
+        return jsonify({'error': 'Unauthorized'}), 401
+    return None
 
 # Initialize database (registers teardown handler)
 init_db(app)
@@ -62,10 +85,12 @@ def submit_player():
                 dt = datetime.fromisoformat(closing_time.replace('Z', '+00:00'))
                 fid_str = str(data.get('fid', '')).strip()
                 existing = get_player_by_fid(fid_str) if fid_str else None
-                if not existing and datetime.utcnow().replace(tzinfo=dt.tzinfo) >= dt:
+                now_utc = datetime.now(timezone.utc)
+                if not existing and now_utc >= dt:
+                    logger.info(f"Blocked new submission from FID {fid_str} - applications closed")
                     return jsonify({'error': 'Applications are closed', 'code': 'APPLICATIONS_CLOSED'}), 403
             except ValueError:
-                pass
+                logger.warning(f"Invalid closing_time format in settings: {closing_time}")
 
         # Validate required fields
         required_fields = ['fid', 'game_name', 'alliance']
@@ -79,7 +104,7 @@ def submit_player():
         if time_slots_by_day:
             time_slots = time_slots_by_day  # pass dict to save_player
 
-        # Set defaults for numeric fields
+        # Set defaults and validate numeric fields
         numeric_fields = [
             'construction_speedups_days', 'research_speedups_days',
             'troop_training_speedups_days', 'general_speedups_days',
@@ -89,10 +114,18 @@ def submit_player():
             if field not in data:
                 data[field] = 0
             else:
-                data[field] = float(data[field]) if '.' in str(data[field]) or 'speedups' in field else int(data[field])
+                try:
+                    data[field] = float(data[field]) if '.' in str(data[field]) or 'speedups' in field else int(data[field])
+                except (ValueError, TypeError):
+                    return jsonify({'error': f'Invalid value for {field}'}), 400
+                if data[field] < 0:
+                    return jsonify({'error': f'{field} cannot be negative'}), 400
+                if data[field] > 99999:
+                    return jsonify({'error': f'{field} exceeds maximum allowed value (99999)'}), 400
 
         # Save player
         player_id = save_player(data, time_slots)
+        logger.info(f"Player submitted/updated: FID={data.get('fid')}, name={data.get('game_name')}, id={player_id}")
 
         return jsonify({
             'success': True,
@@ -101,6 +134,7 @@ def submit_player():
         }), 200
 
     except Exception as e:
+        logger.error(f"Error in submit_player: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/player/check-duplicate', methods=['POST'])
@@ -151,7 +185,7 @@ def wos_lookup():
             return jsonify({'error': 'FID is required'}), 400
 
         # Build signed request for WOS API
-        secret = 'tB87#kPtkxqOS2'
+        secret = WOS_API_SECRET
         ts = str(int(time_module.time() * 1e9))
         form_data = f'fid={fid}&time={ts}'
         sign = hashlib.md5((form_data + secret).encode()).hexdigest()
@@ -202,9 +236,9 @@ def get_research_day_setting():
 def set_research_day_setting():
     """Set the research day to 'tuesday' or 'friday'."""
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         day = data.get('research_day', '').lower()
@@ -225,9 +259,9 @@ def get_fire_crystals_setting():
 def set_fire_crystals_setting():
     """Toggle fire crystal fields visibility."""
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         show = data.get('show_fire_crystals', False)
@@ -241,9 +275,9 @@ def set_fire_crystals_setting():
 def set_closing_time_setting():
     """Set or clear application closing time."""
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         closing_time = data.get('closing_time', '')
@@ -265,9 +299,9 @@ def set_closing_time_setting():
 def set_state_number_setting():
     """Set the state number for the welcome message."""
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         state_number = str(data.get('state_number', '')).strip()
@@ -288,21 +322,25 @@ def admin_login():
         password = data.get('password', '')
 
         if password == ADMIN_PASSWORD:
+            logger.info("Admin login successful")
             return jsonify({
                 'success': True,
                 'role': 'admin',
                 'token': 'admin-token'
             }), 200
         elif password == MINISTER_PASSWORD:
+            logger.info("Minister login successful")
             return jsonify({
                 'success': True,
                 'role': 'minister',
                 'token': 'minister-token'
             }), 200
         else:
+            logger.warning("Failed login attempt")
             return jsonify({'error': 'Invalid password'}), 401
 
     except Exception as e:
+        logger.error(f"Error in admin_login: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/admin/players', methods=['GET'])
@@ -310,9 +348,9 @@ def get_players():
     """Get all players with calculated points."""
     try:
         # Simple auth check
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         players = get_all_players()
 
@@ -333,9 +371,9 @@ def update_player(player_id):
     """Update player information."""
     try:
         # Simple auth check
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         time_slots_by_day = data.pop('time_slots_by_day', None)
@@ -355,13 +393,15 @@ def remove_player(player_id):
     """Delete a player."""
     try:
         # Simple auth check
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         delete_player(player_id)
+        logger.info(f"Player deleted: id={player_id}")
         return jsonify({'success': True, 'message': 'Player deleted'}), 200
     except Exception as e:
+        logger.error(f"Error deleting player {player_id}: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/admin/assignments/auto-assign', methods=['POST'])
@@ -369,9 +409,9 @@ def auto_assign():
     """Auto-assign players to time slots based on points."""
     try:
         # Simple auth check
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         day = data.get('day', '').lower()
@@ -533,6 +573,9 @@ def auto_assign():
 
         db.commit()
 
+        assigned_count = sum(1 for s in assignments.values() if s)
+        logger.info(f"Auto-assign completed: day={day}, assigned={assigned_count}, unassigned={len(unassigned)}")
+
         return jsonify({
             'success': True,
             'assignments': assignments,
@@ -540,6 +583,7 @@ def auto_assign():
         }), 200
 
     except Exception as e:
+        logger.error(f"Error in auto_assign: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/admin/assignments/<day>', methods=['GET'])
@@ -547,9 +591,9 @@ def get_assignments(day):
     """Get assignments for a specific day."""
     try:
         # Simple auth check
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         db = get_db()
         cursor = db.cursor()
@@ -587,9 +631,9 @@ def update_assignments():
     """Update assignments after drag-and-drop."""
     try:
         # Simple auth check
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         day = data.get('day')
@@ -624,9 +668,9 @@ def export_assignments():
     """Export assignments for all days to a single Excel workbook."""
     try:
         # Simple auth check
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         wb = openpyxl.Workbook()
         wb.remove(wb.active)  # Remove default sheet
@@ -758,9 +802,9 @@ def publish_schedule():
     Supports multiple days — stores as comma-separated list.
     """
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         day = data.get('day', '').lower()
@@ -783,9 +827,9 @@ def publish_schedule():
 def unpublish_schedule():
     """Remove a specific day from published schedules."""
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         day = data.get('day', '').lower()
@@ -864,7 +908,7 @@ def get_closing_time_setting():
     if closing_time:
         try:
             dt = datetime.fromisoformat(closing_time.replace('Z', '+00:00'))
-            is_closed = datetime.utcnow().replace(tzinfo=dt.tzinfo) >= dt
+            is_closed = datetime.now(timezone.utc) >= dt
         except ValueError:
             pass
     return jsonify({'closing_time': closing_time, 'is_closed': is_closed}), 200
@@ -921,9 +965,9 @@ def get_player_assignments(fid):
 def export_players_json():
     """Export all players as JSON (admin auth required)."""
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         players = get_all_players()
 
@@ -969,9 +1013,9 @@ def export_players_json():
 def import_players_json():
     """Import players from JSON (admin auth required). Upserts by FID."""
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         data = request.json
         if not data or 'players' not in data:
@@ -1032,9 +1076,9 @@ def import_players_json():
 def delete_all_players():
     """Delete all players and their assignments."""
     try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or 'token' not in auth_header:
-            return jsonify({'error': 'Unauthorized'}), 401
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
 
         db = get_db()
         cursor = db.cursor()
@@ -1043,8 +1087,10 @@ def delete_all_players():
         cursor.execute('DELETE FROM players')
         db.commit()
 
+        logger.warning("All players deleted by admin")
         return jsonify({'success': True, 'message': 'All players deleted'}), 200
     except Exception as e:
+        logger.error(f"Error deleting all players: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
