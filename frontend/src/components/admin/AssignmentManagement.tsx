@@ -11,7 +11,7 @@ import {
   DragEndEvent,
   DragStartEvent,
 } from '@dnd-kit/core';
-import { Sparkles, Download, AlertCircle, ToggleLeft, ToggleRight, Globe, EyeOff, Lock, Unlock } from 'lucide-react';
+import { Sparkles, Download, AlertCircle, Globe, EyeOff, Lock, Unlock } from 'lucide-react';
 import axios from 'axios';
 import TimezoneSelector from '../TimezoneSelector';
 import { generateAssignmentSlots, getSlotDisplayTime, getSavedTimezone } from '../../utils/timezone';
@@ -210,7 +210,6 @@ export default function AssignmentManagement() {
   const [activePlayer, setActivePlayer] = useState<AssignedPlayer | null>(null);
   const [overSlotId, setOverSlotId] = useState<string | null>(null);
   const [researchDay, setResearchDay] = useState<'tuesday' | 'friday'>('tuesday');
-  const [showFireCrystals, setShowFireCrystals] = useState(false);
   const [timezone, setTimezone] = useState(getSavedTimezone);
   const [publishedDays, setPublishedDays] = useState<string[]>([]);
 
@@ -228,7 +227,6 @@ export default function AssignmentManagement() {
 
   useEffect(() => {
     fetchResearchDay();
-    fetchFireCrystalsSetting();
     fetchPublishedDays();
   }, []);
 
@@ -247,49 +245,6 @@ export default function AssignmentManagement() {
       }
     } catch {
       // Default to tuesday on error
-    }
-  };
-
-  const handleToggleResearchDay = async () => {
-    const newDay = researchDay === 'tuesday' ? 'friday' : 'tuesday';
-    try {
-      const token = localStorage.getItem('adminToken');
-      await axios.put(
-        '/api/admin/settings/research-day',
-        { research_day: newDay },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setResearchDay(newDay);
-      // If currently viewing the research day tab, switch to the new key
-      if (selectedDay === researchDay) {
-        setSelectedDay(newDay);
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update research day');
-    }
-  };
-
-  const fetchFireCrystalsSetting = async () => {
-    try {
-      const response = await axios.get('/api/settings/show-fire-crystals');
-      setShowFireCrystals(response.data.show_fire_crystals);
-    } catch {
-      // Default to false on error
-    }
-  };
-
-  const handleToggleFireCrystals = async () => {
-    const newValue = !showFireCrystals;
-    try {
-      const token = localStorage.getItem('adminToken');
-      await axios.put(
-        '/api/admin/settings/show-fire-crystals',
-        { show_fire_crystals: newValue },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setShowFireCrystals(newValue);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update fire crystals setting');
     }
   };
 
@@ -578,42 +533,8 @@ export default function AssignmentManagement() {
           </button>
         )}
 
-        {/* Fire Crystals Toggle */}
-        <div className="flex items-center gap-2 px-4 py-2 bg-dark-bg border border-theme-border rounded-lg">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showFireCrystals}
-              onChange={handleToggleFireCrystals}
-              className="w-4 h-4 accent-accent"
-            />
-            <span className="text-sm text-theme-dim">{t('admin.showFireCrystals')}</span>
-          </label>
-        </div>
-
         {/* Timezone Selector */}
         <TimezoneSelector value={timezone} onChange={setTimezone} />
-
-        {/* Research Day Toggle */}
-        <div className="flex items-center gap-2 ml-auto px-4 py-2 bg-dark-bg border border-theme-border rounded-lg">
-          <span className="text-sm text-theme-dim">{t('admin.researchDayToggle')}:</span>
-          <button
-            onClick={handleToggleResearchDay}
-            className="flex items-center gap-1.5 font-medium text-sm transition-colors"
-          >
-            {researchDay === 'tuesday' ? (
-              <>
-                <ToggleLeft className="w-6 h-6 text-accent" />
-                <span className="text-accent">{t('admin.tuesday').split(' - ')[0]}</span>
-              </>
-            ) : (
-              <>
-                <ToggleRight className="w-6 h-6 text-accent" />
-                <span className="text-accent">{t('admin.friday').split(' - ')[0]}</span>
-              </>
-            )}
-          </button>
-        </div>
       </div>
 
       {/* Error Message */}

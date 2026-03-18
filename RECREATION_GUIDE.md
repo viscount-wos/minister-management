@@ -37,6 +37,9 @@ This document contains everything needed to recreate the Ministry Management Sys
 - SQLite with `journal_mode=DELETE` (required for GCS FUSE compatibility)
 - Single gunicorn worker (required for SQLite on GCS FUSE)
 - 5 languages: English, Korean, Chinese, Turkish, Arabic (with RTL support for Arabic)
+- Settings stored as key-value pairs in SQLite `settings` table — configurable state number, application closing time, research day, fire crystal field visibility
+- Application closing time blocks new submissions after deadline but allows existing player updates
+- LootBar affiliate link integrated on home page, post-submission, and update page
 
 ---
 
@@ -63,20 +66,24 @@ minister_management/
 │       ├── index.css           # Global styles, dark theme, scrollbar
 │       ├── i18n.ts             # All translations (EN/KO/ZH/TR/AR)
 │       ├── utils/
-│       │   └── timezone.ts     # Timezone conversion utilities
+│       │   ├── timezone.ts     # Timezone conversion utilities
+│       │   └── affiliate.ts    # LootBar affiliate link helper
 │       ├── components/
 │       │   ├── LanguageSelector.tsx
 │       │   ├── TimezoneSelector.tsx
 │       │   └── admin/
 │       │       ├── PlayerManagement.tsx
-│       │       └── AssignmentManagement.tsx
+│       │       ├── AssignmentManagement.tsx
+│       │       └── AdminSettings.tsx
 │       └── pages/
 │           ├── Home.tsx
 │           ├── PlayerForm.tsx
 │           ├── UpdateSubmission.tsx
 │           ├── AdminLogin.tsx
 │           ├── AdminDashboard.tsx
-│           └── PublishedSchedule.tsx
+│           ├── PublishedSchedule.tsx
+│           ├── PlayerGuide.tsx
+│           └── AdminGuide.tsx
 ├── data/                       # SQLite DB (created at runtime)
 ├── Dockerfile                  # Multi-stage build
 ├── docker-compose.yml          # Local development
@@ -1520,8 +1527,27 @@ Due to the size of the frontend source files, they are provided as references to
 | `src/pages/PublishedSchedule.tsx` | Public read-only schedule view | 146 |
 | `src/components/admin/PlayerManagement.tsx` | CRUD table, search, sort, edit modal | 517 |
 | `src/components/admin/AssignmentManagement.tsx` | Drag-drop assignments, auto-assign, publish | 687 |
+| `src/components/admin/AdminSettings.tsx` | Admin settings panel (state number, closing time, research day, fire crystals) | — |
+| `src/pages/PlayerGuide.tsx` | Player-facing guide page | — |
+| `src/pages/AdminGuide.tsx` | Admin-facing guide page | — |
+| `src/utils/affiliate.ts` | LootBar affiliate link helper | — |
 
 > **IMPORTANT:** The `i18n.ts` file is critical — it contains all translations for 5 languages across all UI elements. The complete file is 793 lines. Copy it exactly from the source.
+
+### Frontend Routes
+
+Defined in `src/App.tsx` via React Router:
+
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/` | `Home` | Landing page with published schedule links |
+| `/submit` | `PlayerForm` | Player submission form |
+| `/update` | `UpdateSubmission` | Update existing submission by FID |
+| `/admin` | `AdminLogin` | Admin password login |
+| `/admin/dashboard` | `AdminDashboard` | Admin panel (players, assignments, settings) |
+| `/schedule/:day` | `PublishedSchedule` | Public read-only schedule for a day |
+| `/guide` | `PlayerGuide` | Player-facing guide |
+| `/admin/guide` | `AdminGuide` | Admin-facing guide |
 
 ---
 
@@ -1645,6 +1671,17 @@ points = troop_training_speedups_days (raw value, 1 point per day)
 - In Excel export, `23:50+` displays as `23:50 (+1d)` for clarity
 - When hour 23 is selected as a preference, the `:50` slot maps to `23:50+` (NOT `23:50`)
 
+### Application Closing Time
+
+- Checked in `submit_player()`: if `application_closing_time` setting is set and the current UTC time is past the deadline, new FIDs are blocked with a 403 response
+- Existing FID updates are still allowed after the deadline — only new submissions are blocked
+- The closing time is stored and compared in UTC
+
+### Settings Helpers
+
+- `get_setting(key, default=None)` — retrieves a value from the `settings` table, returns `default` if not found
+- `set_setting(key, value)` — upserts a value into the `settings` table using `INSERT OR REPLACE`
+
 ### Multi-Day Publishing
 
 - Published days are stored as a comma-separated string in the `settings` table (key: `published_days`)
@@ -1668,7 +1705,11 @@ points = troop_training_speedups_days (raw value, 1 point per day)
 | `GET` | `/api/settings/research-day` | Get current research day |
 | `GET` | `/api/settings/show-fire-crystals` | Get fire crystal visibility |
 | `GET` | `/api/settings/published-days` | Get array of published days |
+| `GET` | `/api/settings/application-closing-time` | Returns `{closing_time, is_closed}` |
+| `GET` | `/api/settings/state-number` | Returns `{state_number}`, default '2694' |
 | `GET` | `/api/published-schedule/<day>` | Get public schedule for a day |
+| `GET` | `/api/time-preferences/heatmap` | Get time slot demand data for heat map |
+| `GET` | `/api/player/<fid>/assignments` | Get a player's assignments across all days |
 
 ### Admin Endpoints (require `Authorization: Bearer <token>` header)
 
@@ -1684,9 +1725,13 @@ points = troop_training_speedups_days (raw value, 1 point per day)
 | `POST` | `/api/admin/assignments/update` | Save drag-drop changes |
 | `GET` | `/api/admin/export` | Export Excel workbook |
 | `PUT` | `/api/admin/settings/research-day` | Set Tuesday/Friday |
-| `PUT` | `/api/admin/settings/show-fire-crystals` | Toggle fire crystals |
+| `PUT` | `/api/admin/settings/show-fire-crystals` | Toggle fire crystal fields |
+| `PUT` | `/api/admin/settings/application-closing-time` | Set/clear application deadline |
+| `PUT` | `/api/admin/settings/state-number` | Set state number |
 | `PUT` | `/api/admin/settings/publish` | Publish a day's schedule |
 | `PUT` | `/api/admin/settings/unpublish` | Unpublish a day's schedule |
+| `GET` | `/api/admin/players/export-json` | Export all players as JSON |
+| `POST` | `/api/admin/players/import` | Import players from JSON |
 
 ---
 
@@ -1744,6 +1789,8 @@ points = troop_training_speedups_days (raw value, 1 point per day)
 - `research_day` — `'tuesday'` or `'friday'`
 - `show_fire_crystals` — `'true'` or `'false'`
 - `published_days` — comma-separated list, e.g., `'monday,thursday'`
+- `application_closing_time` — ISO 8601 UTC datetime string, or empty to disable
+- `state_number` — state identifier string, default `'2694'`
 
 ### `admin_users`
 | Column | Type | Notes |

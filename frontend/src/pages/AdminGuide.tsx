@@ -142,6 +142,25 @@ export default function AdminGuide() {
             <p className="text-theme-dim leading-relaxed">{t('adminGuide.researchDayBody')}</p>
           </section>
 
+          {/* Settings Tab */}
+          <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+                <Settings className="w-5 h-5 text-accent" />
+              </div>
+              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.settingsTitle')}</h2>
+            </div>
+            <div className="text-theme-dim leading-relaxed space-y-3">
+              <p>{t('adminGuide.settingsBody')}</p>
+              <ul className="list-disc list-inside space-y-1 ml-2">
+                <li>{t('adminGuide.settingsState')}</li>
+                <li>{t('adminGuide.settingsClosing')}</li>
+                <li>{t('adminGuide.settingsResearch')}</li>
+                <li>{t('adminGuide.settingsFireCrystals')}</li>
+              </ul>
+            </div>
+          </section>
+
           {/* Publishing */}
           <section className="bg-dark-card rounded-xl border border-theme-border p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -189,6 +208,7 @@ export default function AdminGuide() {
               <li>{t('adminGuide.workflow5')}</li>
               <li>{t('adminGuide.workflow6')}</li>
               <li>{t('adminGuide.workflow7')}</li>
+              <li>{t('adminGuide.workflow8')}</li>
             </ol>
           </section>
         </div>

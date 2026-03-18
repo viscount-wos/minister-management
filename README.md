@@ -4,15 +4,36 @@ A web application for managing ministry assignments during State vs State (SVS) 
 
 ## Features
 
+### Player Features
 - **Player Submission Form** - 3-step form for players to submit speedups, resources, and time preferences (FID required)
 - **WOS API Integration** - "Load from WOS" button auto-fills player name, avatar, and furnace level from FID
-- **Alliance Tag** - 3-character alliance tag displayed as `[TAG]` next to player names
+- **Alliance Tag** - 3-character alliance tag (required) displayed as `[TAG]` next to player names
 - **Player Updates** - Players update their submissions anytime using their FID
-- **Admin Panel** - Password-protected interface with:
-  - Player management (view, sort, search, edit, delete, remove all)
-  - Auto-assignment based on point calculations
-  - Drag-and-drop time slot management with player avatars and furnace level icons
-  - Multi-day Excel export (Monday, Tuesday, Thursday tabs + Unassigned tab)
+- **Heat Map on Time Slots** - Color-coded time slot selection showing demand (blue=low, yellow=medium, red=high)
+- **"Select ALL Available Times" Guidance** - Notes on time selection pages encourage broad availability
+- **Assignment Disclaimer** - Players see "Assignments subject to change" and "+/-20 min tolerance" notes
+- **Unsaved Changes Warning** - "Are you sure?" confirmation before leaving the form with unsaved changes
+- **Player Guide** (`/guide`) - Comprehensive in-app guide accessible from the home page
+- **Published Schedule** - Players can view their assigned schedule once published by an admin
+
+### Admin Features
+- **Admin Dashboard** - Password-protected interface with three tabs: **Players**, **Assignments**, **Settings**
+  - **Players tab**: View, sort, search, edit, delete, remove all players
+  - **Assignments tab**: Auto-assignment, drag-and-drop scheduling, sticky/locked assignments, per-day publishing, Excel export
+  - **Settings tab**: State number, application closing time, research day toggle, fire crystal fields toggle
+- **Application Closing Time** - Set a deadline after which new submissions are blocked (existing players can still update)
+- **Sticky (Locked) Assignments** - Lock icon on player cards; locked players are preserved during auto-assign
+- **Multi-day Publishing** - Publish and unpublish schedules independently per day (Monday, Tuesday/Friday, Thursday)
+- **Heat Map Visualization** - Color-coded time slots showing player demand across the schedule
+- **Export/Import Players (JSON)** - Backup and restore all player data
+- **Multi-day Excel Export** - Workbook with Monday, Tuesday/Friday, Thursday tabs + Unassigned tab
+- **Configurable State Number** - Dynamic "Welcome, State {N}" message on the home page
+- **Research Day Toggle** - Switch research day between Tuesday and Friday
+- **Show/Hide Fire Crystal Fields** - Toggle visibility of fire crystal resource fields in the player form
+- **Admin Guide** (`/admin/guide`) - Comprehensive in-app guide accessible from the admin dashboard
+- **LootBar Affiliate Integration** - Contextual affiliate banners on the home page, post-submission, near speedup fields, and on the update page
+
+### General
 - **5 Languages** - English, Korean, Chinese, Turkish, Arabic (with RTL support)
 - **Dark Theme** - Navy and gold themed UI
 - **Dockerized** - Multi-stage Docker build for easy deployment
@@ -100,8 +121,9 @@ minister_management/
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/          # Home, PlayerForm, AdminDashboard, etc.
-│   │   ├── components/     # LanguageSelector, admin/ subcomponents
+│   │   ├── pages/          # Home, PlayerForm, AdminDashboard, PublishedSchedule, etc.
+│   │   ├── components/     # LanguageSelector, admin/ subcomponents (incl. AdminSettings)
+│   │   ├── utils/          # Utility modules (affiliate integration, etc.)
 │   │   └── i18n.ts         # All translations
 │   ├── package.json
 │   └── vite.config.ts

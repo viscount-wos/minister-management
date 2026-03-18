@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { ArrowLeft, Calendar, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import TimezoneSelector from '../components/TimezoneSelector';
 import { getSavedTimezone, getSlotDisplayTime, generateAssignmentSlots } from '../utils/timezone';
@@ -25,6 +25,7 @@ export default function PublishedSchedule() {
   const [data, setData] = useState<PublishedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timezone, setTimezone] = useState(getSavedTimezone);
+  const [appsStillOpen, setAppsStillOpen] = useState(false);
 
   useEffect(() => {
     if (!day) {
@@ -36,6 +37,15 @@ export default function PublishedSchedule() {
       .then(res => setData(res.data))
       .catch(() => setData({ published: false }))
       .finally(() => setLoading(false));
+
+    axios.get('/api/settings/application-closing-time')
+      .then(res => {
+        // Show disclaimer if closing time is set but apps haven't closed yet
+        if (res.data.closing_time && !res.data.is_closed) {
+          setAppsStillOpen(true);
+        }
+      })
+      .catch(() => {});
   }, [day]);
 
   const allSlots = generateAssignmentSlots();
@@ -92,6 +102,13 @@ export default function PublishedSchedule() {
           </h2>
           <p className="text-xl text-theme-dim">{translatedDayLabel}</p>
         </div>
+
+        {appsStillOpen && (
+          <div className="mb-6 p-4 bg-warning/10 border border-warning/30 rounded-lg flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0" />
+            <p className="text-warning text-sm font-medium">{t('schedule.disclaimer')}</p>
+          </div>
+        )}
 
         <div className="flex justify-end mb-4">
           <TimezoneSelector value={timezone} onChange={setTimezone} />

@@ -55,6 +55,18 @@ def submit_player():
     try:
         data = request.json
 
+        # Check if applications are closed (block new submissions only)
+        closing_time = get_setting('application_closing_time', '')
+        if closing_time:
+            try:
+                dt = datetime.fromisoformat(closing_time.replace('Z', '+00:00'))
+                fid_str = str(data.get('fid', '')).strip()
+                existing = get_player_by_fid(fid_str) if fid_str else None
+                if not existing and datetime.utcnow().replace(tzinfo=dt.tzinfo) >= dt:
+                    return jsonify({'error': 'Applications are closed', 'code': 'APPLICATIONS_CLOSED'}), 403
+            except ValueError:
+                pass
+
         # Validate required fields
         required_fields = ['fid', 'game_name', 'alliance']
         for field in required_fields:
@@ -223,6 +235,50 @@ def set_fire_crystals_setting():
         return jsonify({'success': True, 'show_fire_crystals': show}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/admin/settings/application-closing-time', methods=['PUT'])
+def set_closing_time_setting():
+    """Set or clear application closing time."""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = request.json
+        closing_time = data.get('closing_time', '')
+
+        # Validate if non-empty
+        if closing_time:
+            try:
+                datetime.fromisoformat(closing_time.replace('Z', '+00:00'))
+            except ValueError:
+                return jsonify({'error': 'Invalid datetime format'}), 400
+
+        set_setting('application_closing_time', closing_time)
+        return jsonify({'success': True, 'closing_time': closing_time}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/admin/settings/state-number', methods=['PUT'])
+def set_state_number_setting():
+    """Set the state number for the welcome message."""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or 'token' not in auth_header:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = request.json
+        state_number = str(data.get('state_number', '')).strip()
+        if not state_number:
+            return jsonify({'error': 'State number is required'}), 400
+
+        set_setting('state_number', state_number)
+        return jsonify({'success': True, 'state_number': state_number}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():
@@ -798,6 +854,26 @@ def get_published_days_setting():
     published_days = get_setting('published_days', '')
     days_list = [d for d in published_days.split(',') if d]
     return jsonify({'published_days': days_list}), 200
+
+
+@app.route('/api/settings/application-closing-time', methods=['GET'])
+def get_closing_time_setting():
+    """Get application closing time and whether applications are currently closed."""
+    closing_time = get_setting('application_closing_time', '')
+    is_closed = False
+    if closing_time:
+        try:
+            dt = datetime.fromisoformat(closing_time.replace('Z', '+00:00'))
+            is_closed = datetime.utcnow().replace(tzinfo=dt.tzinfo) >= dt
+        except ValueError:
+            pass
+    return jsonify({'closing_time': closing_time, 'is_closed': is_closed}), 200
+
+
+@app.route('/api/settings/state-number', methods=['GET'])
+def get_state_number_setting():
+    """Get the state number for the welcome message."""
+    return jsonify({'state_number': get_setting('state_number', '2694')}), 200
 
 
 @app.route('/api/time-preferences/heatmap', methods=['GET'])

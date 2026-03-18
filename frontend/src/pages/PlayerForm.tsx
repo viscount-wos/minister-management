@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, Download, Loader2, XCircle, ExternalLink } from 'lucide-react';
 import axios from 'axios';
 import TimezoneSelector from '../components/TimezoneSelector';
 import { getSavedTimezone, generatePlayerTimeSlots, formatTimeInTimezone, getTimezoneAbbr } from '../utils/timezone';
+import { LOOTBAR_URL } from '../utils/affiliate';
 
 interface PlayerData {
   fid: string;
@@ -34,6 +35,8 @@ export default function PlayerForm() {
   const [researchDay, setResearchDay] = useState('tuesday');
   const [timezone, setTimezone] = useState(getSavedTimezone);
   const [heatmapData, setHeatmapData] = useState<Record<string, Record<string, number>>>({});
+  const [appsClosed, setAppsClosed] = useState(false);
+  const [closingChecked, setClosingChecked] = useState(false);
 
   useEffect(() => {
     axios.get('/api/settings/show-fire-crystals')
@@ -45,6 +48,12 @@ export default function PlayerForm() {
     axios.get('/api/time-preferences/heatmap')
       .then(res => setHeatmapData(res.data))
       .catch(() => {});
+    axios.get('/api/settings/application-closing-time')
+      .then(res => {
+        setAppsClosed(res.data.is_closed || false);
+        setClosingChecked(true);
+      })
+      .catch(() => setClosingChecked(true));
   }, []);
 
   const [playerData, setPlayerData] = useState<PlayerData>({
@@ -198,7 +207,7 @@ export default function PlayerForm() {
       setSuccess(true);
       setTimeout(() => {
         navigate('/');
-      }, 2000);
+      }, 5000);
     } catch (err: any) {
       setError(err.response?.data?.error || t('form.submitError'));
     } finally {
@@ -212,7 +221,36 @@ export default function PlayerForm() {
         <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center">
           <CheckCircle className="w-20 h-20 text-success mx-auto mb-6" />
           <h2 className="text-3xl font-bold text-accent mb-4">{t('form.success')}</h2>
-          <p className="text-theme-dim">{t('form.submissionSuccess')}</p>
+          <p className="text-theme-dim mb-6">{t('form.submissionSuccess')}</p>
+          <a
+            href={LOOTBAR_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 rounded-xl hover:border-amber-500/60 transition-all group"
+          >
+            <span className="text-lg">🔥</span>
+            <span className="text-amber-400 font-medium text-sm">{t('promo.lootbarCta')}</span>
+            <ExternalLink className="w-3.5 h-3.5 text-amber-400 opacity-60 group-hover:opacity-100" />
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (closingChecked && appsClosed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center">
+          <XCircle className="w-20 h-20 text-danger mx-auto mb-6" />
+          <h2 className="text-3xl font-bold text-danger mb-4">{t('home.applicationsClosed')}</h2>
+          <p className="text-theme-dim mb-6">{t('form.applicationsClosedDesc')}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('update.backHome')}
+          </button>
         </div>
       </div>
     );
@@ -430,6 +468,17 @@ export default function PlayerForm() {
                   <strong>💡 </strong>{t('form.generalSpeedupsNote')}
                 </p>
               </div>
+              {/* LootBar contextual hint */}
+              <a
+                href={LOOTBAR_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex items-center justify-center gap-2 text-amber-400/80 hover:text-amber-400 text-xs transition-colors"
+              >
+                <span>🔥</span>
+                <span>{t('promo.lootbarSpeedups')}</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
           </div>
         )}

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LogOut, Users, Calendar, HelpCircle } from 'lucide-react';
+import { LogOut, Users, Calendar, HelpCircle, Settings } from 'lucide-react';
 import PlayerManagement from '../components/admin/PlayerManagement';
 import AssignmentManagement from '../components/admin/AssignmentManagement';
+import AdminSettings from '../components/admin/AdminSettings';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'players' | 'assignments'>('players');
+  const [activeTab, setActiveTab] = useState<'players' | 'assignments' | 'settings'>('players');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -83,12 +84,24 @@ export default function AdminDashboard() {
               <Calendar className="w-5 h-5" />
               {t('admin.assignments')}
             </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors border-b-2 ${
+                activeTab === 'settings'
+                  ? 'border-accent text-accent'
+                  : 'border-transparent text-theme-dim hover:text-theme-text'
+              }`}
+            >
+              <Settings className="w-5 h-5" />
+              {t('admin.settings')}
+            </button>
           </div>
         </div>
 
         {/* Content */}
         {activeTab === 'players' && <PlayerManagement />}
         {activeTab === 'assignments' && <AssignmentManagement />}
+        {activeTab === 'settings' && <AdminSettings />}
       </div>
     </div>
   );
