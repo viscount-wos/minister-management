@@ -54,12 +54,31 @@ export function formatTimeInTimezone(utcHHMM: string, timezone: string): string 
   }).format(date);
 }
 
+export type TimeSlotScheme = 'exact_alignment' | 'max_slots';
+
 /**
- * Generate the 49 assignment time slots (23:50 through 23:50+).
- * These are 30-minute slots starting at 23:50 UTC (previous day)
- * through 23:50 UTC (end of day), covering ~24.5 hours.
+ * Generate the assignment time slots for a scheme.
+ *
+ * 'exact_alignment' — 48 hour-aligned slots: 00:00, 00:30, ... 23:30.
+ * 'max_slots'       — 49 slots starting at 23:50 UTC (previous day) through
+ *                     23:50+ UTC (end of day): 23:50, 00:20, 00:50, ... 23:20, 23:50+.
  */
-export function generateAssignmentSlots(): string[] {
+export function generateAssignmentSlots(scheme: TimeSlotScheme = 'exact_alignment'): string[] {
+  if (scheme === 'exact_alignment') {
+    const slots: string[] = [];
+    let hour = 0;
+    let minute = 0;
+    for (let i = 0; i < 48; i++) {
+      slots.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+      minute += 30;
+      if (minute >= 60) {
+        minute -= 60;
+        hour += 1;
+      }
+    }
+    return slots;
+  }
+  // max_slots
   const slots: string[] = ['23:50'];
   let hour = 0;
   let minute = 20;

@@ -39,7 +39,6 @@ This document contains everything needed to recreate the Ministry Management Sys
 - 5 languages: English, Korean, Chinese, Turkish, Arabic (with RTL support for Arabic)
 - Settings stored as key-value pairs in SQLite `settings` table — configurable state number, application closing time, research day, fire crystal field visibility
 - Application closing time blocks new submissions after deadline but allows existing player updates
-- LootBar affiliate link integrated on home page, post-submission, and update page
 
 ---
 
@@ -66,8 +65,7 @@ minister_management/
 │       ├── index.css           # Global styles, dark theme, scrollbar
 │       ├── i18n.ts             # All translations (EN/KO/ZH/TR/AR)
 │       ├── utils/
-│       │   ├── timezone.ts     # Timezone conversion utilities
-│       │   └── affiliate.ts    # LootBar affiliate link helper
+│       │   └── timezone.ts     # Timezone conversion utilities
 │       ├── components/
 │       │   ├── LanguageSelector.tsx
 │       │   ├── TimezoneSelector.tsx
@@ -1530,7 +1528,6 @@ Due to the size of the frontend source files, they are provided as references to
 | `src/components/admin/AdminSettings.tsx` | Admin settings panel (state number, closing time, research day, fire crystals) | — |
 | `src/pages/PlayerGuide.tsx` | Player-facing guide page | — |
 | `src/pages/AdminGuide.tsx` | Admin-facing guide page | — |
-| `src/utils/affiliate.ts` | LootBar affiliate link helper | — |
 
 > **IMPORTANT:** The `i18n.ts` file is critical — it contains all translations for 5 languages across all UI elements. The complete file is 793 lines. Copy it exactly from the source.
 

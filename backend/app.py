@@ -18,7 +18,7 @@ from database import (
     init_db, get_all_players, get_player_by_fid,
     save_player, delete_player, calculate_points, get_db,
     get_research_day, get_show_fire_crystals, set_setting, get_setting,
-    get_time_preference_counts
+    get_time_preference_counts, get_time_slot_scheme
 )
 import json
 
@@ -50,7 +50,11 @@ VALID_TOKENS = {'admin-token', 'minister-token'}
 def check_admin_auth():
     """Validate admin authentication. Returns None if valid, or error response tuple if invalid."""
     auth_header = request.headers.get('Authorization')
-    if not auth_header or auth_header not in VALID_TOKENS:
+    if not auth_header:
+        return jsonify({'error': 'Unauthorized'}), 401
+    # Strip 'Bearer ' prefix if present (frontend sends both formats)
+    token = auth_header.removeprefix('Bearer ').strip()
+    if token not in VALID_TOKENS:
         return jsonify({'error': 'Unauthorized'}), 401
     return None
 
@@ -270,6 +274,38 @@ def set_fire_crystals_setting():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/settings/time-slot-scheme', methods=['GET'])
+def get_time_slot_scheme_setting():
+    """Get the current time slot scheme (public endpoint)."""
+    return jsonify({'time_slot_scheme': get_time_slot_scheme()}), 200
+
+@app.route('/api/admin/settings/time-slot-scheme', methods=['PUT'])
+def set_time_slot_scheme_setting():
+    """Set the time slot scheme to 'exact_alignment' or 'max_slots'.
+
+    On change, existing assignments are remapped best-effort onto the new
+    slot grid so placements are preserved rather than wiped.
+    """
+    try:
+        auth_error = check_admin_auth()
+        if auth_error:
+            return auth_error
+
+        data = request.json
+        scheme = data.get('time_slot_scheme', '')
+        if scheme not in ('exact_alignment', 'max_slots'):
+            return jsonify({'error': 'Invalid value. Must be "exact_alignment" or "max_slots"'}), 400
+
+        old_scheme = get_time_slot_scheme()
+        set_setting('time_slot_scheme', scheme)
+        remapped = 0
+        if scheme != old_scheme:
+            remapped = remap_assignments_between_schemes(old_scheme, scheme)
+        return jsonify({'success': True, 'time_slot_scheme': scheme, 'remapped': remapped}), 200
+    except Exception as e:
+        logger.error(f"Error setting time slot scheme: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/admin/settings/application-closing-time', methods=['PUT'])
 def set_closing_time_setting():
@@ -404,6 +440,209 @@ def remove_player(player_id):
         logger.error(f"Error deleting player {player_id}: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
+def generate_time_slots(scheme):
+    """Generate the ordered list of 30-minute assignment slots for a scheme.
+
+    'exact_alignment' -> 00:00, 00:30, ..., 23:30 (48 hour-aligned slots).
+    'max_slots'       -> 23:50, 00:20, 00:50, ..., 23:20, 23:50+ (49 slots,
+                         starting 10 min before midnight the previous day).
+    """
+    if scheme == 'exact_alignment':
+        slots = []
+        hour, minute = 0, 0
+        for _ in range(48):
+            slots.append(f"{hour:02d}:{minute:02d}")
+            minute += 30
+            if minute >= 60:
+                minute -= 60
+                hour += 1
+        return slots
+    # max_slots (legacy behavior)
+    slots = ['23:50']
+    hour, minute = 0, 20
+    while True:
+        slot = f"{hour:02d}:{minute:02d}"
+        if slot == '23:50':
+            slots.append('23:50+')
+            break
+        slots.append(slot)
+        minute += 30
+        if minute >= 60:
+            minute -= 60
+            hour += 1
+    return slots
+
+
+def matching_slots_for_pref(hour, scheme):
+    """Candidate slots for a player's preferred hour (0-23) under a scheme."""
+    if scheme == 'exact_alignment':
+        # The two slots within the selected hour
+        return [f"{hour:02d}:00", f"{hour:02d}:30"]
+    # max_slots: (H-1):50, H:20, H:50 with day-boundary sentinels
+    prev_h = (hour - 1) % 24
+    result = ['23:50'] if hour == 0 else [f"{prev_h:02d}:50"]
+    result.append(f"{hour:02d}:20")
+    result.append('23:50+' if hour == 23 else f"{hour:02d}:50")
+    return result
+
+
+def slot_to_minutes(slot):
+    """Canonical minutes-from-midnight for a slot id.
+
+    23:50 (pre-midnight, previous day) = -10; 23:50+ (end of day) = 1430.
+    """
+    if slot == '23:50':
+        return -10
+    if slot == '23:50+':
+        return 1430
+    return int(slot[:2]) * 60 + int(slot[3:5])
+
+
+def remap_assignments_between_schemes(old_scheme, new_scheme):
+    """Best-effort remap of stored assignments onto the new slot grid.
+
+    Each existing assignment moves to the nearest slot (by wall-clock minutes)
+    in the new scheme. If two land on the same target slot, the higher-point
+    player keeps it and the other is dropped (it becomes unassigned).
+    Returns the number of assignments kept after remapping.
+    """
+    target_slots = generate_time_slots(new_scheme)
+    target_minutes = [(s, slot_to_minutes(s)) for s in target_slots]
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT player_id, day, time_slot, is_sticky FROM assignments')
+    rows = [dict(r) for r in cursor.fetchall()]
+    if not rows:
+        return 0
+
+    by_day = {}
+    for r in rows:
+        by_day.setdefault(r['day'], []).append(r)
+
+    remapped = 0
+    for day, day_rows in by_day.items():
+        planned = []
+        for r in day_rows:
+            src_min = slot_to_minutes(r['time_slot'])
+            nearest = min(target_minutes, key=lambda t: abs(t[1] - src_min))[0]
+            cursor.execute('SELECT * FROM players WHERE id = ?', (r['player_id'],))
+            prow = cursor.fetchone()
+            pts = calculate_points(dict(prow), day) if prow else 0
+            planned.append({'row': r, 'target': nearest, 'points': pts})
+
+        # Highest points wins each contested target slot
+        planned.sort(key=lambda x: x['points'], reverse=True)
+        taken = set()
+        winners = []
+        for p in planned:
+            if p['target'] in taken:
+                continue  # loser dropped -> becomes unassigned
+            taken.add(p['target'])
+            winners.append(p)
+
+        cursor.execute('DELETE FROM assignments WHERE day = ?', (day,))
+        for p in winners:
+            cursor.execute('''
+                INSERT INTO assignments (player_id, day, time_slot, position, is_assigned, is_sticky)
+                VALUES (?, ?, ?, 0, 1, ?)
+            ''', (p['row']['player_id'], day, p['target'], p['row']['is_sticky']))
+            remapped += 1
+
+    db.commit()
+    return remapped
+
+
+def _day_type_for(day, research_day):
+    """Map a weekday to its time-preference bucket."""
+    if day == 'monday':
+        return 'construction'
+    if day == 'thursday':
+        return 'troop'
+    if day == research_day:
+        return 'research'
+    return 'construction'
+
+
+def get_shared_slot_link(day, scheme, research_day):
+    """Return the cross-day link for a day's 23:50 boundary, or None.
+
+    Only applies in 'max_slots' scheme, and only between calendar-adjacent
+    active days, where the earlier day's end-of-day 23:50+ is the same real
+    time as the later day's pre-midnight 23:50:
+      - monday(23:50+)  <-> tuesday(23:50)   when research_day == 'tuesday'
+      - thursday(23:50+) <-> friday(23:50)    when research_day == 'friday'
+
+    Returns (other_day, this_slot, other_slot) from `day`'s perspective.
+    """
+    if scheme != 'max_slots':
+        return None
+    pairs = []
+    if research_day == 'tuesday':
+        pairs.append(('monday', 'tuesday'))
+    if research_day == 'friday':
+        pairs.append(('thursday', 'friday'))
+    for earlier, later in pairs:
+        if day == earlier:
+            return (later, '23:50+', '23:50')
+        if day == later:
+            return (earlier, '23:50', '23:50+')
+    return None
+
+
+def compute_shared_winner(players, earlier_day, later_day, research_day):
+    """Pick the player for a shared 23:50 boundary slot.
+
+    Candidates are players who chose that boundary on either day — hour 23 on
+    the earlier day, or hour 0 on the later (research) day. Among them, the one
+    with the highest COMBINED score across the two days wins, since a single
+    player holds the position across the day boundary.
+    """
+    earlier_type = _day_type_for(earlier_day, research_day)
+    later_type = _day_type_for(later_day, research_day)
+
+    def is_candidate(p):
+        by_day = p.get('time_slots_by_day', {})
+        return ('23:00' in by_day.get(earlier_type, [])) or ('00:00' in by_day.get(later_type, []))
+
+    candidates = [p for p in players if is_candidate(p)]
+    if not candidates:
+        return None
+    for p in candidates:
+        p['_combined'] = calculate_points(p, earlier_day) + calculate_points(p, later_day)
+    candidates.sort(key=lambda p: p['_combined'], reverse=True)
+    return candidates[0]
+
+
+def sync_shared_boundary(cursor, day, scheme, research_day):
+    """Mirror `day`'s 23:50 boundary slot onto its linked day's boundary.
+
+    Keeps the two rows that represent the same real time in sync after an
+    auto-assign or manual edit. Caller is responsible for committing.
+    """
+    link = get_shared_slot_link(day, scheme, research_day)
+    if not link:
+        return
+    other_day, this_slot, other_slot = link
+
+    cursor.execute(
+        'SELECT player_id, is_sticky FROM assignments WHERE day = ? AND time_slot = ?',
+        (day, this_slot)
+    )
+    row = cursor.fetchone()
+
+    # Reset the linked slot, then mirror this day's boundary onto it
+    cursor.execute('DELETE FROM assignments WHERE day = ? AND time_slot = ?', (other_day, other_slot))
+    if row:
+        pid = row['player_id']
+        # Prevent the same player appearing twice on the other day
+        cursor.execute('DELETE FROM assignments WHERE day = ? AND player_id = ?', (other_day, pid))
+        cursor.execute('''
+            INSERT INTO assignments (player_id, day, time_slot, position, is_assigned, is_sticky)
+            VALUES (?, ?, ?, 0, 1, ?)
+        ''', (pid, other_day, other_slot, row['is_sticky']))
+
+
 @app.route('/api/admin/assignments/auto-assign', methods=['POST'])
 def auto_assign():
     """Auto-assign players to time slots based on points."""
@@ -436,21 +675,9 @@ def auto_assign():
         # Sort by points (descending)
         players.sort(key=lambda p: p['points'], reverse=True)
 
-        # Generate 30-minute time slots starting at 23:50 (previous day)
-        # through 23:50+ (end of day), covering ~24.5 hours.
-        # Slots: 23:50, 00:20, 00:50, 01:20, ..., 23:20, 23:50+
-        time_slots = ['23:50']
-        hour, minute = 0, 20
-        while True:
-            slot = f"{hour:02d}:{minute:02d}"
-            if slot == '23:50':
-                time_slots.append('23:50+')
-                break
-            time_slots.append(slot)
-            minute += 30
-            if minute >= 60:
-                minute -= 60
-                hour += 1
+        # Generate time slots for the active scheme
+        scheme = get_time_slot_scheme()
+        time_slots = generate_time_slots(scheme)
 
         # Fetch sticky assignments BEFORE clearing
         db = get_db()
@@ -494,38 +721,48 @@ def auto_assign():
             if slot in assignments:
                 assignments[slot].append(player_data)
 
+        # Shared 23:50 boundary (max_slots + adjacent research day): one player
+        # holds the same real time on both days, chosen by highest COMBINED score
+        # across the two days, and locked to the boundary slot here.
+        shared_locked_ids = set()
+        shared_link = get_shared_slot_link(day, scheme, research_day)
+        if shared_link:
+            other_day, this_slot, _other_slot = shared_link
+            earlier_day, later_day = (day, other_day) if this_slot == '23:50+' else (other_day, day)
+            if this_slot in assignments and len(assignments[this_slot]) == 0:
+                winner = compute_shared_winner(players, earlier_day, later_day, research_day)
+                if winner and winner['id'] not in sticky_player_ids:
+                    assignments[this_slot] = [{
+                        'id': winner['id'],
+                        'player_id': winner['id'],
+                        'fid': winner['fid'],
+                        'game_name': winner['game_name'],
+                        'points': calculate_points(winner, day),
+                        'preferred_times': list(winner.get('time_slots_by_day', {}).get(day_type, [])),
+                        'avatar_image': winner.get('avatar_image', ''),
+                        'stove_lv': winner.get('stove_lv'),
+                        'stove_lv_content': winner.get('stove_lv_content', ''),
+                        'alliance': winner.get('alliance', ''),
+                        'is_sticky': False,
+                    }]
+                    shared_locked_ids.add(winner['id'])
+
         for player in players:
-            # Skip players that are sticky-assigned
-            if player['id'] in sticky_player_ids:
+            # Skip sticky-assigned or shared-boundary-locked players
+            if player['id'] in sticky_player_ids or player['id'] in shared_locked_ids:
                 continue
 
             # Use day-specific time preferences
             time_slots_by_day = player.get('time_slots_by_day', {})
             player_time_prefs = set(time_slots_by_day.get(day_type, player.get('time_slots', [])))
 
-            # Find matching 30-min slots for player's hourly preferences
-            # With ±20 min tolerance, each hour H maps to 3 slots:
-            #   (H-1):50  — starts 10 min before the hour (within 20 min)
-            #   H:20      — starts 20 min after the hour (within 20 min)
-            #   H:50      — within the selected hour
+            # Find matching slots for the player's hourly preferences,
+            # per the active scheme (exact_alignment or max_slots).
             matching_slots = []
             for pref in player_time_prefs:
                 if ':' in pref:
                     h = int(pref.split(':')[0])
-                    prev_h = (h - 1) % 24
-                    # Previous hour's :50 slot
-                    if h == 0:
-                        matching_slots.append('23:50')  # The pre-midnight slot
-                    else:
-                        matching_slots.append(f"{prev_h:02d}:50")
-                    # Current hour's :20 and :50 slots
-                    matching_slots.append(f"{h:02d}:20")
-                    # For hour 23, the :50 slot is "23:50+" (end of day),
-                    # NOT "23:50" which is the pre-midnight slot (previous day)
-                    if h == 23:
-                        matching_slots.append('23:50+')
-                    else:
-                        matching_slots.append(f"{h:02d}:50")
+                    matching_slots.extend(matching_slots_for_pref(h, scheme))
 
             assigned = False
             for slot in matching_slots:
@@ -536,6 +773,7 @@ def auto_assign():
                         'fid': player['fid'],
                         'game_name': player['game_name'],
                         'points': player['points'],
+                        'preferred_times': list(player_time_prefs),
                         'avatar_image': player.get('avatar_image', ''),
                         'stove_lv': player.get('stove_lv'),
                         'stove_lv_content': player.get('stove_lv_content', ''),
@@ -570,6 +808,9 @@ def auto_assign():
                     INSERT INTO assignments (player_id, day, time_slot, position, is_assigned, is_sticky)
                     VALUES (?, ?, ?, ?, 1, ?)
                 ''', (player['id'], day, time_slot, position, 1 if player.get('is_sticky') else 0))
+
+        # Mirror the shared 23:50 boundary onto the linked day
+        sync_shared_boundary(cursor, day, scheme, research_day)
 
         db.commit()
 
@@ -619,11 +860,46 @@ def get_assignments(day):
                 assignments[slot] = []
             row_dict = dict(row)
             row_dict['points'] = calculate_points(row_dict, day.lower())
+
+            # Fetch preferred times for this player
+            cursor.execute('SELECT time_slot FROM time_preferences WHERE player_id = ?', (row['player_id'],))
+            row_dict['preferred_times'] = sorted([r['time_slot'] for r in cursor.fetchall()])
+
             assignments[slot].append(row_dict)
 
-        return jsonify(assignments), 200
+        # Compute unassigned players (everyone not placed in a slot this day)
+        # so the schedule page can show them on first load, not only after
+        # re-running auto-assign.
+        assigned_ids = {p['player_id'] for slot_players in assignments.values() for p in slot_players}
+        research_day = get_research_day()
+        day_type_map = {'monday': 'construction', 'thursday': 'troop'}
+        day_type_map[research_day] = 'research'
+        day_type = day_type_map.get(day.lower(), 'construction')
+
+        unassigned = []
+        for p in get_all_players():
+            if p['id'] in assigned_ids:
+                continue
+            prefs = sorted(p.get('time_slots_by_day', {}).get(day_type, []))
+            unassigned.append({
+                'id': p['id'],
+                'player_id': p['id'],
+                'fid': p['fid'],
+                'game_name': p['game_name'],
+                'points': calculate_points(p, day.lower()),
+                'preferred_times': prefs,
+                'avatar_image': p.get('avatar_image') or '',
+                'stove_lv': p.get('stove_lv'),
+                'stove_lv_content': p.get('stove_lv_content') or '',
+                'alliance': p.get('alliance') or '',
+                'is_sticky': False,
+            })
+        unassigned.sort(key=lambda x: x['points'], reverse=True)
+
+        return jsonify({'assignments': assignments, 'unassigned': unassigned}), 200
 
     except Exception as e:
+        logger.error(f"Error in get_assignments: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/admin/assignments/update', methods=['POST'])
@@ -655,6 +931,9 @@ def update_assignments():
                 ''', (player['player_id'], day, time_slot, 0,
                       player.get('is_assigned', True),
                       1 if player.get('is_sticky') else 0))
+
+        # Keep the shared 23:50 boundary in sync across the linked day
+        sync_shared_boundary(cursor, day.lower(), get_time_slot_scheme(), get_research_day())
 
         db.commit()
 

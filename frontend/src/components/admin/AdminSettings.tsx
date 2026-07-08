@@ -12,6 +12,7 @@ export default function AdminSettings() {
   const [saveMessage, setSaveMessage] = useState('');
   const [researchDay, setResearchDay] = useState<'tuesday' | 'friday'>('tuesday');
   const [showFireCrystals, setShowFireCrystals] = useState(false);
+  const [timeSlotScheme, setTimeSlotScheme] = useState<'exact_alignment' | 'max_slots'>('exact_alignment');
 
   const token = localStorage.getItem('adminToken') || '';
 
@@ -27,6 +28,10 @@ export default function AdminSettings() {
 
     axios.get('/api/settings/show-fire-crystals')
       .then(res => setShowFireCrystals(res.data.show_fire_crystals || false))
+      .catch(() => {});
+
+    axios.get('/api/settings/time-slot-scheme')
+      .then(res => setTimeSlotScheme(res.data.time_slot_scheme || 'exact_alignment'))
       .catch(() => {});
 
     axios.get('/api/settings/application-closing-time')
@@ -117,6 +122,20 @@ export default function AdminSettings() {
         { headers: { Authorization: token } }
       );
       setShowFireCrystals(newValue);
+      showSaveMessage();
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleSetTimeSlotScheme = async (scheme: 'exact_alignment' | 'max_slots') => {
+    if (scheme === timeSlotScheme) return;
+    try {
+      await axios.put('/api/admin/settings/time-slot-scheme',
+        { time_slot_scheme: scheme },
+        { headers: { Authorization: token } }
+      );
+      setTimeSlotScheme(scheme);
       showSaveMessage();
     } catch {
       // ignore
@@ -229,6 +248,43 @@ export default function AdminSettings() {
             {showFireCrystals ? t('admin.enabled') : t('admin.disabled')}
           </span>
         </label>
+      </div>
+
+      {/* Time Slot Scheme */}
+      <div className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <h3 className="text-xl font-bold text-accent mb-2">{t('admin.timeSlotScheme')}</h3>
+        <p className="text-theme-dim text-sm mb-4">{t('admin.timeSlotSchemeDesc')}</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {([
+            { value: 'exact_alignment' as const, title: t('admin.schemeExact'), desc: t('admin.schemeExactDesc') },
+            { value: 'max_slots' as const, title: t('admin.schemeMax'), desc: t('admin.schemeMaxDesc') },
+          ]).map(opt => {
+            const active = timeSlotScheme === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => handleSetTimeSlotScheme(opt.value)}
+                className={`text-left p-4 rounded-lg border transition-colors ${
+                  active
+                    ? 'border-accent bg-accent/10'
+                    : 'border-theme-border bg-dark-bg hover:border-accent/50'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  {active ? (
+                    <ToggleRight className="w-6 h-6 text-accent" />
+                  ) : (
+                    <ToggleLeft className="w-6 h-6 text-theme-dim" />
+                  )}
+                  <span className={`font-semibold ${active ? 'text-accent' : 'text-theme-text'}`}>
+                    {opt.title}
+                  </span>
+                </div>
+                <p className="text-theme-dim text-xs leading-relaxed">{opt.desc}</p>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

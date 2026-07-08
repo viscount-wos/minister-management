@@ -372,6 +372,18 @@ GCS FUSE volume mounts require `--execution-environment gen2`. Gen1 does not sup
 
 ## Version History
 
+- **v1.2.0** (July 2026): Time Slot Schemes & Scheduling Fixes
+  - **Time slot scheme** setting (`exact_alignment` default vs `max_slots`), selectable in the Settings tab
+    - `exact_alignment`: hour-aligned slots (00:00, 00:30 … 23:30, 48/day)
+    - `max_slots`: legacy 23:50-boundary grid (23:50, 00:20 … 23:50+, 49/day)
+    - Slot generation lives in `generate_time_slots()` / `matching_slots_for_pref()` (`app.py`) and `generateAssignmentSlots(scheme)` (`timezone.ts`)
+    - Switching schemes remaps existing placements via `remap_assignments_between_schemes()` (nearest slot by wall-clock minutes; collisions → higher points wins)
+  - **Shared 23:50 boundary slot** (max_slots + calendar-adjacent active days: Mon↔Tue or Thu↔Fri): one player holds the same real time on both days, chosen by highest COMBINED score. See `get_shared_slot_link()`, `compute_shared_winner()`, `sync_shared_boundary()`. Shown on both days in the UI and synced on manual edit.
+  - **Fixed**: unassigned players now returned by `GET /api/admin/assignments/<day>` (shape is now `{assignments, unassigned}`) so they show on first load, not only after re-running auto-assign
+  - Migration: installs with existing assignment data are pinned to `max_slots` to preserve behavior; fresh installs default to `exact_alignment`
+  - New API endpoints: `GET /api/settings/time-slot-scheme`, `PUT /api/admin/settings/time-slot-scheme`
+  - Removed LootBar affiliate integration (no longer active for Whiteout Survival)
+
 - **v1.1.0** (March 2026): WOS API Integration & Enhancements
   - "Load from WOS" button auto-fills player name, avatar, and furnace level from FID
   - Alliance tag field (3 chars max, displayed as `[TAG]` next to player names)

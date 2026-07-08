@@ -29,9 +29,9 @@ A web application for managing ministry assignments during State vs State (SVS) 
 - **Multi-day Excel Export** - Workbook with Monday, Tuesday/Friday, Thursday tabs + Unassigned tab
 - **Configurable State Number** - Dynamic "Welcome, State {N}" message on the home page
 - **Research Day Toggle** - Switch research day between Tuesday and Friday
+- **Time Slot Scheme** - Choose **Exact Alignment** (00:00, 00:30 … 48 slots/day) or **Maximum Slots** (starts 23:50 the night before for an extra slot, 49/day). In Maximum Slots mode, adjacent days share the 23:50 boundary slot: it shows on both days, is auto-assigned by highest combined score across the two days, and syncs when edited manually. Switching schemes remaps existing placements
 - **Show/Hide Fire Crystal Fields** - Toggle visibility of fire crystal resource fields in the player form
 - **Admin Guide** (`/admin/guide`) - Comprehensive in-app guide accessible from the admin dashboard
-- **LootBar Affiliate Integration** - Contextual affiliate banners on the home page, post-submission, near speedup fields, and on the update page
 
 ### General
 - **5 Languages** - English, Korean, Chinese, Turkish, Arabic (with RTL support)
@@ -123,7 +123,7 @@ minister_management/
 │   ├── src/
 │   │   ├── pages/          # Home, PlayerForm, AdminDashboard, PublishedSchedule, etc.
 │   │   ├── components/     # LanguageSelector, admin/ subcomponents (incl. AdminSettings)
-│   │   ├── utils/          # Utility modules (affiliate integration, etc.)
+│   │   ├── utils/          # Utility modules (timezone helpers, etc.)
 │   │   └── i18n.ts         # All translations
 │   ├── package.json
 │   └── vite.config.ts

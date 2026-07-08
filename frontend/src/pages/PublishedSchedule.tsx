@@ -78,8 +78,8 @@ export default function PublishedSchedule() {
   }
 
   const assignments = data.assignments || {};
-  // Only show slots that have players assigned
-  const populatedSlots = allSlots.filter(slot => (assignments[slot] || []).length > 0);
+  // Show all slots - populated ones with player cards, empty ones with blank placeholder
+  const hasAnyAssignments = allSlots.some(slot => (assignments[slot] || []).length > 0);
 
   // Translate the day label
   const dayKey = data.day || '';
@@ -114,19 +114,26 @@ export default function PublishedSchedule() {
           <TimezoneSelector value={timezone} onChange={setTimezone} />
         </div>
 
-        {populatedSlots.length === 0 ? (
+        {!hasAnyAssignments ? (
           <p className="text-center text-theme-dim py-8">{t('schedule.noAssignments')}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {populatedSlots.map(slot => {
+            {allSlots.map(slot => {
               const players = assignments[slot] || [];
               const displayTime = getSlotDisplayTime(slot, timezone);
+              const isEmpty = players.length === 0;
               return (
                 <div
                   key={slot}
-                  className="border border-theme-border rounded-lg p-3 bg-dark-bg"
+                  className={`border rounded-lg p-3 ${
+                    isEmpty
+                      ? 'border-theme-border/40 bg-dark-bg/50'
+                      : 'border-theme-border bg-dark-bg'
+                  }`}
                 >
-                  <div className="font-semibold text-accent mb-2 text-center">
+                  <div className={`font-semibold mb-2 text-center ${
+                    isEmpty ? 'text-theme-dim' : 'text-accent'
+                  }`}>
                     {displayTime}
                     {slot === '23:50+' && <span className="text-xs opacity-60 ml-1">(+1d)</span>}
                     {timezone !== 'UTC' && (
@@ -135,19 +142,25 @@ export default function PublishedSchedule() {
                       </span>
                     )}
                   </div>
-                  {players.map((player, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2 bg-accent/10 border border-accent/30 rounded-lg text-center"
-                    >
-                      <div className="font-medium text-theme-text">
-                        {player.alliance && (
-                          <span className="text-accent">[{player.alliance}] </span>
-                        )}
-                        {player.game_name}
-                      </div>
+                  {isEmpty ? (
+                    <div className="p-2 border border-dashed border-theme-border/30 rounded-lg text-center">
+                      <span className="text-theme-dim/50 text-sm">{t('schedule.unfilled')}</span>
                     </div>
-                  ))}
+                  ) : (
+                    players.map((player, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2 bg-accent/10 border border-accent/30 rounded-lg text-center"
+                      >
+                        <div className="font-medium text-theme-text">
+                          {player.alliance && (
+                            <span className="text-accent">[{player.alliance}] </span>
+                          )}
+                          {player.game_name}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               );
             })}

@@ -179,6 +179,18 @@ def init_db(app):
                         pass  # Skip duplicates
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_time_prefs_player ON time_preferences(player_id)')
 
+        # Migration: the time_slot_scheme setting is new. Installs that already
+        # have assignment data were built on the max_slots (23:50) grid, so
+        # preserve that behavior for them. Fresh installs leave it unset and
+        # fall back to the exact_alignment default in get_time_slot_scheme().
+        cursor.execute("SELECT value FROM settings WHERE key = 'time_slot_scheme'")
+        if not cursor.fetchone():
+            cursor.execute('SELECT COUNT(*) AS n FROM assignments')
+            if cursor.fetchone()['n'] > 0:
+                cursor.execute(
+                    "INSERT INTO settings (key, value) VALUES ('time_slot_scheme', 'max_slots')"
+                )
+
         db.commit()
 
 
@@ -210,6 +222,17 @@ def get_research_day():
 def get_show_fire_crystals():
     """Get whether fire crystal fields should be shown."""
     return get_setting('show_fire_crystals', 'false') == 'true'
+
+
+def get_time_slot_scheme():
+    """Get the time slot scheme.
+
+    'exact_alignment' (default) -> slots align to the hour (00:00, 00:30 ... 23:30).
+    'max_slots'                 -> slots start at 23:50 the night before to fit an
+                                   extra slot (23:50, 00:20, 00:50 ... 23:20, 23:50+).
+    """
+    scheme = get_setting('time_slot_scheme', 'exact_alignment')
+    return scheme if scheme in ('exact_alignment', 'max_slots') else 'exact_alignment'
 
 
 def calculate_points(player, day):

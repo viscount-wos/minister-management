@@ -11,10 +11,10 @@ import {
   DragEndEvent,
   DragStartEvent,
 } from '@dnd-kit/core';
-import { Sparkles, Download, AlertCircle, Globe, EyeOff, Lock, Unlock } from 'lucide-react';
+import { Sparkles, Download, AlertCircle, Globe, EyeOff, Lock, Unlock, Link2 } from 'lucide-react';
 import axios from 'axios';
 import TimezoneSelector from '../TimezoneSelector';
-import { generateAssignmentSlots, getSlotDisplayTime, getSavedTimezone } from '../../utils/timezone';
+import { generateAssignmentSlots, getSlotDisplayTime, getSavedTimezone, TimeSlotScheme } from '../../utils/timezone';
 
 interface AssignedPlayer {
   id: number;
@@ -44,7 +44,9 @@ const generateTimeSlots = generateAssignmentSlots;
 const PLAYER_CARD_CLASS = 'bg-accent/15 border-accent/40 text-accent';
 
 // Draggable player card
-function DraggablePlayer({ player, sourceSlot, onToggleLock }: { player: AssignedPlayer; sourceSlot: string; onToggleLock?: (player: AssignedPlayer, slot: string) => void }) {
+function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { player: AssignedPlayer; sourceSlot: string; onToggleLock?: (player: AssignedPlayer, slot: string) => void; timezone?: string }) {
+  const { t } = useTranslation();
+  const [showTooltip, setShowTooltip] = useState(false);
   const dragId = `player-${player.player_id}-${sourceSlot}`;
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: dragId,
@@ -58,6 +60,8 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock }: { player: Assigne
     opacity: isDragging ? 0.3 : 1,
   };
 
+  const preferredTimes = (player as any).preferred_times as string[] | undefined;
+
   return (
     <div
       ref={setNodeRef}
@@ -67,7 +71,36 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock }: { player: Assigne
       className={`p-3 border-2 rounded-lg cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow relative ${
         player.is_sticky ? 'bg-amber-500/15 border-amber-500/50 text-accent' : PLAYER_CARD_CLASS
       }`}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
     >
+      {/* Tooltip */}
+      {showTooltip && !isDragging && (
+        <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-3 bg-dark-bg border border-accent/40 rounded-lg shadow-xl text-sm pointer-events-none">
+          <div className="font-semibold text-accent truncate">
+            {player.alliance && <span>[{player.alliance}] </span>}{player.game_name}
+          </div>
+          <div className="text-xs text-theme-dim mt-1">FID: {player.fid} • {(player.points ?? 0).toLocaleString()} pts</div>
+          {preferredTimes && preferredTimes.length > 0 ? (
+            <div className="mt-2 border-t border-theme-border pt-2">
+              <div className="text-xs font-medium text-theme-dim mb-1">{t('admin.requestedTimes', 'Requested Times')}:</div>
+              <div className="flex flex-wrap gap-1">
+                {preferredTimes.map((time) => (
+                  <span key={time} className="text-xs px-1.5 py-0.5 bg-accent/15 text-accent rounded">
+                    {timezone ? getSlotDisplayTime(time, timezone) : time}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-2 border-t border-theme-border pt-2 text-xs text-theme-dim italic">
+              {t('admin.noTimePref', 'No time preferences set')}
+            </div>
+          )}
+          {/* Arrow */}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-accent/40" />
+        </div>
+      )}
       <div className="flex items-center gap-2">
         <div className="relative flex-shrink-0">
           {player.avatar_image ? (
@@ -153,12 +186,13 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
 }
 
 // Droppable time slot container
-function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer }: {
+function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer, sharedNote }: {
   slotId: string;
   displayTime: string;
   children: React.ReactNode;
   isOver: boolean;
   hasPlayer: boolean;
+  sharedNote?: string | null;
 }) {
   const { setNodeRef } = useDroppable({ id: `slot-${slotId}` });
 
@@ -166,7 +200,9 @@ function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer }: {
     <div
       ref={setNodeRef}
       className={`border-2 border-dashed rounded-lg p-3 min-h-[100px] transition-colors ${
-        isOver && !hasPlayer
+        sharedNote
+          ? 'border-amber-500/50 bg-amber-500/5'
+          : isOver && !hasPlayer
           ? 'border-accent bg-accent/10'
           : isOver && hasPlayer
           ? 'border-danger bg-danger/10'
@@ -177,6 +213,12 @@ function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer }: {
         {displayTime}
         {slotId === '23:50+' && <span className="text-xs opacity-60 ml-1">(+1d)</span>}
       </div>
+      {sharedNote && (
+        <div className="flex items-start gap-1 text-[11px] leading-tight text-amber-400/90 mb-2">
+          <Link2 className="w-3 h-3 mt-0.5 shrink-0" />
+          <span>{sharedNote}</span>
+        </div>
+      )}
       {children}
     </div>
   );
@@ -212,6 +254,7 @@ export default function AssignmentManagement() {
   const [researchDay, setResearchDay] = useState<'tuesday' | 'friday'>('tuesday');
   const [timezone, setTimezone] = useState(getSavedTimezone);
   const [publishedDays, setPublishedDays] = useState<string[]>([]);
+  const [timeSlotScheme, setTimeSlotScheme] = useState<TimeSlotScheme>('exact_alignment');
 
   const DAY_TABS = [
     { key: 'monday', label: 'Monday - Construction' },
@@ -223,11 +266,28 @@ export default function AssignmentManagement() {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  const timeSlots = generateTimeSlots();
+  const timeSlots = generateTimeSlots(timeSlotScheme);
+
+  // Shared 23:50 boundary: in max_slots mode, adjacent active days share the
+  // same real-time slot (Mon 23:50+ == Tue 23:50; Thu 23:50+ == Fri 23:50).
+  const sharedBoundary = (() => {
+    if (timeSlotScheme !== 'max_slots') return null;
+    const dayName = (k: string) => t(`admin.${k}`).split(' - ')[0];
+    if (selectedDay === 'monday' && researchDay === 'tuesday')
+      return { slot: '23:50+', note: t('admin.sharedSlotNote', { day: dayName('tuesday') }) };
+    if (selectedDay === 'tuesday' && researchDay === 'tuesday')
+      return { slot: '23:50', note: t('admin.sharedSlotNote', { day: dayName('monday') }) };
+    if (selectedDay === 'thursday' && researchDay === 'friday')
+      return { slot: '23:50+', note: t('admin.sharedSlotNote', { day: dayName('friday') }) };
+    if (selectedDay === 'friday' && researchDay === 'friday')
+      return { slot: '23:50', note: t('admin.sharedSlotNote', { day: dayName('thursday') }) };
+    return null;
+  })();
 
   useEffect(() => {
     fetchResearchDay();
     fetchPublishedDays();
+    fetchTimeSlotScheme();
   }, []);
 
   useEffect(() => {
@@ -254,6 +314,18 @@ export default function AssignmentManagement() {
       setPublishedDays(response.data.published_days || []);
     } catch {
       // ignore
+    }
+  };
+
+  const fetchTimeSlotScheme = async () => {
+    try {
+      const response = await axios.get('/api/settings/time-slot-scheme');
+      const scheme = response.data.time_slot_scheme;
+      if (scheme === 'exact_alignment' || scheme === 'max_slots') {
+        setTimeSlotScheme(scheme);
+      }
+    } catch {
+      // Default to exact_alignment on error
     }
   };
 
@@ -294,11 +366,13 @@ export default function AssignmentManagement() {
       });
       // Enforce 1 player per slot on load
       const cleaned: Assignments = {};
-      for (const [slot, players] of Object.entries(response.data as Assignments)) {
+      const rawAssignments = (response.data.assignments || {}) as Assignments;
+      for (const [slot, players] of Object.entries(rawAssignments)) {
         cleaned[slot] = (players || []).slice(0, 1);
       }
       setAssignments(cleaned);
-      setUnassignedPlayers([]);
+      // Unassigned players are now returned on load, not just after auto-assign
+      setUnassignedPlayers(response.data.unassigned || []);
     } catch (err: any) {
       setError(err.response?.data?.error || t('admin.fetchAssignmentsError'));
     } finally {
@@ -571,6 +645,7 @@ export default function AssignmentManagement() {
                       displayTime={getSlotDisplayTime(slot, timezone)}
                       isOver={overSlotId === slot}
                       hasPlayer={hasPlayer && activePlayer?.player_id !== slotPlayers[0]?.player_id}
+                      sharedNote={sharedBoundary?.slot === slot ? sharedBoundary.note : null}
                     >
                       <div className="space-y-2">
                         {slotPlayers.slice(0, 1).map((player) => (
@@ -579,6 +654,7 @@ export default function AssignmentManagement() {
                             player={player}
                             sourceSlot={slot}
                             onToggleLock={handleToggleLock}
+                            timezone={timezone}
                           />
                         ))}
                       </div>
@@ -600,6 +676,7 @@ export default function AssignmentManagement() {
                       <DraggablePlayer
                         player={player}
                         sourceSlot="unassigned"
+                        timezone={timezone}
                       />
                       {player.preferred_times && player.preferred_times.length > 0 && (
                         <div className="text-xs text-theme-dim mt-1 pl-2">
