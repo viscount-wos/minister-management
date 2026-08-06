@@ -8,7 +8,6 @@ A full-stack web application for managing Whiteout Survival SVS (State vs State)
 
 ### Player Features
 - 3-page submission form (Information > Time Preferences > Review)
-- **WOS API integration** - "Load from WOS" button auto-fills game name, avatar, and furnace level
 - **Alliance tag** - 3-character tag displayed as `[TAG]` next to player names
 - Update submission using FID lookup
 - FID required for all submissions
@@ -128,7 +127,6 @@ Note: 1 day = 1440 minutes
 |--------|------|-------------|
 | POST | `/api/player/submit` | Submit or update player info |
 | GET | `/api/player/:fid` | Get player by FID |
-| POST | `/api/player/wos-lookup` | Lookup player from WOS API (returns name, avatar, furnace level) |
 | GET | `/health` | Health check |
 
 ### Admin (require Authorization header)
@@ -147,7 +145,7 @@ Note: 1 day = 1440 minutes
 ## Database Schema
 
 ### players
-`id`, `fid` (unique, required), `game_name`, `alliance` (3-char tag), `construction_speedups_days`, `research_speedups_days`, `troop_training_speedups_days`, `general_speedups_days`, `fire_crystals`, `refined_fire_crystals`, `fire_crystal_shards`, `avatar_image` (URL from WOS API), `stove_lv` (furnace level), `stove_lv_content` (furnace icon URL), `created_at`, `updated_at`
+`id`, `fid` (unique, required), `game_name`, `alliance` (3-char tag), `construction_speedups_days`, `research_speedups_days`, `troop_training_speedups_days`, `general_speedups_days`, `fire_crystals`, `refined_fire_crystals`, `fire_crystal_shards`, `avatar_image`, `stove_lv`, `stove_lv_content` (all legacy, no longer populated), `created_at`, `updated_at`
 
 ### time_preferences
 `id`, `player_id` (FK → players), `time_slot`

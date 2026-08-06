@@ -286,7 +286,7 @@ gcloud builds submit --tag gcr.io/$PROJECT_ID/minister-management
 ### Step 5: Deploy
 
 ```bash
-gcloud run deploy minister-management \
+gcloud run deploy ministry-management \
     --image gcr.io/$PROJECT_ID/minister-management \
     --platform managed \
     --region us-central1 \
@@ -307,7 +307,7 @@ gcloud run deploy minister-management \
 
 ```bash
 gcloud run domain-mappings create \
-    --service minister-management \
+    --service ministry-management \
     --domain your-domain.com \
     --region us-central1
 ```
@@ -316,12 +316,17 @@ Follow the DNS instructions provided (typically a CNAME to `ghs.googlehosted.com
 
 ### Updating
 
+The live deployment is done straight from source — this rebuilds the frontend fresh via
+the multi-stage Dockerfile and preserves the existing config (secrets, GCS volume,
+min-instances), so none of the flags from Step 5 need repeating:
+
 ```bash
-gcloud builds submit --tag gcr.io/$PROJECT_ID/minister-management
-gcloud run deploy minister-management \
-    --image gcr.io/$PROJECT_ID/minister-management \
-    --region us-central1
+gcloud run deploy ministry-management --source . --region us-central1
 ```
+
+> **Service name:** the Cloud Run service is `ministry-management` (with a "y").
+> `minister-management` is only the container image / local Docker tag — using it as the
+> service name fails with "Cannot find service".
 
 ---
 
@@ -427,7 +432,7 @@ curl http://localhost:8080/health
 docker compose logs -f
 
 # Cloud Run
-gcloud run services logs read minister-management --region=us-central1
+gcloud run services logs read ministry-management --region=us-central1
 
 # systemd
 journalctl -u minister -f
@@ -446,7 +451,7 @@ journalctl -u minister -f
 
 **Cloud Run crash loop (429 errors):**
 - Set `--min-instances 1` to prevent aggressive cold-start scaling
-- Check logs: `gcloud run services logs read minister-management`
+- Check logs: `gcloud run services logs read ministry-management`
 - Verify GCS FUSE volume mount is configured
 
 **Cloud Run database errors:**

@@ -45,7 +45,6 @@ export default function PlayerGuide() {
                 <h3 className="text-lg font-semibold text-theme-text mb-2">{t('playerGuide.step1Header')}</h3>
                 <ul className="list-disc list-inside space-y-1 ml-2">
                   <li>{t('playerGuide.step1Fid')}</li>
-                  <li>{t('playerGuide.step1Wos')}</li>
                   <li>{t('playerGuide.step1Alliance')}</li>
                   <li>{t('playerGuide.step1Speedups')}</li>
                   <li>{t('playerGuide.step1General')}</li>

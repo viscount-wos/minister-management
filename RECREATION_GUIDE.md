@@ -678,59 +678,6 @@ def get_player(fid):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/player/wos-lookup', methods=['POST'])
-def wos_lookup():
-    """Look up player info from the WOS game API."""
-    try:
-        data = request.json
-        fid = data.get('fid', '').strip()
-
-        if not fid:
-            return jsonify({'error': 'FID is required'}), 400
-
-        # Build signed request for WOS API
-        secret = 'tB87#kPtkxqOS2'
-        ts = str(int(time_module.time() * 1e9))
-        form_data = f'fid={fid}&time={ts}'
-        sign = hashlib.md5((form_data + secret).encode()).hexdigest()
-        body = f'sign={sign}&{form_data}'
-
-        response = http_requests.post(
-            'https://wos-giftcode-api.centurygame.com/api/player',
-            data=body,
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Origin': 'https://wos-giftcode.centurygame.com',
-                'Referer': 'https://wos-giftcode.centurygame.com/',
-            },
-            timeout=10
-        )
-
-        result = response.json()
-
-        if result.get('code') != 0:
-            return jsonify({'error': 'Player not found in WOS'}), 404
-
-        wos_data = result['data']
-        return jsonify({
-            'success': True,
-            'fid': str(wos_data['fid']),
-            'nickname': wos_data.get('nickname', ''),
-            'kid': wos_data.get('kid'),
-            'stove_lv': wos_data.get('stove_lv'),
-            'stove_lv_content': wos_data.get('stove_lv_content', ''),
-            'avatar_image': wos_data.get('avatar_image', ''),
-        }), 200
-
-    except http_requests.exceptions.Timeout:
-        return jsonify({'error': 'WOS API timed out'}), 504
-    except http_requests.exceptions.RequestException as e:
-        return jsonify({'error': f'Failed to reach WOS API: {str(e)}'}), 502
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 @app.route('/api/settings/research-day', methods=['GET'])
 def get_research_day_setting():
     """Get the current research day setting (public endpoint)."""
@@ -1518,7 +1465,7 @@ Due to the size of the frontend source files, they are provided as references to
 | `src/components/LanguageSelector.tsx` | 5-language switcher with RTL toggle | 37 |
 | `src/components/TimezoneSelector.tsx` | Timezone dropdown with Globe icon | 31 |
 | `src/pages/Home.tsx` | Landing page with published schedule links | 117 |
-| `src/pages/PlayerForm.tsx` | 5-step submission form with WOS lookup | 617 |
+| `src/pages/PlayerForm.tsx` | 5-step submission form | 617 |
 | `src/pages/UpdateSubmission.tsx` | FID-based update form with tabbed time prefs | 415 |
 | `src/pages/AdminLogin.tsx` | Password login page | 88 |
 | `src/pages/AdminDashboard.tsx` | Admin tabs (Players/Assignments) | 86 |
@@ -1698,7 +1645,6 @@ points = troop_training_speedups_days (raw value, 1 point per day)
 | `POST` | `/api/player/submit` | Submit/update player info |
 | `POST` | `/api/player/check-duplicate` | Check if FID/name exists |
 | `GET` | `/api/player/<fid>` | Get player by FID |
-| `POST` | `/api/player/wos-lookup` | Lookup player from WOS game API |
 | `GET` | `/api/settings/research-day` | Get current research day |
 | `GET` | `/api/settings/show-fire-crystals` | Get fire crystal visibility |
 | `GET` | `/api/settings/published-days` | Get array of published days |
@@ -1747,9 +1693,9 @@ points = troop_training_speedups_days (raw value, 1 point per day)
 | fire_crystals | INTEGER | Default 0 |
 | refined_fire_crystals | INTEGER | Default 0 |
 | fire_crystal_shards | INTEGER | Default 0 |
-| avatar_image | TEXT | URL from WOS API |
-| stove_lv | INTEGER | Furnace level from WOS API |
-| stove_lv_content | TEXT | Furnace icon URL from WOS API |
+| avatar_image | TEXT | Legacy: avatar URL from the old WOS lookup, no longer populated |
+| stove_lv | INTEGER | Legacy: furnace level from the old WOS lookup, no longer populated |
+| stove_lv_content | TEXT | Legacy: furnace icon URL from the old WOS lookup, no longer populated |
 | alliance | TEXT | 3-char max alliance tag |
 | timezone | TEXT | Player's preferred timezone |
 | created_at | TIMESTAMP | Auto |
@@ -1863,18 +1809,23 @@ docker compose up --build
 
 ---
 
-## WOS API Integration
+## WOS API Integration (removed August 2026)
 
-The app integrates with the Whiteout Survival gift code API to auto-fill player information:
+The app used to auto-fill player name, avatar and furnace level from the Whiteout
+Survival gift code API via `POST https://wos-giftcode-api.centurygame.com/api/player`.
 
-**Endpoint:** `POST https://wos-giftcode-api.centurygame.com/api/player`
+Century Games reworked the Gift Code Center in July 2026 — it no longer logs the player
+in behind a captcha, it just takes a Player ID plus a State and redeems in a single POST.
+`/api/player` and `/api/captcha` were deleted along with that flow and now return 404 on
+every method, while `/api/gift_code` and `/api/gift_code_config` still answer. No public
+endpoint resolves a FID into nickname / avatar / furnace level any more, so the
+"Load from WOS" button was removed and players type their own game name.
 
-**Authentication:**
-- Uses a shared secret: `tB87#kPtkxqOS2`
-- Request body: `sign=<md5>&fid=<fid>&time=<nanosecond_timestamp>`
-- Sign is MD5 of `fid=<fid>&time=<ts>` + secret
+Request signing itself is unchanged, should an endpoint ever come back: sort the keys,
+URL-encode the values, join as `k=v&k=v`, and prepend `sign=md5(canonical + "tB87#kPtkxqOS2")`.
 
-**Returns:** nickname, avatar image URL, furnace level, furnace icon URL
+`backend/test_wos_api.py` probes the live API and reports whether a usable lookup
+endpoint exists — run it before assuming this is still true.
 
 ---
 

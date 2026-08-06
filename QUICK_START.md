@@ -64,7 +64,7 @@ npm run dev
 
 1. Open http://localhost:8080 (Docker) or http://localhost:5173 (dev)
 2. Click **Submit New Application** and create a test player
-   - Enter your FID and click **Load from WOS** to auto-fill name and avatar
+   - Enter your FID and game name
    - Add your alliance tag (3 chars) and resource amounts
 3. Click **Minister Administration** and log in with your password
 4. Go to the **Assignments** tab and try **Auto Assign**

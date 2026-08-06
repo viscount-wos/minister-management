@@ -104,7 +104,8 @@ Located in: `backend/app.py` → `/api/admin/assignments/auto-assign`
 - `game_name`, `alliance` (3-char tag, optional)
 - Speedups: `construction_speedups_days`, `research_speedups_days`, `troop_training_speedups_days`, `general_speedups_days`
 - Resources: `fire_crystals`, `refined_fire_crystals`, `fire_crystal_shards`
-- WOS API data: `avatar_image` (URL), `stove_lv` (furnace level int), `stove_lv_content` (furnace icon URL)
+- Legacy WOS API data: `avatar_image` (URL), `stove_lv` (furnace level int), `stove_lv_content` (furnace icon URL)
+  - Columns retained so pre-2026-08 rows still render their avatar/furnace icon; nothing populates them any more (see v1.3.0)
 - Timestamps: `created_at`, `updated_at`
 
 **time_preferences:**
@@ -184,7 +185,6 @@ docker compose up --build
 ### Public Endpoints
 - `POST /api/player/submit` - Submit/update player info
 - `GET /api/player/<fid>` - Get player by FID
-- `POST /api/player/wos-lookup` - Lookup player from WOS API (returns nickname, avatar, furnace level)
 - `GET /health` - Health check
 
 ### Admin Endpoints (require Authorization header)
@@ -199,6 +199,13 @@ docker compose up --build
 - `GET /api/admin/export` - Export all-day Excel workbook (Monday, Tuesday, Thursday tabs + Unassigned)
 
 ## Common Tasks
+
+### Checking whether the WOS player lookup is available again
+
+`backend/test_wos_api.py` probes the live gift-code API and reports whether a
+player-lookup endpoint exists. Run `python backend/test_wos_api.py [FID] [STATE]`
+(exit 0 = a usable lookup exists, 1 = not). See v1.3.0 for why the feature was
+removed.
 
 ### Adding a New Language
 1. Edit `frontend/src/i18n.ts`
@@ -274,6 +281,19 @@ docker compose up --build
 - Check mobile responsiveness
 
 ### Deploying to Cloud Run
+Production is project `viscount-wos-tools`, region `us-central1`, service **`ministry-management`**
+(with a "y" — `minister-management` is only the container image name and fails as a service name),
+served at `ministry.hunterisadonkey.com`. Deploy from source:
+
+```bash
+gcloud run deploy ministry-management --source . --region us-central1
+```
+
+This rebuilds the frontend fresh via the multi-stage Dockerfile and preserves existing
+config (secrets, GCS FUSE volume, min-instances). The SQLite DB lives on the GCS bucket
+`viscount-wos-tools-ministry-data` and survives redeploys — spot-check player data after
+any infra event.
+
 See `DEPLOYMENT.md` for full instructions covering bare metal, Docker, Cloud Run, and other platforms.
 
 ## Deployment Lessons Learned (Cloud Run + GCS FUSE)
@@ -372,6 +392,24 @@ GCS FUSE volume mounts require `--execution-environment gen2`. Gen1 does not sup
 
 ## Version History
 
+- **v1.3.0** (August 2026): Removed "Load from WOS"
+  - Century Games reworked the Gift Code Center in July 2026: it no longer logs the
+    player in behind a captcha, it just takes a Player ID + State and redeems in one POST.
+    `POST /api/player` and `POST /api/captcha` were deleted from
+    `wos-giftcode-api.centurygame.com` as part of that change (both now 404 on every
+    method; `/api/gift_code` and `/api/gift_code_config` still answer, so the API itself
+    is up). Request signing is unchanged — the secret `tB87#kPtkxqOS2` and the
+    sort-keys/urlencode-values/`md5(canonical + secret)` scheme still validate.
+  - No public endpoint resolves a FID into nickname / avatar / furnace level any more,
+    so the button could not be repaired and was removed. Players type their own game name.
+  - Removed: `POST /api/player/wos-lookup`, the "Load from WOS" button and avatar
+    previews in `PlayerForm.tsx`, the `loadFromWOS` / `enterFidFirst` / `wosLookupFailed` /
+    `playerGuide.step1Wos` translation keys, and `WOS_API_SECRET`
+  - Kept: the `avatar_image`, `stove_lv`, `stove_lv_content` DB columns and the admin/
+    assignment UI that renders them, so players who submitted before this change keep
+    their avatar and furnace icon
+  - Added `backend/test_wos_api.py` — re-run it if Century Games ever restores a lookup endpoint
+
 - **v1.2.0** (July 2026): Time Slot Schemes & Scheduling Fixes
   - **Time slot scheme** setting (`exact_alignment` default vs `max_slots`), selectable in the Settings tab
     - `exact_alignment`: hour-aligned slots (00:00, 00:30 … 23:30, 48/day)
@@ -404,6 +442,6 @@ GCS FUSE volume mounts require `--execution-environment gen2`. Gen1 does not sup
 
 ---
 
-**Last Updated**: March 6, 2026
+**Last Updated**: August 6, 2026
 **Maintained By**: State Technical Administrator
 **Purpose**: Ministry assignment automation for Whiteout Survival SVS events

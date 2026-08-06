@@ -1,10 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 import os
-import hashlib
-import time as time_module
 import logging
-import requests as http_requests
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 import openpyxl
@@ -39,9 +36,6 @@ CORS(app)
 # Admin credentials
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 MINISTER_PASSWORD = os.getenv('MINISTER_PASSWORD', 'minister123')
-
-# WOS API secret (move to env var for security)
-WOS_API_SECRET = os.getenv('WOS_API_SECRET', 'tB87#kPtkxqOS2')
 
 # Valid auth tokens
 VALID_TOKENS = {'admin-token', 'minister-token'}
@@ -175,59 +169,6 @@ def get_player(fid):
         if player:
             return jsonify(player), 200
         return jsonify({'error': 'Player not found'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/player/wos-lookup', methods=['POST'])
-def wos_lookup():
-    """Look up player info from the WOS game API."""
-    try:
-        data = request.json
-        fid = data.get('fid', '').strip()
-
-        if not fid:
-            return jsonify({'error': 'FID is required'}), 400
-
-        # Build signed request for WOS API
-        secret = WOS_API_SECRET
-        ts = str(int(time_module.time() * 1e9))
-        form_data = f'fid={fid}&time={ts}'
-        sign = hashlib.md5((form_data + secret).encode()).hexdigest()
-        body = f'sign={sign}&{form_data}'
-
-        response = http_requests.post(
-            'https://wos-giftcode-api.centurygame.com/api/player',
-            data=body,
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Origin': 'https://wos-giftcode.centurygame.com',
-                'Referer': 'https://wos-giftcode.centurygame.com/',
-            },
-            timeout=10
-        )
-
-        result = response.json()
-
-        if result.get('code') != 0:
-            return jsonify({'error': 'Player not found in WOS'}), 404
-
-        wos_data = result['data']
-        return jsonify({
-            'success': True,
-            'fid': str(wos_data['fid']),
-            'nickname': wos_data.get('nickname', ''),
-            'kid': wos_data.get('kid'),
-            'stove_lv': wos_data.get('stove_lv'),
-            'stove_lv_content': wos_data.get('stove_lv_content', ''),
-            'avatar_image': wos_data.get('avatar_image', ''),
-        }), 200
-
-    except http_requests.exceptions.Timeout:
-        return jsonify({'error': 'WOS API timed out'}), 504
-    except http_requests.exceptions.RequestException as e:
-        return jsonify({'error': f'Failed to reach WOS API: {str(e)}'}), 502
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

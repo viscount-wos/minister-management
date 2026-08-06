@@ -20,8 +20,7 @@ After the deadline, the "Submit New Application" card is grayed out and the form
 2. **Click "Submit New Application"** (only available while applications are open)
 3. **Step 1: Enter Your Information**
    - Player ID/FID (required - this is your unique identifier, you'll need it to update later)
-   - Click **"Load from WOS"** to auto-fill your game name, avatar, and furnace level from the WOS API
-   - Game Name (required - auto-filled if you use Load from WOS, but editable)
+   - Game Name (required)
    - Alliance Tag (required, 3 characters max - displayed as `[TAG]` next to your name)
    - All your speedups in days
    - Your fire crystals, refined fire crystals, and shards (fire crystal fields may be hidden depending on admin settings)

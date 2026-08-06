@@ -6,7 +6,6 @@ A web application for managing ministry assignments during State vs State (SVS) 
 
 ### Player Features
 - **Player Submission Form** - 3-step form for players to submit speedups, resources, and time preferences (FID required)
-- **WOS API Integration** - "Load from WOS" button auto-fills player name, avatar, and furnace level from FID
 - **Alliance Tag** - 3-character alliance tag (required) displayed as `[TAG]` next to player names
 - **Player Updates** - Players update their submissions anytime using their FID
 - **Heat Map on Time Slots** - Color-coded time slot selection showing demand (blue=low, yellow=medium, red=high)
