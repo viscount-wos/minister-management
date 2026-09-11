@@ -15,6 +15,7 @@ import { Sparkles, Download, AlertCircle, Globe, EyeOff, Lock, Unlock, Link2 } f
 import axios from 'axios';
 import TimezoneSelector from '../TimezoneSelector';
 import { generateAssignmentSlots, getSlotDisplayTime, getSavedTimezone, TimeSlotScheme } from '../../utils/timezone';
+import { activeDaysInOrder } from '../../utils/days';
 
 interface AssignedPlayer {
   id: number;
@@ -256,11 +257,7 @@ export default function AssignmentManagement() {
   const [publishedDays, setPublishedDays] = useState<string[]>([]);
   const [timeSlotScheme, setTimeSlotScheme] = useState<TimeSlotScheme>('exact_alignment');
 
-  const DAY_TABS = [
-    { key: 'monday', label: 'Monday - Construction' },
-    { key: researchDay, label: researchDay === 'tuesday' ? 'Tuesday - Research' : 'Friday - Research' },
-    { key: 'thursday', label: 'Thursday - Troop Training' },
-  ];
+  const DAY_TABS = activeDaysInOrder(researchDay);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -557,15 +554,15 @@ export default function AssignmentManagement() {
       <div className="flex gap-4 mb-6 border-b border-theme-border pb-2">
         {DAY_TABS.map((day) => (
           <button
-            key={day.key}
-            onClick={() => setSelectedDay(day.key)}
+            key={day}
+            onClick={() => setSelectedDay(day)}
             className={`px-4 py-2 font-medium rounded-lg transition-colors ${
-              selectedDay === day.key
+              selectedDay === day
                 ? 'bg-accent text-dark-bg'
                 : 'text-theme-dim hover:text-theme-text'
             }`}
           >
-            {t(`admin.${day.key}`)}
+            {t(`admin.${day}`)}
           </button>
         ))}
       </div>

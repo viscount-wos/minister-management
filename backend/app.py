@@ -494,6 +494,20 @@ def remap_assignments_between_schemes(old_scheme, new_scheme):
     return remapped
 
 
+WEEKDAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+
+def sort_days_by_week(days):
+    """Order weekday names Monday-first, so schedules read in calendar order.
+
+    Sorting these names alphabetically puts Thursday before Tuesday. Unknown
+    values sort last rather than being dropped.
+    """
+    return sorted(days, key=lambda d: (
+        WEEKDAY_ORDER.index(d) if d in WEEKDAY_ORDER else len(WEEKDAY_ORDER), d
+    ))
+
+
 def _day_type_for(day, research_day):
     """Map a weekday to its time-preference bucket."""
     if day == 'monday':
@@ -1037,8 +1051,9 @@ def publish_schedule():
         current = get_setting('published_days', '')
         days_set = set(d for d in current.split(',') if d)
         days_set.add(day)
-        set_setting('published_days', ','.join(sorted(days_set)))
-        return jsonify({'success': True, 'published_days': sorted(days_set)}), 200
+        ordered = sort_days_by_week(days_set)
+        set_setting('published_days', ','.join(ordered))
+        return jsonify({'success': True, 'published_days': ordered}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1057,8 +1072,9 @@ def unpublish_schedule():
         current = get_setting('published_days', '')
         days_set = set(d for d in current.split(',') if d)
         days_set.discard(day)
-        set_setting('published_days', ','.join(sorted(days_set)))
-        return jsonify({'success': True, 'published_days': sorted(days_set)}), 200
+        ordered = sort_days_by_week(days_set)
+        set_setting('published_days', ','.join(ordered))
+        return jsonify({'success': True, 'published_days': ordered}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1116,7 +1132,7 @@ def get_published_schedule(day):
 def get_published_days_setting():
     """Get which days are currently published (public endpoint)."""
     published_days = get_setting('published_days', '')
-    days_list = [d for d in published_days.split(',') if d]
+    days_list = sort_days_by_week(d for d in published_days.split(',') if d)
     return jsonify({'published_days': days_list}), 200
 
 

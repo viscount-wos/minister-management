@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FileText, Edit, Shield, Calendar, HelpCircle, Clock } from 'lucide-react';
 import axios from 'axios';
+import { sortDaysByWeek } from '../utils/days';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function Home() {
 
   useEffect(() => {
     axios.get('/api/settings/published-days')
-      .then(res => setPublishedDays(res.data.published_days || []))
+      .then(res => setPublishedDays(sortDaysByWeek(res.data.published_days || [])))
       .catch(() => {});
 
     axios.get('/api/settings/state-number')

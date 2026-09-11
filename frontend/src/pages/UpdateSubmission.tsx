@@ -5,6 +5,7 @@ import { Search, ArrowLeft, Save, AlertCircle, CheckCircle } from 'lucide-react'
 import axios from 'axios';
 import TimezoneSelector from '../components/TimezoneSelector';
 import { getSavedTimezone, generatePlayerTimeSlots, getTimezoneAbbr, formatTimeInTimezone } from '../utils/timezone';
+import { activeDaysInOrder } from '../utils/days';
 
 interface PlayerData {
   id?: number;
@@ -220,9 +221,7 @@ export default function UpdateSubmission() {
           <div className="space-y-6">
             {/* Current Assignments */}
             {playerAssignments !== null && (() => {
-              const dayOrder = researchDay === 'friday'
-                ? ['monday', 'friday', 'thursday'] as const
-                : ['monday', 'tuesday', 'thursday'] as const;
+              const dayOrder = activeDaysInOrder(researchDay);
               const dayLabels: Record<string, string> = {
                 monday: t('admin.monday'),
                 tuesday: t('admin.tuesday'),
