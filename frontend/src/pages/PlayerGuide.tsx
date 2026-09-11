@@ -78,15 +78,15 @@ export default function PlayerGuide() {
               <p>{t('playerGuide.heatmapBody')}</p>
               <div className="flex flex-wrap gap-3 mt-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-blue-500/40 border border-blue-400/60"></div>
+                  <div className="w-6 h-6 rounded bg-heat-low/40 border border-heat-low/70"></div>
                   <span className="text-sm">{t('playerGuide.heatmapBlue')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-yellow-500/40 border border-yellow-400/60"></div>
+                  <div className="w-6 h-6 rounded bg-heat-mid/40 border border-heat-mid/70"></div>
                   <span className="text-sm">{t('playerGuide.heatmapYellow')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-red-500/40 border border-red-400/60"></div>
+                  <div className="w-6 h-6 rounded bg-heat-high/40 border border-heat-high/70"></div>
                   <span className="text-sm">{t('playerGuide.heatmapRed')}</span>
                 </div>
               </div>

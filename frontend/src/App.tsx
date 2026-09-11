@@ -8,7 +8,9 @@ import AdminDashboard from './pages/AdminDashboard';
 import PublishedSchedule from './pages/PublishedSchedule';
 import PlayerGuide from './pages/PlayerGuide';
 import AdminGuide from './pages/AdminGuide';
+import Changelog from './pages/Changelog';
 import LanguageSelector from './components/LanguageSelector';
+import ThemeSelector from './components/ThemeSelector';
 
 function App() {
   const { i18n } = useTranslation();
@@ -19,7 +21,10 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
-        <header className="w-full py-3 px-4 flex justify-end">
+        {/* Both selectors share one wrapping row so they stack tidily on a
+            phone instead of forcing the header wider than the screen. */}
+        <header className="w-full py-3 px-4 flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
+          <ThemeSelector />
           <LanguageSelector />
         </header>
         <div className="flex-1">
@@ -32,6 +37,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/guide" element={<PlayerGuide />} />
             <Route path="/admin/guide" element={<AdminGuide />} />
+            <Route path="/changelog" element={<Changelog />} />
           </Routes>
         </div>
         <footer className="mt-auto pb-4 text-center">

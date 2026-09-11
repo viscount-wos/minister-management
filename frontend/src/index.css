@@ -2,6 +2,110 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * ---------------------------------------------------------------------------
+ * Theme tokens
+ * ---------------------------------------------------------------------------
+ * Values are space-separated RGB channels rather than hex, because Tailwind's
+ * <alpha-value> placeholder needs channels to build tinted utilities such as
+ * `bg-accent/20`. See tailwind.config.js.
+ *
+ * :root carries Ministry Dark, the default. A theme is applied by stamping
+ * data-theme on <html>; the default stamps nothing. See src/utils/theme.ts.
+ *
+ * Every text pair below was measured against WCAG 2.x: body, muted and accent
+ * text clear AA on both the page ground and cards, and borders clear the 3:1
+ * non-text threshold so panel edges stay visible.
+ */
+:root {
+  color-scheme: dark;
+
+  --c-dark-bg: 15 25 35;              /* #0f1923 */
+  --c-dark-card: 26 39 51;            /* #1a2733 */
+  --c-dark-card-hover: 31 48 64;      /* #1f3040 */
+  --c-dark-input: 20 32 44;           /* #14202c */
+
+  --c-theme-text: 224 230 237;        /* #e0e6ed */
+  --c-theme-dim: 136 153 166;         /* #8899a6 */
+  --c-theme-border: 99 118 138;       /* #63768a - raised from #2d3e4f for 3:1 */
+
+  --c-accent: 232 166 57;             /* #e8a639 */
+  --c-accent-dim: 201 139 46;         /* #c98b2e */
+  --c-accent-light: 240 192 96;       /* #f0c060 */
+
+  --c-success: 46 204 113;            /* #2ecc71 */
+  --c-success-dark: 39 174 96;        /* #27ae60 */
+  --c-danger: 240 104 90;             /* #f0685a - raised from #e74c3c for AA */
+  --c-danger-dark: 217 83 74;         /* #d9534a */
+  --c-warning: 243 156 18;            /* #f39c12 */
+  --c-warning-dark: 214 137 16;       /* #d68910 */
+
+  --c-heat-low: 74 143 214;           /* #4a8fd6 */
+  --c-heat-mid: 217 154 43;           /* #d99a2b */
+  --c-heat-high: 224 97 86;           /* #e06156 */
+}
+
+/* Reading: warm light ground, dark non-black text. Follows the dyslexia
+   guidance that avoids both white-paper glare and pure black text. */
+:root[data-theme='reading'] {
+  color-scheme: light;
+
+  --c-dark-bg: 247 243 232;           /* #f7f3e8 */
+  --c-dark-card: 255 252 244;         /* #fffcf4 */
+  --c-dark-card-hover: 241 233 216;   /* #f1e9d8 */
+  --c-dark-input: 255 253 247;        /* #fffdf7 */
+
+  --c-theme-text: 34 48 60;           /* #22303c */
+  --c-theme-dim: 92 102 112;          /* #5c6670 */
+  --c-theme-border: 148 135 111;      /* #94876f */
+
+  --c-accent: 138 90 18;              /* #8a5a12 - bronze; the original gold
+                                         falls to about 2:1 on a light ground */
+  --c-accent-dim: 110 71 16;          /* #6e4710 */
+  --c-accent-light: 148 99 21;        /* #946315 */
+
+  --c-success: 31 107 63;             /* #1f6b3f */
+  --c-success-dark: 23 83 47;         /* #17532f */
+  --c-danger: 163 43 30;              /* #a32b1e */
+  --c-danger-dark: 130 34 22;         /* #822216 */
+  --c-warning: 138 90 18;             /* #8a5a12 */
+  --c-warning-dark: 110 71 16;        /* #6e4710 */
+
+  --c-heat-low: 31 95 143;            /* #1f5f8f */
+  --c-heat-mid: 138 90 18;            /* #8a5a12 */
+  --c-heat-high: 163 43 30;           /* #a32b1e */
+}
+
+/* Low Glare: still dark, but the saturated gold is pulled back to a muted
+   brass that is easier to sit with across a long form. */
+:root[data-theme='low-glare'] {
+  color-scheme: dark;
+
+  --c-dark-bg: 27 34 41;              /* #1b2229 */
+  --c-dark-card: 36 44 52;            /* #242c34 */
+  --c-dark-card-hover: 44 53 62;      /* #2c353e */
+  --c-dark-input: 24 31 38;           /* #181f26 */
+
+  --c-theme-text: 212 216 220;        /* #d4d8dc */
+  --c-theme-dim: 150 160 168;         /* #96a0a8 */
+  --c-theme-border: 109 122 132;      /* #6d7a84 */
+
+  --c-accent: 201 165 92;             /* #c9a55c */
+  --c-accent-dim: 171 138 72;         /* #ab8a48 */
+  --c-accent-light: 220 189 124;      /* #dcbd7c */
+
+  --c-success: 111 185 138;           /* #6fb98a */
+  --c-success-dark: 85 154 112;       /* #559a70 */
+  --c-danger: 221 129 117;            /* #dd8175 */
+  --c-danger-dark: 198 106 94;        /* #c66a5e */
+  --c-warning: 201 165 92;            /* #c9a55c */
+  --c-warning-dark: 171 138 72;       /* #ab8a48 */
+
+  --c-heat-low: 111 159 196;          /* #6f9fc4 */
+  --c-heat-mid: 192 154 82;           /* #c09a52 */
+  --c-heat-high: 207 127 116;         /* #cf7f74 */
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -9,8 +113,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0f1923;
-  color: #e0e6ed;
+  background: rgb(var(--c-dark-bg));
+  color: rgb(var(--c-theme-text));
   min-height: 100vh;
 }
 
@@ -40,31 +144,49 @@ code {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f1923;
+  background: rgb(var(--c-dark-bg));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2d3e4f;
+  background: rgb(var(--c-theme-border));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d5060;
+  background: rgb(var(--c-accent-dim));
 }
 
-/* Number input spinner on dark bg */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+/* Number input spinners are drawn dark by the browser, so they need inverting
+   on the dark themes only. color-scheme handles this on the light theme. */
+:root:not([data-theme='reading']) input[type="number"]::-webkit-inner-spin-button,
+:root:not([data-theme='reading']) input[type="number"]::-webkit-outer-spin-button {
   filter: invert(1);
 }
 
 /* Footer */
 .app-footer {
-  border-top: 1px solid #2d3e4f;
+  border-top: 1px solid rgb(var(--c-theme-border));
   padding: 1.5rem 0 1rem;
   text-align: center;
   font-style: italic;
   font-size: 0.75rem;
-  color: #8899a6;
-  opacity: 0.6;
+  color: rgb(var(--c-theme-dim));
+}
+
+/* Honour a system request for less motion: drop the blanket colour transition
+   above and any hover lift, rather than only easing them. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .hover\:-translate-y-2:hover,
+  .hover\:-translate-y-1:hover {
+    transform: none !important;
+  }
 }

@@ -34,6 +34,8 @@ A web application for managing ministry assignments during State vs State (SVS) 
 
 ### General
 - **9 Languages** - English, Spanish, French, German, Polish, Korean, Chinese, Turkish, Arabic (with RTL support)
+- **3 Colour Themes** - Ministry Dark (default), Reading (warm light), Low Glare; remembered per device
+- **Changelog** - `/changelog`, linked from the home page
 - **Dark Theme** - Navy and gold themed UI
 - **Dockerized** - Multi-stage Docker build for easy deployment
 

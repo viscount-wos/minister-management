@@ -409,30 +409,21 @@ export default function PlayerForm() {
                 const dayHeatmap = heatmapData[dayType] || {};
                 const counts = Object.values(dayHeatmap);
                 const maxCount = counts.length > 0 ? Math.max(...counts) : 0;
-                const getHeatColor = (utcVal: string) => {
+                const getHeatClasses = (utcVal: string) => {
                   const count = dayHeatmap[utcVal] || 0;
-                  if (count === 0 || maxCount === 0) return undefined;
+                  if (count === 0 || maxCount === 0) return '';
                   const ratio = count / maxCount;
-                  if (ratio <= 0.33) return 'rgba(59, 130, 246, 0.25)';
-                  if (ratio <= 0.66) return 'rgba(245, 158, 11, 0.3)';
-                  return 'rgba(239, 68, 68, 0.3)';
-                };
-                const getHeatBorder = (utcVal: string) => {
-                  const count = dayHeatmap[utcVal] || 0;
-                  if (count === 0 || maxCount === 0) return undefined;
-                  const ratio = count / maxCount;
-                  if (ratio <= 0.33) return '2px solid rgba(59, 130, 246, 0.6)';
-                  if (ratio <= 0.66) return '2px solid rgba(245, 158, 11, 0.7)';
-                  return '2px solid rgba(239, 68, 68, 0.7)';
+                  if (ratio <= 0.33) return 'bg-heat-low/25 border-heat-low/60';
+                  if (ratio <= 0.66) return 'bg-heat-mid/30 border-heat-mid/70';
+                  return 'bg-heat-high/30 border-heat-high/70';
                 };
                 return (
                   <>
                     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
                       {timeSlotOptions.map(({ display, utcValue }) => {
                         const isSelected = slots.includes(utcValue);
-                        const heatBg = getHeatColor(utcValue);
-                        const heatBorder = getHeatBorder(utcValue);
                         const count = dayHeatmap[utcValue] || 0;
+                        const heatClasses = isSelected ? '' : getHeatClasses(utcValue);
                         return (
                           <button
                             key={utcValue}
@@ -440,9 +431,10 @@ export default function PlayerForm() {
                             className={`p-3 rounded-lg border-2 transition-all font-medium relative ${
                               isSelected
                                 ? 'bg-accent border-accent text-dark-bg'
-                                : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
+                                : heatClasses
+                                  ? `text-theme-text hover:border-accent ${heatClasses}`
+                                  : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
                             }`}
-                            style={!isSelected && heatBg ? { backgroundColor: heatBg, border: heatBorder } : undefined}
                             title={count > 0 ? `${count} applicant${count !== 1 ? 's' : ''}` : undefined}
                           >
                             {display}

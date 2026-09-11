@@ -131,6 +131,11 @@ Located in: `backend/app.py` → `/api/admin/assignments/auto-assign`
 
 ### 3. Multi-Language Support
 - 9 languages: English, Spanish, French, German, Polish, Korean, Chinese, Turkish, Arabic
+
+### 5. Theming
+- Colours resolve through CSS custom properties; palettes in `src/index.css`
+- Never hardcode a hex or an off-palette Tailwind colour (e.g. `amber-500`) in a component
+- Theme preference is client-side only (`localStorage`), never sent to the server
 - RTL support for Arabic
 - All UI text in `frontend/src/i18n.ts`
 - Language state managed via react-i18next
@@ -392,6 +397,37 @@ GCS FUSE volume mounts require `--execution-environment gen2`. Gen1 does not sup
 
 ## Version History
 
+- **v1.4.0** (September 2026): Themes, accessibility, changelog
+  - **Colour themes**: three user-selectable schemes — `ministry-dark` (default, unchanged),
+    `reading` (warm light ground, dark non-black text, bronze accent) and `low-glare`
+    (dark with the gold desaturated). Chosen in the header; stored in `localStorage`
+    under `preferred_theme`; applied by stamping `data-theme` on `<html>`.
+    The default stamps nothing, so an unknown or missing value falls back to the
+    original scheme. See `frontend/src/utils/theme.ts` and `components/ThemeSelector.tsx`.
+  - **Theme token layer**: `tailwind.config.js` colours now resolve through CSS custom
+    properties (`rgb(var(--c-*) / <alpha-value>)`), with the palettes defined in
+    `src/index.css`. The `<alpha-value>` form is required so tinted utilities like
+    `bg-accent/20` stay correct in every theme. Adding a theme = one more
+    `:root[data-theme='...']` block; no component changes.
+  - Added `heat.low` / `heat.mid` / `heat.high` tokens. The demand heat map previously
+    wrote 12 inline `rgba()` values that no theme could override, and the guide's legend
+    swatches were hand-matched to them in a separate file; both now share the tokens.
+    Note: heat classes must be written as **complete literal strings** in source
+    (`'bg-heat-low/25 border-heat-low/60'`) or Tailwind will not generate them.
+  - **Contrast fixes**: `danger` raised to #f0685a (was #e74c3c, which measured 3.98:1 on
+    cards and failed AA for 17 error messages); `theme-border` raised to #63768a (was
+    #2d3e4f at 1.62:1, below the 3:1 non-text threshold). Every text pair in all three
+    themes now clears AA, and borders clear 3:1.
+  - `prefers-reduced-motion` honoured: the blanket `* { transition }` rule and the hover
+    lifts are disabled when the OS asks for less motion.
+  - **Changelog page** at `/changelog`, linked from the home page. Entries live in the
+    `changelog` i18n section; `RELEASES` in `pages/Changelog.tsx` maps them to keys.
+  - Speedup and fire crystal field labels reworded to "Number of days to be used for X"
+    and "Number of X to be used", after players missed that General speedups had to be
+    folded into the Construction and Research totals.
+  - Schedule days now sort by weekday rather than alphabetically (see `sort_days_by_week`
+    in `app.py` and `frontend/src/utils/days.ts`).
+
 - **v1.3.0** (August 2026): Removed "Load from WOS"
   - Century Games reworked the Gift Code Center in July 2026: it no longer logs the
     player in behind a captcha, it just takes a Player ID + State and redeems in one POST.
@@ -442,6 +478,6 @@ GCS FUSE volume mounts require `--execution-environment gen2`. Gen1 does not sup
 
 ---
 
-**Last Updated**: August 6, 2026
+**Last Updated**: September 11, 2026
 **Maintained By**: State Technical Administrator
 **Purpose**: Ministry assignment automation for Whiteout Survival SVS events

@@ -70,7 +70,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
       {...attributes}
       {...listeners}
       className={`p-3 border-2 rounded-lg cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow relative ${
-        player.is_sticky ? 'bg-amber-500/15 border-amber-500/50 text-accent' : PLAYER_CARD_CLASS
+        player.is_sticky ? 'bg-warning/15 border-warning/50 text-accent' : PLAYER_CARD_CLASS
       }`}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
@@ -136,7 +136,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
               onToggleLock(player, sourceSlot);
             }}
             className={`flex-shrink-0 p-1 rounded transition-colors ${
-              player.is_sticky ? 'text-amber-500 hover:text-amber-400' : 'text-theme-dim hover:text-accent opacity-40 hover:opacity-100'
+              player.is_sticky ? 'text-warning hover:text-accent-light' : 'text-theme-dim hover:text-accent opacity-40 hover:opacity-100'
             }`}
             title={player.is_sticky ? 'Click to unlock' : 'Click to lock'}
           >
@@ -202,7 +202,7 @@ function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer, share
       ref={setNodeRef}
       className={`border-2 border-dashed rounded-lg p-3 min-h-[100px] transition-colors ${
         sharedNote
-          ? 'border-amber-500/50 bg-amber-500/5'
+          ? 'border-warning/50 bg-warning/10'
           : isOver && !hasPlayer
           ? 'border-accent bg-accent/10'
           : isOver && hasPlayer
@@ -215,7 +215,7 @@ function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer, share
         {slotId === '23:50+' && <span className="text-xs opacity-60 ml-1">(+1d)</span>}
       </div>
       {sharedNote && (
-        <div className="flex items-start gap-1 text-[11px] leading-tight text-amber-400/90 mb-2">
+        <div className="flex items-start gap-1 text-[11px] leading-tight text-warning mb-2">
           <Link2 className="w-3 h-3 mt-0.5 shrink-0" />
           <span>{sharedNote}</span>
         </div>

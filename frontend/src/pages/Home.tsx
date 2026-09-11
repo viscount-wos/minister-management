@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Edit, Shield, Calendar, HelpCircle, Clock } from 'lucide-react';
+import { FileText, Edit, Shield, Calendar, HelpCircle, Clock, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { sortDaysByWeek } from '../utils/days';
 
@@ -158,13 +158,21 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="mt-6 text-center">
+        {/* Wraps to two rows on a phone rather than overflowing the width */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           <button
             onClick={() => navigate('/guide')}
             className="inline-flex items-center gap-2 text-accent hover:text-accent-dim transition-colors text-sm font-medium"
           >
             <HelpCircle className="w-4 h-4" />
             {t('playerGuide.linkText')}
+          </button>
+          <button
+            onClick={() => navigate('/changelog')}
+            className="inline-flex items-center gap-2 text-theme-dim hover:text-accent transition-colors text-sm font-medium"
+          >
+            <Sparkles className="w-4 h-4" />
+            {t('changelog.linkText')}
           </button>
         </div>
 
