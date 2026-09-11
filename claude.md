@@ -49,7 +49,7 @@ minister_management/
 │   │   │   └── admin/
 │   │   │       ├── PlayerManagement.tsx      # CRUD table for players
 │   │   │       └── AssignmentManagement.tsx  # Drag-drop assignments
-│   │   ├── i18n.ts        # Translations (EN, KO, ZH, TR, AR)
+│   │   ├── i18n.ts        # Translations (EN, ES, FR, DE, PL, KO, ZH, TR, AR)
 │   │   ├── App.tsx        # Main app with routing
 │   │   └── main.tsx       # Entry point
 │   ├── package.json
@@ -130,7 +130,7 @@ Located in: `backend/app.py` → `/api/admin/assignments/auto-assign`
 - Each hourly preference covers two 30-minute slots
 
 ### 3. Multi-Language Support
-- 5 languages: English, Korean, Chinese, Turkish, Arabic
+- 9 languages: English, Spanish, French, German, Polish, Korean, Chinese, Turkish, Arabic
 - RTL support for Arabic
 - All UI text in `frontend/src/i18n.ts`
 - Language state managed via react-i18next

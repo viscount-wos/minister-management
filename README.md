@@ -33,7 +33,7 @@ A web application for managing ministry assignments during State vs State (SVS) 
 - **Admin Guide** (`/admin/guide`) - Comprehensive in-app guide accessible from the admin dashboard
 
 ### General
-- **5 Languages** - English, Korean, Chinese, Turkish, Arabic (with RTL support)
+- **9 Languages** - English, Spanish, French, German, Polish, Korean, Chinese, Turkish, Arabic (with RTL support)
 - **Dark Theme** - Navy and gold themed UI
 - **Dockerized** - Multi-stage Docker build for easy deployment
 
@@ -94,7 +94,7 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for Docker, Google Cloud Run, and other platf
 | Backend | Python 3.11 / Flask 3.0 / SQLite |
 | Frontend | React 18 / TypeScript / Vite |
 | Styling | Tailwind CSS |
-| i18n | react-i18next (5 languages) |
+| i18n | react-i18next (9 languages) |
 | Drag & Drop | @dnd-kit |
 | Production Server | gunicorn |
 | Containerization | Docker (multi-stage build) |

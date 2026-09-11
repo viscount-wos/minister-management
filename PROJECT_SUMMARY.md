@@ -2,7 +2,7 @@
 
 ## Overview
 
-A full-stack web application for managing Whiteout Survival SVS (State vs State) ministry assignments. Players submit their speedup resources and time availability; ministers use an auto-assignment algorithm and drag-and-drop interface to schedule ministry positions. Features a dark navy and gold themed UI with 5-language support.
+A full-stack web application for managing Whiteout Survival SVS (State vs State) ministry assignments. Players submit their speedup resources and time availability; ministers use an auto-assignment algorithm and drag-and-drop interface to schedule ministry positions. Features a dark navy and gold themed UI with 9-language support.
 
 ## Features
 
@@ -12,7 +12,7 @@ A full-stack web application for managing Whiteout Survival SVS (State vs State)
 - Update submission using FID lookup
 - FID required for all submissions
 - Support for all speedup types and fire crystal resources
-- Multi-language support (5 languages)
+- Multi-language support (9 languages)
 
 ### Admin Features
 - Password-protected admin/minister access
@@ -27,7 +27,7 @@ A full-stack web application for managing Whiteout Survival SVS (State vs State)
 - SQLite database with persistent storage
 - Docker multi-stage build (Node frontend + Python backend)
 - Multiple deployment options (bare metal, Docker, Cloud Run)
-- Multi-language i18n (English, Korean, Chinese, Turkish, Arabic)
+- Multi-language i18n (English, Spanish, French, German, Polish, Korean, Chinese, Turkish, Arabic)
 - RTL support for Arabic
 - Responsive design
 - Dark navy/gold themed UI
@@ -82,7 +82,7 @@ minister_management/
 │   │   │   └── admin/
 │   │   │       ├── PlayerManagement.tsx      # Player CRUD table
 │   │   │       └── AssignmentManagement.tsx  # Drag-drop assignments
-│   │   ├── i18n.ts            # Translations for 5 languages
+│   │   ├── i18n.ts            # Translations for 9 languages
 │   │   ├── App.tsx            # Main app component with routing
 │   │   └── main.tsx           # Entry point
 │   ├── package.json
@@ -177,10 +177,14 @@ Note: 1 day = 1440 minutes
 ## Supported Languages
 
 1. **English** (en) - Default
-2. **Korean** (ko) - 한국어
-3. **Chinese** (zh) - 中文
-4. **Turkish** (tr) - Türkce
-5. **Arabic** (ar) - العربية (with RTL support)
+2. **Spanish** (es) - Español
+3. **French** (fr) - Français
+4. **German** (de) - Deutsch
+5. **Polish** (pl) - Polski
+6. **Korean** (ko) - 한국어
+7. **Chinese** (zh) - 中文
+8. **Turkish** (tr) - Türkçe
+9. **Arabic** (ar) - العربية (with RTL support)
 
 ## Deployment
 

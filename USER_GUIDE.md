@@ -230,6 +230,10 @@ A comprehensive in-app **Admin Guide** is available at `/admin/guide`, accessibl
 
 The application supports:
 - 🇬🇧 English
+- 🇪🇸 Spanish (Español)
+- 🇫🇷 French (Français)
+- 🇩🇪 German (Deutsch)
+- 🇵🇱 Polish (Polski)
 - 🇰🇷 Korean (한국어)
 - 🇨🇳 Chinese (中文)
 - 🇹🇷 Turkish (Türkçe)
