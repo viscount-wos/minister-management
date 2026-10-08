@@ -159,6 +159,93 @@ def admin_put_plan(ref):
     return jsonify(_plan_body(db, rnd, plan_mod.load_row(db, rnd['id']), plan))
 
 
+@bp.route('/api/admin/svs/rounds/<ref>/plan/place', methods=['POST'])
+@require_admin
+def admin_place_in_plan(ref):
+    """\"Add to rally\" from the players table (and MCP svs_plan_place): ONE change applied atomically to the STORED
+    plan under the write lock, so other leaders' edits are never overwritten. Body:
+    {fid | fids: [..] (bulk, max 100), as: auto|named|extra|leader|group, leader_id? (auto/named/extra; or an
+    EMPTY leader card for as=leader), group_id? (as=leader: a main/counter group -> a new leader card; as=group: an
+    extra group), slot? (named 0-3), move?: bool, expected_revision?: int}.
+    One player (``fid``): 422 DOUBLE_BOOKED (already elsewhere and move is off; details = where),
+    RALLY_FULL / GROUP_FULL (no room), SLOT_TAKEN. Bulk (``fids``): those are reported in ``result`` instead
+    (skipped / overflow). 404 LEADER_NOT_FOUND / GROUP_NOT_FOUND / PLAYER_NOT_FOUND, 409 PLAN_CONFLICT when
+    expected_revision is given and stale, 409 ROUND_CLOSED.
+    -> 200 the GET shape (+1 revision only when something changed) + {changed, result: {placed, moved, unchanged,
+    skipped, overflow}}."""
+    rnd = resolve_round(ref)
+    require_writable(rnd)
+    data = get_json_body()
+    mode = data.get('as') or 'auto'
+    move = data.get('move', False)
+    if not isinstance(move, bool):
+        raise validation_error('move must be true or false', 'move')
+    expected = data.get('expected_revision')
+    if expected is not None and (isinstance(expected, bool) or not isinstance(expected, int) or expected < 0):
+        raise validation_error('expected_revision must be a whole number', 'expected_revision')
+    strict = 'fids' not in data
+    if strict:
+        raw = [data.get('fid')]
+    else:
+        raw = data.get('fids')
+        if not isinstance(raw, list) or not raw or len(raw) > plan_mod.MAX_PLACE_BULK:
+            raise validation_error(f'fids must be a list of 1-{plan_mod.MAX_PLACE_BULK} FIDs', 'fids')
+    refs = []
+    for i, f in enumerate(raw):
+        field = 'fid' if strict else f'fids[{i}]'
+        if f in (None, '') or isinstance(f, bool) or not isinstance(f, (str, int)):
+            raise validation_error(f'{field} is required (a player FID)', field)
+        ref_ = plan_mod.player_ref({'fid': f}, field, allow_none=False)
+        if ref_ not in refs:
+            refs.append(ref_)
+    db = get_db()
+    begin_immediate(db)
+    try:
+        row = plan_mod.load_row(db, rnd['id'])
+        current = row['revision'] if row else 0
+        if expected is not None and expected != current:
+            raise ApiError(409, 'PLAN_CONFLICT', 'Someone else saved this plan in the meantime; reload it first',
+                           details={'revision': current, 'updated_at': row['updated_at'] if row else None})
+        known = {r['fid'] for r in db.execute(
+            f'SELECT fid FROM profiles WHERE fid IN ({",".join("?" * len(refs))})', [r['fid'] for r in refs])}
+        missing = [r for r in refs if r['fid'] not in known]
+        if missing and strict:
+            raise ApiError(404, 'PLAYER_NOT_FOUND', f'No player with FID {missing[0]["fid"]}', field='fid')
+        refs = [r for r in refs if r['fid'] in known]
+        stored = plan_mod.stored_plan(row)
+        names = plan_mod.people(db, sorted(set(plan_mod.plan_fids(stored)) | {r['fid'] for r in refs}), rnd['id'])
+        plan, result = plan_mod.place_players(
+            stored, refs, mode, leader_id=data.get('leader_id'), group_id=data.get('group_id'),
+            slot=data.get('slot'), move=move, strict=strict, names=names)
+        result['not_found'] = [{'player': r} for r in missing]
+        changed = bool(result['placed'])
+        if changed:
+            from core.heroes import library
+            from core.settings import state_generation
+            hero = plan_mod.HeroCheck(library()['heroes'], state_generation(),
+                                      allowed_legacy=plan_mod.plan_heroes(stored))
+            plan = plan_mod.validate_plan(plan, hero)
+            plan_mod.check_double(plan, names)
+            now = now_iso()
+            doc = json.dumps(plan, separators=(',', ':'))
+            if row:
+                db.execute('UPDATE svs_plans SET plan = ?, revision = ?, updated_at = ? WHERE round_id = ?',
+                           (doc, current + 1, now, rnd['id']))
+            else:
+                db.execute('INSERT INTO svs_plans (round_id, plan, revision, created_at, updated_at) '
+                           'VALUES (?, ?, ?, ?, ?)', (rnd['id'], doc, current + 1, now, now))
+            db.commit()
+        else:
+            db.rollback()
+            plan = stored
+    except ApiError:
+        db.rollback()
+        raise
+    body = _plan_body(db, rnd, plan_mod.load_row(db, rnd['id']), plan)
+    body.update(changed=changed, result=result)
+    return jsonify(body)
+
+
 @bp.route('/api/admin/svs/rounds/<ref>/plan/share', methods=['POST'])
 @require_admin
 def admin_share_plan(ref):

@@ -38,8 +38,20 @@ def round_settings(round_row):
 
 
 def round_applications(db, round_row):
-    """All applications of a round, newest first, with the CURRENT profile and joiner_strength (no furnace)."""
-    return _tyrant_round_applications(db, round_row)
+    """All applications of a round, newest first, with the CURRENT profile, joiner_strength (no furnace) and
+    ``plan_place``: where the player is in the round's battle plan ({position: leader|named_joiner|extra_joiner|
+    extra_group, group_id, group_kind, leader_id, slot}) or None (the ``in_plan`` filter)."""
+    from events.svs import plan as plan_mod
+    apps = _tyrant_round_applications(db, round_row)
+    plan = plan_mod.stored_plan(plan_mod.load_row(db, round_row['id']))
+    kinds = {g['id']: g['kind'] for g in plan['groups']}
+    where = {}
+    for ref, _path, w in plan_mod.iter_placements(plan):
+        if ref.get('fid') and ref['fid'] not in where:
+            where[ref['fid']] = dict(w, group_kind=kinds.get(w['group_id']))
+    for a in apps:
+        a['plan_place'] = where.get(a['fid'])
+    return apps
 
 
 def filter_and_sort(apps, filters=None, sort='submitted', direction='desc'):
@@ -70,6 +82,7 @@ def summary(apps, settings):
     all_t11 = 0
     alliances = Counter()
     vc = 0
+    in_plan = 0
     troops = {k: Counter() for k in sv.TROOP_TYPES}
     camps = {k: Counter() for k in sv.TROOP_TYPES}
     for a in apps:
@@ -81,6 +94,8 @@ def summary(apps, settings):
             all_t11 += 1
         if ans.get('discord_vc'):
             vc += 1
+        if a.get('plan_place') is not None:
+            in_plan += 1
         alliances[(prof.get('alliance') or '').strip().upper() or None] += 1
         for kind in sv.TROOP_TYPES:
             tier = _troop(prof, kind, 'tier')
@@ -91,6 +106,7 @@ def summary(apps, settings):
         'avg_hours': round(hour_total / len(apps), 1) if apps else 0,
         'all_t11': all_t11,
         'discord_vc': vc,
+        'plan': {'in': in_plan, 'out': len(apps) - in_plan},
         'hours': [{'hour': h, 'count': hour_counts.get(h, 0)} for h in hours],
         'alliances': [{'alliance': k, 'count': v}
                       for k, v in sorted(alliances.items(), key=lambda kv: (-kv[1], kv[0] or '~'))],

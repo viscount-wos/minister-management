@@ -13,6 +13,7 @@ URL uses the same keys. (No role filter: SVS sign-up does not ask the role; the 
   <type>_tier    exact tier of one troop type (1..11 / T11, or 'none')
   submitted_from, submitted_to   YYYY-MM-DD (UTC, inclusive)
   days           submitted in the last N days
+  in_plan        yes | no: placed anywhere in the round's battle plan (leader, joiner, extra, extra group) or not
 """
 from datetime import datetime, timedelta, timezone
 
@@ -24,7 +25,7 @@ from events.tyrant.filters import _blank, _csv, _date, _int, _norm_ts, parse_tie
 TROOP_FILTERS = sv.TROOP_TYPES + ('all',)
 EXACT_KEYS = tuple(f'{k}_{d}' for k in sv.TROOP_TYPES for d in ('camp', 'tier'))
 FILTER_KEYS = ('q', 'alliance', 'hours', 'vc', 'troop', 'min_camp', 'min_tier') + EXACT_KEYS + (
-    'submitted_from', 'submitted_to', 'days')
+    'submitted_from', 'submitted_to', 'days', 'in_plan')
 
 
 def _troop(profile, kind, key):
@@ -79,6 +80,11 @@ def parse_filters(args, settings):
     days = _int(get('days'), 'days', 1, 3650)
     if days:
         f['days'] = days
+    in_plan = str(get('in_plan') or '').strip().lower()
+    if in_plan not in ('', 'any', 'yes', 'no'):
+        raise validation_error('in_plan must be yes or no', 'in_plan')
+    if in_plan in ('yes', 'no'):
+        f['in_plan'] = in_plan
     return f
 
 
@@ -109,6 +115,8 @@ def matches(app, f):
         want = f.get(f'{kind}_tier')
         if want is not None and (_troop(prof, kind, 'tier') or 'none') != want:
             return False
+    if 'in_plan' in f and (app.get('plan_place') is not None) != (f['in_plan'] == 'yes'):
+        return False
     created = _norm_ts(app.get('created_at'))
     if 'submitted_from' in f and created[:10] < f['submitted_from']:
         return False
