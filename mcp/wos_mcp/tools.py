@@ -35,7 +35,12 @@ MINISTRY_ANSWERS_HELP = (
     'general_speedups_days (numbers 0-99999, decimals allowed); fire_crystals, '
     'refined_fire_crystals, fire_crystal_shards (whole numbers 0-99999); time_slots_by_day: '
     '{"construction": ["HH:MM", ...], "research": [...], "troop": [...]} (UTC slots). '
-    'tyrant/svs accept free-form JSON objects for now.'
+    'Tyrant answers (full set): availability: list of window ids from the current round\'s settings.windows '
+    '(get_current_round; defaults w1 11:01-11:15 opening rush, w2 11:15-13:00, w3 13:00-15:00, w4 15:00-16:30, '
+    'w5 16:30-18:00 UTC); discord_vc: bool; gem_spend: whole number of gems or null; roles: subset of '
+    'rally_leader, joiner, gathering, battle_mgmt, event_prep; language: en|es|fr|de|pl|ko|zh|tr|ar or null. '
+    'Tyrant requires profile.game_name and profile.alliance; furnace_level, power (absolute, not millions), '
+    'discord_id and troops live on the PROFILE. svs accepts free-form JSON objects for now.'
 )
 MAX_LIST = 200
 
@@ -296,6 +301,20 @@ preview of the round that would be closed. Optional closing_time is ISO-8601 (e.
         if settings is not None:
             body['settings'] = settings
         return R.from_api(await api.admin('POST', f'/api/admin/events/{seg(event)}/start-new-round', json=body))
+
+    @server.tool(annotations=_ro('Get Frost Dragon Tyrant summary'), description=f"""{ADMIN} Tyrant only:
+summary stats of one round: total players, opening_rush (players available in any rush window), discord_vc,
+gem_spend_total, per-window counts, alliances (count each), roles (count each), troop_tiers per troop type
+and furnace_levels (codes FC10..FC1, 30..1, highest first). `round_id` is a tyrant round id or "current";
+optional `alliance` restricts everything to one alliance tag. {UNTRUSTED} {ERRORS}""")
+    async def get_tyrant_summary(ctx: Context,
+                                 round_id: Annotated[int | Literal['current'], Field(
+                                     description='Round id or "current".')] = 'current',
+                                 alliance: Annotated[str | None, Field(max_length=3)] = None) -> CallToolResult:
+        if bad := refused(ctx):
+            return bad
+        params = {'alliance': alliance} if alliance else None
+        return R.from_api(await api.admin('GET', f'/api/admin/tyrant/rounds/{seg(round_id)}/summary', params=params))
 
     @server.tool(annotations=_ro('Get ministry assignments'), description=f"""{ADMIN} Ministry only:
 the saved assignments for one day of a round, including unpublished days: occupied slots ->

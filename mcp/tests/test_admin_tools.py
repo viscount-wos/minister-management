@@ -7,7 +7,7 @@ from conftest import BEARER, call, connect, fid
 pytestmark = pytest.mark.anyio
 
 ADMIN_TOOLS = {'list_rounds', 'list_applications', 'get_application_by_id', 'update_application',
-               'start_new_round', 'get_assignments'}
+               'start_new_round', 'get_assignments', 'get_tyrant_summary'}
 ANSWERS = {'construction_speedups_days': 1, 'general_speedups_days': 0, 'research_speedups_days': 0,
            'troop_training_speedups_days': 0, 'fire_crystals': 0, 'refined_fire_crystals': 0,
            'fire_crystal_shards': 0, 'time_slots_by_day': {'construction': ['10:00'], 'research': [], 'troop': []}}
