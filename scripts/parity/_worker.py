@@ -184,6 +184,23 @@ class OldAdapter:
         r = self.c.put('/api/admin/settings/application-closing-time', json={'closing_time': iso}, headers=self.h)
         assert r.status_code == 200, r.data
 
+    def resync_boundary_after_remap(self):
+        """Oracle emulation of the documented L3 fix (milestone 1c): after a scheme switch the new app
+        mirrors the shared 23:50 boundary (from the earlier day if occupied, else from the later day).
+        In v1.4 that is exactly what re-saving that day unchanged does (its save syncs the boundary)."""
+        if self.scheme() != 'max_slots':
+            return
+        rd = self.research_day()
+        earlier, later = ('monday', 'tuesday') if rd == 'tuesday' else ('thursday', 'friday')
+        if self.get_assignments(earlier)['slots'].get('23:50+'):
+            day = earlier
+        elif self.get_assignments(later)['slots'].get('23:50'):
+            day = later
+        else:
+            return
+        cur = self.get_assignments(day)['slots']
+        self.update_assignments(day, {s: (cs[0]['player_id'], cs[0]['is_sticky']) for s, cs in cur.items() if cs})
+
     def submit(self, fid, entry):
         body = {'fid': fid, 'game_name': entry.get('game_name'), 'alliance': entry.get('alliance') or '',
                 'timezone': entry.get('timezone')}
@@ -202,6 +219,10 @@ class NewAdapter:
         os.environ.pop('FLASK_ENV', None)
         sys.path.insert(0, backend_dir)
         from app import create_app  # noqa: E402  (phase-1 module)
+        # The v1.4 import is explicit since milestone 1c (a normal boot refuses a v1.4 file):
+        # run it the way the cut-over runbook does, then boot normally.
+        from core.db import migrate  # noqa: E402
+        migrate(db, allow_v14=True)
         self.app = create_app({'DATABASE_PATH': db, 'SECRET_KEY': 'parity-new-secret-not-placeholder',
                                'ADMIN_PASSWORD': ADMIN_PW, 'MINISTER_PASSWORD': MINISTER_PW,
                                'STATIC_DIR': '/nonexistent', 'TESTING': True})
@@ -426,6 +447,8 @@ def run(ad, cases):
     orphans_before = ad.orphan_assignment_rows() if isinstance(ad, OldAdapter) else 0
     remapped = ad.set_scheme(other)
     orphans_after = ad.orphan_assignment_rows() if isinstance(ad, OldAdapter) else 0
+    if isinstance(ad, OldAdapter):
+        ad.resync_boundary_after_remap()  # documented deviation L3 applied to the oracle
     rec('S5:remap', 'remap', {'remapped': remapped, 'orphan_rows_before': orphans_before,
                               'orphan_rows_after': orphans_after})
     linked = None
@@ -443,15 +466,16 @@ def run(ad, cases):
     statuses = {}
     for c in edit_cases:
         fid = cases[c]
-        statuses[c] = ad.submit(fid, exp[fid]) if fid in exp else 'missing'
+        key = fid if fid in exp else fid.strip()  # the v1.4 import trims FID whitespace (documented)
+        statuses[c] = ad.submit(fid, exp[key]) if key in exp else 'missing'
     statuses['brand_new'] = ad.submit(NEW_FID_1, {'game_name': 'Parity New', 'alliance': 'PAR',
                                                   'construction_speedups_days': 1,
                                                   'time_slots_by_day': {'construction': ['10:00']}})
     rec('S7:edit_status', 'plain', statuses)
     rec('S7:player_count', 'plain', ad.player_count())
     pts = ad.points()
-    rec('S7:points_after_edit', 'points', {k: v for k, v in pts.items()
-                                           if k in [cases[c] for c in edit_cases] or k == NEW_FID_1})
+    wanted = {cases[c] for c in edit_cases} | {cases[c].strip() for c in edit_cases} | {NEW_FID_1}
+    rec('S7:points_after_edit', 'points', {k: v for k, v in pts.items() if k in wanted})
     ad.set_closing('2020-01-01T00:00:00.000Z')
     some = sorted(f for f in all_fids if f.isdigit() and len(f) == 9 and f in exp)[0]
     rec('S7:closed_status', 'plain', {

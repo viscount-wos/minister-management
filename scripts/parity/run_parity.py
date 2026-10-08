@@ -135,6 +135,23 @@ def run_worker(py, side, db, old_dir, out, mutation=None):
 
 # ------------------------------------------------------------------ normalisers
 
+def _trim_fid(x):
+    """Oracle data with the legacy FID '330000777 ' replaced by its trimmed form (keys and values)."""
+    if isinstance(x, dict):
+        return {(FID_WS.strip() if k == FID_WS else k): _trim_fid(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_trim_fid(v) for v in x]
+    return FID_WS.strip() if x == FID_WS else x
+
+
+def n_fid_trim(o, n):
+    return _trim_fid(o), n
+
+
+FID_TRIM = ("legacy FID whitespace trimmed by the v1.4 import ('330000777 ' -> '330000777'; documented FID rule)",
+            EXPECTED, n_fid_trim)
+
+
 def _nullstr_card(c):
     c = dict(c)
     for k in STR_FIELDS:
@@ -233,22 +250,24 @@ def n_schedule(o, n):
     return o, n
 
 
+NULL_STR = "absent alliance/avatar/stove_lv_content/timezone are null (documented; v1.4 mixed '' and null)"
 NORMALISERS = {
-    'assignments': [("null alliance/avatar/stove_lv_content returned as '' instead of null on cards",
-                     BENIGN, n_assign_null),
+    'assignments': [FID_TRIM,
+                    (NULL_STR, EXPECTED, n_assign_null),
                     ("preferred_times = that day's own prefs (documented)", EXPECTED, n_assign_prefs),
                     ('order of equal-points players in unassigned list', BENIGN, n_assign_ties)],
-    'export_json': [("null alliance/avatar/stove_lv_content/timezone exported as '' instead of null", BENIGN,
-                     n_export_null),
+    'export_json': [FID_TRIM,
+                    (NULL_STR, EXPECTED, n_export_null),
                     ('order of hours inside time_slots_by_day lists (v1.4 read them via the unique index, i.e. '
                      'sorted; migration keeps insertion order)', BENIGN, n_export_pref_order),
                     ('player order', BENIGN, n_export_order)],
-    'xlsx': [("extra 'Unassigned' summary sheet (documented)", EXPECTED, n_xlsx_unassigned_sheet),
+    'xlsx': [FID_TRIM,
+             ("extra 'Unassigned' summary sheet (documented)", EXPECTED, n_xlsx_unassigned_sheet),
              ('order of equal-points rows in the UNASSIGNED section', BENIGN, n_xlsx_ties)],
     'heatmap': [('v1.4 also counted time_preferences rows of deleted players (orphans); new counts '
-                 'round applicants only', BENIGN, n_heat_orphans)],
+                 'round applicants only (documented)', EXPECTED, n_heat_orphans)],
     'schedule': [],
-    'points': [], 'plain': [], 'shared': [], 'meta': [], 'player_assignments': [],
+    'points': [FID_TRIM], 'plain': [], 'shared': [], 'meta': [], 'player_assignments': [],
 }
 PRE = {'xlsx': xlsx_base, 'schedule': None}
 
@@ -374,6 +393,9 @@ def check_player_assignments(o, n):
     bad = [f for f in od if od[f] != nd.get(f)]
     if not bad:
         return OK, [], []
+    trimmed = _trim_fid(od)
+    if trimmed == nd:
+        return EXPECTED, [(EXPECTED, FID_TRIM[0])], []
     if bad == [FID_WS]:
         return REGRESSION, [(REGRESSION, FID_WS_REASON)], []
     return REGRESSION, [], [f'{f}: old={_short(od[f])} new={_short(nd.get(f))}' for f in bad[:4]]
@@ -389,7 +411,7 @@ def check_step(name, o, n):
         if kind == 'points':
             od = {k: v for k, v in o['data'].items()}
             nd = {k: v for k, v in n['data'].items()}
-            extra = set(nd) - set(od)
+            extra = set(nd) - set(_trim_fid(od))
             if extra == {FID_WS.strip()}:
                 nd = {k: v for k, v in nd.items() if k not in extra}
                 st, lab, d = compare('points', od, nd)
