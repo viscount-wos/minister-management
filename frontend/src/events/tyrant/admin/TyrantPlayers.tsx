@@ -496,6 +496,54 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
             <StatCard testId="stat-alliances" label={t('tyrant:admin.stats.alliances')} value={summary.alliances.filter((a) => a.alliance).length} />
           </div>
 
+          {/* breakdowns right under the headline stats (owner); rows are filters too */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <Bars
+              testId="by-window"
+              title={t('tyrant:admin.byWindow')}
+              total={summary.total}
+              rows={summary.windows.map((w) => ({
+                key: w.id,
+                n: w.count,
+                active: splitList(filters.windows).includes(w.id),
+                onClick: () => F.toggleInList('windows', w.id),
+                label: w.rush ? (
+                  <>
+                    {t('tyrant:step2.openingRush')} <Range start={w.start} end={w.end} />
+                  </>
+                ) : (
+                  <Range start={w.start} end={w.end} />
+                ),
+              }))}
+            />
+            <Bars
+              testId="by-role"
+              title={t('tyrant:admin.byRole')}
+              total={summary.total}
+              rows={ROLES.map((r) => ({
+                key: r,
+                n: summary.roles[r] ?? 0,
+                label: t(`tyrant:roles.${r}`),
+                active: rolesSel.includes(r),
+                onClick: () => F.toggleInList('roles', r),
+              }))}
+            />
+            <Bars
+              testId="by-alliance"
+              title={t('tyrant:admin.byAlliance')}
+              total={summary.total}
+              rows={summary.alliances.map((a) => ({
+                key: a.alliance ?? 'none',
+                n: a.count,
+                label: a.alliance ?? t('tyrant:admin.none'),
+                active: !!a.alliance && allianceSel.includes(a.alliance),
+                onClick: () => {
+                  if (a.alliance) F.toggleInList('alliance', a.alliance);
+                },
+              }))}
+            />
+          </div>
+
           <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5" data-testid="by-troop">
             <h3 className="font-semibold text-accent">{t('tyrant:admin.byTroop')}</h3>
             <p className="text-xs text-theme-dim mb-3">{t('tyrant:admin.chipHint')}</p>
@@ -684,56 +732,6 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
           </div>
         )}
       </div>
-
-      {/* breakdowns below the table (phones reach the players first); rows are filters too */}
-      {summary && (
-          <div className="grid md:grid-cols-3 gap-4">
-          <Bars
-            testId="by-window"
-            title={t('tyrant:admin.byWindow')}
-            total={summary.total}
-            rows={summary.windows.map((w) => ({
-              key: w.id,
-              n: w.count,
-              active: splitList(filters.windows).includes(w.id),
-              onClick: () => F.toggleInList('windows', w.id),
-              label: w.rush ? (
-                <>
-                  {t('tyrant:step2.openingRush')} <Range start={w.start} end={w.end} />
-                </>
-              ) : (
-                <Range start={w.start} end={w.end} />
-              ),
-            }))}
-          />
-          <Bars
-            testId="by-role"
-            title={t('tyrant:admin.byRole')}
-            total={summary.total}
-            rows={ROLES.map((r) => ({
-              key: r,
-              n: summary.roles[r] ?? 0,
-              label: t(`tyrant:roles.${r}`),
-              active: rolesSel.includes(r),
-              onClick: () => F.toggleInList('roles', r),
-            }))}
-          />
-          <Bars
-            testId="by-alliance"
-            title={t('tyrant:admin.byAlliance')}
-            total={summary.total}
-            rows={summary.alliances.map((a) => ({
-              key: a.alliance ?? 'none',
-              n: a.count,
-              label: a.alliance ?? t('tyrant:admin.none'),
-              active: !!a.alliance && allianceSel.includes(a.alliance),
-              onClick: () => {
-                if (a.alliance) F.toggleInList('alliance', a.alliance);
-              },
-            }))}
-          />
-        </div>
-      )}
     </div>
   );
 }
