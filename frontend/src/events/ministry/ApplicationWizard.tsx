@@ -544,6 +544,7 @@ export default function ApplicationWizard() {
             </div>
             <p className="text-sm text-accent text-center mb-6 font-medium">{t('ministry:form.selectAllAvailable')}</p>
             <SlotGrid
+              key={dayType /* fresh buttons per day: no colour cross-fade from the previous day */}
               dayType={dayType}
               selected={answers.time_slots_by_day[dayType]}
               onToggle={(utc) => toggleSlot(dayType, utc)}

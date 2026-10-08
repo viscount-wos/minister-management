@@ -194,13 +194,36 @@ Final shape is in docs/API.md. Where it differs from the sketch above:
 
 ### Frontend 1b decisions (p1b/frontend-wiring)
 - All HTTP goes through `frontend/src/shared/api.ts` (typed, error codes, one CONFLICT retry, 401 -> login).
-- The player flow is ONE page, `/ministry/apply`: FID first, then "New application for <round>" or
-  "Edit your application for <round>". It replaces v1.4's 5-step wizard + separate update page
-  (`/submit`, `/update`, `/apply`, `/ministry/submit|update` redirect there). Empty-slot `confirm()` kept.
-- "Past round read-only" = `status === 'closed'` (UI only; the API still accepts writes, see
-  docs/BACKEND_ISSUES.md #2).
-- A player's own assignments show every active day (as v1.4), not only published ones.
+- ~~The player flow is ONE page~~ (1b, REVERSED by the owner in 1d: "the wizard was part of the appeal, it was far
+  clearer for the user"). See "Frontend 1d decisions".
+- "Past round read-only" = `status === 'closed'` (the API now also refuses writes: 409 `ROUND_CLOSED`).
+- ~~A player's own assignments show every active day~~ (1c: the API lists published days only, see below).
 - Server error text is never shown; `code`/`field` map to translated messages.
+
+### Frontend 1d decisions (p1d/wizard)
+- The ministry player flow is v1.4's 5-step WIZARD again, at `/ministry/apply` (`ApplicationWizard.tsx`):
+  1 Player information (+ speedups/crystals), 2 Construction day, 3 Research day, 4 Troop training day,
+  5 Review & confirm. Same step indicator, Back/Next, v1.4 wording, step-1 checks (name, alliance) and the per-day
+  "no time slots selected" `confirm()` on Next. `/submit`, `/apply`, `/update`, `/ministry/submit|update` redirect
+  here keeping the query (`/update?fid=123` opens straight in edit mode).
+- Rounds on top: step 1 starts with the FID (Next = look it up). Then the wizard is
+  - EDIT mode "Edit your application for <round>" when the FID applied in the current round: every step pre-filled,
+    v1.4's update page parts kept (current-assignments box at the top of step 1, "Update" submit button);
+  - NEW mode "New application for <round>": profile fields pre-filled, round answers (speedups, crystals, hours)
+    blank. "Use my last answers" (only when an earlier application exists, NEW mode only) sits on step 1 above the
+    speedups and copies the previous round's numbers AND hours, with a "copied from <round>" notice.
+  - New FID + closing time passed -> the "applications closed" card; an existing application stays editable.
+    403 `APPLICATIONS_CLOSED` on submit -> closed card; 404 `NO_CURRENT_ROUND` / 409 `ROUND_CLOSED` -> "not open".
+    A server `VALIDATION_ERROR` sends the player back to the step holding that field.
+- The step indicator follows the page direction like v1.4 (Arabic: step 1 on the right). Back/Next arrows are
+  mirrored in RTL (v1.4 did not mirror them).
+- The timezone is chosen on the time steps (as v1.4), not on step 1; it is saved to the profile.
+- Own assignments: only published days are listed (API 1c); with none published the box says "You have not been
+  assigned to any slots yet." instead of "None" per day.
+- Fractional crystal counts imported from v1.4 are shown and re-sent unchanged (never truncated).
+- Test ids: `wizard` (data-mode), `wizard-steps` (data-step), `wizard-step-indicator-N` (data-state
+  done|current|todo, aria-current), `wizard-step-N`, `wizard-step-title`, `wizard-back`, `wizard-next`,
+  `wizard-submit` (data-mode), `slot-<day>-<HH:MM>`, `slot-grid-<day>`, `review-*`, `review-slots-<day>`.
 
 ## MCP server (phase 1b, in front of the API)
 Separate process `mcp/` (Python, official `mcp` SDK, streamable HTTP), talks to the app ONLY via the HTTP API above.

@@ -84,17 +84,17 @@ export default function ProfileFields({
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
         {showTimezone && (
-        <div>
-          <label htmlFor="profile-timezone" className="block text-sm font-medium text-theme-text mb-2">
-            {t('profile:timezone')}
-          </label>
-          <TimezoneSelector
-            id="profile-timezone"
-            testId="profile-timezone"
-            value={value.timezone}
-            onChange={(tz) => set({ timezone: tz })}
-          />
-        </div>
+          <div>
+            <label htmlFor="profile-timezone" className="block text-sm font-medium text-theme-text mb-2">
+              {t('profile:timezone')}
+            </label>
+            <TimezoneSelector
+              id="profile-timezone"
+              testId="profile-timezone"
+              value={value.timezone}
+              onChange={(tz) => set({ timezone: tz })}
+            />
+          </div>
         )}
         <Field
           id="profile-furnace-level"
