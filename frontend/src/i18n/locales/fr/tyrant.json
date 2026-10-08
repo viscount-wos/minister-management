@@ -1,4 +1,147 @@
 {
   "name": "Tyran Dragon de Givre",
-  "tagline": "Disponibilités, statistiques, troupes et rôles pour le combat du Tyran"
+  "tagline": "Disponibilités, stats, troupes et rôles pour le combat du Tyran",
+  "home": {
+    "welcome": "Bienvenue, {{state}}",
+    "currentRound": "Manche en cours : {{round}}",
+    "subtitle": "Indiquez vos disponibilités et vos stats",
+    "closeAt": "Fin des inscriptions : {{time}}",
+    "closed": "Les inscriptions sont closes.",
+    "applyTile": "S'inscrire ou modifier",
+    "applyTileDesc": "Saisissez votre ID joueur pour vous inscrire ou modifier votre inscription",
+    "applyTileClosedDesc": "Les nouvelles inscriptions sont closes. Vous pouvez encore modifier la vôtre.",
+    "adminDesc": "Stats, joueurs et exports",
+    "utcNote": "Toutes les heures sont en UTC"
+  },
+  "apply": {
+    "title": "Inscription Tyran",
+    "enterFid": "Saisissez votre ID joueur (FID) pour vous inscrire ou modifier votre inscription.",
+    "newFor": "Nouvelle inscription pour {{round}}",
+    "editFor": "Modifier votre inscription pour {{round}}",
+    "notOpenTitle": "Les inscriptions ne sont pas ouvertes",
+    "notOpenBody": "Aucune manche du Tyran n'est ouverte. Revenez plus tard.",
+    "closedTitle": "Inscriptions closes",
+    "closedBody": "Les nouvelles inscriptions pour {{round}} ne sont plus acceptées. Si vous êtes déjà inscrit, saisissez cet ID pour la modifier.",
+    "closedButEditable": "Inscriptions closes aux nouveaux joueurs. Vous pouvez encore modifier la vôtre.",
+    "otherFid": "Utiliser un autre ID joueur",
+    "savedTitle": "Envoyé !",
+    "savedNew": "Merci de vous être inscrit pour {{round}}. Rendez-vous sur le champ de bataille !",
+    "savedEdit": "Votre inscription pour {{round}} a été mise à jour.",
+    "viewMine": "Voir mon inscription",
+    "backHome": "Retour au Tyran Dragon de Givre"
+  },
+  "fields": {
+    "ingameName": "Nom en jeu",
+    "fid": "ID joueur WOS (FID)",
+    "fidPlaceholder": "ex. 99292909",
+    "discordId": "ID Discord",
+    "discordPlaceholder": "ex. pseudo",
+    "alliance": "Alliance",
+    "alliancePlaceholder": "ex. WOO"
+  },
+  "step1": {
+    "title": "Identité du joueur",
+    "desc": "Dites-nous qui vous êtes"
+  },
+  "step2": {
+    "title": "Disponibilités",
+    "desc": "Cochez tous les créneaux où vous pouvez participer",
+    "utcNote": "Toutes les heures sont en UTC",
+    "selectAll": "Tout sélectionner",
+    "openingRush": "Assaut d'ouverture",
+    "discordVc": "Je peux écouter le vocal Discord"
+  },
+  "step3": {
+    "title": "Stats du joueur",
+    "desc": "Indiquez votre niveau de fournaise et votre puissance",
+    "furnaceLevel": "Niveau de fournaise",
+    "power": "Puissance en millions",
+    "powerPlaceholder": "ex. 410",
+    "gemSpend": "Dépense max. estimée en gemmes",
+    "gemPlaceholder": "ex. 10000"
+  },
+  "step4": {
+    "title": "Niveaux des troupes",
+    "desc": "Choisissez la fournaise et le niveau T de chaque type de troupe",
+    "infantry": "🛡 Infanterie",
+    "lancer": "🐴 Lanciers",
+    "marksman": "🏹 Tireurs",
+    "fcLevel": "Niveau de fournaise",
+    "tLevel": "Niveau T"
+  },
+  "step5": {
+    "title": "Rôles souhaités",
+    "desc": "Cochez tout ce qui s'applique"
+  },
+  "step6": {
+    "title": "Vérifiez vos infos",
+    "desc": "Vérifiez que tout est correct avant d'envoyer",
+    "edit": "Modifier"
+  },
+  "roles": {
+    "rally_leader": "Chef de rassemblement",
+    "joiner": "Participant",
+    "gathering": "Récolte/Pillage",
+    "battle_mgmt": "Gestion de la bataille",
+    "event_prep": "Préparation de l'événement"
+  },
+  "errors": {
+    "power": "La puissance doit être un nombre (en millions), ex. 410",
+    "gems": "La dépense en gemmes doit être un nombre entier, ex. 10000"
+  },
+  "admin": {
+    "eventSwitch": "Événement",
+    "subtitle": "Inscriptions de cette manche : stats, joueurs et exports",
+    "defaultRoundName": "Tyran {{date}}",
+    "stats": {
+      "total": "Joueurs",
+      "openingRush": "Assaut d'ouverture",
+      "discordVc": "Vocal Discord",
+      "alliances": "Alliances",
+      "gems": "Gemmes estimées"
+    },
+    "byWindow": "Joueurs par créneau (UTC)",
+    "byRole": "Rôles souhaités",
+    "byAlliance": "Alliances",
+    "byTroop": "Niveaux de troupes",
+    "none": "aucun",
+    "search": "Chercher nom, FID ou Discord...",
+    "allianceFilter": "Alliance",
+    "allAlliances": "Toutes les alliances",
+    "minFurnace": "Fournaise minimum",
+    "anyFurnace": "Tous niveaux",
+    "exportCsv": "Exporter CSV",
+    "exportExcel": "Exporter Excel",
+    "exportError": "Échec de l'export",
+    "showing": "{{n}} joueurs",
+    "col": {
+      "power": "Puissance",
+      "gems": "Gemmes",
+      "windows": "Créneaux (UTC)",
+      "vc": "Vocal",
+      "submitted": "Envoyé"
+    },
+    "troopShort": {
+      "infantry": "Inf",
+      "lancer": "Lan",
+      "marksman": "Tir"
+    },
+    "confirmDelete": "Retirer l'inscription de {{name}} de cette manche ? Le profil du joueur est conservé.",
+    "noPlayers": "Aucune inscription pour l'instant",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "page": "Page {{page}} sur {{pages}}",
+    "settings": {
+      "windows": "Créneaux horaires (UTC)",
+      "windowsDesc": "Les joueurs choisissent parmi ces créneaux. Les changements ne valent que pour cette manche ; une nouvelle manche les reprend.",
+      "start": "Début",
+      "end": "Fin",
+      "remove": "Supprimer le créneau",
+      "add": "Ajouter un créneau",
+      "resetDefaults": "Valeurs par défaut",
+      "save": "Enregistrer les créneaux",
+      "saved": "Réglages enregistrés",
+      "error": "Impossible d'enregistrer. Vérifiez les heures (fin après début)."
+    }
+  }
 }

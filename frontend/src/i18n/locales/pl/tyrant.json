@@ -1,4 +1,147 @@
 {
-  "name": "Tyran Mroźny Smok",
-  "tagline": "Dostępność, statystyki, wojska i role na walkę z Tyranem"
+  "name": "Tyran Mroźnego Smoka",
+  "tagline": "Dostępność, statystyki, wojska i role na walkę z Tyranem",
+  "home": {
+    "welcome": "Witaj, {{state}}",
+    "currentRound": "Bieżąca runda: {{round}}",
+    "subtitle": "Zgłoś swoją dostępność i statystyki",
+    "closeAt": "Zapisy do: {{time}}",
+    "closed": "Zapisy są zamknięte.",
+    "applyTile": "Zapisz się lub zmień",
+    "applyTileDesc": "Wpisz swoje ID gracza, aby się zapisać lub zmienić zgłoszenie",
+    "applyTileClosedDesc": "Nowe zapisy są zamknięte. Swoje zgłoszenie nadal możesz zmienić.",
+    "adminDesc": "Statystyki, gracze i eksport",
+    "utcNote": "Wszystkie godziny w UTC"
+  },
+  "apply": {
+    "title": "Zapisy na Tyrana",
+    "enterFid": "Wpisz swoje ID gracza (FID), aby się zapisać lub zmienić zgłoszenie.",
+    "newFor": "Nowe zgłoszenie na {{round}}",
+    "editFor": "Zmień swoje zgłoszenie na {{round}}",
+    "notOpenTitle": "Zapisy nie są otwarte",
+    "notOpenBody": "Żadna runda Tyrana nie jest teraz otwarta. Zajrzyj później.",
+    "closedTitle": "Zapisy zamknięte",
+    "closedBody": "Nowe zgłoszenia na {{round}} nie są już przyjmowane. Jeśli już się zapisałeś, wpisz to ID, aby je zmienić.",
+    "closedButEditable": "Zapisy zamknięte dla nowych graczy. Swoje zgłoszenie nadal możesz zmienić.",
+    "otherFid": "Użyj innego ID gracza",
+    "savedTitle": "Wysłano!",
+    "savedNew": "Dzięki za zapis na {{round}}. Do zobaczenia na polu bitwy!",
+    "savedEdit": "Twoje zgłoszenie na {{round}} zostało zaktualizowane.",
+    "viewMine": "Zobacz moje zgłoszenie",
+    "backHome": "Powrót do Tyrana Mroźnego Smoka"
+  },
+  "fields": {
+    "ingameName": "Nick w grze",
+    "fid": "ID gracza WOS (FID)",
+    "fidPlaceholder": "np. 99292909",
+    "discordId": "ID Discord",
+    "discordPlaceholder": "np. nazwa",
+    "alliance": "Sojusz",
+    "alliancePlaceholder": "np. WOO"
+  },
+  "step1": {
+    "title": "Tożsamość gracza",
+    "desc": "Powiedz nam, kim jesteś"
+  },
+  "step2": {
+    "title": "Dostępność",
+    "desc": "Zaznacz wszystkie przedziały, w których możesz grać",
+    "utcNote": "Wszystkie godziny w UTC",
+    "selectAll": "Zaznacz wszystkie przedziały",
+    "openingRush": "Otwierający szturm",
+    "discordVc": "Mogę słuchać na kanale głosowym Discord"
+  },
+  "step3": {
+    "title": "Statystyki gracza",
+    "desc": "Podaj obecny poziom pieca i siłę",
+    "furnaceLevel": "Poziom pieca",
+    "power": "Siła w milionach",
+    "powerPlaceholder": "np. 410",
+    "gemSpend": "Szac. maks. wydatek klejnotów",
+    "gemPlaceholder": "np. 10000"
+  },
+  "step4": {
+    "title": "Poziomy wojsk",
+    "desc": "Wybierz piec i poziom T dla każdego typu wojsk",
+    "infantry": "🛡 Piechota",
+    "lancer": "🐴 Lansjerzy",
+    "marksman": "🏹 Strzelcy",
+    "fcLevel": "Poziom pieca",
+    "tLevel": "Poziom T"
+  },
+  "step5": {
+    "title": "Wybrane role",
+    "desc": "Zaznacz wszystkie pasujące"
+  },
+  "step6": {
+    "title": "Sprawdź dane",
+    "desc": "Upewnij się, że wszystko się zgadza, zanim wyślesz",
+    "edit": "Edytuj"
+  },
+  "roles": {
+    "rally_leader": "Lider rajdu",
+    "joiner": "Uczestnik",
+    "gathering": "Zbieranie/Grabież",
+    "battle_mgmt": "Zarządzanie bitwą",
+    "event_prep": "Przygotowanie wydarzenia"
+  },
+  "errors": {
+    "power": "Siła musi być liczbą (w milionach), np. 410",
+    "gems": "Wydatek klejnotów musi być liczbą całkowitą, np. 10000"
+  },
+  "admin": {
+    "eventSwitch": "Wydarzenie",
+    "subtitle": "Zgłoszenia tej rundy: statystyki, gracze i eksport",
+    "defaultRoundName": "Tyran {{date}}",
+    "stats": {
+      "total": "Gracze",
+      "openingRush": "Otwierający szturm",
+      "discordVc": "Głos Discord",
+      "alliances": "Sojusze",
+      "gems": "Szac. klejnoty"
+    },
+    "byWindow": "Gracze w przedziałach (UTC)",
+    "byRole": "Wybrane role",
+    "byAlliance": "Sojusze",
+    "byTroop": "Poziomy wojsk",
+    "none": "brak",
+    "search": "Szukaj nicku, FID lub Discorda...",
+    "allianceFilter": "Sojusz",
+    "allAlliances": "Wszystkie sojusze",
+    "minFurnace": "Piec co najmniej",
+    "anyFurnace": "Dowolny poziom",
+    "exportCsv": "Eksport CSV",
+    "exportExcel": "Eksport Excel",
+    "exportError": "Eksport nie powiódł się",
+    "showing": "Graczy: {{n}}",
+    "col": {
+      "power": "Siła",
+      "gems": "Klejnoty",
+      "windows": "Przedziały (UTC)",
+      "vc": "Głos",
+      "submitted": "Wysłano"
+    },
+    "troopShort": {
+      "infantry": "Pie",
+      "lancer": "Lan",
+      "marksman": "Str"
+    },
+    "confirmDelete": "Usunąć zgłoszenie gracza {{name}} z tej rundy? Profil gracza zostanie zachowany.",
+    "noPlayers": "Brak zgłoszeń",
+    "prev": "Poprzednia",
+    "next": "Następna",
+    "page": "Strona {{page}} z {{pages}}",
+    "settings": {
+      "windows": "Przedziały czasu (UTC)",
+      "windowsDesc": "Gracze wybierają spośród tych przedziałów. Zmiany dotyczą tylko tej rundy; nowa runda je kopiuje.",
+      "start": "Początek",
+      "end": "Koniec",
+      "remove": "Usuń przedział",
+      "add": "Dodaj przedział",
+      "resetDefaults": "Przywróć domyślne",
+      "save": "Zapisz przedziały",
+      "saved": "Ustawienia zapisane",
+      "error": "Nie udało się zapisać. Sprawdź godziny (koniec po początku)."
+    }
+  }
 }

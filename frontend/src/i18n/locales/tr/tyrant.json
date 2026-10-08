@@ -1,4 +1,147 @@
 {
-  "name": "Buz Ejderhası Tiranı",
-  "tagline": "Tiran savaşı için uygunluk, istatistikler, birlikler ve roller"
+  "name": "Ayaz Ejderhası Tiranı",
+  "tagline": "Tiran savaşı için müsaitlik, istatistikler, birlikler ve roller",
+  "home": {
+    "welcome": "Hoş geldin, {{state}}",
+    "currentRound": "Mevcut tur: {{round}}",
+    "subtitle": "Müsaitlik durumunuzu ve istatistiklerinizi kaydedin",
+    "closeAt": "Kayıtlar kapanıyor: {{time}}",
+    "closed": "Kayıtlar kapandı.",
+    "applyTile": "Kaydol veya güncelle",
+    "applyTileDesc": "Yeni kayıt için veya kaydını düzenlemek için Oyuncu ID'ni gir",
+    "applyTileClosedDesc": "Yeni kayıtlar kapandı. Kendi kaydını hâlâ düzenleyebilirsin.",
+    "adminDesc": "İstatistikler, oyuncular ve dışa aktarma",
+    "utcNote": "Tüm saatler UTC'dir"
+  },
+  "apply": {
+    "title": "Tiran kaydı",
+    "enterFid": "Kaydolmak veya kaydını düzenlemek için Oyuncu ID'ni (FID) gir.",
+    "newFor": "{{round}} için yeni kayıt",
+    "editFor": "{{round}} kaydını düzenle",
+    "notOpenTitle": "Kayıtlar açık değil",
+    "notOpenBody": "Şu anda açık bir Tiran turu yok. Daha sonra tekrar bak.",
+    "closedTitle": "Kayıtlar kapandı",
+    "closedBody": "{{round}} için yeni kayıt kabul edilmiyor. Zaten kaydolduysan düzenlemek için o Oyuncu ID'sini gir.",
+    "closedButEditable": "Yeni oyuncular için kayıtlar kapandı. Kendi kaydını hâlâ güncelleyebilirsin.",
+    "otherFid": "Başka bir Oyuncu ID kullan",
+    "savedTitle": "Gönderildi!",
+    "savedNew": "{{round}} için kaydın için teşekkürler. Savaş alanında görüşürüz!",
+    "savedEdit": "{{round}} kaydın güncellendi.",
+    "viewMine": "Kaydımı gör",
+    "backHome": "Ayaz Ejderhası Tiranı'na dön"
+  },
+  "fields": {
+    "ingameName": "Oyun İçi İsim",
+    "fid": "WOS Oyuncu ID (FID)",
+    "fidPlaceholder": "ör. 99292909",
+    "discordId": "Discord ID",
+    "discordPlaceholder": "ör. kullaniciadi",
+    "alliance": "İttifak",
+    "alliancePlaceholder": "ör. WOO"
+  },
+  "step1": {
+    "title": "Oyuncu Kimliği",
+    "desc": "Bize kendinizi tanıtın"
+  },
+  "step2": {
+    "title": "Müsaitlik",
+    "desc": "Katılabileceğiniz tüm zaman dilimlerini seçin",
+    "utcNote": "Tüm saatler UTC'dir",
+    "selectAll": "Tüm Zaman Dilimlerini Seç",
+    "openingRush": "Açılış Hücumu",
+    "discordVc": "Discord sesli kanalda dinleyebilirim"
+  },
+  "step3": {
+    "title": "Oyuncu İstatistikleri",
+    "desc": "Mevcut fırın seviyenizi ve gücünüzü girin",
+    "furnaceLevel": "Fırın Seviyesi",
+    "power": "Güç (Milyon)",
+    "powerPlaceholder": "ör. 410",
+    "gemSpend": "Tahmini Maks. Elmas Harcaması",
+    "gemPlaceholder": "ör. 10000"
+  },
+  "step4": {
+    "title": "Birlik Seviyeleri",
+    "desc": "Her birlik türü için fırın ve T-seviyesini seçin",
+    "infantry": "🛡 Piyade",
+    "lancer": "🐴 Mızrakçı",
+    "marksman": "🏹 Nişancı",
+    "fcLevel": "Fırın Seviyesi",
+    "tLevel": "T-Seviye"
+  },
+  "step5": {
+    "title": "İstenen Roller",
+    "desc": "Uygun olanların hepsini seçin"
+  },
+  "step6": {
+    "title": "Bilgilerinizi Gözden Geçirin",
+    "desc": "Göndermeden önce her şeyin doğru olduğundan emin olun",
+    "edit": "Düzenle"
+  },
+  "roles": {
+    "rally_leader": "Ralli Lideri",
+    "joiner": "Katılımcı",
+    "gathering": "Toplama/Yağma",
+    "battle_mgmt": "Savaş Yönetimi",
+    "event_prep": "Etkinlik Hazırlığı"
+  },
+  "errors": {
+    "power": "Güç bir sayı olmalı (milyon), ör. 410",
+    "gems": "Elmas harcaması tam sayı olmalı, ör. 10000"
+  },
+  "admin": {
+    "eventSwitch": "Etkinlik",
+    "subtitle": "Bu turun kayıtları: istatistikler, oyuncular ve dışa aktarma",
+    "defaultRoundName": "Tiran {{date}}",
+    "stats": {
+      "total": "Toplam Oyuncu",
+      "openingRush": "Açılış Hücumu",
+      "discordVc": "Discord Ses",
+      "alliances": "İttifaklar",
+      "gems": "Tahmini elmas"
+    },
+    "byWindow": "Zaman dilimine göre oyuncular (UTC)",
+    "byRole": "İstenen roller",
+    "byAlliance": "İttifaklar",
+    "byTroop": "Birlik seviyeleri",
+    "none": "yok",
+    "search": "İsim, FID veya Discord ara...",
+    "allianceFilter": "İttifak",
+    "allAlliances": "Tüm ittifaklar",
+    "minFurnace": "En az fırın",
+    "anyFurnace": "Her seviye",
+    "exportCsv": "CSV dışa aktar",
+    "exportExcel": "Excel dışa aktar",
+    "exportError": "Dışa aktarma başarısız",
+    "showing": "{{n}} oyuncu",
+    "col": {
+      "power": "Güç",
+      "gems": "Elmas",
+      "windows": "Dilimler (UTC)",
+      "vc": "Ses",
+      "submitted": "Gönderim"
+    },
+    "troopShort": {
+      "infantry": "Piy",
+      "lancer": "Mız",
+      "marksman": "Niş"
+    },
+    "confirmDelete": "{{name}} adlı oyuncunun kaydı bu turdan silinsin mi? Oyuncu profili korunur.",
+    "noPlayers": "Henüz kayıt yok",
+    "prev": "Önceki",
+    "next": "Sonraki",
+    "page": "Sayfa {{page}} / {{pages}}",
+    "settings": {
+      "windows": "Zaman dilimleri (UTC)",
+      "windowsDesc": "Oyuncular bu dilimlerden seçer. Değişiklikler yalnızca bu tura uygulanır; yeni tur bunları kopyalar.",
+      "start": "Başlangıç",
+      "end": "Bitiş",
+      "remove": "Dilimi kaldır",
+      "add": "Dilim ekle",
+      "resetDefaults": "Varsayılana dön",
+      "save": "Dilimleri kaydet",
+      "saved": "Ayarlar kaydedildi",
+      "error": "Kaydedilemedi. Saatleri kontrol et (bitiş başlangıçtan sonra)."
+    }
+  }
 }

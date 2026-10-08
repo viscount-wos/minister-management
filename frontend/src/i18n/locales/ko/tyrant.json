@@ -1,4 +1,147 @@
 {
   "name": "서리 용 폭군",
-  "tagline": "폭군 전투를 위한 참여 시간, 능력치, 병력, 역할"
+  "tagline": "폭군 전투를 위한 참여 시간, 능력치, 병력, 역할",
+  "home": {
+    "welcome": "환영합니다, {{state}}",
+    "currentRound": "현재 라운드: {{round}}",
+    "subtitle": "참여 가능 시간과 스탯을 등록하세요",
+    "closeAt": "신청 마감: {{time}}",
+    "closed": "신청이 마감되었습니다.",
+    "applyTile": "신청 또는 수정",
+    "applyTileDesc": "플레이어 ID를 입력해 새로 신청하거나 신청을 수정하세요",
+    "applyTileClosedDesc": "신규 신청은 마감되었습니다. 기존 신청은 수정할 수 있습니다.",
+    "adminDesc": "통계, 플레이어, 내보내기",
+    "utcNote": "모든 시간은 UTC 기준입니다"
+  },
+  "apply": {
+    "title": "폭군 신청",
+    "enterFid": "플레이어 ID(FID)를 입력해 신청하거나 수정하세요.",
+    "newFor": "{{round}} 새 신청",
+    "editFor": "{{round}} 신청 수정",
+    "notOpenTitle": "신청 기간이 아닙니다",
+    "notOpenBody": "현재 열린 폭군 라운드가 없습니다. 나중에 다시 확인하세요.",
+    "closedTitle": "신청 마감",
+    "closedBody": "{{round}} 신규 신청은 더 이상 받지 않습니다. 이미 신청했다면 그 플레이어 ID를 입력해 수정하세요.",
+    "closedButEditable": "신규 플레이어 신청은 마감되었습니다. 기존 신청은 수정할 수 있습니다.",
+    "otherFid": "다른 플레이어 ID 사용",
+    "savedTitle": "제출 완료!",
+    "savedNew": "{{round}}에 등록해 주셔서 감사합니다. 전장에서 만나요!",
+    "savedEdit": "{{round}} 신청이 수정되었습니다.",
+    "viewMine": "내 신청 보기",
+    "backHome": "서리 용 폭군으로 돌아가기"
+  },
+  "fields": {
+    "ingameName": "게임 내 이름",
+    "fid": "WOS 플레이어 ID (FID)",
+    "fidPlaceholder": "예: 99292909",
+    "discordId": "디스코드 ID",
+    "discordPlaceholder": "예: username",
+    "alliance": "연맹",
+    "alliancePlaceholder": "예: WOO"
+  },
+  "step1": {
+    "title": "플레이어 정보",
+    "desc": "본인 정보를 입력하세요"
+  },
+  "step2": {
+    "title": "참여 가능 시간",
+    "desc": "참여 가능한 시간대를 모두 선택하세요",
+    "utcNote": "모든 시간은 UTC 기준입니다",
+    "selectAll": "모든 시간대 선택",
+    "openingRush": "오프닝 러시",
+    "discordVc": "디스코드 음성 참여 가능"
+  },
+  "step3": {
+    "title": "플레이어 스탯",
+    "desc": "현재 용광로 레벨과 전투력을 입력하세요",
+    "furnaceLevel": "용광로 레벨",
+    "power": "전투력 (백만 단위)",
+    "powerPlaceholder": "예: 410",
+    "gemSpend": "예상 최대 보석 사용량",
+    "gemPlaceholder": "예: 10000"
+  },
+  "step4": {
+    "title": "병종 레벨",
+    "desc": "각 병종의 용광로와 T레벨을 선택하세요",
+    "infantry": "🛡 보병",
+    "lancer": "🐴 창병",
+    "marksman": "🏹 궁수",
+    "fcLevel": "용광로 레벨",
+    "tLevel": "T-레벨"
+  },
+  "step5": {
+    "title": "희망 역할",
+    "desc": "해당하는 항목을 모두 선택하세요"
+  },
+  "step6": {
+    "title": "정보 확인",
+    "desc": "제출 전 모든 정보가 정확한지 확인하세요",
+    "edit": "수정"
+  },
+  "roles": {
+    "rally_leader": "랠리 리더",
+    "joiner": "참여자",
+    "gathering": "채집/약탈",
+    "battle_mgmt": "전투 관리",
+    "event_prep": "이벤트 준비"
+  },
+  "errors": {
+    "power": "전투력은 숫자(백만 단위)로 입력하세요. 예: 410",
+    "gems": "보석 사용량은 정수로 입력하세요. 예: 10000"
+  },
+  "admin": {
+    "eventSwitch": "이벤트",
+    "subtitle": "이번 라운드 신청: 통계, 플레이어, 내보내기",
+    "defaultRoundName": "폭군 {{date}}",
+    "stats": {
+      "total": "전체 플레이어",
+      "openingRush": "오프닝 러시",
+      "discordVc": "디스코드 음성",
+      "alliances": "연맹",
+      "gems": "예상 보석"
+    },
+    "byWindow": "시간대별 플레이어 (UTC)",
+    "byRole": "희망 역할",
+    "byAlliance": "연맹",
+    "byTroop": "병종 티어",
+    "none": "없음",
+    "search": "이름, FID, 디스코드 검색...",
+    "allianceFilter": "연맹",
+    "allAlliances": "모든 연맹",
+    "minFurnace": "최소 용광로",
+    "anyFurnace": "모든 레벨",
+    "exportCsv": "CSV 내보내기",
+    "exportExcel": "엑셀 내보내기",
+    "exportError": "내보내기 실패",
+    "showing": "플레이어 {{n}}명",
+    "col": {
+      "power": "전투력",
+      "gems": "보석",
+      "windows": "시간대 (UTC)",
+      "vc": "음성",
+      "submitted": "제출"
+    },
+    "troopShort": {
+      "infantry": "보병",
+      "lancer": "창병",
+      "marksman": "궁수"
+    },
+    "confirmDelete": "{{name}}님의 신청을 이 라운드에서 삭제할까요? 플레이어 프로필은 유지됩니다.",
+    "noPlayers": "아직 신청이 없습니다",
+    "prev": "이전",
+    "next": "다음",
+    "page": "{{page}} / {{pages}} 페이지",
+    "settings": {
+      "windows": "시간대 (UTC)",
+      "windowsDesc": "플레이어는 이 시간대 중에서 선택합니다. 변경은 이 라운드에만 적용되며 새 라운드는 이를 복사합니다.",
+      "start": "시작",
+      "end": "종료",
+      "remove": "시간대 삭제",
+      "add": "시간대 추가",
+      "resetDefaults": "기본값으로",
+      "save": "시간대 저장",
+      "saved": "설정이 저장되었습니다",
+      "error": "저장하지 못했습니다. 시간을 확인하세요 (종료가 시작보다 뒤)."
+    }
+  }
 }

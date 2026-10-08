@@ -1,4 +1,147 @@
 {
   "name": "霜龙暴君",
-  "tagline": "暴君之战的可参与时间、属性、部队与分工"
+  "tagline": "暴君之战的可用时间、数据、兵种和角色",
+  "home": {
+    "welcome": "欢迎，{{state}}",
+    "currentRound": "当前轮次：{{round}}",
+    "subtitle": "登记你的可用时间和数据",
+    "closeAt": "报名截止：{{time}}",
+    "closed": "报名已截止。",
+    "applyTile": "报名或修改",
+    "applyTileDesc": "输入玩家ID开始报名或修改你的报名",
+    "applyTileClosedDesc": "新报名已截止。你仍可修改自己的报名。",
+    "adminDesc": "统计、玩家和导出",
+    "utcNote": "所有时间均为UTC时间"
+  },
+  "apply": {
+    "title": "暴君报名",
+    "enterFid": "输入玩家ID（FID）开始或修改你的报名。",
+    "newFor": "{{round}} 新报名",
+    "editFor": "修改你的 {{round}} 报名",
+    "notOpenTitle": "报名未开放",
+    "notOpenBody": "目前没有开放的暴君轮次，请稍后再来。",
+    "closedTitle": "报名已截止",
+    "closedBody": "{{round}} 不再接受新报名。如果你已报名，请输入该玩家ID进行修改。",
+    "closedButEditable": "新玩家报名已截止。你仍可修改自己的报名。",
+    "otherFid": "使用其他玩家ID",
+    "savedTitle": "提交成功！",
+    "savedNew": "感谢你报名 {{round}}。战场上见！",
+    "savedEdit": "你的 {{round}} 报名已更新。",
+    "viewMine": "查看我的报名",
+    "backHome": "返回霜龙暴君"
+  },
+  "fields": {
+    "ingameName": "游戏昵称",
+    "fid": "WOS 玩家ID (FID)",
+    "fidPlaceholder": "例如 99292909",
+    "discordId": "Discord ID",
+    "discordPlaceholder": "例如 username",
+    "alliance": "联盟",
+    "alliancePlaceholder": "例如 WOO"
+  },
+  "step1": {
+    "title": "玩家身份",
+    "desc": "告诉我们你是谁"
+  },
+  "step2": {
+    "title": "可用时间",
+    "desc": "选择所有你能参加的时间段",
+    "utcNote": "所有时间均为UTC时间",
+    "selectAll": "选择所有时间段",
+    "openingRush": "开场冲锋",
+    "discordVc": "可以在Discord语音频道收听"
+  },
+  "step3": {
+    "title": "玩家数据",
+    "desc": "输入你当前的熔炉等级和战力",
+    "furnaceLevel": "熔炉等级",
+    "power": "战力（百万）",
+    "powerPlaceholder": "例如 410",
+    "gemSpend": "预计最大宝石消耗",
+    "gemPlaceholder": "例如 10000"
+  },
+  "step4": {
+    "title": "兵种等级",
+    "desc": "为每个兵种选择熔炉和T等级",
+    "infantry": "🛡 步兵",
+    "lancer": "🐴 骑兵",
+    "marksman": "🏹 射手",
+    "fcLevel": "熔炉等级",
+    "tLevel": "T等级"
+  },
+  "step5": {
+    "title": "希望担任的角色",
+    "desc": "选择所有适用的选项"
+  },
+  "step6": {
+    "title": "确认信息",
+    "desc": "提交前请确认所有信息无误",
+    "edit": "编辑"
+  },
+  "roles": {
+    "rally_leader": "集结指挥",
+    "joiner": "参战者",
+    "gathering": "采集/掠夺",
+    "battle_mgmt": "战斗管理",
+    "event_prep": "活动准备"
+  },
+  "errors": {
+    "power": "战力必须是数字（百万），例如 410",
+    "gems": "宝石消耗必须是整数，例如 10000"
+  },
+  "admin": {
+    "eventSwitch": "活动",
+    "subtitle": "本轮报名：统计、玩家和导出",
+    "defaultRoundName": "暴君 {{date}}",
+    "stats": {
+      "total": "玩家总数",
+      "openingRush": "开场冲锋",
+      "discordVc": "Discord语音",
+      "alliances": "联盟",
+      "gems": "预计宝石"
+    },
+    "byWindow": "各时间段玩家（UTC）",
+    "byRole": "希望担任的角色",
+    "byAlliance": "联盟",
+    "byTroop": "兵种等级",
+    "none": "无",
+    "search": "搜索昵称、FID或Discord...",
+    "allianceFilter": "联盟",
+    "allAlliances": "所有联盟",
+    "minFurnace": "熔炉至少",
+    "anyFurnace": "任意等级",
+    "exportCsv": "导出CSV",
+    "exportExcel": "导出Excel",
+    "exportError": "导出失败",
+    "showing": "{{n}} 名玩家",
+    "col": {
+      "power": "战力",
+      "gems": "宝石",
+      "windows": "时间段（UTC）",
+      "vc": "语音",
+      "submitted": "提交时间"
+    },
+    "troopShort": {
+      "infantry": "步",
+      "lancer": "骑",
+      "marksman": "射"
+    },
+    "confirmDelete": "从本轮删除 {{name}} 的报名？玩家资料会保留。",
+    "noPlayers": "暂无报名",
+    "prev": "上一页",
+    "next": "下一页",
+    "page": "第 {{page}} / {{pages}} 页",
+    "settings": {
+      "windows": "时间段（UTC）",
+      "windowsDesc": "玩家从这些时间段中选择。修改只影响本轮；新一轮会复制这些设置。",
+      "start": "开始",
+      "end": "结束",
+      "remove": "删除时间段",
+      "add": "添加时间段",
+      "resetDefaults": "恢复默认",
+      "save": "保存时间段",
+      "saved": "设置已保存",
+      "error": "无法保存。请检查时间（结束晚于开始）。"
+    }
+  }
 }

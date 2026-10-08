@@ -212,6 +212,11 @@ def test_admin_list_filter_search_sort_paging(client, admin):
     assert [a['fid'] for a in r.json['applications']] == ['23', '22', '21']
     r = client.get(base + '?sort=gems&dir=asc&limit=1&offset=1', headers=admin)
     assert r.json['total'] == 3 and r.json['limit'] == 1 and [a['fid'] for a in r.json['applications']] == ['21']
+    r = client.get(base + '?min_furnace=fc1', headers=admin)
+    assert [a['fid'] for a in r.json['applications']] == ['21']  # FC10 yes, 30 and blank no
+    r = client.get(base + '?min_furnace=20', headers=admin)
+    assert sorted(a['fid'] for a in r.json['applications']) == ['21', '22']
+    assert client.get(base + '?min_furnace=FC11', headers=admin).json['field'] == 'min_furnace'
     assert client.get(base + '?sort=bogus', headers=admin).json['field'] == 'sort'
     assert client.get(base + '?limit=0', headers=admin).json['field'] == 'limit'
     r = client.get('/api/admin/tyrant/rounds/current/applications', headers=admin)

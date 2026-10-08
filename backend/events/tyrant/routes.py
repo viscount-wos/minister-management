@@ -31,12 +31,13 @@ def resolve_round(ref):
 @require_admin
 def admin_list(ref):
     """?q= (FID, name or Discord ID) &alliance= &sort=submitted|updated|name|alliance|fid|furnace|power|gems
-    &dir=asc|desc &limit= &offset= -> {round_id, total, applications: [...]}"""
+    &dir=asc|desc &min_furnace=<code> &limit= &offset= -> {round_id, total, applications: [...]}"""
     rnd = resolve_round(ref)
     apps = logic.filter_and_sort(logic.round_applications(get_db(), rnd),
                                  q=request.args.get('q', ''), alliance=request.args.get('alliance', ''),
                                  sort=request.args.get('sort') or 'submitted',
-                                 direction=(request.args.get('dir') or 'desc').lower())
+                                 direction=(request.args.get('dir') or 'desc').lower(),
+                                 min_furnace=request.args.get('min_furnace', ''))
     body = {'round_id': rnd['id']}
     body.update(paginate(apps, 'applications'))
     return jsonify(body)

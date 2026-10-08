@@ -1,4 +1,147 @@
 {
   "name": "Frostdrachen-Tyrann",
-  "tagline": "Verfügbarkeit, Werte, Truppen und Rollen für den Kampf gegen den Tyrannen"
+  "tagline": "Verfügbarkeit, Werte, Truppen und Rollen für den Tyrannen-Kampf",
+  "home": {
+    "welcome": "Willkommen, {{state}}",
+    "currentRound": "Aktuelle Runde: {{round}}",
+    "subtitle": "Trage deine Verfügbarkeit und Werte ein",
+    "closeAt": "Anmeldeschluss: {{time}}",
+    "closed": "Die Anmeldung ist geschlossen.",
+    "applyTile": "Anmelden oder ändern",
+    "applyTileDesc": "Gib deine Spieler-ID ein, um dich anzumelden oder deine Anmeldung zu ändern",
+    "applyTileClosedDesc": "Neue Anmeldungen sind geschlossen. Deine kannst du noch ändern.",
+    "adminDesc": "Statistik, Spieler und Export",
+    "utcNote": "Alle Zeiten in UTC"
+  },
+  "apply": {
+    "title": "Tyrannen-Anmeldung",
+    "enterFid": "Gib deine Spieler-ID (FID) ein, um dich anzumelden oder deine Anmeldung zu ändern.",
+    "newFor": "Neue Anmeldung für {{round}}",
+    "editFor": "Deine Anmeldung für {{round}} bearbeiten",
+    "notOpenTitle": "Die Anmeldung ist nicht offen",
+    "notOpenBody": "Gerade ist keine Tyrannen-Runde offen. Schau später wieder vorbei.",
+    "closedTitle": "Anmeldung geschlossen",
+    "closedBody": "Neue Anmeldungen für {{round}} werden nicht mehr angenommen. Wenn du schon angemeldet bist, gib diese Spieler-ID ein, um sie zu ändern.",
+    "closedButEditable": "Für neue Spieler geschlossen. Deine Anmeldung kannst du noch ändern.",
+    "otherFid": "Andere Spieler-ID verwenden",
+    "savedTitle": "Gesendet!",
+    "savedNew": "Danke für deine Anmeldung zu {{round}}. Wir sehen uns auf dem Schlachtfeld!",
+    "savedEdit": "Deine Anmeldung für {{round}} wurde aktualisiert.",
+    "viewMine": "Meine Anmeldung ansehen",
+    "backHome": "Zurück zum Frostdrachen-Tyrann"
+  },
+  "fields": {
+    "ingameName": "Name im Spiel",
+    "fid": "WOS-Spieler-ID (FID)",
+    "fidPlaceholder": "z. B. 99292909",
+    "discordId": "Discord-ID",
+    "discordPlaceholder": "z. B. benutzername",
+    "alliance": "Allianz",
+    "alliancePlaceholder": "z. B. WOO"
+  },
+  "step1": {
+    "title": "Spieler",
+    "desc": "Sag uns, wer du bist"
+  },
+  "step2": {
+    "title": "Verfügbarkeit",
+    "desc": "Wähle alle Zeitfenster, in denen du dabei sein kannst",
+    "utcNote": "Alle Zeiten in UTC",
+    "selectAll": "Alle Zeitfenster wählen",
+    "openingRush": "Eröffnungsansturm",
+    "discordVc": "Kann im Discord-Sprachkanal zuhören"
+  },
+  "step3": {
+    "title": "Spielerwerte",
+    "desc": "Gib deine aktuelle Ofenstufe und Macht ein",
+    "furnaceLevel": "Ofenstufe",
+    "power": "Macht in Millionen",
+    "powerPlaceholder": "z. B. 410",
+    "gemSpend": "Geschätzte max. Edelsteinausgabe",
+    "gemPlaceholder": "z. B. 10000"
+  },
+  "step4": {
+    "title": "Truppenstufen",
+    "desc": "Wähle Ofen- und T-Stufe für jeden Truppentyp",
+    "infantry": "🛡 Infanterie",
+    "lancer": "🐴 Lanzenträger",
+    "marksman": "🏹 Schützen",
+    "fcLevel": "Ofenstufe",
+    "tLevel": "T-Stufe"
+  },
+  "step5": {
+    "title": "Gewünschte Rollen",
+    "desc": "Alles Zutreffende ankreuzen"
+  },
+  "step6": {
+    "title": "Angaben prüfen",
+    "desc": "Bitte prüfe vor dem Absenden, ob alles stimmt",
+    "edit": "Bearbeiten"
+  },
+  "roles": {
+    "rally_leader": "Sammelführer",
+    "joiner": "Teilnehmer",
+    "gathering": "Sammeln/Plündern",
+    "battle_mgmt": "Kampfleitung",
+    "event_prep": "Event-Vorbereitung"
+  },
+  "errors": {
+    "power": "Macht muss eine Zahl sein (in Millionen), z. B. 410",
+    "gems": "Edelsteinausgabe muss eine ganze Zahl sein, z. B. 10000"
+  },
+  "admin": {
+    "eventSwitch": "Event",
+    "subtitle": "Anmeldungen dieser Runde: Statistik, Spieler und Export",
+    "defaultRoundName": "Tyrann {{date}}",
+    "stats": {
+      "total": "Spieler",
+      "openingRush": "Eröffnungsansturm",
+      "discordVc": "Discord-Sprache",
+      "alliances": "Allianzen",
+      "gems": "Geschätzte Edelsteine"
+    },
+    "byWindow": "Spieler pro Zeitfenster (UTC)",
+    "byRole": "Gewünschte Rollen",
+    "byAlliance": "Allianzen",
+    "byTroop": "Truppenstufen",
+    "none": "keine",
+    "search": "Name, FID oder Discord suchen...",
+    "allianceFilter": "Allianz",
+    "allAlliances": "Alle Allianzen",
+    "minFurnace": "Ofen mindestens",
+    "anyFurnace": "Jede Stufe",
+    "exportCsv": "CSV exportieren",
+    "exportExcel": "Excel exportieren",
+    "exportError": "Export fehlgeschlagen",
+    "showing": "{{n}} Spieler",
+    "col": {
+      "power": "Macht",
+      "gems": "Edelsteine",
+      "windows": "Zeitfenster (UTC)",
+      "vc": "Sprache",
+      "submitted": "Gesendet"
+    },
+    "troopShort": {
+      "infantry": "Inf",
+      "lancer": "Lan",
+      "marksman": "Sch"
+    },
+    "confirmDelete": "Anmeldung von {{name}} aus dieser Runde entfernen? Das Spielerprofil bleibt erhalten.",
+    "noPlayers": "Noch keine Anmeldungen",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "page": "Seite {{page}} von {{pages}}",
+    "settings": {
+      "windows": "Zeitfenster (UTC)",
+      "windowsDesc": "Spieler wählen aus diesen Fenstern. Änderungen gelten nur für diese Runde; eine neue Runde übernimmt sie.",
+      "start": "Beginn",
+      "end": "Ende",
+      "remove": "Fenster entfernen",
+      "add": "Fenster hinzufügen",
+      "resetDefaults": "Standard wiederherstellen",
+      "save": "Zeitfenster speichern",
+      "saved": "Einstellungen gespeichert",
+      "error": "Speichern fehlgeschlagen. Prüfe die Zeiten (Ende nach Beginn)."
+    }
+  }
 }

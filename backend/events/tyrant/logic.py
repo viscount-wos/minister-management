@@ -14,7 +14,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from core.exports import append_safe, to_csv_bytes
-from core.furnace import FURNACE_LEVELS, furnace_ordinal
+from core.furnace import FURNACE_LEVELS, furnace_ordinal, validate_furnace
 from core.validation import validate_number
 from core.errors import validation_error
 from events import EventSpec
@@ -79,7 +79,7 @@ def _troop(profile, kind, key):
     return None
 
 
-def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='desc'):
+def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='desc', min_furnace=None):
     if alliance:
         a = alliance.strip().casefold()
         apps = [x for x in apps if (x['profile'].get('alliance') or '').strip().casefold() == a]
@@ -88,6 +88,9 @@ def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='de
         apps = [x for x in apps if needle in (x['fid'] or '').casefold()
                 or needle in (x['profile'].get('game_name') or '').casefold()
                 or needle in (x['profile'].get('discord_id') or '').casefold()]
+    if min_furnace:
+        floor = furnace_ordinal(validate_furnace(min_furnace, 'min_furnace'))
+        apps = [x for x in apps if furnace_ordinal(x['profile'].get('furnace_level')) >= floor]
     if sort not in SORT_KEYS:
         raise validation_error('sort must be one of ' + ', '.join(SORT_KEYS), 'sort')
     if direction not in ('asc', 'desc'):

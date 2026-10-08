@@ -1,4 +1,147 @@
 {
   "name": "Tirano Dragón de Escarcha",
-  "tagline": "Disponibilidad, estadísticas, tropas y roles para la batalla del Tirano"
+  "tagline": "Disponibilidad, estadísticas, tropas y roles para la batalla del Tirano",
+  "home": {
+    "welcome": "Bienvenido, {{state}}",
+    "currentRound": "Ronda actual: {{round}}",
+    "subtitle": "Registra tu disponibilidad y estadísticas",
+    "closeAt": "Las inscripciones cierran: {{time}}",
+    "closed": "Las inscripciones están cerradas.",
+    "applyTile": "Inscribirse o actualizar",
+    "applyTileDesc": "Introduce tu ID de jugador para inscribirte o editar tu inscripción",
+    "applyTileClosedDesc": "Ya no se admiten nuevas inscripciones. Aún puedes editar la tuya.",
+    "adminDesc": "Estadísticas, jugadores y exportación",
+    "utcNote": "Todas las horas están en UTC"
+  },
+  "apply": {
+    "title": "Inscripción al Tirano",
+    "enterFid": "Introduce tu ID de jugador (FID) para inscribirte o editar tu inscripción.",
+    "newFor": "Nueva inscripción para {{round}}",
+    "editFor": "Edita tu inscripción para {{round}}",
+    "notOpenTitle": "Las inscripciones no están abiertas",
+    "notOpenBody": "No hay ninguna ronda del Tirano abierta. Vuelve más tarde.",
+    "closedTitle": "Inscripciones cerradas",
+    "closedBody": "Ya no se admiten nuevas inscripciones para {{round}}. Si ya te inscribiste, introduce ese ID para editarla.",
+    "closedButEditable": "Inscripciones cerradas para nuevos jugadores. Aún puedes actualizar la tuya.",
+    "otherFid": "Usar otro ID de jugador",
+    "savedTitle": "¡Enviado!",
+    "savedNew": "Gracias por inscribirte en {{round}}. ¡Nos vemos en el campo de batalla!",
+    "savedEdit": "Tu inscripción para {{round}} se ha actualizado.",
+    "viewMine": "Ver mi inscripción",
+    "backHome": "Volver al Tirano Dragón de Escarcha"
+  },
+  "fields": {
+    "ingameName": "Nombre en el juego",
+    "fid": "ID de jugador WOS (FID)",
+    "fidPlaceholder": "p. ej. 99292909",
+    "discordId": "ID de Discord",
+    "discordPlaceholder": "p. ej. usuario",
+    "alliance": "Alianza",
+    "alliancePlaceholder": "p. ej. WOO"
+  },
+  "step1": {
+    "title": "Identidad del jugador",
+    "desc": "Dinos quién eres"
+  },
+  "step2": {
+    "title": "Disponibilidad",
+    "desc": "Marca todas las franjas en las que puedes participar",
+    "utcNote": "Todas las horas están en UTC",
+    "selectAll": "Seleccionar todas las franjas",
+    "openingRush": "Ataque inicial",
+    "discordVc": "Puedo escuchar en el canal de voz de Discord"
+  },
+  "step3": {
+    "title": "Estadísticas",
+    "desc": "Indica tu nivel de horno y tu poder actuales",
+    "furnaceLevel": "Nivel de horno",
+    "power": "Poder en millones",
+    "powerPlaceholder": "p. ej. 410",
+    "gemSpend": "Gasto máx. estimado de gemas",
+    "gemPlaceholder": "p. ej. 10000"
+  },
+  "step4": {
+    "title": "Niveles de tropas",
+    "desc": "Elige el horno y el nivel T de cada tipo de tropa",
+    "infantry": "🛡 Infantería",
+    "lancer": "🐴 Lanceros",
+    "marksman": "🏹 Tiradores",
+    "fcLevel": "Nivel de horno",
+    "tLevel": "Nivel T"
+  },
+  "step5": {
+    "title": "Roles deseados",
+    "desc": "Marca todos los que correspondan"
+  },
+  "step6": {
+    "title": "Revisa tus datos",
+    "desc": "Confirma que todo es correcto antes de enviar",
+    "edit": "Editar"
+  },
+  "roles": {
+    "rally_leader": "Líder de reunión",
+    "joiner": "Participante",
+    "gathering": "Recolección/Saqueo",
+    "battle_mgmt": "Gestión de batalla",
+    "event_prep": "Preparación del evento"
+  },
+  "errors": {
+    "power": "El poder debe ser un número (en millones), p. ej. 410",
+    "gems": "El gasto de gemas debe ser un número entero, p. ej. 10000"
+  },
+  "admin": {
+    "eventSwitch": "Evento",
+    "subtitle": "Inscripciones de esta ronda: estadísticas, jugadores y exportación",
+    "defaultRoundName": "Tirano {{date}}",
+    "stats": {
+      "total": "Jugadores",
+      "openingRush": "Ataque inicial",
+      "discordVc": "Voz Discord",
+      "alliances": "Alianzas",
+      "gems": "Gemas estimadas"
+    },
+    "byWindow": "Jugadores por franja (UTC)",
+    "byRole": "Roles deseados",
+    "byAlliance": "Alianzas",
+    "byTroop": "Niveles de tropa",
+    "none": "ninguno",
+    "search": "Buscar nombre, FID o Discord...",
+    "allianceFilter": "Alianza",
+    "allAlliances": "Todas las alianzas",
+    "minFurnace": "Horno mínimo",
+    "anyFurnace": "Cualquier nivel",
+    "exportCsv": "Exportar CSV",
+    "exportExcel": "Exportar Excel",
+    "exportError": "Error al exportar",
+    "showing": "{{n}} jugadores",
+    "col": {
+      "power": "Poder",
+      "gems": "Gemas",
+      "windows": "Franjas (UTC)",
+      "vc": "Voz",
+      "submitted": "Enviado"
+    },
+    "troopShort": {
+      "infantry": "Inf",
+      "lancer": "Lan",
+      "marksman": "Tir"
+    },
+    "confirmDelete": "¿Quitar la inscripción de {{name}} de esta ronda? El perfil del jugador se conserva.",
+    "noPlayers": "Aún no hay inscripciones",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {{page}} de {{pages}}",
+    "settings": {
+      "windows": "Franjas horarias (UTC)",
+      "windowsDesc": "Los jugadores eligen entre estas franjas. Los cambios solo afectan a esta ronda; una ronda nueva las copia.",
+      "start": "Inicio",
+      "end": "Fin",
+      "remove": "Quitar franja",
+      "add": "Añadir franja",
+      "resetDefaults": "Restablecer valores",
+      "save": "Guardar franjas",
+      "saved": "Ajustes guardados",
+      "error": "No se pudieron guardar. Revisa las horas (el fin después del inicio)."
+    }
+  }
 }

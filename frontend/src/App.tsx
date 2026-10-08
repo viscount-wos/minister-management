@@ -12,6 +12,7 @@ import AdminLogin from './events/ministry/admin/AdminLogin';
 import AdminDashboard from './events/ministry/admin/AdminDashboard';
 import AdminGuide from './events/ministry/admin/AdminGuide';
 import TyrantPage from './events/tyrant/TyrantPage';
+import TyrantWizard from './events/tyrant/TyrantWizard';
 import SvsPage from './events/svs/SvsPage';
 import TalPage from './events/tal/TalPage';
 
@@ -35,6 +36,7 @@ function App() {
 
             {/* Other events */}
             <Route path="/tyrant" element={<TyrantPage />} />
+            <Route path="/tyrant/apply" element={<TyrantWizard />} />
             <Route path="/svs" element={<SvsPage />} />
             <Route path="/tal" element={<TalPage />} />
 

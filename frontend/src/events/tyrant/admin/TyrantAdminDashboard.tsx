@@ -1,39 +1,32 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LogOut, Users, Calendar, HelpCircle, Settings, RefreshCw, Lock, AlertCircle } from 'lucide-react';
-import api, { Round, adminSession, onUnauthorized } from '../../../shared/api';
+import { LogOut, Users, HelpCircle, Settings, RefreshCw, Lock, AlertCircle } from 'lucide-react';
+import { Round, adminSession, onUnauthorized } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
-import PlayerManagement from './PlayerManagement';
-import AssignmentManagement from './AssignmentManagement';
-import AdminSettings from './AdminSettings';
-import StartNewRoundDialog from './StartNewRoundDialog';
-import { MINISTRY_PATHS } from '../paths';
 import AdminEventSwitch from '../../../shell/AdminEventSwitch';
-import TyrantAdminDashboard from '../../tyrant/admin/TyrantAdminDashboard';
+import StartNewRoundDialog from '../../ministry/admin/StartNewRoundDialog';
+import { TyrantSettings, tyrantApi } from '../api';
+import { TYRANT_PATHS } from '../paths';
+import TyrantPlayers from './TyrantPlayers';
+import TyrantRoundSettings from './TyrantRoundSettings';
 
-type Tab = 'players' | 'assignments' | 'settings';
+type Tab = 'players' | 'settings';
+type TRound = Round<TyrantSettings>;
 
-/** Rounds other than the open/draft ones are history: viewable, not editable. */
-export const isReadOnlyRound = (r: Round | null) => !r || r.status === 'closed';
-
-/** One dashboard URL; ?event=tyrant switches to the Frost Dragon Tyrant admin. */
-export default function AdminDashboard() {
-  const [params] = useSearchParams();
-  return params.get('event') === 'tyrant' ? <TyrantAdminDashboard /> : <MinistryAdminDashboard />;
-}
-
-function MinistryAdminDashboard() {
+// Frost Dragon Tyrant admin: same shell as the ministry dashboard (event switch,
+// round selector, Start new round, tabs). Players tab = tyrantpoll's admin page
+// (stats cards, search, alliance filter, sortable table, delete, CSV + Excel).
+export default function TyrantAdminDashboard() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<Tab>('players');
-  const [rounds, setRounds] = useState<Round[] | null>(null);
+  const { t, i18n } = useTranslation();
+  const [tab, setTab] = useState<Tab>('players');
+  const [rounds, setRounds] = useState<TRound[] | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showStart, setShowStart] = useState(false);
   const [error, setError] = useState('');
   const hasToken = !!adminSession.token();
 
-  // A 401 anywhere (missing / forged / expired token) -> back to login.
   useEffect(() => {
     if (!hasToken) {
       navigate('/admin', { replace: true });
@@ -45,7 +38,7 @@ function MinistryAdminDashboard() {
   const loadRounds = useCallback(
     async (select?: number) => {
       try {
-        const res = await api.admin.rounds('ministry');
+        const res = await tyrantApi.admin.rounds();
         setRounds(res.rounds);
         const open = res.rounds.find((r) => r.status === 'open');
         setSelectedId((prev) => {
@@ -64,28 +57,20 @@ function MinistryAdminDashboard() {
     if (hasToken) loadRounds();
   }, [hasToken, loadRounds]);
 
-  const handleLogout = () => {
-    adminSession.clear();
-    navigate(MINISTRY_PATHS.home);
-  };
-
-  const onRoundUpdated = (r: Round) =>
-    setRounds((rs) => (rs ? rs.map((x) => (x.id === r.id ? { ...x, ...r, application_count: x.application_count } : x)) : rs));
-
   if (!hasToken) return null;
 
   const round = rounds?.find((r) => r.id === selectedId) ?? null;
   const currentOpen = rounds?.find((r) => r.status === 'open') ?? null;
-  const readOnly = isReadOnlyRound(round);
+  const readOnly = !round || round.status === 'closed';
 
-  const tabButton = (tab: Tab, Icon: typeof Users, label: string) => (
+  const tabButton = (key: Tab, Icon: typeof Users, label: string) => (
     <button
-      onClick={() => setActiveTab(tab)}
-      data-testid={`tab-${tab}`}
+      onClick={() => setTab(key)}
+      data-testid={`tab-${key}`}
       role="tab"
-      aria-selected={activeTab === tab}
+      aria-selected={tab === key}
       className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors border-b-2 ${
-        activeTab === tab ? 'border-accent text-accent' : 'border-transparent text-theme-dim hover:text-theme-text'
+        tab === key ? 'border-accent text-accent' : 'border-transparent text-theme-dim hover:text-theme-text'
       }`}
     >
       <Icon className="w-5 h-5" aria-hidden="true" />
@@ -94,16 +79,16 @@ function MinistryAdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-dark-bg py-8 px-4">
+    <div className="min-h-screen bg-dark-bg py-8 px-4" data-testid="tyrant-admin">
       <div className="max-w-7xl mx-auto">
         <div className="bg-dark-card rounded-xl border border-theme-border p-6 mb-6">
           <div className="mb-4">
-            <AdminEventSwitch current="ministry" />
+            <AdminEventSwitch current="tyrant" />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-accent">{t('admin:title')}</h1>
-              <p className="text-theme-dim mt-1">{t('admin:managePlayers')}</p>
+              <h1 className="text-3xl font-bold text-accent">{t('tyrant:name')}</h1>
+              <p className="text-theme-dim mt-1">{t('tyrant:admin.subtitle')}</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -114,7 +99,10 @@ function MinistryAdminDashboard() {
                 {t('guide:admin.linkText')}
               </button>
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  adminSession.clear();
+                  navigate(TYRANT_PATHS.home);
+                }}
                 data-testid="admin-logout"
                 className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark transition-colors"
               >
@@ -124,7 +112,6 @@ function MinistryAdminDashboard() {
             </div>
           </div>
 
-          {/* Round selector: current round by default; past rounds are read-only */}
           <div className="mt-6 flex flex-wrap items-end gap-4">
             <div>
               <label htmlFor="round-select" className="block text-sm font-medium text-theme-text mb-1">
@@ -191,23 +178,31 @@ function MinistryAdminDashboard() {
 
           <div className="flex gap-4 mt-6 border-b border-theme-border" role="tablist">
             {tabButton('players', Users, t('admin:players'))}
-            {tabButton('assignments', Calendar, t('admin:assignments'))}
             {tabButton('settings', Settings, t('admin:settings'))}
           </div>
         </div>
 
-        {activeTab === 'players' &&
-          (round ? <PlayerManagement key={round.id} round={round} readOnly={readOnly} onChanged={() => loadRounds()} /> : <NoRoundCard />)}
-        {activeTab === 'assignments' &&
-          (round ? <AssignmentManagement key={round.id} round={round} readOnly={readOnly} onRoundUpdated={onRoundUpdated} /> : <NoRoundCard />)}
-        {activeTab === 'settings' && (
-          <AdminSettings key={round?.id ?? 'none'} round={round} readOnly={readOnly} onRoundUpdated={onRoundUpdated} />
+        {!round ? (
+          <div className="bg-dark-card rounded-xl border border-theme-border p-12 text-center text-theme-dim">
+            {t('admin:round.noRoundsYet')}
+          </div>
+        ) : tab === 'players' ? (
+          <TyrantPlayers key={round.id} round={round} readOnly={readOnly} onChanged={() => loadRounds()} />
+        ) : (
+          <TyrantRoundSettings
+            key={round.id}
+            round={round}
+            readOnly={readOnly}
+            onSaved={(r) => setRounds((rs) => (rs ? rs.map((x) => (x.id === r.id ? { ...x, ...r, application_count: x.application_count } : x)) : rs))}
+          />
         )}
       </div>
 
       {showStart && (
         <StartNewRoundDialog
-          currentRound={currentOpen}
+          event="tyrant"
+          defaultName={t('tyrant:admin.defaultRoundName', { date: new Date().toLocaleDateString(i18n.language) })}
+          currentRound={currentOpen as Round | null}
           onClose={() => setShowStart(false)}
           onStarted={(r) => {
             setShowStart(false);
@@ -215,15 +210,6 @@ function MinistryAdminDashboard() {
           }}
         />
       )}
-    </div>
-  );
-}
-
-function NoRoundCard() {
-  const { t } = useTranslation();
-  return (
-    <div className="bg-dark-card rounded-xl border border-theme-border p-12 text-center text-theme-dim">
-      {t('admin:round.noRoundsYet')}
     </div>
   );
 }

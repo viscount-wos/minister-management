@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Crown, Flame, Castle, Swords, Shield, Sparkles, LucideIcon } from 'lucide-react';
 import api from '../shared/api';
 import { MINISTRY_PATHS } from '../events/ministry/paths';
+import { TYRANT_PATHS } from '../events/tyrant/paths';
 
 type TileStatus = 'open' | 'notOpen' | 'nextRelease' | 'comingSoon';
 
@@ -17,7 +18,7 @@ interface EventTile {
 // One tile per event, in the order players meet them.
 const EVENTS: EventTile[] = [
   { key: 'ministry', path: MINISTRY_PATHS.home, icon: Crown, status: 'open' },
-  { key: 'tyrant', path: '/tyrant', icon: Flame, status: 'nextRelease' },
+  { key: 'tyrant', path: TYRANT_PATHS.home, icon: Flame, status: 'open' },
   { key: 'svs', path: '/svs', icon: Castle, status: 'nextRelease' },
   { key: 'tal', path: '/tal', icon: Swords, status: 'comingSoon' },
 ];

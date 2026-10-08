@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import api, { Round } from '../../../shared/api';
+import api, { EventKey, Round } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
 import { localInputToIso } from '../../../shared/datetime';
 
@@ -13,11 +13,15 @@ interface StartNewRoundDialogProps {
   currentRound: Round | null;
   onClose: () => void;
   onStarted: (round: Round) => void;
+  /** Which event's round to start (default ministry). */
+  event?: EventKey;
+  /** Suggested name; default "Ministry <date>". */
+  defaultName?: string;
 }
 
-export default function StartNewRoundDialog({ currentRound, onClose, onStarted }: StartNewRoundDialogProps) {
+export default function StartNewRoundDialog({ currentRound, onClose, onStarted, event = 'ministry', defaultName }: StartNewRoundDialogProps) {
   const { t, i18n } = useTranslation();
-  const [name, setName] = useState(() => t('admin:round.defaultName', { date: new Date().toLocaleDateString(i18n.language) }));
+  const [name, setName] = useState(() => defaultName ?? t('admin:round.defaultName', { date: new Date().toLocaleDateString(i18n.language) }));
   const [closing, setClosing] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -36,7 +40,7 @@ export default function StartNewRoundDialog({ currentRound, onClose, onStarted }
     setBusy(true);
     setError('');
     try {
-      const res = await api.admin.startNewRound('ministry', { name: name.trim(), closing_time: localInputToIso(closing) });
+      const res = await api.admin.startNewRound(event, { name: name.trim(), closing_time: localInputToIso(closing) });
       onStarted(res.round);
     } catch (err) {
       setError(errorText(t, err, 'admin:round.startError'));

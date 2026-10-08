@@ -1,4 +1,147 @@
 {
   "name": "Frost Dragon Tyrant",
-  "tagline": "Availability, stats, troops and roles for the Tyrant fight"
+  "tagline": "Availability, stats, troops and roles for the Tyrant fight",
+  "home": {
+    "welcome": "Welcome, {{state}}",
+    "currentRound": "Current round: {{round}}",
+    "subtitle": "Register your availability and stats",
+    "closeAt": "Sign-ups close: {{time}}",
+    "closed": "Sign-ups are now closed.",
+    "applyTile": "Sign up or update",
+    "applyTileDesc": "Enter your Player ID to start a new sign-up or edit yours",
+    "applyTileClosedDesc": "New sign-ups are closed. You can still edit yours.",
+    "adminDesc": "Stats, players and exports",
+    "utcNote": "All times are in UTC"
+  },
+  "apply": {
+    "title": "Tyrant sign-up",
+    "enterFid": "Enter your Player ID (FID) to start or edit your sign-up.",
+    "newFor": "New sign-up for {{round}}",
+    "editFor": "Edit your sign-up for {{round}}",
+    "notOpenTitle": "Sign-ups are not open",
+    "notOpenBody": "There is no open Tyrant round right now. Check back later.",
+    "closedTitle": "Sign-ups are closed",
+    "closedBody": "New sign-ups for {{round}} are no longer accepted. If you already signed up, enter that Player ID to edit it.",
+    "closedButEditable": "Sign-ups are closed for new players. You can still update yours.",
+    "otherFid": "Use a different Player ID",
+    "savedTitle": "Submitted!",
+    "savedNew": "Thank you for registering for {{round}}. See you on the battlefield!",
+    "savedEdit": "Your sign-up for {{round}} has been updated.",
+    "viewMine": "View my sign-up",
+    "backHome": "Back to Frost Dragon Tyrant"
+  },
+  "fields": {
+    "ingameName": "In-Game Name",
+    "fid": "WOS Player ID (FID)",
+    "fidPlaceholder": "e.g. 99292909",
+    "discordId": "Discord ID",
+    "discordPlaceholder": "e.g. username",
+    "alliance": "Alliance",
+    "alliancePlaceholder": "e.g. WOO"
+  },
+  "step1": {
+    "title": "Player Identity",
+    "desc": "Tell us who you are"
+  },
+  "step2": {
+    "title": "Availability",
+    "desc": "Select all time slots you can attend",
+    "utcNote": "All times are in UTC",
+    "selectAll": "Select All Time Slots",
+    "openingRush": "Opening Rush",
+    "discordVc": "Can listen in Discord VC"
+  },
+  "step3": {
+    "title": "Player Stats",
+    "desc": "Enter your current furnace level and power",
+    "furnaceLevel": "Furnace Level",
+    "power": "Power in Millions",
+    "powerPlaceholder": "e.g. 410",
+    "gemSpend": "Est. Max Gem Spend",
+    "gemPlaceholder": "e.g. 10000"
+  },
+  "step4": {
+    "title": "Troop Levels",
+    "desc": "Select furnace and T-level for each troop type",
+    "infantry": "🛡 Infantry",
+    "lancer": "🐴 Lancer",
+    "marksman": "🏹 Marksman",
+    "fcLevel": "Furnace Level",
+    "tLevel": "T-Level"
+  },
+  "step5": {
+    "title": "Roles Wanted",
+    "desc": "Check all that apply"
+  },
+  "step6": {
+    "title": "Review Your Info",
+    "desc": "Please confirm everything looks correct before submitting",
+    "edit": "Edit"
+  },
+  "roles": {
+    "rally_leader": "Rally Leader",
+    "joiner": "Joiner",
+    "gathering": "Gathering/Looting",
+    "battle_mgmt": "Battle Management",
+    "event_prep": "Event Preparation"
+  },
+  "errors": {
+    "power": "Power must be a number (in millions), e.g. 410",
+    "gems": "Gem spend must be a whole number, e.g. 10000"
+  },
+  "admin": {
+    "eventSwitch": "Event",
+    "subtitle": "Sign-ups for this round: stats, players and exports",
+    "defaultRoundName": "Tyrant {{date}}",
+    "stats": {
+      "total": "Total Players",
+      "openingRush": "Opening Rush",
+      "discordVc": "Discord VC",
+      "alliances": "Alliances",
+      "gems": "Est. gem spend"
+    },
+    "byWindow": "Players per time window (UTC)",
+    "byRole": "Roles wanted",
+    "byAlliance": "Alliances",
+    "byTroop": "Troop tiers",
+    "none": "none",
+    "search": "Search name, FID or Discord...",
+    "allianceFilter": "Alliance",
+    "allAlliances": "All alliances",
+    "minFurnace": "Furnace at least",
+    "anyFurnace": "Any level",
+    "exportCsv": "Export CSV",
+    "exportExcel": "Export Excel",
+    "exportError": "Export failed",
+    "showing": "{{n}} players",
+    "col": {
+      "power": "Power",
+      "gems": "Gems",
+      "windows": "Windows (UTC)",
+      "vc": "VC",
+      "submitted": "Submitted"
+    },
+    "troopShort": {
+      "infantry": "Inf",
+      "lancer": "Lan",
+      "marksman": "Mar"
+    },
+    "confirmDelete": "Remove {{name}}'s sign-up from this round? The player profile is kept.",
+    "noPlayers": "No sign-ups yet",
+    "prev": "Previous",
+    "next": "Next",
+    "page": "Page {{page}} of {{pages}}",
+    "settings": {
+      "windows": "Time windows (UTC)",
+      "windowsDesc": "Players choose from these windows. Changes apply to this round only; a new round copies them.",
+      "start": "Start",
+      "end": "End",
+      "remove": "Remove window",
+      "add": "Add window",
+      "resetDefaults": "Reset to defaults",
+      "save": "Save windows",
+      "saved": "Settings saved",
+      "error": "Could not save the settings. Check the times (end after start)."
+    }
+  }
 }
