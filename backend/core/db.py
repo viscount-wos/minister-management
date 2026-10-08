@@ -211,17 +211,20 @@ def _import_v14(conn):
         if key not in LEGACY_ROUND_SETTING_KEYS:
             conn.execute('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', (key, value))
 
-    legacy_assignment_count = 0
+    legacy_slots = []
     if _table_exists(conn, 'legacy_assignments'):
-        legacy_assignment_count = conn.execute('SELECT COUNT(*) AS n FROM legacy_assignments').fetchone()['n']
+        legacy_slots = [r['time_slot'] for r in conn.execute('SELECT time_slot FROM legacy_assignments')]
 
     research_day = (legacy_settings.get('research_day') or 'tuesday').lower()
     if research_day not in ('tuesday', 'friday'):
         research_day = 'tuesday'
     scheme = legacy_settings.get('time_slot_scheme')
     if scheme not in ('exact_alignment', 'max_slots'):
-        # v1.4 rule: installs with assignment data are pinned to max_slots
-        scheme = 'max_slots' if legacy_assignment_count > 0 else 'exact_alignment'
+        # No stored scheme: v1.4 would pin max_slots at its next start if assignments
+        # existed, but a running v1.4 used exact_alignment. Infer from the slots
+        # actually stored (:20/:50 only exist on the max_slots grid).
+        on_max_grid = any(str(s).endswith((':20', ':50', ':50+')) for s in legacy_slots)
+        scheme = 'max_slots' if on_max_grid else 'exact_alignment'
     published = [d for d in (legacy_settings.get('published_days') or '').split(',') if d.strip()]
     published = sorted({d.strip().lower() for d in published},
                        key=lambda d: (WEEKDAY_ORDER.index(d) if d in WEEKDAY_ORDER else 99, d))

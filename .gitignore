@@ -66,3 +66,7 @@ docker-compose.override.yml
 
 # AI Tools
 .claude/
+
+# DB migration backups (<db>.pre-v2-<ts>.bak)
+*.bak
+.pytest_cache/

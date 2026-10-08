@@ -37,3 +37,9 @@ Thumbs.db
 # Frontend build artifacts (built inside Docker)
 frontend/dist/
 frontend/node_modules/
+
+# Backend venv and DB migration backups
+backend/venv/
+**/__pycache__/
+**/.pytest_cache/
+*.bak

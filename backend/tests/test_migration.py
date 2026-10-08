@@ -265,6 +265,13 @@ def test_scheme_pinned_when_setting_missing(tmp_path):
     conn = ro(p)
     assert json.loads(conn.execute('SELECT settings FROM rounds').fetchone()[0])['time_slot_scheme'] == 'max_slots'
 
+    # no stored scheme and assignments on the hour grid -> exact_alignment (what v1.4 was running)
+    p3 = str(tmp_path / 'c.db')
+    make_v14_db(p3, settings=s, assignments=[(1, 'monday', '10:00', 0, 1, 0), (2, 'monday', '10:30', 0, 1, 0)])
+    build_app(p3)
+    row = ro(p3).execute('SELECT settings FROM rounds').fetchone()
+    assert json.loads(row[0])['time_slot_scheme'] == 'exact_alignment'
+
     p2 = str(tmp_path / 'b.db')
     make_v14_db(p2, settings={}, assignments=[])
     build_app(p2)
@@ -299,3 +306,28 @@ def test_fresh_db_gets_v2_schema_without_rounds(tmp_path):
     assert conn.execute('SELECT COUNT(*) FROM rounds').fetchone()[0] == 0
     assert conn.execute('PRAGMA journal_mode').fetchone()[0] == 'delete'
     assert not glob.glob(p + '.pre-v2-*.bak')
+
+
+def test_older_pre_v14_columns_tolerated(tmp_path):
+    """A DB that never ran the v1.1/v1.2 ALTERs (no alliance/is_sticky/day_type) still migrates."""
+    p = str(tmp_path / 'old.db')
+    conn = sqlite3.connect(p)
+    conn.execute(V14_SCHEMA[0])
+    conn.execute('CREATE TABLE time_preferences (id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, '
+                 'time_slot TEXT)')
+    conn.execute('CREATE TABLE assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, day TEXT, '
+                 'time_slot TEXT, position INTEGER DEFAULT 0, is_assigned BOOLEAN DEFAULT 1)')
+    conn.execute("INSERT INTO players (id, fid, game_name, construction_speedups_days, fire_crystals) "
+                 "VALUES (1, '1', 'Old', NULL, 2)")
+    conn.execute("INSERT INTO time_preferences (player_id, time_slot) VALUES (1, '08:00')")
+    conn.execute("INSERT INTO assignments (player_id, day, time_slot) VALUES (1, 'Monday', '08:00')")
+    conn.commit()
+    conn.close()
+    build_app(p)
+    c = ro(p)
+    a = json.loads(c.execute('SELECT answers FROM applications').fetchone()[0])
+    assert a['construction_speedups_days'] == 0 and a['fire_crystals'] == 2
+    assert a['time_slots_by_day'] == {'construction': ['08:00'], 'research': ['08:00'], 'troop': ['08:00']}
+    assert tuple(c.execute('SELECT day, time_slot, is_sticky FROM ministry_assignments').fetchone()) == \
+        ('monday', '08:00', 0)
+    assert c.execute('SELECT alliance FROM profiles').fetchone()[0] is None
