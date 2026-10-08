@@ -313,6 +313,24 @@ names are (c) Century Games; credit it when showing them). {UNTRUSTED} {ERRORS}"
             params['troop'] = troop
         return R.from_api(await api.get('/api/heroes', params=params or None))
 
+    @server.tool(annotations=_ro('Get shared SVS plan'), description=f"""The SVS battle plan behind a SHARE LINK
+(read-only; what the state sees at /svs/plan/<token>). `token` is the last part of the link an admin shared. Returns
+round_name, battle {{start, hours, end}} (UTC), pet_buff_times {{open, two_hours, last_hour}} (UTC "HH:MM"),
+strategy (single | main_counter), show_real_names and groups in order: main, counter, extra. Main/counter groups carry
+min_requirements (joining rules for everyone else: per troop type min_camp "FC1".."FC10" and min_tier 10|11, null =
+any), notes and leaders in order; each leader: number, player {{name, fid, alliance}} (null when hidden behind an
+alias), alias + pfp_hero (the in-game disguise), rally {{heroes x3, ratio {{inf, lan, mks}} %, other_joiner_heroes}},
+garrison (same, only when split), pet_buff + pet_buff_time, named_joiners [{{player, rally {{lead_hero, ratio,
+ratio_overridden}}, garrison?}}] (ratio = the leader's unless overridden) and extra_joiners. Extra groups (e.g.
+turrets) have players + notes. A wrong, replaced or turned-off link gives 404 PLAN_NOT_FOUND.
+{UNTRUSTED} {ERRORS}""")
+    async def get_svs_plan_shared(
+            token: Annotated[str, Field(min_length=1, max_length=64, description='The share-link token.')],
+    ) -> CallToolResult:
+        if bad := R.check_segment('token', token):
+            return bad
+        return R.from_api(await api.get(f'/api/svs/plan/{seg(token)}'))
+
     @server.tool(annotations=_ro('Get my minister assignments'), description=f"""Minister event (key 'ministry') only: the
 player's assigned time slots in the current round, for PUBLISHED days only ({{"round_id",
 "published_days", "assignments": {{"monday": [{{"time_slot": "10:00"}}]}}}}). Slots are UTC.
@@ -581,6 +599,35 @@ always offered). Returns the public settings {{state_number, state_generation}}.
         if bad := refused(ctx):
             return bad
         return R.from_api(await api.admin('PUT', '/api/admin/settings', json={'state_generation': generation}))
+
+    @server.tool(annotations=_ro('Get SVS plan'), description=f"""{ADMIN} SVS only: the battle plan of a round
+(read-only here; plans are edited in Event Management -> SVS -> Battle plan). Returns revision, updated_at, plan (the
+stored document: strategy, show_real_names, groups with min_requirements, leaders with player refs {{fid}} or quick-add
+{{name}}, disguise, split, rally/garrison heroes (hero slugs, see get_heroes) + ratio, pet_buff, named_joiners,
+other_joiner_heroes, extra_joiners), share {{enabled, token, path, created_at}}, battle + pet_buff_times (UTC),
+state_generation, people (fid -> game_name, alliance, signed_up) and view: the resolved plan exactly as the shared
+page shows it but with real names (see get_svs_plan_shared for its shape). Revision 0 = nothing saved yet.
+`round_id` is an svs round id or "current". {UNTRUSTED} {ERRORS}""")
+    async def get_svs_plan(ctx: Context,
+                           round_id: Annotated[int | Literal['current'], Field(
+                               description='Round id or "current".')] = 'current') -> CallToolResult:
+        if bad := refused(ctx):
+            return bad
+        return R.from_api(await api.admin('GET', f'/api/admin/svs/rounds/{seg(round_id)}/plan'))
+
+    @server.tool(annotations=_rw('Share SVS plan', idempotent=False), description=f"""{ADMIN} SVS only: manage
+the plan's secret read-only SHARE LINK. action "create": make a link if there is none (returns the existing one
+otherwise); "rotate": a NEW link, the old one stops working at once (use it when a link leaked); "disable": turn
+sharing off (every old link stops working). Returns {{round_id, share: {{enabled, token, path, created_at}}}}; the
+public page is <app>/svs/plan/<token>. The plan itself and its revision are not changed. `round_id` is an svs round id
+or "current". {ERRORS}""")
+    async def svs_plan_share(action: Literal['create', 'rotate', 'disable'], ctx: Context,
+                             round_id: Annotated[int | Literal['current'], Field(
+                                 description='Round id or "current".')] = 'current') -> CallToolResult:
+        if bad := refused(ctx):
+            return bad
+        return R.from_api(await api.admin('POST', f'/api/admin/svs/rounds/{seg(round_id)}/plan/share',
+                                          json={'action': action}))
 
     @server.tool(annotations=_ro('Get minister assignments'), description=f"""{ADMIN} Minister event (key 'ministry') only:
 the saved assignments for one day of a round, including unpublished days: occupied slots ->

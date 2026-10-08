@@ -7,7 +7,7 @@ pytestmark = pytest.mark.anyio
 
 PUBLIC_TOOLS = {'list_events', 'get_current_round', 'get_profile', 'update_profile', 'get_application',
                 'get_previous_application', 'submit_application', 'get_published_schedule',
-                'get_my_assignments', 'get_heroes'}
+                'get_my_assignments', 'get_heroes', 'get_svs_plan_shared'}
 
 ANSWERS = {'construction_speedups_days': 2, 'research_speedups_days': 0, 'troop_training_speedups_days': 0,
            'general_speedups_days': 1.5, 'fire_crystals': 0, 'refined_fire_crystals': 0,
