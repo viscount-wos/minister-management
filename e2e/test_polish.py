@@ -114,7 +114,8 @@ def test_first_load_only_fetches_the_active_language(page: Page, base_url):
 
 # ------------------------------------------------------------------ rate limit message
 
-def test_rate_limited_lookup_shows_friendly_message(page: Page, base_url):
+def test_rate_limited_lookup_shows_friendly_message(page: Page, base_url, api):
+    open_round(api, 'tyrant')
     def limited(route):
         route.fulfill(status=429, headers={'Retry-After': '42'}, content_type='application/json',
                       body='{"error": "Too many requests", "code": "RATE_LIMITED", "field": null,'
@@ -205,7 +206,8 @@ def test_admin_closing_time_entered_in_display_zone(page: Page, base_url, api):
 
 @pytest.mark.parametrize('path', ['/minister/apply', '/tyrant/apply'])
 @pytest.mark.parametrize('lang', ['en', 'ar'])
-def test_fid_step_has_where_do_i_find_it_hint(page: Page, base_url, path, lang):
+def test_fid_step_has_where_do_i_find_it_hint(page: Page, base_url, api, path, lang):
+    open_round(api, 'tyrant')
     page.goto(base_url + '/')
     set_display(page, lang, 'UTC')
     page.goto(base_url + path)
@@ -222,7 +224,8 @@ def test_fid_step_has_where_do_i_find_it_hint(page: Page, base_url, path, lang):
 # ------------------------------------------------------------------ discreet admin link
 
 @pytest.mark.parametrize('event,path', [('ministry', '/minister'), ('tyrant', '/tyrant')])
-def test_event_management_is_a_small_link(page: Page, base_url, event, path):
+def test_event_management_is_a_small_link(page: Page, base_url, api, event, path):
+    open_round(api, event)
     page.goto(base_url + path)
     link = page.get_by_test_id(f'{event}-admin-tile')
     tile = page.get_by_test_id(f'{event}-apply-tile')

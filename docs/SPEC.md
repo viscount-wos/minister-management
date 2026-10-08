@@ -470,3 +470,28 @@ Old routes (`/apply`, `/update`, etc.) redirect to the new ones.
 - E2E: Playwright (python) smoke against docker compose: home -> ministry apply in en and ar (RTL),
   edit via FID, admin login, start new round, "use my last answers".
 - Reviewer pass: a separate agent critiques each milestone against this spec before it is accepted.
+
+## v2.1.0 polish (p3/polish)
+- **Security headers + CSP** on every response (`core/security.py`, details in docs/API.md). The inline pre-paint
+  script in index.html stays inline (it must run before the first paint) and is allowed by its SHA-256 hash, computed
+  from the served file at runtime, so a rebuild never needs a hand-edited hash. No `'unsafe-inline'` for scripts or
+  styles (React `style={{}}` goes through the CSSOM, which CSP does not block). HSTS only in production or over https.
+  The e2e suite fails any test during which a page logs a CSP violation (`e2e/conftest.py`, every browser context).
+- **Performance**: brotli/gzip (Flask-Compress; compressed `/assets/*` bodies cached in memory), immutable caching
+  for `/assets/*`, every page but Home is a lazy chunk (`src/pages.ts`, the current URL's chunk is preloaded in
+  parallel with the language), and each language is one chunk (`locale-<lang>`) loaded on demand; render waits for it
+  (`i18nReady`). A chunk that fails to load (old file name after a deploy) reloads the page once.
+- **Rate limits** on public FID lookups (30/min/IP) and submissions (10/min/IP): `429 RATE_LIMITED` + `Retry-After`,
+  env `RATE_LIMIT_LOOKUPS_PER_MIN` / `RATE_LIMIT_SUBMITS_PER_MIN` (0 = off), translated message in the UI.
+- **Dates/times**: ONE helper (`shared/datetime.ts` `formatDateTime`, `<DateTime>` / `useFormatDateTime`): the
+  header's display timezone, the UI language's month/weekday names (en uses en-GB order; ar Latin digits), no
+  seconds, the zone in brackets, Unicode-isolated for RTL: "Sat 10 Oct, 15:06 (London)". Admin closing-time inputs
+  read/write the same display timezone (`isoToZonedInput` / `zonedInputToIso`) and say which zone. The landing
+  pages' "All times are in UTC" notes became "Times are shown in {zone} time". Game windows defined in UTC (Tyrant
+  windows, minister slots) keep their explicit "(UTC)" / "game time (UTC)" labels.
+- **Find your player ID**: `shared/FidHelp.tsx` (a native `<details>`) under the FID input of both wizards.
+- **Event Management link** on event pages is a small muted link (test ids `ministry-admin-tile`, `tyrant-admin-tile`
+  kept) under the sign-up card instead of a second big card.
+- **Round renaming** moved to the shared Event Management header ("Rename", every event, any round incl. closed ones)
+  via `PATCH /api/admin/rounds/{ref}`; the ministry Settings tab's own round-name card was removed (one place only).
+

@@ -39,6 +39,7 @@ The source of truth is `backend/core/*.py` and `backend/events/ministry/routes.p
 | 403 | `APPLICATIONS_CLOSED` | NEW application after the round's `closing_time` |
 | 409 | `ROUND_CLOSED` | admin write (application edit/delete, assignments, auto-assign, publish, import, round settings) on a `closed` round; reopen it first |
 | 429 | `TOO_MANY_ATTEMPTS` | admin login throttled after repeated failures; `Retry-After` header + `details.retry_after` seconds |
+| 429 | `RATE_LIMITED` | too many public FID lookups / submissions from one IP (see "Rate limits"); `Retry-After` header + `details.retry_after` seconds |
 | 503 | `RETRY` | database busy (another write held the lock); retry after `Retry-After` seconds |
 | 404 | `NOT_FOUND` | resource (profile, application, round, endpoint) not found |
 | 404 | `UNKNOWN_EVENT` | event key not in the fixed set |
@@ -47,6 +48,29 @@ The source of truth is `backend/core/*.py` and `backend/events/ministry/routes.p
 | 409 | `ROUND_ALREADY_OPEN` | would create a second open round for an event |
 | 409 | `CONFLICT` | concurrent write collided (e.g. two first submissions for one FID); retry |
 | 500 | `INTERNAL_ERROR` | bug; details are logged server-side only |
+
+### Rate limits (public player endpoints, v2.1.0)
+In-process sliding window per client IP (`TRUSTED_PROXY_HOPS` decides which `X-Forwarded-For` entry is the
+client, as for the login throttle; production runs ONE instance so per-process state is enough):
+
+| Bucket | Endpoints | Default | Env |
+|---|---|---|---|
+| lookup | `GET /api/profile/{fid}`, `GET /api/events/{event}/current/application/{fid}`, `GET /api/events/{event}/previous-application/{fid}`, `GET /api/events/ministry/current/assignments/{fid}` | 30 / minute | `RATE_LIMIT_LOOKUPS_PER_MIN` |
+| submit | `PUT /api/events/{event}/current/application/{fid}`, `PUT /api/profile/{fid}` | 10 / minute | `RATE_LIMIT_SUBMITS_PER_MIN` |
+
+`0` disables a bucket (the e2e compose and the backend/MCP test suites do). Over the limit: `429 RATE_LIMITED`
+with `Retry-After`. Requests with a valid admin token are not limited. Code: `backend/core/ratelimit.py`.
+
+### Response headers (every response, v2.1.0)
+`backend/core/security.py`: `Content-Security-Policy` (`default-src 'self'`; `script-src 'self'` + the SHA-256 of the
+inline pre-paint script in the served `index.html`, computed at runtime; `style-src 'self'`; `img-src 'self' data:`;
+`connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`; `frame-ancestors 'none'`),
+`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`,
+`Permissions-Policy` (camera, microphone, geolocation, payment, usb off), `Cross-Origin-Opener-Policy: same-origin`,
+and `Strict-Transport-Security: max-age=31536000; includeSubDomains` in production (FLASK_ENV != development) or
+when the request came over https. Text responses are brotli/gzip compressed (Flask-Compress). `/assets/*` (hashed
+names) are `Cache-Control: public, max-age=31536000, immutable` (a missing asset is a 404, never index.html);
+index.html / SPA routes and `/api/*` are `no-cache` (`/api/admin/*` `no-store`).
 
 ## Auth
 
@@ -212,6 +236,8 @@ may change in the same request.
   409 `ROUND_ALREADY_OPEN` if opening a second round.
 - `GET /api/admin/rounds/{id}` → round (full settings).
 - `PUT /api/admin/rounds/{id}` any of `{"name", "status", "closing_time" (null clears), "settings" (partial, merged)}` → round.
+- `PATCH /api/admin/rounds/{ref}` `{"name"}` (only the name; 1-100 chars) → round. Works on ANY round, closed ones
+  included (the name is a label, e.g. renaming "Imported from previous system"). MCP: `rename_round`.
   Switching `research_day` drops the old research day from `published_days`.
   Changing ministry `time_slot_scheme` remaps that round's assignments to the nearest slot of the new grid
   (collisions: higher points keeps the slot) and adds `"remapped": <kept count>` to the response.

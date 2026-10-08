@@ -6,7 +6,7 @@ database; every call goes through the API so validation stays in the backend.
 - `POST /mcp` — public tools (list_events, get_current_round, get_profile, update_profile, get_application,
   get_previous_application, submit_application, get_published_schedule, get_my_assignments)
 - `POST /admin/mcp` — public + admin tools (list_rounds, list_applications, get_application_by_id,
-  update_application, start_new_round, get_assignments); requires `Authorization: Bearer $MCP_BEARER_TOKEN`
+  update_application, start_new_round, rename_round, get_assignments); requires `Authorization: Bearer $MCP_BEARER_TOKEN`
 - `GET /health`
 
 ```bash

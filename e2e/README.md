@@ -45,6 +45,13 @@ none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gi
   admin: `round-select`, `round-status`, `start-new-round`, `new-round-dialog`, `confirm-new-round`,
   `read-only-banner`, `tab-<players|assignments|settings>`, `player-row-<fid>`, `card-<fid>`.
 
+- **CSP watch** (`conftest.py`): `Browser.new_context` is wrapped so EVERY context (the `page` fixture, phone
+  contexts, ad-hoc ones) reports Content-Security-Policy violations (console + `securitypolicyviolation`); the
+  autouse `no_csp_violations` fixture fails the test that caused one. Don't inject `<style>`/`<script>` tags in
+  tests (CSP blocks them): set styles through the CSSOM (`el.style.setProperty`). `test_polish.py` self-tests it.
+- **Rate limits are off** in `docker-compose.e2e.yml` (`RATE_LIMIT_*_PER_MIN=0`): one IP drives the whole suite.
+  The limits are covered in `backend/tests/test_security.py`; the UI's 429 message uses a stubbed response.
+
 ## What it covers
 
 `test_i18n.py`

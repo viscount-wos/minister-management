@@ -403,6 +403,21 @@ all 9 languages, and `RELEASES` in `frontend/src/shell/Changelog.tsx` must be up
 items to the latest release until it ships; start a new release block once a version is deployed.
 Record the developer-level detail here as well.
 
+- **v2.1.0** (October 2026): Faster, clearer, safer (branch p3/polish). Details in `docs/SPEC.md` "v2.1.0 polish".
+  - Security headers on every response (`backend/core/security.py`): CSP with the inline pre-paint script allowed by
+    a SHA-256 hash computed from the served index.html at runtime, X-Frame-Options DENY + frame-ancestors 'none',
+    nosniff, Referrer-Policy, Permissions-Policy, HSTS only in production/https. e2e fails on any CSP violation.
+  - Flask-Compress (br + gzip), `/assets/*` immutable for a year, html/API no-cache; missing assets 404.
+  - Code-splitting: every page except Home is lazy (`frontend/src/pages.ts`), locales are one chunk per language
+    loaded on demand (`i18n/index.ts` `loadLanguage`, `i18nReady`). Main JS 849 KB -> 258 KB; a player's first
+    load of /tyrant ~885 KB uncompressed -> ~100 KB brotli.
+  - Per-IP rate limits (`backend/core/ratelimit.py`): FID lookups 30/min, submissions 10/min, 429 RATE_LIMITED +
+    Retry-After, env RATE_LIMIT_LOOKUPS_PER_MIN / RATE_LIMIT_SUBMITS_PER_MIN (0 = off; off in the e2e compose).
+  - One date/time helper (`shared/datetime.ts`, `shared/DateTime.tsx`): display timezone, month names, no seconds,
+    zone label; admin closing-time inputs use the display timezone too.
+  - "Where do I find my player ID?" hint (`shared/FidHelp.tsx`); discreet Event Management link on event pages.
+  - Rename any round (closed too) from the Event Management header: `PATCH /api/admin/rounds/<ref>`, MCP `rename_round`.
+
 - **v2.0.0** (October 2026): State event hub (wos-events). Deployed as Cloud Run service `wos-events` at hunterisadonkey.com.
   Details in `docs/SPEC.md`.
   - Event registry: Minister (key `ministry`, shown as "Minister"), Frost Dragon Tyrant, SVS and

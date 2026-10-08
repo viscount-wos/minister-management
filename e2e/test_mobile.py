@@ -81,7 +81,7 @@ class Phone:
         page.evaluate("document.querySelectorAll('[data-testid=wizard-nav]')"
                       ".forEach(e => e.style.setProperty('position', 'static', 'important'))")
         page.screenshot(path=str(SHOTS / f'{slug(self.device)}-{self.lang}-{name}.png'), full_page=True)
-        page.evaluate("document.querySelectorAll('style').forEach(s => { if (s.textContent.includes('wizard-nav]{position:static')) s.remove(); })")
+        page.evaluate("document.querySelectorAll('[data-testid=wizard-nav]').forEach(e => e.style.removeProperty('position'))")
 
     def check(self, name: str, tappable: list[str] = ()):
         """No sideways scroll, header in one row, key controls >= 44px, inputs >= 16px; then a screenshot."""
