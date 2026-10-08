@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, LucideIcon } from 'lucide-react';
+import { GuideLoading } from './useGuidesReady';
 
 // Shared building blocks for every player and admin guide (same look as the original Minister guide).
 // Guides are plain sections of translated text: keys live in the `guide` namespace (docs/GUIDES.md).
@@ -94,14 +95,14 @@ export function GuideTips({ title, keys, t }: { title: string; keys: string[]; t
 }
 
 /** Scroll to the URL's #hash once the guide has rendered (lazy page: the browser's own jump fires too early). */
-export function useScrollToHash() {
+export function useScrollToHash(ready = true) {
   const { hash } = useLocation();
   useEffect(() => {
-    if (!hash) return;
+    if (!hash || !ready) return;
     const id = decodeURIComponent(hash.slice(1));
     const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }), 60);
     return () => window.clearTimeout(timer);
-  }, [hash]);
+  }, [hash, ready]);
 }
 
 /** Page frame of a PLAYER guide: back link to the event page, title, subtitle, then the sections. */
@@ -111,8 +112,10 @@ export function PlayerGuideFrame({
   backLabel,
   title,
   subtitle,
+  ready,
   children,
 }: {
+  ready: boolean;
   testId: string;
   backTo: string;
   backLabel: string;
@@ -121,7 +124,7 @@ export function PlayerGuideFrame({
   children: ReactNode;
 }) {
   const navigate = useNavigate();
-  useScrollToHash();
+  useScrollToHash(ready);
   return (
     <div className="min-h-screen bg-dark-bg py-4 sm:py-8 px-3 sm:px-4" data-testid={testId}>
       <div className="max-w-3xl mx-auto">
@@ -133,11 +136,17 @@ export function PlayerGuideFrame({
           <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
           {backLabel}
         </button>
-        <h1 className="text-3xl sm:text-4xl font-bold text-accent mb-2 break-words" data-testid="guide-title">
-          {title}
-        </h1>
-        <p className="text-theme-dim mb-6 sm:mb-8">{subtitle}</p>
-        <div className="space-y-6 sm:space-y-8">{children}</div>
+        {ready ? (
+          <>
+            <h1 className="text-3xl sm:text-4xl font-bold text-accent mb-2 break-words" data-testid="guide-title">
+              {title}
+            </h1>
+            <p className="text-theme-dim mb-6 sm:mb-8">{subtitle}</p>
+            <div className="space-y-6 sm:space-y-8">{children}</div>
+          </>
+        ) : (
+          <GuideLoading />
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, BookOpen, Compass } from 'lucide-react';
 import { usePageTitle } from '../shared/usePageTitle';
 import { useScrollToHash } from '../shared/guide/GuideBits';
+import { GuideLoading, useGuidesReady } from '../shared/guide/useGuidesReady';
 import AdminEventSwitch from './AdminEventSwitch';
 import EventBasicsGuide from './EventBasicsGuide';
 import { resolveAdminEvent } from './registry';
@@ -21,7 +22,8 @@ export default function AdminGuidePage() {
   const event = resolveAdminEvent(params.get('event'));
   const basics = params.get('topic') === 'basics';
   const Guide = event.Guide;
-  useScrollToHash();
+  const ready = useGuidesReady();
+  useScrollToHash(ready);
 
   useEffect(() => {
     if (params.get('event') !== event.key) {
@@ -31,7 +33,7 @@ export default function AdminGuidePage() {
     }
   }, [params, event.key, setParams]);
 
-  usePageTitle(basics ? t('guide:basics.title') : t('guide:admin.title'), t(event.label));
+  usePageTitle(ready && (basics ? t('guide:basics.title') : t('guide:admin.title')), t(event.label));
 
   const topicTab = (on: boolean, label: string, href: string, testId: string, Icon: typeof BookOpen) => (
     <button
@@ -66,25 +68,31 @@ export default function AdminGuidePage() {
           {t('guide:admin.backToDashboard')}
         </button>
 
-        <h1 className="text-3xl sm:text-4xl font-bold text-accent mb-4 break-words" data-testid="admin-guide-title">
-          {basics ? t('guide:basics.title') : t('guide:admin.title')}
-        </h1>
-        <div className="mb-3">
-          <AdminEventSwitch current={event.key} hrefFor={basics ? ADMIN_PATHS.basics : ADMIN_PATHS.guide} />
-        </div>
+        {!ready ? (
+          <GuideLoading />
+        ) : (
+          <>
+            <h1 className="text-3xl sm:text-4xl font-bold text-accent mb-4 break-words" data-testid="admin-guide-title">
+              {basics ? t('guide:basics.title') : t('guide:admin.title')}
+            </h1>
+            <div className="mb-3">
+              <AdminEventSwitch current={event.key} hrefFor={basics ? ADMIN_PATHS.basics : ADMIN_PATHS.guide} />
+            </div>
 
-        {/* Event guide | Event Management basics */}
-        <div className="mb-3 flex flex-wrap gap-1" role="tablist" aria-label={t('guide:admin.title')} data-testid="guide-topics">
-          {topicTab(!basics, t('guide:basics.eventTab', { event: t(event.label) }), ADMIN_PATHS.guide(event.key), 'guide-topic-event', BookOpen)}
-          {topicTab(basics, t('guide:basics.title'), ADMIN_PATHS.basics(event.key), 'guide-topic-basics', Compass)}
-        </div>
-        {!basics && (
-          <p className="mb-6 text-sm text-theme-dim" data-testid="guide-basics-hint">
-            {t('guide:basics.hint')}
-          </p>
+            {/* Event guide | Event Management basics */}
+            <div className="mb-3 flex flex-wrap gap-1" role="tablist" aria-label={t('guide:admin.title')} data-testid="guide-topics">
+              {topicTab(!basics, t('guide:basics.eventTab', { event: t(event.label) }), ADMIN_PATHS.guide(event.key), 'guide-topic-event', BookOpen)}
+              {topicTab(basics, t('guide:basics.title'), ADMIN_PATHS.basics(event.key), 'guide-topic-basics', Compass)}
+            </div>
+            {!basics && (
+              <p className="mb-6 text-sm text-theme-dim" data-testid="guide-basics-hint">
+                {t('guide:basics.hint')}
+              </p>
+            )}
+
+            {basics ? <EventBasicsGuide /> : <Guide key={event.key} />}
+          </>
         )}
-
-        {basics ? <EventBasicsGuide /> : <Guide key={event.key} />}
       </div>
     </div>
   );

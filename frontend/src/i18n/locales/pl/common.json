@@ -24,6 +24,13 @@
     "question": "Gdzie znajdę moje ID gracza?",
     "answer": "W grze dotknij swojego zdjęcia profilowego (w lewym górnym rogu). Twoje ID gracza to numer pod Twoją nazwą."
   },
+  "guideLinks": {
+    "playerLink": "Jak to działa? Przeczytaj poradnik",
+    "wizardLink": "Pierwszy raz? Najpierw przeczytaj poradnik",
+    "planHelp": "Jak czytać ten plan?",
+    "ministerLink": "Jak działa ten system? Przeczytaj Poradnik gracza",
+    "adminLink": "Poradnik administratora"
+  },
   "home": {
     "title": "Wydarzenia stanu",
     "subtitle": "Wybierz wydarzenie, aby się zapisać lub sprawdzić harmonogram",

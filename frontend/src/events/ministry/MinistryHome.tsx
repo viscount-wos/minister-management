@@ -131,7 +131,7 @@ export default function MinistryHome() {
 
         <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <LinkButton icon={HelpCircle} accent onClick={() => navigate(MINISTRY_PATHS.guide)} testId="ministry-guide-link">
-            {t('guide:player.linkText')}
+            {t('common:guideLinks.ministerLink')}
           </LinkButton>
           <LinkButton icon={Sparkles} onClick={() => navigate('/changelog')}>
             {t('changelog:linkText')}

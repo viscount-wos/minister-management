@@ -24,6 +24,13 @@
     "question": "Wo finde ich meine Spieler-ID?",
     "answer": "Tippe im Spiel oben links auf dein Profilbild. Deine Spieler-ID ist die Zahl unter deinem Namen."
   },
+  "guideLinks": {
+    "playerLink": "Wie funktioniert das? Lies die Anleitung",
+    "wizardLink": "Neu hier? Lies zuerst die Anleitung",
+    "planHelp": "Wie lese ich diesen Plan?",
+    "ministerLink": "Wie funktioniert dieses System? Lesen Sie den Spielerleitfaden",
+    "adminLink": "Admin-Leitfaden"
+  },
   "home": {
     "title": "Staats-Events",
     "subtitle": "Wähle ein Event, um dich anzumelden oder deinen Plan anzusehen",

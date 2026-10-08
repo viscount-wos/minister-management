@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BookOpen } from 'lucide-react';
 
-/** Small "read the guide" link (wizard step 1, shared plan view). `label` = a guide:common.* key. */
-export default function GuideLink({ to, testId, label = 'guide:common.wizardLink' }: { to: string; testId: string; label?: string }) {
+/** Small "read the guide" link (wizard step 1, shared plan view). `label` = a common:guideLinks.* key. */
+export default function GuideLink({ to, testId, label = 'common:guideLinks.wizardLink' }: { to: string; testId: string; label?: string }) {
   const { t } = useTranslation();
   return (
     <Link

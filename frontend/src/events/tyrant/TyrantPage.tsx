@@ -100,7 +100,7 @@ export default function TyrantPage() {
 
         <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <LinkButton icon={HelpCircle} accent onClick={() => navigate(TYRANT_PATHS.guide)} testId="tyrant-guide-link">
-            {t('guide:common.playerLink')}
+            {t('common:guideLinks.playerLink')}
           </LinkButton>
           <LinkButton icon={ArrowLeft} accent flipInRtl onClick={() => navigate('/')}>
             {t('common:nav.home')}

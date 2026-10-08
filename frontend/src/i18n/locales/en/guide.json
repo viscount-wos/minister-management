@@ -1,11 +1,5 @@
 {
-  "common": {
-    "playerLink": "How does it work? Read the guide",
-    "wizardLink": "New here? Read the guide first",
-    "planHelp": "How do I read this plan?"
-  },
   "player": {
-    "linkText": "How does this system work? Read the Player Guide",
     "title": "Player Guide",
     "subtitle": "How to apply for a minister slot, step by step.",
     "whatIsTitle": "What is this?",
@@ -13,7 +7,6 @@
     "submitTitle": "How to apply",
     "step1Header": "Step 1: Player Information",
     "step1Fid": "On the minister page, press \"Apply or update\". Enter your player ID (FID) and press Next. Can't find it? Tap \"Where do I find my player ID?\": in the game, tap your profile picture (top left); the number under your name is your ID.",
-    "step1Alliance": "Enter your Alliance Tag (required, up to 3 characters).",
     "step1Speedups": "Enter your speedups in DAYS for Construction, Research and Troop Training. If the leaders turned them on, also enter your Fire Crystals, Refined Fire Crystals and Fire Crystal Shards.",
     "step1General": "Planning to use General speedups for Construction or Research? Add those days to the Construction or Research totals.",
     "step2Header": "Steps 2–4: Pick your hours",
@@ -186,11 +179,10 @@
     "links3": "The SVS battle plan has its own secret link (Battle plan → Share). Share it only inside the state.",
     "limitsTitle": "When the site says \"slow down\"",
     "limits1": "To stop abuse, player ID look-ups and sign-ups are limited per internet connection (about 30 look-ups and 10 sign-ups a minute).",
-    "limits2": "A player who hits the limit sees \"Too many requests… wait a minute\". Many players on one Wi-Fi can hit it together: ask them to wait a minute and try again.",
+    "limits2": "A player who hits the limit sees \"Too many requests in a short time\". Many players on one Wi-Fi can hit it together: ask them to wait a minute and try again.",
     "limits3": "Admin pages have no limit, except the login (see above)."
   },
   "admin": {
-    "linkText": "Admin Guide",
     "backToDashboard": "Back to Dashboard",
     "title": "Admin Guide",
     "subtitle": "How to run Minister applications: players, assignments, settings and publishing.",

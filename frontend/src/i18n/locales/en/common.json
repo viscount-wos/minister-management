@@ -24,6 +24,13 @@
     "question": "Where do I find my player ID?",
     "answer": "In the game, tap your profile picture (top left). Your player ID is the number shown under your name."
   },
+  "guideLinks": {
+    "playerLink": "How does it work? Read the guide",
+    "wizardLink": "New here? Read the guide first",
+    "planHelp": "How do I read this plan?",
+    "ministerLink": "How does this system work? Read the Player Guide",
+    "adminLink": "Admin Guide"
+  },
   "home": {
     "title": "State Events",
     "subtitle": "Pick an event to sign up or check your schedule",

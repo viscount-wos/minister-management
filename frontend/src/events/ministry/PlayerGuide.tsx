@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { FileText, Edit, Clock, Palette, Globe, Lightbulb, Calendar, AlarmClock } from 'lucide-react';
 import { MINISTRY_PATHS } from './paths';
+import { useGuidesReady } from '../../shared/guide/useGuidesReady';
 import { usePageTitle } from '../../shared/usePageTitle';
 import { GuideList, GuideNote, GuideSection, GuideTips, PlayerGuideFrame } from '../../shared/guide/GuideBits';
 
@@ -9,10 +10,12 @@ import { GuideList, GuideNote, GuideSection, GuideTips, PlayerGuideFrame } from 
 export default function PlayerGuide() {
   const { t } = useTranslation();
   const k = (key: string) => t(`guide:player.${key}`);
-  usePageTitle(k('title'), t('ministry:event.name'));
+  const ready = useGuidesReady();
+  usePageTitle(ready && k('title'), t('ministry:event.name'));
 
   return (
     <PlayerGuideFrame
+      ready={ready}
       testId="player-guide-ministry"
       backTo={MINISTRY_PATHS.home}
       backLabel={t('ministry:update.backHome')}

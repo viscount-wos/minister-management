@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Lightbulb, ListOrdered, Shield, Crown, Edit, Map as MapIcon, EyeOff } from 'lucide-react';
 import { SVS_PATHS } from './paths';
+import { useGuidesReady } from '../../shared/guide/useGuidesReady';
 import { usePageTitle } from '../../shared/usePageTitle';
 import { GuideList, GuideNote, GuideSection, GuideTips, PlayerGuideFrame } from '../../shared/guide/GuideBits';
 import { RatioBar } from './plan/bits';
@@ -11,10 +12,12 @@ import { RatioBar } from './plan/bits';
 export default function SvsGuide() {
   const { t } = useTranslation();
   const k = (key: string) => t(`guide:svsPlayer.${key}`);
-  usePageTitle(k('title'), t('svs:name'));
+  const ready = useGuidesReady();
+  usePageTitle(ready && k('title'), t('svs:name'));
 
   return (
     <PlayerGuideFrame
+      ready={ready}
       testId="player-guide-svs"
       backTo={SVS_PATHS.home}
       backLabel={t('svs:apply.backHome')}

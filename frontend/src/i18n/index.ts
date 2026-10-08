@@ -51,21 +51,42 @@ const loaders = import.meta.glob('./locales/*/*.json', { import: 'default' }) as
 
 const loaded = new Map<string, Promise<void>>();
 
-/** Fetch (once) every namespace of a language into i18next. */
+// The guides (namespace 'guide': long help text) are a separate lazy chunk per language (guide-<lang>, see
+// vite.config.ts): players opening a sign-up page never download them. A guide page calls useGuidesReady()
+// (shared/guide/useGuidesReady.ts), which loads them; from then on a language switch loads that language's
+// guides too, before switching, so a guide never shows raw keys.
+const LAZY_NAMESPACES = new Set(['guide']);
+const nsOf = (path: string) => path.match(/\/([^/]+)\.json$/)![1];
+let guidesWanted = false;
+const guidesLoaded = new Map<string, Promise<void>>();
+
+/** Fetch (once) the guide namespace of a language. */
+export function loadGuides(lang: string): Promise<void> {
+  guidesWanted = true;
+  let p = guidesLoaded.get(lang);
+  if (!p) {
+    const load = loaders[`./locales/${lang}/guide.json`];
+    p = load ? load().then((data) => void i18n.addResourceBundle(lang, 'guide', data, true, true)) : Promise.resolve();
+    p.catch(() => guidesLoaded.delete(lang));
+    guidesLoaded.set(lang, p);
+  }
+  return p;
+}
+
+/** Fetch (once) every eager namespace of a language into i18next (plus its guides once a guide page asked). */
 export function loadLanguage(lang: string): Promise<void> {
   let p = loaded.get(lang);
   if (!p) {
-    const files = Object.entries(loaders).filter(([path]) => path.startsWith(`./locales/${lang}/`));
+    const files = Object.entries(loaders).filter(([path]) => path.startsWith(`./locales/${lang}/`) && !LAZY_NAMESPACES.has(nsOf(path)));
     p = Promise.all(
       files.map(async ([path, load]) => {
-        const ns = path.match(/\/([^/]+)\.json$/)![1];
-        i18n.addResourceBundle(lang, ns, await load(), true, true);
+        i18n.addResourceBundle(lang, nsOf(path), await load(), true, true);
       }),
     ).then(() => undefined);
     p.catch(() => loaded.delete(lang)); // a failed fetch (offline / new deploy) may be retried
     loaded.set(lang, p);
   }
-  return p;
+  return guidesWanted ? Promise.all([p, loadGuides(lang)]).then(() => undefined) : p;
 }
 
 /** Sets <html dir> (and lang) for the given language. */

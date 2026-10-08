@@ -341,7 +341,7 @@ export default function SvsPlanView() {
             )}
           </p>
           {/* Help: the SVS guide's static "reading the plan" section (it shows nothing of this plan) */}
-          <GuideLink to={SVS_PATHS.planHelp} testId="plan-help-link" label="guide:common.planHelp" />
+          <GuideLink to={SVS_PATHS.planHelp} testId="plan-help-link" label="common:guideLinks.planHelp" />
         </header>
 
         {/* Find me */}

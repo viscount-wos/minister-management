@@ -101,7 +101,7 @@ export default function SvsPage() {
 
         <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <LinkButton icon={HelpCircle} accent onClick={() => navigate(SVS_PATHS.guide)} testId="svs-guide-link">
-            {t('guide:common.playerLink')}
+            {t('common:guideLinks.playerLink')}
           </LinkButton>
           <LinkButton icon={ArrowLeft} accent flipInRtl onClick={() => navigate('/')}>
             {t('common:nav.home')}
