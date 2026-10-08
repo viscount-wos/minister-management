@@ -306,6 +306,28 @@ def test_no_raw_keys_every_step_9_languages(page: Page, base_url, shot):
     assert not bad, bad
 
 
+def test_shared_profile_furnace_dropdown_in_ministry(page: Page, base_url, shot):
+    """The profile is shared: the ministry wizard shows the furnace code saved by Tyrant, in the same dropdown."""
+    page.goto(base_url + '/ministry/apply')
+    page.wait_for_load_state('networkidle')
+    page.get_by_test_id('fid-input').fill(FID_A)
+    page.get_by_test_id('wizard-next').click()
+    sel = page.get_by_test_id('profile-furnace-level')
+    expect(sel).to_have_value('FC8')
+    assert sel.evaluate('el => el.tagName') == 'SELECT'
+    values = sel.locator('option').evaluate_all('os => os.map(o => o.value)')
+    assert values[:2] == ['', 'FC10'] and values[-1] == '1' and len(values) == 41
+    ui.switch_language(page, 'ar')
+    labels = sel.locator('option').evaluate_all('os => os.map(o => o.textContent)')
+    assert labels[0] == tr('common:furnace.select', 'ar') and labels[11] == tr('common:furnace.level', 'ar', n='30')
+    groups = sel.locator('optgroup').evaluate_all('gs => gs.map(g => g.label)')
+    assert groups == [tr('common:furnace.fireCrystal', 'ar'), tr('common:furnace.preFc', 'ar')]
+    sel.select_option('25')
+    expect(sel).to_have_value('25')
+    shot('ministry-furnace-ar')
+    ui.switch_language(page, 'en')
+
+
 def test_closing_time_states(page: Page, base_url, shot, tapi, tyrant_round):
     tapi.update_round(tyrant_round['id'], closing_time='2000-01-01T00:00:00Z')
     try:
