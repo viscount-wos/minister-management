@@ -113,8 +113,14 @@ def check(page: Page, testid: str, on: bool = True) -> None:
     (expect(box).to_be_checked() if on else expect(box).not_to_be_checked())
 
 
+def assert_no_furnace_field(page: Page) -> None:
+    """Owner decision p2e: the Tyrant wizard does not ask the main (city) furnace."""
+    expect(page.get_by_test_id('furnace-level')).to_have_count(0)
+    expect(page.locator('#furnace-level')).to_have_count(0)
+
+
 def fill_all_steps(page: Page, *, name: str, alliance: str, discord: str, windows: list[str], vc: bool,
-                   furnace: str, power: str, gems: str, troops: dict, roles: list[str], shot=None, tag='') -> None:
+                   power: str, gems: str, troops: dict, roles: list[str], shot=None, tag='') -> None:
     """From step 1 (profile loaded) to the review step."""
     at_step(page, 1)
     page.get_by_test_id('profile-game-name').fill(name)
@@ -127,7 +133,7 @@ def fill_all_steps(page: Page, *, name: str, alliance: str, discord: str, window
     check(page, 'discord-vc', vc)
     shot and shot(f'{tag}step2')
     next_step(page, 3)
-    page.get_by_test_id('furnace-level').select_option(furnace)
+    assert_no_furnace_field(page)
     page.get_by_test_id('power-millions').fill(power)
     page.get_by_test_id('gem-spend').fill(gems)
     shot and shot(f'{tag}step3')
@@ -195,10 +201,10 @@ def test_full_wizard_new_in_english(page: Page, base_url, shot, tapi, tyrant_rou
     page.get_by_test_id('wizard-back').click()
     at_step(page, 1)
     fill_all_steps(page, name='Tyra', alliance='woo', discord='tyra#0001', windows=['w1', 'w3'], vc=True,
-                   furnace='FC8', power='410.5', gems='10000',
+                   power='410.5', gems='10000',
                    troops={'infantry': ('FC5', '10'), 'lancer': ('FC9', '9'), 'marksman': ('FC10', '11')},
                    roles=['rally_leader', 'joiner'], shot=shot, tag='en-')
-    expect(page.get_by_test_id('review-furnace-level')).to_contain_text('FC8')
+    expect(page.get_by_test_id('review-furnace-level')).to_have_count(0)  # no furnace row (p2e)
     expect(page.get_by_test_id('review-troop-infantry')).to_contain_text('FC5 / T10')
     expect(page.get_by_test_id('review-troop-marksman')).to_contain_text('FC10 / T11')
     expect(page.get_by_test_id('review-alliance')).to_contain_text('WOO')
@@ -206,9 +212,7 @@ def test_full_wizard_new_in_english(page: Page, base_url, shot, tapi, tyrant_rou
     # Edit per section (tyrantpoll's review) -> back to that step
     page.get_by_test_id('review-edit-3').click()
     at_step(page, 3)
-    # Tyrant furnace dropdown: exactly FC10..FC1 (no pre-FC 30..1)
-    values = page.get_by_test_id('furnace-level').locator('option').evaluate_all('os => os.map(o => o.value)')
-    assert values == FC_ONLY, values
+    assert_no_furnace_field(page)
     page.get_by_test_id('gem-spend').fill('12000')
     for n in (4, 5, 6):
         next_step(page, n)
@@ -223,7 +227,7 @@ def test_full_wizard_new_in_english(page: Page, base_url, shot, tapi, tyrant_rou
                               'roles': ['rally_leader', 'joiner'], 'language': 'en'}
     prof = tapi.profile(FID_A)
     assert prof['game_name'] == 'Tyra' and prof['alliance'] == 'WOO' and prof['discord_id'] == 'tyra#0001'
-    assert prof['furnace_level'] == 'FC8' and prof['power'] == 410_500_000
+    assert prof['furnace_level'] is None and prof['power'] == 410_500_000  # Tyrant does not ask the furnace
     assert prof['troops'] == {'infantry': {'furnace_level': 'FC5', 'tier': 10},
                               'lancer': {'furnace_level': 'FC9', 'tier': 9},
                               'marksman': {'furnace_level': 'FC10', 'tier': 11}}
@@ -243,7 +247,7 @@ def test_edit_via_fid(page: Page, base_url, shot, tapi, tyrant_round):
     expect(page.get_by_test_id('window-w3')).to_be_checked()
     expect(page.get_by_test_id('discord-vc')).to_be_checked()
     next_step(page, 3)
-    expect(page.get_by_test_id('furnace-level')).to_have_value('FC8')
+    assert_no_furnace_field(page)
     expect(page.get_by_test_id('power-millions')).to_have_value('410.5')
     expect(page.get_by_test_id('gem-spend')).to_have_value('12000')
     next_step(page, 4)
@@ -275,11 +279,11 @@ def test_arabic_rtl_wizard(page: Page, base_url, shot, tapi, tyrant_round):
     assert one['x'] > six['x']
     expect(page.get_by_test_id('wizard-step-title')).to_have_text(tr('tyrant:step1.title', 'ar'))
     fill_all_steps(page, name='طاغية', alliance='ARB', discord='', windows=['w2', 'w4'], vc=False,
-                   furnace='FC3', power='95', gems='',
+                   power='95', gems='',
                    troops={'infantry': ('FC3', '8'), 'lancer': ('FC1', '11'), 'marksman': ('FC3', '9')}, roles=['gathering'],
                    shot=shot, tag='ar-')
     expect(page.get_by_test_id('wizard-step-title')).to_have_text(tr('tyrant:step6.title', 'ar'))
-    expect(page.get_by_test_id('review-furnace-level')).to_contain_text('FC3')
+    expect(page.get_by_test_id('review-furnace-level')).to_have_count(0)
     # Back/Next arrows mirrored, buttons in Arabic
     expect(page.get_by_test_id('wizard-back')).to_have_text(tr('ministry:form.back', 'ar'))
     shot('ar-step6-review')
@@ -289,24 +293,21 @@ def test_arabic_rtl_wizard(page: Page, base_url, shot, tapi, tyrant_round):
     shot('ar-saved')
     app = tapi.application(FID_AR)
     assert app['answers']['availability'] == ['w2', 'w4'] and app['answers']['language'] == 'ar'
-    assert tapi.profile(FID_AR)['furnace_level'] == 'FC3'
+    assert tapi.profile(FID_AR)['furnace_level'] is None
     ui.switch_language(page, 'en')
 
 
 def test_fc_only_dropdowns_camp_labels_and_required(page: Page, base_url, shot, tapi):
-    """Furnace + every camp: exactly FC10..FC1; camps are labelled as CAMP levels with a hint; the furnace and
-    each camp level + tier are required (any combination is fine)."""
+    """Every camp: exactly FC10..FC1; camps are labelled as CAMP levels with a hint; each camp level + tier is
+    required (any combination is fine). No main furnace (p2e): step 3 passes with nothing filled in."""
     fid = str(61_000_000 + secrets.randbelow(999_999))
     assert open_wizard(page, base_url, fid) == 'new'
     page.get_by_test_id('profile-game-name').fill('Req')
     page.get_by_test_id('profile-alliance').fill('REQ')
     next_step(page, 2)
     next_step(page, 3)
-    page.get_by_test_id('wizard-next').click()
-    at_step(page, 3)
-    expect(page.get_by_test_id('form-error')).to_have_text(tr('tyrant:errors.furnaceRequired'))
-    page.get_by_test_id('furnace-level').select_option('FC2')
-    next_step(page, 4)
+    assert_no_furnace_field(page)
+    next_step(page, 4)  # nothing required on step 3 any more
     expect(page.get_by_test_id('camp-hint')).to_have_text(tr('tyrant:step4.campHint'))
     for kind in ('infantry', 'lancer', 'marksman'):
         sel = page.get_by_test_id(f'troop-{kind}-furnace')
@@ -317,7 +318,7 @@ def test_fc_only_dropdowns_camp_labels_and_required(page: Page, base_url, shot, 
     page.get_by_test_id('wizard-next').click()
     at_step(page, 4)
     expect(page.get_by_test_id('form-error')).to_have_text(tr('tyrant:errors.campRequired'))
-    # any combination: camps above the furnace, T11 in an FC1 camp
+    # any combination: T11 in an FC1 camp, T8 in an FC7 camp
     for kind, (camp, tier) in {'infantry': ('FC10', '11'), 'lancer': ('FC1', '11'), 'marksman': ('FC7', '8')}.items():
         page.get_by_test_id(f'troop-{kind}-furnace').select_option(camp)
         if kind != 'marksman':
@@ -336,7 +337,8 @@ def test_fc_only_dropdowns_camp_labels_and_required(page: Page, base_url, shot, 
 
 
 def test_legacy_pre_fc_profile_must_repick(page: Page, base_url, shot, tapi):
-    """A profile saved with pre-FC levels (Minister, or before the rule) shows them as unselected in Tyrant."""
+    """A profile saved with pre-FC camp levels (before the rule) shows them as unselected in Tyrant; the profile's
+    pre-FC furnace (Minister) is neither asked nor changed."""
     fid = str(62_000_000 + secrets.randbelow(999_999))
     legacy = {k: {'furnace_level': '25', 'tier': 10} for k in ('infantry', 'lancer', 'marksman')}
     tapi.api.call('PUT', f'/api/profile/{fid}', {'game_name': 'Oldie', 'alliance': 'OLD', 'furnace_level': '28',
@@ -344,10 +346,7 @@ def test_legacy_pre_fc_profile_must_repick(page: Page, base_url, shot, tapi):
     assert open_wizard(page, base_url, fid) == 'new'
     next_step(page, 2)
     next_step(page, 3)
-    expect(page.get_by_test_id('furnace-level')).to_have_value('')
-    page.get_by_test_id('wizard-next').click()
-    expect(page.get_by_test_id('form-error')).to_have_text(tr('tyrant:errors.furnaceRequired'))
-    page.get_by_test_id('furnace-level').select_option('FC1')
+    assert_no_furnace_field(page)
     next_step(page, 4)
     for kind in ('infantry', 'lancer', 'marksman'):
         expect(page.get_by_test_id(f'troop-{kind}-furnace')).to_have_value('')
@@ -362,7 +361,7 @@ def test_legacy_pre_fc_profile_must_repick(page: Page, base_url, shot, tapi):
     page.get_by_test_id('wizard-submit').click()
     expect(page.get_by_test_id('save-success')).to_be_visible()
     prof = tapi.profile(fid)
-    assert prof['furnace_level'] == 'FC1' and prof['troops']['lancer'] == {'furnace_level': 'FC1', 'tier': 10}
+    assert prof['furnace_level'] == '28' and prof['troops']['lancer'] == {'furnace_level': 'FC1', 'tier': 10}
     tapi.delete_application(fid)
 
 
@@ -388,17 +387,18 @@ def test_no_raw_keys_every_step_9_languages(page: Page, base_url, shot):
     assert not bad, bad
 
 
-def test_shared_profile_furnace_dropdown_in_ministry(page: Page, base_url, shot):
-    """The profile is shared: the ministry wizard shows the furnace code saved by Tyrant, in the same dropdown."""
+def test_ministry_still_asks_furnace_with_pre_fc(page: Page, base_url, shot):
+    """Minister still asks the furnace (only Tyrant dropped it, p2e): the shared dropdown FC10..FC1 then 30..1. The
+    Tyrant sign-up of FID_A did not write a furnace, so it starts blank."""
     page.goto(base_url + '/minister/apply')
     page.wait_for_load_state('networkidle')
     page.get_by_test_id('fid-input').fill(FID_A)
     page.get_by_test_id('wizard-next').click()
     sel = page.get_by_test_id('profile-furnace-level')
-    expect(sel).to_have_value('FC8')
+    expect(sel).to_have_value('')
     assert sel.evaluate('el => el.tagName') == 'SELECT'
     values = sel.locator('option').evaluate_all('os => os.map(o => o.value)')
-    assert values[:2] == ['', 'FC10'] and values[-1] == '1' and len(values) == 41
+    assert values == [''] + [f'FC{n}' for n in range(10, 0, -1)] + [str(n) for n in range(30, 0, -1)], values
     ui.switch_language(page, 'ar')
     labels = sel.locator('option').evaluate_all('os => os.map(o => o.textContent)')
     assert labels[0] == tr('common:furnace.select', 'ar') and labels[11] == tr('common:furnace.level', 'ar', n='30')
@@ -447,9 +447,14 @@ def test_admin_stats_filter_sort_export_settings(page: Page, base_url, admin_pas
         f"{tr('tyrant:admin.troopShort.marksman')} FC10 T11")
     expect(page.get_by_test_id('by-window-w1')).to_have_attribute('data-count', '1')
     expect(page.get_by_test_id('by-role-gathering')).to_have_attribute('data-count', '1')
-    expect(page.get_by_test_id(f'player-row-{FID_A}').get_by_test_id('furnace-badge')).to_have_text('FC8')
+    # no main furnace anywhere in the Tyrant admin (p2e): no column, badge, sort or filter
+    expect(page.get_by_test_id('furnace-badge')).to_have_count(0)
+    expect(page.get_by_test_id('sort-furnace')).to_have_count(0)
+    expect(page.get_by_test_id('furnace-filter')).to_have_count(0)
+    heads = page.get_by_test_id('tyrant-table').locator('thead th').all_inner_texts()
+    assert not any('furnace' in h.lower() for h in heads), heads
     shot('admin-tyrant')
-    # search, alliance filter, furnace filter, sort
+    # search, alliance filter, sort
     page.get_by_test_id('tyrant-search').fill('tyra#')
     expect(page.locator('[data-testid^="player-row-"]')).to_have_count(1)
     page.get_by_test_id('tyrant-search').fill('')
@@ -463,14 +468,13 @@ def test_admin_stats_filter_sort_export_settings(page: Page, base_url, admin_pas
     page.get_by_test_id('filter-pill-alliance-ARB').click()
     expect(page.get_by_test_id('filter-pills')).to_have_count(0)
     page.get_by_test_id('filter-more').click()
-    page.get_by_test_id('furnace-filter').select_option('FC5')
-    expect(page.locator('[data-testid^="player-row-"]')).to_have_count(1)
-    expect(page.get_by_test_id(f'player-row-{FID_A}')).to_be_visible()
-    page.get_by_test_id('furnace-filter').select_option('')
-    expect(page.locator('[data-testid^="player-row-"]')).to_have_count(2)
-    page.get_by_test_id('sort-furnace').click()
+    expect(page.get_by_test_id('more-filters')).to_be_visible()
+    expect(page.get_by_test_id('more-filters').locator('#furnace-filter')).to_have_count(0)  # no 'Furnace at least'
+    page.get_by_test_id('filter-more').click()
+    # sort by strength: FID_A (FC5/T10, FC9/T9, FC10/T11 = 54) above FID_AR (FC3/T8, FC1/T11, FC3/T9 = 35)
+    page.get_by_test_id('sort-strength').click()
     expect(page.locator('[data-testid^="player-row-"]').first).to_have_attribute('data-testid', f'player-row-{FID_A}')
-    page.get_by_test_id('sort-furnace').click()
+    page.get_by_test_id('sort-strength').click()
     expect(page.locator('[data-testid^="player-row-"]').first).to_have_attribute('data-testid', f'player-row-{FID_AR}')
     # exports
     with page.expect_download() as dl:
@@ -478,6 +482,7 @@ def test_admin_stats_filter_sort_export_settings(page: Page, base_url, admin_pas
     text = open(dl.value.path(), encoding='utf-8-sig').read()
     rows = list(csv.reader(io.StringIO(text)))
     assert rows[0][:4] == ['FID', 'In-Game Name', 'Alliance', 'Discord ID'] and len(rows) == 3
+    assert not any('furnace' in h.lower() for h in rows[0]), rows[0]  # no furnace column (p2e)
     assert dl.value.suggested_filename.endswith('.csv')
     with page.expect_download() as dl:
         page.get_by_test_id('export-excel').click()
@@ -555,7 +560,7 @@ def test_start_new_round_then_use_last_answers(page: Page, base_url, admin_passw
     expect(page.get_by_test_id('discord-vc')).to_be_checked()
     next_step(page, 3)
     expect(page.get_by_test_id('gem-spend')).to_have_value('12000')
-    expect(page.get_by_test_id('furnace-level')).to_have_value('FC8')  # profile
+    assert_no_furnace_field(page)
     for n in (4, 5, 6):
         next_step(page, n)
     page.get_by_test_id('wizard-submit').click()

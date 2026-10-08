@@ -258,6 +258,9 @@ def test_minister_wizard_new_on_phone(phone, api, device, lang, locale):
     page.get_by_test_id('wizard-next').click()
     expect(page.get_by_test_id('application-heading')).to_have_attribute('data-mode', 'new')
     ui.fill_profile(page, f'Phone {lang} {RUN}', 'MOB')
+    # Minister still asks the furnace (only Tyrant dropped it, p2e): FC10..FC1 then 30..1
+    opts = page.get_by_test_id('profile-furnace-level').locator('option').evaluate_all('os => os.map(o => o.value)')
+    assert opts == [''] + [f'FC{n}' for n in range(10, 0, -1)] + [str(n) for n in range(30, 0, -1)], opts
     for field, mode in [('construction_speedups_days', 'decimal'), ('research_speedups_days', 'decimal'),
                         ('troop_training_speedups_days', 'decimal')]:
         assert page.get_by_test_id(f'answer-{field}').get_attribute('inputmode') == mode
@@ -341,10 +344,10 @@ def test_tyrant_wizard_new_on_phone(phone, api, device, lang, locale):
     # 3 stats: decimal keyboard for power, numeric for gems
     assert page.get_by_test_id('power-millions').get_attribute('inputmode') == 'decimal'
     assert page.get_by_test_id('gem-spend').get_attribute('inputmode') == 'numeric'
-    page.get_by_test_id('furnace-level').select_option('FC5')
+    expect(page.get_by_test_id('furnace-level')).to_have_count(0)  # Tyrant does not ask the main furnace (p2e)
     page.get_by_test_id('power-millions').fill('123.4')
     page.get_by_test_id('gem-spend').fill('5000')
-    p.check('tyrant-3-stats', tappable=['wizard-back', 'wizard-next', 'furnace-level', 'power-millions', 'gem-spend'])
+    p.check('tyrant-3-stats', tappable=['wizard-back', 'wizard-next', 'power-millions', 'gem-spend'])
     ui.next_step(page)
     # 4 troops: CAMP levels (FC10..FC1 only) + tier, all required
     expect(page.get_by_test_id('camp-hint')).to_have_text(ui.tr(lang, 'tyrant:step4.campHint'))
@@ -453,6 +456,9 @@ def test_admin_tyrant_filters_on_phone(phone, api, base_url, lang, locale):
     expect(page.get_by_test_id('tyrant-table')).to_be_visible()
     page.wait_for_load_state('networkidle')
     expect(page.get_by_test_id('stat-gems')).to_have_count(0)
+    # no main furnace in the Tyrant admin (p2e): no column / badge / sort / 'Furnace at least' filter
+    for gone in ('furnace-badge', 'sort-furnace', 'furnace-filter'):
+        expect(page.get_by_test_id(gone)).to_have_count(0)
     total = int(page.get_by_test_id('stat-total-value').inner_text())
     chips = ['chip-infantry-camp-FC10', 'chip-infantry-tier-T11', 'filter-troop', 'filter-min-camp', 'filter-min-tier',
              'alliance-filter', 'windows-filter', 'filter-more', 'sort-strength', 'sort-name']
