@@ -26,7 +26,8 @@ async def test_tyrant_submit_get_previous_and_validation(public, admin, api):
         err, data = await call(c, 'submit_application', {'event': 'tyrant', 'fid': f, 'answers': answers(),
                                                          'profile': prof})
         assert not err, data
-        assert data['created'] and data['profile']['furnace_level'] == 'FC8' and data['profile']['alliance'] == 'FDT'
+        # Tyrant does not ask the main furnace (owner p2e): an old client's furnace_level is ignored, not stored
+        assert data['created'] and data['profile']['furnace_level'] is None and data['profile']['alliance'] == 'FDT'
         assert data['profile']['troops']['lancer'] == {'furnace_level': None, 'tier': None}
         err, data = await call(c, 'get_application', {'event': 'tyrant', 'fid': f})
         assert not err and data['answers']['availability'] == ['w1', 'w2'] and data['answers']['gem_spend'] == 20000
@@ -39,13 +40,15 @@ async def test_tyrant_submit_get_previous_and_validation(public, admin, api):
             'event': 'tyrant', 'fid': f, 'answers': answers(),
             'profile': {'troops': {'infantry': {'furnace_level': 'FC12'}}}})
         assert err and data['field'] == 'profile.troops.infantry.furnace_level'
-        # Tyrant: FC1-FC10 only for the furnace and every camp (pre-FC -> VALIDATION_ERROR)
-        for prof_bad, field in [({'furnace_level': '30'}, 'profile.furnace_level'),
-                                ({'troops': {'lancer': {'furnace_level': '25', 'tier': 10}}},
-                                 'profile.troops.lancer.furnace_level')]:
-            err, data = await call(c, 'submit_application', {'event': 'tyrant', 'fid': f, 'answers': answers(),
-                                                             'profile': prof_bad})
-            assert err and data['code'] == 'VALIDATION_ERROR' and data['field'] == field, data
+        # Tyrant: FC1-FC10 only for every camp (pre-FC -> VALIDATION_ERROR)
+        err, data = await call(c, 'submit_application', {'event': 'tyrant', 'fid': f, 'answers': answers(),
+                                                         'profile': {'troops': {'lancer': {'furnace_level': '25',
+                                                                                           'tier': 10}}}})
+        assert err and data['code'] == 'VALIDATION_ERROR' and data['field'] == 'profile.troops.lancer.furnace_level'
+        # ... while any main furnace (even an invalid one) is ignored
+        err, data = await call(c, 'submit_application', {'event': 'tyrant', 'fid': f, 'answers': answers(),
+                                                         'profile': {'furnace_level': '30'}})
+        assert not err and data['profile']['furnace_level'] is None, data
         err, data = await call(c, 'submit_application', {'event': 'tyrant', 'fid': fid(), 'answers': answers(),
                                                          'profile': {'game_name': 'NoAlliance'}})
         assert err and data['field'] == 'profile.alliance'
@@ -72,7 +75,7 @@ async def test_tyrant_admin_list_and_summary(public, admin, api):
     async with admin() as c:
         err, data = await call(c, 'list_applications', {'event': 'tyrant'})
         assert not err and data['round_id'] == rnd['id'] and data['total'] == 3
-        assert data['applications'][0]['profile']['furnace_level'] == 'FC10'
+        assert 'furnace_level' not in data['applications'][0]['profile']  # tyrant rows: no main furnace (p2e)
         err, data = await call(c, 'list_applications', {'event': 'tyrant', 'alliance': 'BBB'})
         assert not err and data['total'] == 1
         err, data = await call(c, 'get_tyrant_summary', {})
@@ -81,7 +84,7 @@ async def test_tyrant_admin_list_and_summary(public, admin, api):
         assert data['discord_vc'] == 1 and data['roles']['joiner'] == 3 and 'gem_spend_total' not in data
         assert data['camp_levels']['infantry'] == {'FC5': 3} and data['camp_levels']['lancer'] == {'none': 3}
         assert {w['id']: w['count'] for w in data['windows']}['w4'] == 1
-        assert data['furnace_levels'] == {'FC10': 3} and data['troop_tiers']['infantry'] == {'T10': 3}
+        assert 'furnace_levels' not in data and data['troop_tiers']['infantry'] == {'T10': 3}
         err, data = await call(c, 'get_tyrant_summary', {'round_id': rnd['id'], 'alliance': 'AAA'})
         assert not err and data['total'] == 2
         ministry = api.start_round('MCP ministry for tyrant check')
@@ -126,3 +129,8 @@ async def test_tyrant_troop_filters_one_call(public, admin, api):
         assert data['camp_levels']['lancer'] == {'FC10': 1} and data['troop_tiers']['marksman'] == {'T11': 1}
         err, data = await call(c, 'get_tyrant_summary', {'filters': {'tier': {'marksman': 10}}})
         assert not err and data['total'] == 1 and data['filters'] == {'marksman_tier': 10}
+        # no furnace filter any more (p2e): the tool refuses it rather than silently returning everyone
+        for tool in ('list_applications', 'get_tyrant_summary'):
+            err, data = await call(c, tool, {'event': 'tyrant', 'filters': {'min_furnace': 'FC10'}}
+                                   if tool == 'list_applications' else {'filters': {'min_furnace': 'FC10'}})
+            assert err, (tool, data)

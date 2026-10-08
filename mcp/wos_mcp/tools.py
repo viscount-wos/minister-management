@@ -39,8 +39,10 @@ MINISTRY_ANSWERS_HELP = (
     '(get_current_round; defaults w1 11:01-11:15 opening rush, w2 11:15-13:00, w3 13:00-15:00, w4 15:00-16:30, '
     'w5 16:30-18:00 UTC); discord_vc: bool; gem_spend: whole number of gems or null; roles: subset of '
     'rally_leader, joiner, gathering, battle_mgmt, event_prep; language: en|es|fr|de|pl|ko|zh|tr|ar or null. '
-    'Tyrant requires profile.game_name and profile.alliance; furnace_level, power (absolute, not millions), '
-    'discord_id and troops live on the PROFILE. svs accepts free-form JSON objects for now.'
+    'Tyrant requires profile.game_name and profile.alliance; power (absolute, not millions), discord_id and troops '
+    '(camp level + tier per troop type) live on the PROFILE. Tyrant does NOT ask the main furnace: a '
+    'profile.furnace_level sent with a tyrant application is ignored (not stored). svs accepts free-form JSON '
+    'objects for now.'
 )
 MAX_LIST = 200
 
@@ -57,11 +59,11 @@ class ProfileFields(BaseModel):
     timezone: str | None = Field(None, description='IANA timezone, e.g. "Europe/London".')
     furnace_level: str | None = Field(None, description=(
         'Furnace level code: "FC1".."FC10" (Fire Crystal) or "1".."30" (pre-FC), or null. Order: FC10 highest, '
-        'then FC1, then 30 down to 1. Tyrant accepts "FC1".."FC10" ONLY (pre-FC -> VALIDATION_ERROR).'))
+        'then FC1, then 30 down to 1. Minister asks it; Tyrant ignores it (only the troop CAMP levels count).'))
     power: int | None = Field(None, description='Power, integer >= 0, or null.')
     troops: dict[str, Any] | list[Any] | None = Field(None, description=(
         'Troop levels. Tyrant requires {"infantry"|"lancer"|"marksman": {"furnace_level": "FC1".."FC10"|null, '
-        '"tier": 1-11|null}}: furnace_level is that troop type\'s CAMP level (camps can lag the furnace); '
+        '"tier": 1-11|null}}: furnace_level is that troop type\'s CAMP level (camps can lag the city furnace); '
         'any combination is allowed. Other events accept any JSON object.'))
     discord_id: str | None = Field(None, description='Discord username or id, max 64 chars, optional.')
 
@@ -75,7 +77,6 @@ class TyrantFilters(BaseModel):
 
     q: str | None = Field(None, max_length=64, description='FID, in-game name or Discord ID contains.')
     alliances: list[str] | None = Field(None, description='Any of these alliance tags.')
-    min_furnace: str | None = Field(None, description='Main furnace at least this code (e.g. "FC5").')
     min_power: int | None = Field(None, ge=0, description='Power at least (absolute, not millions).')
     max_power: int | None = Field(None, ge=0, description='Power at most (absolute).')
     min_gems: int | None = Field(None, ge=0, description='Per-player est. max gem spend at least.')
@@ -100,9 +101,10 @@ TYRANT_FILTERS_HELP = (
     'pre-FC camps never match), `min_tier` 1-11 (or "T11"), `troop` "infantry"|"lancer"|"marksman"|"all" (default '
     '"all" = EVERY troop type must meet min_camp/min_tier). Camp level = profile.troops.<type>.furnace_level. '
     'Examples: who has T11 everywhere -> min_tier=11; FC10 camps with T11 -> min_camp="FC10", min_tier=11; T11 '
-    'marksmen -> min_tier=11, troop="marksman". `filters` takes the rest: q, alliances, min_furnace, min/max_power '
+    'marksmen -> min_tier=11, troop="marksman". `filters` takes the rest: q, alliances, min/max_power '
     '(absolute), min/max_gems, windows (ALL of), rush, vc, camp/tier (EXACT per troop type, e.g. {"infantry": '
-    '"FC10"}), roles + roles_mode any|all, submitted_from/to (YYYY-MM-DD), days.'
+    '"FC10"}), roles + roles_mode any|all, submitted_from/to (YYYY-MM-DD), days. There is no main-furnace filter: '
+    'Tyrant does not ask the furnace; camp levels + tiers (and joiner_strength) are the strength signal.'
 )
 
 
@@ -292,7 +294,7 @@ points (monday_points, research_points, thursday_points). `round_id` is a round 
 current round of `event`). Optional `alliance` filter (3-letter tag). Paged: `offset`/`limit`
 (default 50, max {MAX_LIST}); the result has total/offset/limit/returned (total counts AFTER filters).
 Tyrant only (event="tyrant"; a non-tyrant round -> NOT_FOUND): {TYRANT_FILTERS_HELP}
-`sort` (tyrant): submitted|updated|name|alliance|fid|furnace|power|gems|strength, `direction` asc|desc (blanks
+`sort` (tyrant): submitted|updated|name|alliance|fid|power|gems|strength, `direction` asc|desc (blanks
 last). Tyrant rows carry `joiner_strength` = sum over the 3 troop types of camp FC number (FC1=1..FC10=10,
 pre-FC/blank 0) + tier (blank 0); 63 = FC10 camps with T11 everywhere; null when no troop data.
 {UNTRUSTED} {ERRORS}""")
@@ -396,8 +398,8 @@ preview of the round that would be closed. Optional closing_time is ISO-8601 (e.
 summary stats of one round: total players, opening_rush (players available in any rush window), discord_vc,
 per-window counts, alliances (count each), roles (count each), troop_tiers per troop type
 ({{"infantry": {{"T11": n, ..., "none": n}}, ...}}), camp_levels per troop type ({{"infantry": {{"FC10": n,
-..., "none": n}}, ...}}; legacy pre-FC codes appear as stored, after FC1) and furnace_levels (codes FC10..FC1, 30..1,
-highest first). No aggregate gem total (owner rule). The counts are computed for the FILTERED set; the result
+..., "none": n}}, ...}}; legacy pre-FC codes appear as stored, after FC1). No main-furnace counts (Tyrant does not
+ask the furnace) and no aggregate gem total (owner rules). The counts are computed for the FILTERED set; the result
 also has round_total (unfiltered), alliance_options and the active `filters`. `round_id` is a tyrant round id or
 "current"; optional `alliance` restricts everything to one alliance tag. {TYRANT_FILTERS_HELP} {UNTRUSTED} {ERRORS}""")
     async def get_tyrant_summary(ctx: Context,
