@@ -516,8 +516,9 @@ def test_admin_stats_filter_sort_export_settings(page: Page, base_url, admin_pas
     page.reload()
     page.wait_for_load_state('networkidle')
     page.get_by_test_id('admin-event-tyrant').wait_for()
-    page.on('dialog', lambda d: d.accept())
-    page.get_by_test_id(f'delete-{throwaway}').click()
+    page.get_by_test_id(f'delete-{throwaway}').click()                 # v2.2.1: a confirm dialog naming them
+    expect(page.get_by_test_id('delete-dialog')).to_contain_text('Gone')
+    page.get_by_test_id('confirm-delete').click()
     expect(page.get_by_test_id(f'player-row-{throwaway}')).to_have_count(0)
     assert tapi.application(throwaway) is None
 
