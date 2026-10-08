@@ -44,8 +44,8 @@ MINISTRY_ANSWERS_HELP = (
     'profile.furnace_level sent with a tyrant application is ignored (not stored). '
     'SVS answers (event key "svs", full set): hours: list of hour starts "HH:MM" (UTC) from the current round\'s '
     'settings.hours (default 11:00, 12:00, 13:00, 14:00, 15:00; start time and duration are round settings), at '
-    'least one; role: "call" (calls rallies) or "join" (joins rallies); discord_vc: bool (can join Discord voice '
-    'chat); language or null. SVS profile: game_name, alliance (required only for a NEW player) and troops: ALL '
+    'least one; discord_vc: bool (can join Discord voice chat); language or null. SVS does NOT ask a role (the battle '
+    'planner assigns rally leaders); a role sent by an old client is ignored. SVS profile: game_name, alliance (required only for a NEW player) and troops: ALL '
     'three types with a camp level "FC1".."FC10" and tier 10 or 11 ONLY (T8/T9 are refused in SVS). Troops are '
     'shared with Frost Dragon Tyrant: values sent replace the stored ones per type and field; blanks never clear.'
 )
@@ -130,15 +130,15 @@ class SvsFilters(BaseModel):
 
 SVS_FILTERS_HELP = (
     'SVS filters (all optional, AND): `hours` list of hour starts ("12:00"; the player attends ALL of them), '
-    '`role` "call"|"join"|"none" (none = admin-added without a role), `vc` true/false (Discord voice chat), '
+    '`vc` true/false (Discord voice chat), '
     '`alliance`, `min_camp` FC code, `min_tier` 10/11, `troop` "infantry"|"lancer"|"marksman"|"all" (default all '
     '= EVERY troop type must meet min_camp/min_tier). `svs_filters` takes the rest: q, alliances, camp/tier (EXACT per '
-    'troop type), submitted_from/to, days. Examples: rally callers on VC -> role="call", vc=true; joiners for the '
-    '12:00 hour with FC10 T11 everywhere -> role="join", hours=["12:00"], min_camp="FC10", min_tier=11.'
+    'troop type), submitted_from/to, days. There is no role filter (SVS does not ask it). Example: players for the '
+    '12:00 hour on VC with FC10 T11 everywhere -> hours=["12:00"], vc=true, min_camp="FC10", min_tier=11.'
 )
 
 
-def _svs_params(filters: 'SvsFilters | None', hours: list[str] | None, role: str | None, vc: bool | None,
+def _svs_params(filters: 'SvsFilters | None', hours: list[str] | None, vc: bool | None,
                 min_camp: str | None, min_tier: int | str | None, troop: str | None,
                 alliance: str | None = None) -> dict[str, str]:
     """SVS filter arguments -> the API's query params (docs/API.md "SVS")."""
@@ -156,7 +156,7 @@ def _svs_params(filters: 'SvsFilters | None', hours: list[str] | None, role: str
         p['hours'] = ','.join(hours)
     if vc is not None:
         p['vc'] = 'yes' if vc else 'no'
-    for key, v in (('role', role), ('min_camp', min_camp), ('min_tier', min_tier), ('troop', troop),
+    for key, v in (('min_camp', min_camp), ('min_tier', min_tier), ('troop', troop),
                    ('alliance', alliance)):
         if v is not None and v != '':
             p[key] = v
@@ -385,7 +385,7 @@ current round of `event`). Optional `alliance` filter (3-letter tag). Paged: `of
 Tyrant only (event="tyrant"; a non-tyrant round -> NOT_FOUND): {TYRANT_FILTERS_HELP}
 `sort` (tyrant): submitted|updated|name|alliance|fid|power|gems|strength, `direction` asc|desc (blanks
 last). SVS only (event="svs"): {SVS_FILTERS_HELP} `sort` (svs): submitted|updated|name|alliance|fid|strength|hours.
-SVS rows carry answers {{hours, role, discord_vc, language}} and joiner_strength. Tyrant rows carry `joiner_strength` = sum over the 3 troop types of camp FC number (FC1=1..FC10=10,
+SVS rows carry answers {{hours, discord_vc, language}} and joiner_strength. Tyrant rows carry `joiner_strength` = sum over the 3 troop types of camp FC number (FC1=1..FC10=10,
 pre-FC/blank 0) + tier (blank 0); 63 = FC10 camps with T11 everywhere; null when no troop data.
 {UNTRUSTED} {ERRORS}""")
     async def list_applications(
@@ -405,12 +405,11 @@ pre-FC/blank 0) + tier (blank 0); 63 = FC10 camps with T11 everywhere; null when
             direction: Literal['asc', 'desc'] | None = None,
             filters: TyrantFilters | None = None,
             hours: Annotated[list[str] | None, Field(description='SVS: hour starts the player attends (ALL).')] = None,
-            role: Literal['call', 'join', 'none'] | None = None,
             vc: Annotated[bool | None, Field(description='SVS: can join Discord voice chat.')] = None,
             svs_filters: SvsFilters | None = None) -> CallToolResult:
         if bad := refused(ctx):
             return bad
-        svs = event == 'svs' or bool(hours) or role is not None or vc is not None or svs_filters is not None
+        svs = event == 'svs' or bool(hours) or vc is not None or svs_filters is not None
         if svs and filters is not None:
             return R.error(400, 'VALIDATION_ERROR', 'filters is for tyrant; use svs_filters for svs', field='filters')
         if round_id == 'current':
@@ -423,7 +422,7 @@ pre-FC/blank 0) + tier (blank 0); 63 = FC10 camps with T11 everywhere; null when
         sort_params = {k: v for k, v in (('sort', sort), ('dir', direction)) if v}
         if svs:
             # the svs list route filters/sorts server-side (and 404s a non-svs round)
-            params = _svs_params(svs_filters, hours, role, vc, min_camp, min_tier, troop, alliance)
+            params = _svs_params(svs_filters, hours, vc, min_camp, min_tier, troop, alliance)
             params.update(sort_params)
             res = await api.admin('GET', f'/api/admin/svs/rounds/{seg(round_id)}/applications', params=params or None)
             if res.ok:
@@ -542,8 +541,9 @@ also has round_total (unfiltered), alliance_options and the active `filters`. `r
         return R.from_api(await api.admin('GET', f'/api/admin/tyrant/rounds/{seg(round_id)}/summary', params=params))
 
     @server.tool(annotations=_ro('Get SVS summary'), description=f"""{ADMIN} SVS only: summary of one round's
-sign-ups: total, rally_callers (role call), joiners (role join), discord_vc (can join voice chat), hours (players
-per battle hour: [{{"hour": "11:00", "count": n}}, ...] in battle order), roles ({{"call", "join", "none"}}),
+sign-ups: total, avg_hours (battle hours per player), all_t11 (players with T11 in all three troop types),
+discord_vc (can join voice chat), hours (players
+per battle hour: [{{"hour": "11:00", "count": n}}, ...] in battle order),
 alliances (count each), troop_tiers and camp_levels per troop type ({{"infantry": {{"T11": n, "T10": n, "none": n}}}}).
 Counts are for the FILTERED set; round_total is unfiltered; also alliance_options and the active `filters`.
 `round_id` is an svs round id or "current". {SVS_FILTERS_HELP} {UNTRUSTED} {ERRORS}""")
@@ -552,7 +552,6 @@ Counts are for the FILTERED set; round_total is unfiltered; also alliance_option
                                   description='Round id or "current".')] = 'current',
                               alliance: Annotated[str | None, Field(max_length=64)] = None,
                               hours: list[str] | None = None,
-                              role: Literal['call', 'join', 'none'] | None = None,
                               vc: bool | None = None,
                               min_camp: Annotated[str | None, Field(max_length=4)] = None,
                               min_tier: int | str | None = None,
@@ -560,14 +559,14 @@ Counts are for the FILTERED set; round_total is unfiltered; also alliance_option
                               svs_filters: SvsFilters | None = None) -> CallToolResult:
         if bad := refused(ctx):
             return bad
-        params = _svs_params(svs_filters, hours, role, vc, min_camp, min_tier, troop, alliance)
+        params = _svs_params(svs_filters, hours, vc, min_camp, min_tier, troop, alliance)
         return R.from_api(await api.admin('GET', f'/api/admin/svs/rounds/{seg(round_id)}/summary',
                                           params=params or None))
 
     @server.tool(annotations=_rw('Add player', idempotent=False), description=f"""{ADMIN} "Add player": create a
 sign-up in a round for a player who didn't sign up themselves (any event with rounds: ministry, tyrant, svs).
 `fid` is required; a FID with no profile yet also needs profile.game_name. Everything else is OPTIONAL here (admin
-mode): e.g. SVS hours/role/discord_vc and troop levels may be left out, but anything you DO pass is validated with
+mode): e.g. SVS hours/discord_vc and troop levels may be left out, but anything you DO pass is validated with
 the event's rules (SVS tiers 10/11 only, tyrant window ids, ...). Troops merge into the shared profile (blanks never
 clear stored values). Works after the closing time; closed rounds refuse (ROUND_CLOSED). If the FID already has a
 sign-up in that round: 409 APPLICATION_EXISTS (use update_application instead). `round_id` is a round id or

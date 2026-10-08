@@ -3,6 +3,8 @@ frontend/src/i18n/locales/<lang>/<ns>.json. Re-runnable (it overwrites these key
 inserted before v210 so the newest release comes first in the file.
 
     python3 scripts/i18n/v220_keys.py
+
+NOTE: the role keys this script adds were removed by the owner (no role question); run v220_no_role.py after it.
 """
 import json
 from pathlib import Path

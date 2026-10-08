@@ -277,7 +277,7 @@ Ministry round settings: `research_day` (`tuesday`|`friday`), `show_fire_crystal
   "answers"?: {...}}` → 201 the new application (admin shape: ids, profile, event decorations such as ministry points
   or `joiner_strength`) + `"profile_created": bool`. `fid` required (a NEW profile needs a canonical digits-only FID
   and `profile.game_name`; an existing profile needs nothing else). Uses the event's own validation in ADMIN mode:
-  answers a player must give (SVS hours/role/VC, SVS troop levels) may be blank; anything sent must be valid (SVS
+  answers a player must give (SVS hours/VC, SVS troop levels) may be blank; anything sent must be valid (SVS
   tiers 10/11, tyrant window ids, ...). Profile troops merge (see SVS). No closing-time check; closed rounds → 409
   `ROUND_CLOSED`. FID already signed up in that round → **409 `APPLICATION_EXISTS`** ("FID … already has a sign-up in
   this round; edit that one instead"). `{ref}` = id or `current` + `?event=`. MCP: `add_player`.
@@ -415,14 +415,16 @@ Player calls are the generic ones with `{event}` = `svs`.
 {"profile": {"game_name": "Sva", "alliance": "woo",
              "troops": {"infantry": {"furnace_level": "FC10", "tier": 11}, "lancer": {"furnace_level": "FC9", "tier": 10},
                         "marksman": {"furnace_level": "FC10", "tier": 11}}},
- "answers": {"hours": ["12:00", "13:00"], "role": "join", "discord_vc": true, "language": "en"}}
+ "answers": {"hours": ["12:00", "13:00"], "discord_vc": true, "language": "en"}}
 ```
 - **Round settings**: `battle_start` "HH:MM" UTC (default "11:00"), `battle_hours` 1-24 (default 5); public settings
   add the derived `hours` (start, start+1h, ... wrapping past midnight). Carried over by start-new-round. Other keys → 400.
 - **Answers** (player submit, all required): `hours` ⊆ the round's hours, at least one (returned in battle order);
-  `role` `call` (calls rallies) | `join` (joins rallies); `discord_vc` bool; `language` or null. Unknown key → 400.
+  `discord_vc` bool; `language` or null. Unknown key → 400. **No role** (owner decision: SVS sign-up does not ask
+  the role; the battle planner assigns leaders): a `role` sent by an old client is ignored (not stored, no 400);
+  roles stored before the change stay in the data but are not shown, filtered or exported.
   An hour the admin has since removed (start/duration changed) is kept when re-sent unchanged; a new unknown hour → 400.
-  Admin create/edit: every answer may be blank (`hours: []`, `role: null`, `discord_vc: null`).
+  Admin create/edit: every answer may be blank (`hours: []`, `discord_vc: null`).
 - **Profile**: `game_name`; `alliance` required only when the shared profile has none (new player); `troops`: what is
   SENT must be FC1-FC10 camps and tiers **10 or 11 only** (`T11`/`11`; T8/T9 → 400 naming e.g.
   `profile.troops.infantry.tier`); it is MERGED into the shared profile, and a player submit then needs the merged
@@ -434,13 +436,13 @@ Player calls are the generic ones with `{event}` = `svs`.
   fields and extra keys not sent stay as stored.
 - **Admin**: `GET /api/admin/svs/rounds/{ref}/applications?<filters>&sort=submitted|updated|name|alliance|fid|strength|hours
   &dir=&limit=&offset=` → `{round_id, total, applications}` (current profile, `joiner_strength` as Tyrant, no furnace).
-  `GET .../summary?<filters>` → `{round_id, round_total, filters, total, rally_callers, joiners, discord_vc,
-  hours: [{hour, count}], roles: {call, join, none}, alliances, troop_tiers, camp_levels, alliance_options}`.
+  `GET .../summary?<filters>` → `{round_id, round_total, filters, total, avg_hours (battle hours per player,
+  1 decimal), all_t11 (T11 in all three troop types), discord_vc, hours: [{hour, count}], alliances, troop_tiers, camp_levels, alliance_options}`.
   `GET .../export?<filters>` (xlsx: "SVS Sign-ups" + "Summary") and `.../export.csv?<filters>`: FID, In-Game Name,
-  Alliance, Role, one Yes/No column per hour (`11:00 UTC`), Discord VC, camp level + tier ×3, Joiner Strength,
+  Alliance, one Yes/No column per hour (`11:00 UTC`), Discord VC, camp level + tier ×3, Joiner Strength,
   Language, Submitted/Updated At. Also `GET /api/admin/rounds/{id}/export` (unfiltered xlsx).
 - **Filters** (one parser `events/svs/filters.py`, list + summary + exports + MCP; same keys in the admin URL; AND):
-  `q` (FID/name), `alliance` (comma list), `hours` (comma list: attends ALL), `role` call|join|none, `vc` yes|no|none,
+  `q` (FID/name), `alliance` (comma list), `hours` (comma list: attends ALL), `vc` yes|no|none,
   `troop` + `min_camp` (FC code) + `min_tier` (10/11), exact `<type>_camp` / `<type>_tier` (chips; `none` = blank),
   `submitted_from`/`submitted_to`, `days`. Bad values → 400 naming the parameter.
 

@@ -9,8 +9,7 @@ export type { TroopType };
 
 export const EVENT = 'svs' as const;
 
-export const ROLES = ['call', 'join'] as const;
-export type SvsRole = (typeof ROLES)[number];
+// No role: SVS sign-up does not ask it (owner); the battle planner assigns rally leaders.
 /** SVS tiers: T11 and T10 ONLY (owner: T8/T9 are never allowed in SVS). Highest first. */
 export const SVS_TIERS = [11, 10] as const;
 
@@ -59,7 +58,6 @@ export function svsTroops(raw: unknown): SvsTroops {
 
 export interface SvsAnswers {
   hours: string[];
-  role: SvsRole | null;
   discord_vc: boolean | null;
   language: string | null;
 }
@@ -92,13 +90,14 @@ export interface SvsAdminApplication extends SvsApplication {
 export interface SvsSummary {
   round_id: number;
   total: number;
-  rally_callers: number;
-  joiners: number;
+  /** Battle hours per player (1 decimal). */
+  avg_hours: number;
+  /** Players with T11 in all three troop types. */
+  all_t11: number;
   discord_vc: number;
   round_total: number;
   alliance_options: string[];
   hours: { hour: string; count: number }[];
-  roles: { call: number; join: number; none: number };
   alliances: { alliance: string | null; count: number }[];
   troop_tiers: Record<TroopType, Record<string, number>>;
   camp_levels: Record<TroopType, Record<string, number>>;
@@ -111,7 +110,6 @@ export const FILTER_KEYS = [
   'q',
   'alliance',
   'hours',
-  'role',
   'vc',
   'troop',
   'min_camp',

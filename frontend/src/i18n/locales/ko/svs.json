@@ -31,9 +31,8 @@
     "tierHint": "SVS에서는 T10과 T11 병력만 인정됩니다."
   },
   "step4": {
-    "title": "내 역할",
-    "desc": "어떻게 싸울지, 함께 이야기할 수 있는지 알려 주세요",
-    "roleTitle": "전투에서 나는…",
+    "title": "음성 채팅",
+    "desc": "전투 중에 함께 이야기할 수 있나요?",
     "vc": "Discord 음성 채팅에 참여할 수 있나요?",
     "vcHint": "음성 채팅은 지휘관이 타이밍을 알리는 데 도움이 됩니다. 듣기만 해도 됩니다."
   },
@@ -41,32 +40,23 @@
     "title": "확인",
     "desc": "제출하기 전에 모든 내용을 확인하세요"
   },
-  "roles": {
-    "call": "집결 개설",
-    "callDesc": "다른 사람이 참여할 집결을 엽니다",
-    "join": "집결 참여",
-    "joinDesc": "다른 플레이어의 집결에 병력을 보냅니다",
-    "none": "역할 없음"
-  },
   "errors": {
     "hoursRequired": "시간을 하나 이상 고르세요",
     "troopsRequired": "모든 병종의 병영 레벨과 티어(T10 또는 T11)를 고르세요",
-    "roleRequired": "역할을 고르세요: 집결 개설 또는 집결 참여",
     "vcRequired": "Discord 음성 채팅 참여 가능 여부를 알려 주세요"
   },
   "admin": {
     "adminSubtitle": "SVS: 신청, 시간, 병력, 내보내기",
     "defaultRoundName": "SVS {{date}}",
     "stats": {
-      "callers": "집결 개설자",
-      "joiners": "참여자",
-      "vc": "Discord VC"
+      "vc": "Discord VC",
+      "avgHours": "플레이어당 평균 시간",
+      "allT11": "세 병종 모두 T11"
     },
     "byHour": "시간별 플레이어 (UTC)",
     "search": "이름 또는 FID 검색...",
     "col": {
-      "hours": "시간 (UTC)",
-      "role": "역할"
+      "hours": "시간 (UTC)"
     },
     "filter": {
       "hours": "시간 (UTC)",
@@ -74,7 +64,6 @@
     },
     "pill": {
       "hour": "{{v}} UTC",
-      "role": "역할: {{v}}",
       "vcYes": "Discord VC: 예",
       "vcNo": "Discord VC: 아니요"
     },

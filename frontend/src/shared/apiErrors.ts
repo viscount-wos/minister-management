@@ -26,7 +26,6 @@ const FIELD_LABELS: Record<string, string> = {
   state_number: 'admin:stateNumber',
   state_generation: 'admin:heroes.generation',
   'answers.hours': 'svs:step2.title',
-  'answers.role': 'svs:step4.roleTitle',
   'answers.discord_vc': 'svs:step4.vc',
   password: 'admin:password',
 };

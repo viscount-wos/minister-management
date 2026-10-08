@@ -144,7 +144,7 @@ minister_management/
 ## Events
 
 Minister (ministry appointments), Frost Dragon Tyrant, **SVS** (v2.2.0: battle hours, troop camp levels with T10/T11,
-call/join role, Discord voice chat; admin stats, filters and exports) and TAL (coming soon). Every event's admin can
+Discord voice chat; admin stats, filters and exports) and TAL (coming soon). Every event's admin can
 **add a player** who did not sign up. See `docs/SPEC.md`, `docs/API.md` and `docs/MCP.md`.
 
 ## Credits

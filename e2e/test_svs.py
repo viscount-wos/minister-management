@@ -35,7 +35,7 @@ def full(camp, tier):
 
 
 def put_svs(api: ui.Api, fid, name, alliance, troops, **answers):
-    a = {'hours': ['12:00'], 'role': 'join', 'discord_vc': True}
+    a = {'hours': ['12:00'], 'discord_vc': True}
     a.update(answers)
     return api.call('PUT', f'/api/events/svs/current/application/{fid}',
                     {'profile': {'game_name': name, 'alliance': alliance, 'troops': troops}, 'answers': a})[1]
@@ -48,7 +48,7 @@ def svs_round(api):
                                                                                      'battle_hours': 5}},
                       admin=True)
     rnd = res['round']
-    put_svs(api, F_CALL, 'Caller', 'AAA', full('FC10', 11), hours=['11:00', '12:00'], role='call')
+    put_svs(api, F_CALL, 'Caller', 'AAA', full('FC10', 11), hours=['11:00', '12:00'])
     put_svs(api, F_JOIN, 'Joiner', 'AAA', full('FC9', 10), hours=['12:00'], discord_vc=False)
     put_svs(api, F_WEAK, 'Weak', 'BBB', full('FC5', 10), hours=['15:00'])
     return rnd
@@ -87,7 +87,7 @@ def hour_chips(page: Page) -> list[str]:
 
 
 def fill_wizard(page: Page, lang: str, *, name: str, alliance: str | None, hours: list[str], camp: str, tier: int,
-                role: str, vc: bool, shot=None, tag='') -> None:
+                vc: bool, shot=None, tag='') -> None:
     at_step(page, 1)
     page.get_by_test_id('profile-game-name').fill(name)
     if alliance is not None:
@@ -118,9 +118,8 @@ def fill_wizard(page: Page, lang: str, *, name: str, alliance: str | None, hours
         expect(page.get_by_test_id(f'tier-{k}-{tier}')).to_have_attribute('aria-checked', 'true')
     shot and shot(f'{tag}3')
     next_step(page, 4)
-    page.get_by_test_id('wizard-next').click()
-    expect(page.get_by_test_id('form-error')).to_have_text(tr('svs:errors.roleRequired', lang))
-    page.get_by_test_id(f'role-{role}').click()
+    # no role question any more (owner): step 4 is only Discord voice chat
+    expect(page.get_by_test_id('wizard-step-4').locator('[data-testid^=role-]')).to_have_count(0)
     page.get_by_test_id('wizard-next').click()
     expect(page.get_by_test_id('form-error')).to_have_text(tr('svs:errors.vcRequired', lang))
     page.get_by_test_id('vc-yes' if vc else 'vc-no').click()
@@ -153,15 +152,15 @@ def test_full_wizard_english(page: Page, base_url, api, shot):
     page.get_by_test_id('wizard-next').click()
     expect(page.get_by_test_id('form-error')).to_have_text(tr('profile:allianceRequired'))
     fill_wizard(page, 'en', name=f'Svs EN {RUN}', alliance='sve', hours=['12:00', '13:00'], camp='FC8', tier=11,
-                role='call', vc=True, shot=shot, tag='en-step')
+                vc=True, shot=shot, tag='en-step')
     expect(page.get_by_test_id('review-hours').locator('[data-hour]')).to_have_count(2)
-    expect(page.get_by_test_id('review-role')).to_contain_text(tr('svs:roles.call'))
+    expect(page.get_by_test_id('review-role')).to_have_count(0)
     expect(page.get_by_test_id('review-troop-lancer')).to_contain_text('FC8 / T11')
     shot('en-step5')
     page.get_by_test_id('wizard-submit').click()
     expect(page.get_by_test_id('save-success')).to_be_visible()
     _, app = api.call('GET', f'/api/events/svs/current/application/{FID_EN}')
-    assert app['answers'] == {'hours': ['12:00', '13:00'], 'role': 'call', 'discord_vc': True, 'language': 'en'}
+    assert app['answers'] == {'hours': ['12:00', '13:00'], 'discord_vc': True, 'language': 'en'}
     _, prof = api.call('GET', f'/api/profile/{FID_EN}')
     assert prof['alliance'] == 'SVE' and prof['troops']['marksman'] == {'furnace_level': 'FC8', 'tier': 11}
     # edit by FID: everything pre-filled, Update
@@ -186,7 +185,7 @@ def test_arabic_rtl_wizard(page: Page, base_url, api, shot):
     assert open_wizard(page, base_url, FID_AR, lang='ar') == 'new'
     assert page.evaluate('document.documentElement.dir') == 'rtl'
     expect(page.get_by_test_id('wizard-step-title')).to_have_text(tr('svs:step1.title', 'ar'))
-    fill_wizard(page, 'ar', name=f'عربي {RUN}', alliance='ARB', hours=['11:00'], camp='FC10', tier=10, role='join',
+    fill_wizard(page, 'ar', name=f'عربي {RUN}', alliance='ARB', hours=['11:00'], camp='FC10', tier=10,
                 vc=False, shot=shot, tag='ar-step')
     # step circles follow the page direction: step 1 on the right
     one = page.get_by_test_id('wizard-step-indicator-1').bounding_box()
@@ -199,7 +198,7 @@ def test_arabic_rtl_wizard(page: Page, base_url, api, shot):
     page.get_by_test_id('wizard-submit').click()
     expect(page.get_by_test_id('save-success')).to_be_visible()
     _, app = api.call('GET', f'/api/events/svs/current/application/{FID_AR}')
-    assert app['answers'] == {'hours': ['11:00'], 'role': 'join', 'discord_vc': False, 'language': 'ar'}
+    assert app['answers'] == {'hours': ['11:00'], 'discord_vc': False, 'language': 'ar'}
 
 
 def test_hours_follow_the_round_setting(page: Page, base_url, api, svs_round):
@@ -247,7 +246,6 @@ def test_prefill_from_tyrant_and_back(page: Page, base_url, api):
     page.get_by_test_id('tier-infantry-10').click()
     page.get_by_test_id('troop-marksman-furnace').select_option('FC9')
     next_step(page, 4)
-    page.get_by_test_id('role-join').click()
     page.get_by_test_id('vc-yes').click()
     next_step(page, 5)
     page.get_by_test_id('wizard-submit').click()
@@ -300,8 +298,11 @@ def test_admin_stats_bars_chips_filters_export(page: Page, base_url, api, shot):
     expect(page.get_by_test_id('svs-table')).to_be_visible()
     _, s = api.call('GET', '/api/admin/svs/rounds/current/summary', admin=True)
     expect(page.get_by_test_id('stat-total-value')).to_have_text(str(s['total']))
-    expect(page.get_by_test_id('stat-callers-value')).to_have_text(str(s['rally_callers']))
-    expect(page.get_by_test_id('stat-joiners-value')).to_have_text(str(s['joiners']))
+    expect(page.get_by_test_id('stat-avg-hours-value')).to_have_text(str(s['avg_hours']))
+    expect(page.get_by_test_id('stat-all-t11-value')).to_have_text(str(s['all_t11']))
+    # no role anywhere (owner: SVS sign-up does not ask it)
+    for gone in ('stat-callers', 'stat-joiners', 'by-role', 'filter-role'):
+        expect(page.get_by_test_id(gone)).to_have_count(0)
     expect(page.get_by_test_id('stat-discord-vc-value')).to_have_text(str(s['discord_vc']))
     # dashboard order (owner): stats -> bars -> troop chips -> filter bar -> table
     tops = [page.get_by_test_id(t).bounding_box()['y'] for t in ('stat-total', 'by-hour', 'by-troop', 'svs-filters',
@@ -314,13 +315,6 @@ def test_admin_stats_bars_chips_filters_export(page: Page, base_url, api, shot):
     assert 'hours=15' in page.url
     expect(page.get_by_test_id(f'player-row-{F_WEAK}')).to_be_visible()
     expect(page.get_by_test_id(f'player-row-{F_CALL}')).to_have_count(0)
-    page.get_by_test_id('clear-filters').click()
-    # role bar
-    page.get_by_test_id('by-role-call').click()
-    assert 'role=call' in page.url
-    expect(page.get_by_test_id(f'player-row-{F_CALL}')).to_be_visible()
-    expect(page.get_by_test_id(f'role-{F_CALL}')).to_have_text(tr('svs:roles.call'))
-    expect(page.get_by_test_id(f'player-row-{F_JOIN}')).to_have_count(0)
     page.get_by_test_id('clear-filters').click()
     # tier chips are T11 / T10 (+ none); a camp chip filters exactly
     labels = page.get_by_test_id('tier-chips-infantry').locator('button').all_inner_texts()
@@ -343,7 +337,7 @@ def test_admin_stats_bars_chips_filters_export(page: Page, base_url, api, shot):
     fids = [r[0] for r in rows[1:]]
     assert F_CALL in fids and F_JOIN not in fids and F_WEAK not in fids
     head = rows[0]
-    assert head[:4] == ['FID', 'In-Game Name', 'Alliance', 'Role'] and '11:00 UTC' in head
+    assert head[:4] == ['FID', 'In-Game Name', 'Alliance', '11:00 UTC'] and 'Role' not in head
     assert dict(zip(head, rows[fids.index(F_CALL) + 1]))['Joiner Strength'] == '63'
     with page.expect_download() as dl:
         page.get_by_test_id('export-excel').click()
@@ -437,7 +431,6 @@ def test_add_player_every_event(page: Page, base_url, api, event, shot):
     page.get_by_test_id('add-alliance').fill('add')
     if event == 'svs':
         page.get_by_test_id('add-hour-13:00').click()
-        page.get_by_test_id('add-role').select_option('call')
         tiers = page.get_by_test_id('add-infantry-tier').locator('option').evaluate_all('os => os.map(o => o.value)')
         assert tiers == ['', '11', '10']
         page.get_by_test_id('add-infantry-tier').select_option('11')
@@ -451,7 +444,7 @@ def test_add_player_every_event(page: Page, base_url, api, event, shot):
     expect(page.get_by_test_id(f'player-row-{fid}')).to_be_visible()
     _, app = api.call('GET', f'/api/events/{event}/current/application/{fid}')
     if event == 'svs':
-        assert app['answers'] == {'hours': ['13:00'], 'role': 'call', 'discord_vc': None, 'language': None}
+        assert app['answers'] == {'hours': ['13:00'], 'discord_vc': None, 'language': None}
         _, prof = api.call('GET', f'/api/profile/{fid}')
         assert prof['troops']['infantry']['tier'] == 11 and prof['alliance'] == 'ADD'
     elif event == 'tyrant':

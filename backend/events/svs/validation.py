@@ -1,19 +1,19 @@
 """SVS (State vs State castle battle) sign-up: answer, round-settings and troop validation (owner brief 2026-10-08).
 
-Much less than Frost Dragon Tyrant: no gems, no furnace, no power, one role.
+Much less than Frost Dragon Tyrant: no gems, no furnace, no power, and NO role (owner: the planner assigns rally
+leaders by hand; an old client that still sends ``role`` is not refused, the value is dropped).
 
 Round settings: ``battle_start`` "HH:MM" UTC (default "11:00") and ``battle_hours`` 1-24 (default 5). The battle's
 HOURS are derived: start, start+1h, ... (wrapping past midnight), e.g. 11:00 12:00 13:00 14:00 15:00 UTC.
 
 Answers (per application):
   hours       list of hour starts "HH:MM" (UTC) the player will attend, a subset of the round's hours
-  role        "call" (calls rallies) | "join" (joins rallies)
   discord_vc  bool: can join Discord voice chat
   language    UI language at submit (or null)
 
 Profile (shared per FID, also Frost Dragon Tyrant's): game_name, alliance (required for a NEW player only), troops =
 per troop type its CAMP level (FC1-FC10) and tier. SVS offers tiers T10/T11 ONLY (owner: T8/T9 are never allowed in
-SVS). On a player submit everything is required: >= 1 hour, a role, the VC answer, and camp + tier (10/11) for all
+SVS). On a player submit everything is required: >= 1 hour, the VC answer, and camp + tier (10/11) for all
 three troop types. Admin create/edit ("add player") is lenient: every answer and troop value may be blank.
 
 Troop merge rule (shared profile, see ``merge_troops``): per troop type and per field, a value sent replaces the
@@ -28,9 +28,10 @@ from core.validation import validate_bool
 
 TROOP_TYPES = ('infantry', 'lancer', 'marksman')
 TIERS = (10, 11)
-ROLES = ('call', 'join')
 LANGUAGES = ('en', 'es', 'fr', 'de', 'pl', 'ko', 'zh', 'tr', 'ar')
-ANSWER_KEYS = ('hours', 'role', 'discord_vc', 'language')
+ANSWER_KEYS = ('hours', 'discord_vc', 'language')
+# Asked until v2.2.0 drafts; accepted from old clients and dropped (never stored, never an error).
+IGNORED_ANSWER_KEYS = ('role',)
 DEFAULT_START = '11:00'
 DEFAULT_HOURS = 5
 MAX_HOURS = 24
@@ -73,13 +74,14 @@ def validate_settings(incoming, current):
 
 
 def validate_answers(answers, settings, existing=None, strict=True):
-    """``strict`` (player submits): >= 1 hour, role and discord_vc required. Admin create/edit: all optional.
+    """``strict`` (player submits): >= 1 hour and discord_vc required. Admin create/edit: all optional.
     ``existing`` = stored answers: an hour the admin has since removed from the round (start/duration changed) is
     kept when re-sent, so old applications stay editable; a NEW unknown hour is a VALIDATION_ERROR."""
     if answers is None:
         answers = {}
     if not isinstance(answers, dict):
         raise validation_error('answers must be an object', 'answers')
+    answers = {k: v for k, v in answers.items() if k not in IGNORED_ANSWER_KEYS}
     unknown = set(answers) - set(ANSWER_KEYS)
     if unknown:
         raise validation_error(f'Unknown answer(s): {", ".join(sorted(unknown))}', 'answers.' + sorted(unknown)[0])
@@ -101,15 +103,6 @@ def validate_answers(answers, settings, existing=None, strict=True):
     out = {'hours': [h for h in allowed if h in picked]}
     if strict and not out['hours']:
         raise validation_error('Pick at least one battle hour', 'answers.hours')
-
-    role = answers.get('role')
-    if role in (None, ''):
-        if strict:
-            raise validation_error('role is required (call or join)', 'answers.role')
-        role = None
-    elif role not in ROLES:
-        raise validation_error('role must be call or join', 'answers.role')
-    out['role'] = role
 
     vc = answers.get('discord_vc')
     if vc is None or vc == '':

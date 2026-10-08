@@ -31,9 +31,8 @@
     "tierHint": "SVS only counts T10 and T11 troops."
   },
   "step4": {
-    "title": "Your role",
-    "desc": "How will you fight, and can you talk with us?",
-    "roleTitle": "In the battle I will…",
+    "title": "Voice chat",
+    "desc": "Can you talk with us during the battle?",
     "vc": "Can you join Discord voice chat?",
     "vcHint": "Voice chat helps leaders call the timing. Listening is enough."
   },
@@ -41,32 +40,23 @@
     "title": "Review",
     "desc": "Check everything before you submit"
   },
-  "roles": {
-    "call": "Call rallies",
-    "callDesc": "I start rallies for others to join",
-    "join": "Join rallies",
-    "joinDesc": "I send my troops into other players' rallies",
-    "none": "No role given"
-  },
   "errors": {
     "hoursRequired": "Pick at least one hour",
     "troopsRequired": "Pick the camp level and the tier (T10 or T11) for every troop type",
-    "roleRequired": "Pick a role: call rallies or join rallies",
     "vcRequired": "Tell us if you can join Discord voice chat"
   },
   "admin": {
     "adminSubtitle": "SVS: sign-ups, hours, troops and exports",
     "defaultRoundName": "SVS {{date}}",
     "stats": {
-      "callers": "Rally callers",
-      "joiners": "Joiners",
-      "vc": "Discord VC"
+      "vc": "Discord VC",
+      "avgHours": "Avg hours per player",
+      "allT11": "T11 in all three"
     },
     "byHour": "Players per hour (UTC)",
     "search": "Search name or FID...",
     "col": {
-      "hours": "Hours (UTC)",
-      "role": "Role"
+      "hours": "Hours (UTC)"
     },
     "filter": {
       "hours": "Hours (UTC)",
@@ -74,7 +64,6 @@
     },
     "pill": {
       "hour": "Hour {{v}} UTC",
-      "role": "Role: {{v}}",
       "vcYes": "Discord VC: yes",
       "vcNo": "Discord VC: no"
     },

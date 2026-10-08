@@ -23,10 +23,10 @@ def plan_doc(leader_fid, joiner_fid):
 async def test_plan_tools(public, admin, api):
     api.start_round('MCP SVS plan', event='svs')
     lead, join = fid(), fid()
-    for f, role in ((lead, 'call'), (join, 'join')):
+    for f in (lead, join):
         status, data = api.admin('POST', '/api/admin/rounds/current/applications?event=svs',
                                  {'fid': f, 'profile': {'game_name': f'P{f}', 'alliance': 'MCP'},
-                                  'answers': {'role': role}})
+                                  'answers': {'hours': ['11:00']}})
         assert status == 201, data
     status, data = api.admin('PUT', '/api/admin/svs/rounds/current/plan', {'revision': 0, 'plan': plan_doc(lead, join)})
     assert status == 200, data

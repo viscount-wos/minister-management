@@ -14,11 +14,9 @@ import {
   FILTER_KEYS,
   FilterKey,
   FilterQuery,
-  ROLES,
   SVS_TIERS,
   SortKey,
   SvsAdminApplication,
-  SvsRole,
   SvsSettings,
   SvsSummary,
   TROOP_TYPES,
@@ -30,7 +28,7 @@ import {
 } from '../api';
 
 // SVS admin Players tab (modelled on Frost Dragon Tyrant's, owner's dashboard order): headline stats -> breakdown
-// bars (players per hour, roles, alliances; clickable filters) -> troop camp/tier chips -> filter bar -> table.
+// bars (players per hour, alliances; clickable filters) -> troop camp/tier chips -> filter bar -> table.
 // Filter state lives in the URL with the API's keys (docs/API.md "SVS"); exports follow the filters.
 
 const PAGE_SIZE = 50;
@@ -53,11 +51,10 @@ const tierValue = (label: string) => (label === 'none' ? 'none' : label.replace(
 /** SVS answers for the add-player dialog: all optional. */
 interface AddState {
   hours: string[];
-  role: SvsRole | null;
   vc: '' | 'yes' | 'no';
   troops: TroopValues;
 }
-const blankAdd = (): AddState => ({ hours: [], role: null, vc: '', troops: blankTroopValues() });
+const blankAdd = (): AddState => ({ hours: [], vc: '', troops: blankTroopValues() });
 
 export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
   const { t } = useTranslation();
@@ -152,13 +149,11 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
   // ------------------------------------------------------------ pills
   const troopName = (k: string) => t(`tyrant:admin.troopName.${k}`);
   const daysLabel = (n: number) => (n === 1 ? t('tyrant:admin.filter.last24h') : t('tyrant:admin.pill.days', { n }));
-  const roleLabel = (r: string) => (r === 'none' ? t('svs:roles.none') : t(`svs:roles.${r}`));
   const pills: FilterPill[] = [];
   const pill = (id: string, text: string, onRemove: () => void) => pills.push({ id, text, label: text, onRemove });
   if (v.q) pill('q', t('tyrant:admin.pill.search', { v: v.q }), () => F.set({ q: null }));
   for (const a of splitList(v.alliance)) pill(`alliance-${a}`, t('tyrant:admin.pill.alliance', { v: a }), () => F.toggleInList('alliance', a));
   for (const h of splitList(filters.hours)) pill(`hour-${h}`, t('svs:admin.pill.hour', { v: h }), () => F.toggleInList('hours', h));
-  if (v.role) pill('role', t('svs:admin.pill.role', { v: roleLabel(v.role) }), () => F.set({ role: null }));
   const troopScope = troopName(v.troop && v.troop !== 'all' ? v.troop : 'all');
   if (v.min_camp)
     pill('min_camp', t('tyrant:admin.pill.minCamp', { troop: troopScope, v: v.min_camp }), () => F.set({ min_camp: null, ...(v.min_tier ? {} : { troop: null }) }));
@@ -236,12 +231,12 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
               value={summary.total}
               sub={filtered ? t('tyrant:admin.ofRound', { total: summary.round_total }) : undefined}
             />
-            <StatCard testId="stat-callers" label={t('svs:admin.stats.callers')} value={summary.rally_callers} />
-            <StatCard testId="stat-joiners" label={t('svs:admin.stats.joiners')} value={summary.joiners} />
+            <StatCard testId="stat-avg-hours" label={t('svs:admin.stats.avgHours')} value={summary.avg_hours} />
+            <StatCard testId="stat-all-t11" label={t('svs:admin.stats.allT11')} value={summary.all_t11} />
             <StatCard testId="stat-discord-vc" label={t('svs:admin.stats.vc')} value={summary.discord_vc} />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <Bars
               testId="by-hour"
               title={t('svs:admin.byHour')}
@@ -252,18 +247,6 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
                 active: hourSel.includes(h.hour),
                 onClick: () => F.toggleInList('hours', h.hour),
                 label: <bdi dir="ltr">{h.hour} UTC</bdi>,
-              }))}
-            />
-            <Bars
-              testId="by-role"
-              title={t('svs:admin.col.role')}
-              total={summary.total}
-              rows={[...ROLES, ...(summary.roles.none ? (['none'] as const) : [])].map((r) => ({
-                key: r,
-                n: summary.roles[r] ?? 0,
-                label: roleLabel(r),
-                active: v.role === r,
-                onClick: () => toggleExact('role', r),
               }))}
             />
             <Bars
@@ -357,26 +340,6 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
             selected={hourSel}
             onToggle={(h) => F.toggleInList('hours', h)}
           />
-          <div>
-            <label htmlFor="filter-role" className="block text-sm font-medium text-theme-text mb-2">
-              {t('svs:admin.col.role')}
-            </label>
-            <select
-              id="filter-role"
-              data-testid="filter-role"
-              value={v.role ?? ''}
-              onChange={(e) => F.set({ role: e.target.value || null })}
-              className={`${SELECT_CLASS} ${v.role ? 'border-accent' : 'border-theme-border'}`}
-            >
-              <option value="">{t('tyrant:admin.filter.anyRole')}</option>
-              {ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {t(`svs:roles.${r}`)}
-                </option>
-              ))}
-              <option value="none">{t('svs:roles.none')}</option>
-            </select>
-          </div>
           <div>
             <label htmlFor="filter-troop" className="block text-sm font-medium text-theme-text mb-2">
               {t('tyrant:admin.filter.troop')}
@@ -507,7 +470,6 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
                 {th('fid', t('admin:fid'))}
                 {th('alliance', t('tyrant:fields.alliance'))}
                 {th('hours', t('svs:admin.col.hours'))}
-                {th(null, t('svs:admin.col.role'))}
                 {th(null, t('tyrant:admin.col.vc'))}
                 {th('strength', t('tyrant:admin.col.strength'))}
                 {th('submitted', t('tyrant:admin.col.submitted'))}
@@ -548,9 +510,6 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
                           </span>
                         ))}
                       </div>
-                    </td>
-                    <td className="px-2 py-2 text-theme-text whitespace-nowrap" data-testid={`role-${a.fid}`}>
-                      {a.answers.role ? t(`svs:roles.${a.answers.role}`) : <span className="text-theme-dim">—</span>}
                     </td>
                     <td className="px-2 py-2">{vcCell(a.answers.discord_vc ?? null)}</td>
                     <td className="px-2 py-2 text-theme-text font-semibold" data-testid="strength">
@@ -616,7 +575,6 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
           extra={() => {
             const answers: Record<string, unknown> = {};
             if (add.hours.length) answers.hours = hours.filter((h) => add.hours.includes(h));
-            if (add.role) answers.role = add.role;
             if (add.vc) answers.discord_vc = add.vc === 'yes';
             const troops = filledTroops(add.troops);
             return { answers, ...(troops ? { profile: { troops } } : {}) };
@@ -643,25 +601,6 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="add-role" className="block text-sm font-medium text-theme-text mb-2">
-                {t('svs:admin.col.role')}
-              </label>
-              <select
-                id="add-role"
-                data-testid="add-role"
-                value={add.role ?? ''}
-                onChange={(e) => setAdd((s) => ({ ...s, role: (e.target.value || null) as SvsRole | null }))}
-                className={`${SELECT_CLASS} border-theme-border`}
-              >
-                <option value="">—</option>
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {t(`svs:roles.${r}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
             <div>
               <label htmlFor="add-vc" className="block text-sm font-medium text-theme-text mb-2">
                 {t('svs:step4.vc')}

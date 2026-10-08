@@ -1,7 +1,7 @@
 import { FormEvent, ReactNode, useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, CheckCircle, XCircle, CalendarOff, Clock, Pencil, Crosshair, Users, Mic, MicOff } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, CalendarOff, Clock, Pencil, Mic, MicOff } from 'lucide-react';
 import { BackLink, STEP_TITLE, StatusCard, WIZARD_CARD, WIZARD_PAGE, WizardNav } from '../../shared/WizardChrome';
 import type { Round } from '../../shared/api';
 import { ApiError, isApiError } from '../../shared/api';
@@ -17,10 +17,8 @@ import { useTimezone } from '../../shared/TimezoneContext';
 import { formatTimeInTimezone, timezoneShortLabel } from '../../shared/timezone';
 import FidHelp from '../../shared/FidHelp';
 import {
-  ROLES,
   SVS_TIERS,
   SvsApplication,
-  SvsRole,
   SvsSettings,
   SvsTroops,
   TROOP_TYPES,
@@ -33,7 +31,7 @@ import { SVS_PATHS } from './paths';
 
 // The SVS sign-up WIZARD (phone-first, owner brief 2026-10-08): much smaller than Frost Dragon Tyrant's.
 //   1 Player (FID -> name, alliance)  2 Battle hours  3 Troops (camp FC + T10/T11)
-//   4 Role (call / join rallies) + Discord voice chat   5 Review -> Submit
+//   4 Discord voice chat   5 Review -> Submit   (no role question: the battle planner assigns leaders, owner)
 // Round flow exactly as the other wizards: FID lookup -> NEW (profile pre-filled from the SHARED profile, so
 // Frost Dragon Tyrant data flows in; "Use my last answers" when an earlier SVS sign-up exists) or EDIT.
 
@@ -45,7 +43,6 @@ interface FormState {
   alliance: string;
   troops: SvsTroops;
   hours: string[];
-  role: SvsRole | null;
   discord_vc: boolean | null;
 }
 
@@ -54,14 +51,12 @@ const EMPTY: FormState = {
   alliance: '',
   troops: svsTroops(null),
   hours: [],
-  role: null,
   discord_vc: null,
 };
 
 function answersToForm(a: SvsApplication['answers'] | undefined, hourIds: string[]) {
   return {
     hours: Array.isArray(a?.hours) ? hourIds.filter((h) => a!.hours!.includes(h)) : [],
-    role: a?.role && (ROLES as readonly string[]).includes(a.role) ? a.role : null,
     discord_vc: typeof a?.discord_vc === 'boolean' ? a.discord_vc : null,
   };
 }
@@ -71,7 +66,7 @@ function stepForField(field: string | null, current: number): number {
   if (/^profile\.(game_name|alliance|fid)$/.test(field) || field === 'fid') return 1;
   if (field.startsWith('answers.hours')) return 2;
   if (field.startsWith('profile.troops')) return 3;
-  if (field === 'answers.role' || field === 'answers.discord_vc') return 4;
+  if (field === 'answers.discord_vc') return 4;
   return current;
 }
 
@@ -80,11 +75,10 @@ const FIELD_LABELS: [RegExp, string][] = [
   [/^profile\.alliance$/, 'tyrant:fields.alliance'],
   [/^answers\.hours/, 'svs:step2.title'],
   [/^profile\.troops/, 'svs:step3.title'],
-  [/^answers\.role$/, 'svs:step4.roleTitle'],
   [/^answers\.discord_vc$/, 'svs:step4.vc'],
 ];
 
-/** A big tappable choice (radio semantics): role cards, VC yes/no, tier buttons. */
+/** A big tappable choice (radio semantics): VC yes/no, tier buttons. */
 function Choice({
   testId,
   selected,
@@ -279,7 +273,6 @@ export default function SvsWizard() {
       }
     }
     if (s === 4) {
-      if (!form.role) return fail('answers.role', 'svs:errors.roleRequired');
       if (form.discord_vc == null) return fail('answers.discord_vc', 'svs:errors.vcRequired');
     }
     setError('');
@@ -320,7 +313,6 @@ export default function SvsWizard() {
         profile: { game_name: form.game_name.trim(), ...(alliance ? { alliance } : {}), troops: form.troops },
         answers: {
           hours: hours.filter((h) => form.hours.includes(h)),
-          role: form.role,
           discord_vc: form.discord_vc,
           language: i18n.language,
         },
@@ -492,7 +484,6 @@ export default function SvsWizard() {
     {
       step: 4,
       rows: [
-        [t('svs:step4.roleTitle'), dash(form.role ? t(`svs:roles.${form.role}`) : ''), 'role'],
         [t('svs:step4.vc'), form.discord_vc == null ? dash('') : yes(form.discord_vc), 'discord-vc'],
       ],
     },
@@ -715,30 +706,10 @@ export default function SvsWizard() {
           </div>
         )}
 
-        {/* Step 4: Role + Discord voice chat */}
+        {/* Step 4: Discord voice chat */}
         {step === 4 && (
           <div data-testid="wizard-step-4" className="space-y-6">
             {stepHeader(4)}
-            <fieldset>
-              <legend className="block font-semibold text-theme-text mb-3">{t('svs:step4.roleTitle')}</legend>
-              <div role="radiogroup" className={`grid gap-3 rounded-lg ${invalidField === 'answers.role' ? 'ring-2 ring-danger' : ''}`} data-testid="role-group">
-                {ROLES.map((r) => (
-                  <Choice
-                    key={r}
-                    testId={`role-${r}`}
-                    selected={form.role === r}
-                    onSelect={() => {
-                      clearIf('answers.role');
-                      set({ role: r });
-                    }}
-                    icon={r === 'call' ? <Crosshair className="w-6 h-6" aria-hidden="true" /> : <Users className="w-6 h-6" aria-hidden="true" />}
-                    sub={t(`svs:roles.${r}Desc`)}
-                  >
-                    {t(`svs:roles.${r}`)}
-                  </Choice>
-                ))}
-              </div>
-            </fieldset>
             <fieldset>
               <legend className="block font-semibold text-theme-text mb-3">{t('svs:step4.vc')}</legend>
               <div role="radiogroup" className={`grid grid-cols-2 gap-3 rounded-lg ${invalidField === 'answers.discord_vc' ? 'ring-2 ring-danger' : ''}`} data-testid="vc-group">

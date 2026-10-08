@@ -14,10 +14,10 @@ def troops(camp='FC10', tier=11):
     return {k: {'furnace_level': camp, 'tier': tier} for k in ('infantry', 'lancer', 'marksman')}
 
 
-def signup(client, fid, name, role='join', camp='FC10', tier=11, alliance='ABC'):
+def signup(client, fid, name, camp='FC10', tier=11, alliance='ABC'):
     r = client.put(f'/api/events/svs/current/application/{fid}',
                    json={'profile': {'game_name': name, 'alliance': alliance, 'troops': troops(camp, tier)},
-                         'answers': {'hours': ['11:00', '12:00'], 'role': role, 'discord_vc': True}})
+                         'answers': {'hours': ['11:00', '12:00'], 'discord_vc': True}})
     assert r.status_code in (200, 201), r.json
 
 
@@ -42,9 +42,9 @@ def base_plan(leaders=()):
 @pytest.fixture
 def svs(client, admin):
     rnd = start_round(client, admin, 'SVS 1', event=EVENT)
-    for fid, name, role in [('9001', 'Alpha', 'call'), ('9002', 'Bravo', 'call'), ('9003', 'Charlie', 'join'),
-                            ('9004', 'Delta', 'join'), ('9005', 'Echo', 'join'), ('9006', 'Foxtrot', 'join')]:
-        signup(client, fid, name, role)
+    for fid, name in [('9001', 'Alpha'), ('9002', 'Bravo'), ('9003', 'Charlie'),
+                      ('9004', 'Delta'), ('9005', 'Echo'), ('9006', 'Foxtrot')]:
+        signup(client, fid, name)
     return rnd
 
 
@@ -193,7 +193,7 @@ def test_double_booking_rejected(client, admin, svs, second):
     r = put_plan(client, admin, plan, 0)
     assert r.status_code == 422 and r.json['code'] == 'DOUBLE_BOOKED', r.json
     d = r.json['details']
-    assert d['leader_id'] == 'L1' and d['leader_label'] == 'Rally Caller 01' and d['role'] == 'named_joiner'
+    assert d['leader_id'] == 'L1' and d['leader_label'] == 'Rally Caller 01' and d['position'] == 'named_joiner'
     assert d['group_id'] == 'main' and d['group_name'] == 'Main' and d['player_name'] == 'Charlie'
     assert 'Rally Caller 01' in r.json['error']
     assert get_plan(client, admin)['revision'] == 0
@@ -202,7 +202,7 @@ def test_double_booking_rejected(client, admin, svs, second):
 def test_double_booking_same_leader_and_quick_add_names(client, admin, svs):
     ld = leader('L1', 'main', '9001', named_joiners=[{'player': {'fid': '9001'}}])
     r = put_plan(client, admin, base_plan([ld]), 0)
-    assert r.status_code == 422 and r.json['details']['role'] == 'leader'
+    assert r.status_code == 422 and r.json['details']['position'] == 'leader'
     ld = leader('L1', 'main', None, extra_joiners=[{'player': {'name': 'Walk In'}}, {'player': {'name': ' walk  in '}}])
     r = put_plan(client, admin, base_plan([ld]), 0)
     assert r.status_code == 422 and r.json['field'] == 'plan.leaders[0].extra_joiners[1].player'

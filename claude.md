@@ -406,7 +406,8 @@ Record the developer-level detail here as well.
 - **v2.2.0** (October 2026): SVS sign-up, add player, hero library (branch p4/svs-signup). Details in `docs/SPEC.md`
   "SVS sign-up".
   - `events/svs/` (validation, filters, logic, routes): hours derived from round settings `battle_start` (UTC,
-    default 11:00) + `battle_hours` (default 5); answers `hours`/`role` (call|join)/`discord_vc`; tiers 10/11 only;
+    default 11:00) + `battle_hours` (default 5); answers `hours`/`discord_vc` (no role: owner decision, the planner assigns leaders; an old client's `role` is
+    ignored); tiers 10/11 only;
     strict player submits (complete merged troops), lenient admin mode; admin list/summary/CSV/xlsx with one filter
     parser; frontend `events/svs/` (5-step `SvsWizard`, `admin/SvsPlayers`, `SvsRoundSettings`, `SvsHeroes`, guide).
   - Shared troops: ONE merge rule `core/troops.py` `merge_troops` (sent value replaces per type+field, blank never

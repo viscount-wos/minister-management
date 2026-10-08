@@ -31,9 +31,8 @@
     "tierHint": "En SVS, seules les troupes T10 et T11 comptent."
   },
   "step4": {
-    "title": "Votre rôle",
-    "desc": "Comment allez-vous combattre, et pouvez-vous nous parler ?",
-    "roleTitle": "Pendant la bataille, je vais…",
+    "title": "Vocal",
+    "desc": "Pouvez-vous nous parler pendant la bataille ?",
     "vc": "Pouvez-vous rejoindre le salon vocal Discord ?",
     "vcHint": "Le vocal aide les chefs à donner le bon moment. Écouter suffit."
   },
@@ -41,32 +40,23 @@
     "title": "Vérification",
     "desc": "Vérifiez tout avant d'envoyer"
   },
-  "roles": {
-    "call": "Lancer des rassemblements",
-    "callDesc": "Je lance des rassemblements que les autres rejoignent",
-    "join": "Rejoindre des rassemblements",
-    "joinDesc": "J'envoie mes troupes dans les rassemblements des autres",
-    "none": "Aucun rôle indiqué"
-  },
   "errors": {
     "hoursRequired": "Choisissez au moins une heure",
     "troopsRequired": "Choisissez le niveau du camp et le palier (T10 ou T11) pour chaque type de troupe",
-    "roleRequired": "Choisissez un rôle : lancer ou rejoindre des rassemblements",
     "vcRequired": "Dites-nous si vous pouvez rejoindre le vocal Discord"
   },
   "admin": {
     "adminSubtitle": "SVS : inscriptions, heures, troupes et exports",
     "defaultRoundName": "SVS {{date}}",
     "stats": {
-      "callers": "Lanceurs",
-      "joiners": "Participants",
-      "vc": "Vocal Discord"
+      "vc": "Vocal Discord",
+      "avgHours": "Heures moyennes par joueur",
+      "allT11": "T11 partout"
     },
     "byHour": "Joueurs par heure (UTC)",
     "search": "Rechercher nom ou FID...",
     "col": {
-      "hours": "Heures (UTC)",
-      "role": "Rôle"
+      "hours": "Heures (UTC)"
     },
     "filter": {
       "hours": "Heures (UTC)",
@@ -74,7 +64,6 @@
     },
     "pill": {
       "hour": "Heure {{v}} UTC",
-      "role": "Rôle : {{v}}",
       "vcYes": "Vocal Discord : oui",
       "vcNo": "Vocal Discord : non"
     },

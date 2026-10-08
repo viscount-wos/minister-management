@@ -38,7 +38,7 @@ def _filters(rnd):
 @bp.route('/api/admin/svs/rounds/<ref>/applications', methods=['GET'])
 @require_admin
 def admin_list(ref):
-    """Filters: events/svs/filters.py (q, alliance, hours, role, vc, troop, min_camp, min_tier, <type>_camp,
+    """Filters: events/svs/filters.py (q, alliance, hours, vc, troop, min_camp, min_tier, <type>_camp,
     <type>_tier, submitted_from/to, days; AND). &sort=submitted|updated|name|alliance|fid|strength|hours
     &dir=asc|desc &limit= &offset= -> {round_id, total, applications} (total = after filters)."""
     rnd = resolve_round(ref)

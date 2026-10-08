@@ -31,9 +31,8 @@
     "tierHint": "SVS 只计算 T10 和 T11 部队。"
   },
   "step4": {
-    "title": "你的角色",
-    "desc": "你会怎样作战？能和我们语音吗？",
-    "roleTitle": "战斗中我会…",
+    "title": "语音",
+    "desc": "战斗期间你能和我们语音吗？",
     "vc": "你能加入 Discord 语音频道吗？",
     "vcHint": "语音能帮助指挥官把握时机。只听也可以。"
   },
@@ -41,32 +40,23 @@
     "title": "确认",
     "desc": "提交前请检查所有内容"
   },
-  "roles": {
-    "call": "发起集结",
-    "callDesc": "我发起集结，让其他人加入",
-    "join": "加入集结",
-    "joinDesc": "我把部队派进其他玩家的集结",
-    "none": "未填写角色"
-  },
   "errors": {
     "hoursRequired": "请至少选择一个小时",
     "troopsRequired": "请为每种兵种选择兵营等级和阶级（T10 或 T11）",
-    "roleRequired": "请选择角色：发起集结或加入集结",
     "vcRequired": "请告诉我们你能否加入 Discord 语音"
   },
   "admin": {
     "adminSubtitle": "SVS：报名、时段、部队与导出",
     "defaultRoundName": "SVS {{date}}",
     "stats": {
-      "callers": "集结发起者",
-      "joiners": "加入者",
-      "vc": "Discord 语音"
+      "vc": "Discord 语音",
+      "avgHours": "人均小时数",
+      "allT11": "三兵种均 T11"
     },
     "byHour": "每小时玩家数（UTC）",
     "search": "搜索名称或 FID...",
     "col": {
-      "hours": "时段（UTC）",
-      "role": "角色"
+      "hours": "时段（UTC）"
     },
     "filter": {
       "hours": "时段（UTC）",
@@ -74,7 +64,6 @@
     },
     "pill": {
       "hour": "{{v}} UTC",
-      "role": "角色：{{v}}",
       "vcYes": "Discord 语音：是",
       "vcNo": "Discord 语音：否"
     },

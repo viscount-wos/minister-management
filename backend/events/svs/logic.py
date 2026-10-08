@@ -1,7 +1,7 @@
 """SVS event logic: EventSpec, admin list/summary and exports (modelled on events/tyrant/logic.py).
 
 Profile (shared per FID with Frost Dragon Tyrant and Minister): game_name, alliance, troops (camp level + tier per
-troop type). SVS does not ask the main furnace, power, gems or Discord ID. Round answers: hours, role, discord_vc,
+troop type). SVS does not ask the main furnace, power, gems or Discord ID. Round answers: hours, discord_vc,
 language (events/svs/validation.py).
 """
 import json
@@ -24,7 +24,6 @@ from events.tyrant.logic import _furnace_sort, _slug, _tier_sort, _troop, joiner
 from events.tyrant.logic import round_applications as _tyrant_round_applications
 
 EVENT = 'svs'
-ROLE_LABELS = {'call': 'Call rallies', 'join': 'Join rallies'}
 SORT_KEYS = ('submitted', 'updated', 'name', 'alliance', 'fid', 'strength', 'hours')
 
 
@@ -67,7 +66,8 @@ def filter_and_sort(apps, filters=None, sort='submitted', direction='desc'):
 def summary(apps, settings):
     hours = sv.battle_hours(settings)
     hour_counts = Counter()
-    roles = Counter()
+    hour_total = 0
+    all_t11 = 0
     alliances = Counter()
     vc = 0
     troops = {k: Counter() for k in sv.TROOP_TYPES}
@@ -76,7 +76,9 @@ def summary(apps, settings):
         ans, prof = a['answers'], a['profile']
         for h in ans.get('hours') or []:
             hour_counts[h] += 1
-        roles[ans.get('role') or 'none'] += 1
+        hour_total += len(ans.get('hours') or [])
+        if all(_troop(prof, k, 'tier') == 11 for k in sv.TROOP_TYPES):
+            all_t11 += 1
         if ans.get('discord_vc'):
             vc += 1
         alliances[(prof.get('alliance') or '').strip().upper() or None] += 1
@@ -86,11 +88,10 @@ def summary(apps, settings):
             camps[kind][_troop(prof, kind, 'furnace_level') or 'none'] += 1
     return {
         'total': len(apps),
-        'rally_callers': roles.get('call', 0),
-        'joiners': roles.get('join', 0),
+        'avg_hours': round(hour_total / len(apps), 1) if apps else 0,
+        'all_t11': all_t11,
         'discord_vc': vc,
         'hours': [{'hour': h, 'count': hour_counts.get(h, 0)} for h in hours],
-        'roles': {'call': roles.get('call', 0), 'join': roles.get('join', 0), 'none': roles.get('none', 0)},
         'alliances': [{'alliance': k, 'count': v}
                       for k, v in sorted(alliances.items(), key=lambda kv: (-kv[1], kv[0] or '~'))],
         'troop_tiers': {k: dict(sorted(c.items(), key=lambda kv: _tier_sort(kv[0]))) for k, c in troops.items()},
@@ -105,7 +106,7 @@ def _yes(v):
 
 
 def export_header(settings):
-    return (['FID', 'In-Game Name', 'Alliance', 'Role']
+    return (['FID', 'In-Game Name', 'Alliance']
             + [f'{h} UTC' for h in sv.battle_hours(settings)]
             + ['Discord VC']
             + [f'{k.capitalize()} {p}' for k in sv.TROOP_TYPES for p in ('Camp Level', 'Tier')]
@@ -117,7 +118,7 @@ def export_rows(apps, settings):
     for a in apps:
         ans, prof = a['answers'], a['profile']
         mine = set(ans.get('hours') or [])
-        row = [a['fid'], prof.get('game_name'), prof.get('alliance'), ROLE_LABELS.get(ans.get('role'), '')]
+        row = [a['fid'], prof.get('game_name'), prof.get('alliance')]
         row += ['Yes' if h in mine else 'No' for h in hours]
         row += [_yes(ans.get('discord_vc'))]
         for kind in sv.TROOP_TYPES:
@@ -161,8 +162,8 @@ def build_workbook(apps, settings, round_row):
     sm.append(['Battle start (UTC)', settings['battle_start']])
     sm.append(['Battle hours', settings['battle_hours']])
     sm.append(['Total players', s['total']])
-    sm.append(['Rally callers', s['rally_callers']])
-    sm.append(['Joiners', s['joiners']])
+    sm.append(['Avg hours per player', s['avg_hours']])
+    sm.append(['T11 in all three', s['all_t11']])
     sm.append(['Discord VC', s['discord_vc']])
     sm.append([])
     sm.append(['Hour (UTC)', 'Players'])

@@ -31,9 +31,8 @@
     "tierHint": "SVS'de yalnızca T10 ve T11 birlikleri sayılır."
   },
   "step4": {
-    "title": "Rolün",
-    "desc": "Nasıl savaşacaksın ve bizimle konuşabilir misin?",
-    "roleTitle": "Savaşta ben…",
+    "title": "Sesli sohbet",
+    "desc": "Savaş sırasında bizimle konuşabilir misin?",
     "vc": "Discord sesli sohbete katılabilir misin?",
     "vcHint": "Sesli sohbet liderlerin zamanlamayı vermesine yardımcı olur. Dinlemek yeterli."
   },
@@ -41,32 +40,23 @@
     "title": "Gözden geçir",
     "desc": "Göndermeden önce her şeyi kontrol et"
   },
-  "roles": {
-    "call": "Ralli başlatacağım",
-    "callDesc": "Başkalarının katılacağı ralliler açarım",
-    "join": "Rallilere katılacağım",
-    "joinDesc": "Birliklerimi diğer oyuncuların rallilerine gönderirim",
-    "none": "Rol belirtilmedi"
-  },
   "errors": {
     "hoursRequired": "En az bir saat seç",
     "troopsRequired": "Her birlik türü için kamp seviyesini ve kademeyi (T10 veya T11) seç",
-    "roleRequired": "Bir rol seç: ralli başlatmak veya rallilere katılmak",
     "vcRequired": "Discord sesli sohbete katılıp katılamayacağını söyle"
   },
   "admin": {
     "adminSubtitle": "SVS: kayıtlar, saatler, birlikler ve dışa aktarma",
     "defaultRoundName": "SVS {{date}}",
     "stats": {
-      "callers": "Ralli başlatanlar",
-      "joiners": "Katılanlar",
-      "vc": "Discord VC"
+      "vc": "Discord VC",
+      "avgHours": "Oyuncu başına ort. saat",
+      "allT11": "Üçünde de T11"
     },
     "byHour": "Saat başına oyuncu (UTC)",
     "search": "İsim veya FID ara...",
     "col": {
-      "hours": "Saatler (UTC)",
-      "role": "Rol"
+      "hours": "Saatler (UTC)"
     },
     "filter": {
       "hours": "Saatler (UTC)",
@@ -74,7 +64,6 @@
     },
     "pill": {
       "hour": "Saat {{v}} UTC",
-      "role": "Rol: {{v}}",
       "vcYes": "Discord VC: evet",
       "vcNo": "Discord VC: hayır"
     },

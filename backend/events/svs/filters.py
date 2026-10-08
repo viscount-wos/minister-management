@@ -1,11 +1,10 @@
 """SVS admin filters: ONE parser shared by the list, summary and export routes (and so by the MCP tools), exactly like
 Frost Dragon Tyrant's (events/tyrant/filters.py, whose helpers it reuses). All optional, combined with AND; the admin
-URL uses the same keys.
+URL uses the same keys. (No role filter: SVS sign-up does not ask the role; the planner assigns leaders.)
 
   q              text: FID or in-game name contains (case-insensitive)
   alliance       one tag or a comma list (any of them)
   hours          comma list of hour starts ("11:00,12:00"): attends ALL of them
-  role           call | join  ("none" = no role given, admin-added players)
   vc             yes | no  (Discord voice chat; "none" = not answered)
   troop          infantry|lancer|marksman|all (default all): which troop types min_camp / min_tier apply to
   min_camp       FC1..FC10: camp level at least this
@@ -24,7 +23,7 @@ from events.tyrant.filters import _blank, _csv, _date, _int, _norm_ts, parse_tie
 
 TROOP_FILTERS = sv.TROOP_TYPES + ('all',)
 EXACT_KEYS = tuple(f'{k}_{d}' for k in sv.TROOP_TYPES for d in ('camp', 'tier'))
-FILTER_KEYS = ('q', 'alliance', 'hours', 'role', 'vc', 'troop', 'min_camp', 'min_tier') + EXACT_KEYS + (
+FILTER_KEYS = ('q', 'alliance', 'hours', 'vc', 'troop', 'min_camp', 'min_tier') + EXACT_KEYS + (
     'submitted_from', 'submitted_to', 'days')
 
 
@@ -49,11 +48,6 @@ def parse_filters(args, settings):
             raise validation_error(f'hours contains an hour that is not in this battle: {h!r}', 'hours')
     if hours:
         f['hours'] = hours
-    role = str(get('role') or '').strip().lower()
-    if role not in ('', 'any') + sv.ROLES + ('none',):
-        raise validation_error('role must be call, join or none', 'role')
-    if role and role != 'any':
-        f['role'] = role
     vc = str(get('vc') or '').strip().lower()
     if vc not in ('', 'any', 'yes', 'no', 'none'):
         raise validation_error('vc must be yes, no or none', 'vc')
@@ -97,8 +91,6 @@ def matches(app, f):
     if 'alliance' in f and (prof.get('alliance') or '').strip().casefold() not in f['alliance']:
         return False
     if 'hours' in f and not set(f['hours']) <= set(ans.get('hours') or []):
-        return False
-    if 'role' in f and (ans.get('role') or 'none') != f['role']:
         return False
     if 'vc' in f:
         vc = ans.get('discord_vc')

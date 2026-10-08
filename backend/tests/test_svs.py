@@ -17,7 +17,7 @@ def troops(camp='FC10', tier=11, **override):
 
 
 def good(**kw):
-    a = {'hours': ['11:00', '13:00'], 'role': 'join', 'discord_vc': True, 'language': 'en'}
+    a = {'hours': ['11:00', '13:00'], 'discord_vc': True, 'language': 'en'}
     a.update(kw)
     return a
 
@@ -58,14 +58,23 @@ def test_submit_and_profile(client, admin):
     start_round(client, admin, 'SVS', event=EVENT)
     r = put(client, '501', answers=good(hours=['13:00', '11:00']))
     assert r.status_code == 201, r.json
-    assert r.json['application']['answers'] == {'hours': ['11:00', '13:00'], 'role': 'join', 'discord_vc': True,
-                                                'language': 'en'}
+    assert r.json['application']['answers'] == {'hours': ['11:00', '13:00'], 'discord_vc': True, 'language': 'en'}
     p = r.json['profile']
     assert p['alliance'] == 'SVS' and p['troops']['lancer'] == {'furnace_level': 'FC10', 'tier': 11}
     # edit by FID: same application
-    r = put(client, '501', answers=good(role='call', discord_vc=False, hours=['15:00']))
+    r = put(client, '501', answers=good(discord_vc=False, hours=['15:00']))
     assert r.status_code == 200 and r.json['created'] is False
-    assert client.get('/api/events/svs/current/application/501').json['answers']['role'] == 'call'
+    assert client.get('/api/events/svs/current/application/501').json['answers']['discord_vc'] is False
+
+
+def test_role_no_longer_asked(client, admin):
+    """Owner: SVS sign-up does not ask the role (the planner assigns leaders). An old client that still sends one is
+    not refused and the value is not stored."""
+    start_round(client, admin, 'SVS', event=EVENT)
+    for i, role in enumerate(('call', 'join', 'lead', None)):
+        r = put(client, f'52{i}', answers=good(role=role))
+        assert r.status_code == 201, r.json
+        assert 'role' not in r.json['application']['answers']
 
 
 def test_strict_player_answers(client, admin):
@@ -74,8 +83,6 @@ def test_strict_player_answers(client, admin):
         ({'hours': []}, 'answers.hours'),
         ({'hours': ['10:00']}, 'answers.hours'),
         ({'hours': '11:00'}, 'answers.hours'),
-        ({'role': None}, 'answers.role'),
-        ({'role': 'lead'}, 'answers.role'),
         ({'discord_vc': None}, 'answers.discord_vc'),
         ({'discord_vc': 'maybe'}, 'answers.discord_vc'),
         ({'language': 'xx'}, 'answers.language'),
@@ -106,7 +113,7 @@ def test_troops_t10_t11_only_and_required(client, admin):
 def test_returning_player_need_not_resend_valid_troops(client, admin):
     start_round(client, admin, 'SVS', event=EVENT)
     assert put(client, '510').status_code == 201
-    r = client.put('/api/events/svs/current/application/510', json={'profile': {}, 'answers': good(role='call')})
+    r = client.put('/api/events/svs/current/application/510', json={'profile': {}, 'answers': good()})
     assert r.status_code == 200, r.json
     # ... but a stored T9 (e.g. from Frost Dragon Tyrant) must be replaced by T10/T11
     client.put('/api/profile/511', json={'game_name': 'T9', 'alliance': 'NIN', 'troops': {
@@ -146,7 +153,7 @@ def test_closing_time_blocks_new_but_not_edit(client, admin):
     client.put(f'/api/admin/rounds/{rnd["id"]}', json={'closing_time': '2020-01-01T00:00:00Z'}, headers=admin)
     r = put(client, '508')
     assert r.status_code == 403 and r.json['code'] == 'APPLICATIONS_CLOSED'
-    assert put(client, '507', answers=good(role='call')).status_code == 200
+    assert put(client, '507', answers=good(hours=['12:00'])).status_code == 200
 
 
 def test_old_hours_kept_when_resent_after_settings_change(client, admin):
@@ -205,12 +212,12 @@ def test_merge_keeps_extra_keys():
 def _seed(client, admin):
     rnd = start_round(client, admin, 'SVS admin', event=EVENT)
     put(client, '701', profile={'alliance': 'AAA', 'troops': troops('FC10', 11)},
-        answers=good(hours=['11:00', '12:00'], role='call', discord_vc=True))
+        answers=good(hours=['11:00', '12:00'], discord_vc=True))
     put(client, '702', profile={'alliance': 'AAA', 'troops': troops('FC9', 10)},
-        answers=good(hours=['12:00'], role='join', discord_vc=False))
+        answers=good(hours=['12:00'], discord_vc=False))
     put(client, '703', profile={'alliance': 'BBB', 'troops': troops('FC10', 10, marksman={'furnace_level': 'FC8',
                                                                                             'tier': 11})},
-        answers=good(hours=['12:00', '15:00'], role='join', discord_vc=True))
+        answers=good(hours=['12:00', '15:00'], discord_vc=True))
     return rnd
 
 
@@ -218,13 +225,14 @@ def test_admin_summary(client, admin):
     rnd = _seed(client, admin)
     s = client.get('/api/admin/svs/rounds/current/summary', headers=admin).json
     assert s['round_id'] == rnd['id'] and s['total'] == 3 and s['round_total'] == 3
-    assert (s['rally_callers'], s['joiners'], s['discord_vc']) == (1, 2, 2)
+    assert (s['avg_hours'], s['all_t11'], s['discord_vc']) == (1.7, 1, 2)
+    assert 'roles' not in s and 'rally_callers' not in s
     assert {h['hour']: h['count'] for h in s['hours']} == {'11:00': 1, '12:00': 3, '13:00': 0, '14:00': 0, '15:00': 1}
     assert s['alliances'][0] == {'alliance': 'AAA', 'count': 2} and s['alliance_options'] == ['AAA', 'BBB']
     assert s['camp_levels']['infantry'] == {'FC10': 2, 'FC9': 1}
     assert s['troop_tiers']['marksman'] == {'T11': 2, 'T10': 1}
-    f = client.get('/api/admin/svs/rounds/current/summary?role=join&alliance=aaa', headers=admin).json
-    assert f['total'] == 1 and f['round_total'] == 3 and f['filters']['role'] == 'join'
+    f = client.get('/api/admin/svs/rounds/current/summary?vc=no&alliance=aaa', headers=admin).json
+    assert f['total'] == 1 and f['round_total'] == 3 and f['filters']['vc'] == 'no'
 
 
 def test_admin_list_filters_and_sort(client, admin):
@@ -237,7 +245,7 @@ def test_admin_list_filters_and_sort(client, admin):
 
     assert sorted(fids('hours=12:00')) == ['701', '702', '703']
     assert fids('hours=11:00,12:00') == ['701']
-    assert fids('role=call') == ['701']
+    assert sorted(fids('role=call')) == ['701', '702', '703']  # an old link's role filter is ignored
     assert sorted(fids('vc=yes')) == ['701', '703']
     assert sorted(fids('min_tier=11&troop=marksman')) == ['701', '703']
     assert fids('min_camp=FC10&min_tier=11') == ['701']
@@ -247,7 +255,7 @@ def test_admin_list_filters_and_sort(client, admin):
     assert fids('sort=strength&dir=desc') == ['701', '703', '702']
     rows = client.get('/api/admin/svs/rounds/current/applications', headers=admin).json['applications']
     assert 'furnace_level' not in rows[0]['profile'] and rows[0]['joiner_strength'] is not None
-    for qs, field in [('hours=10:00', 'hours'), ('role=lead', 'role'), ('vc=maybe', 'vc'), ('min_camp=25', 'min_camp'),
+    for qs, field in [('hours=10:00', 'hours'), ('vc=maybe', 'vc'), ('min_camp=25', 'min_camp'),
                       ('sort=power', 'sort')]:
         r = client.get(f'/api/admin/svs/rounds/current/applications?{qs}', headers=admin)
         assert r.status_code == 400 and r.json['field'] == field, (qs, r.json)
@@ -259,11 +267,11 @@ def test_admin_list_filters_and_sort(client, admin):
 
 def test_exports_follow_filters(client, admin):
     _seed(client, admin)
-    r = client.get('/api/admin/svs/rounds/current/export.csv?role=join', headers=admin)
+    r = client.get('/api/admin/svs/rounds/current/export.csv?hours=15:00', headers=admin)
     assert r.status_code == 200 and 'svs_' in r.headers['Content-Disposition']
     rows = list(csv.reader(io.StringIO(r.data.decode('utf-8-sig'))))
-    assert rows[0][:4] == ['FID', 'In-Game Name', 'Alliance', 'Role'] and '11:00 UTC' in rows[0]
-    assert sorted(r[0] for r in rows[1:]) == ['702', '703'] and rows[1][3] == 'Join rallies'
+    assert rows[0][:4] == ['FID', 'In-Game Name', 'Alliance', '11:00 UTC'] and 'Role' not in rows[0]
+    assert [r[0] for r in rows[1:]] == ['703']
     assert 'Infantry Camp Level' in rows[0] and 'Joiner Strength' in rows[0]
     r = client.get('/api/admin/svs/rounds/current/export?vc=yes', headers=admin)
     wb = openpyxl.load_workbook(io.BytesIO(r.data))
@@ -274,9 +282,7 @@ def test_exports_follow_filters(client, admin):
 def test_admin_edit_is_lenient(client, admin):
     _seed(client, admin)
     app = client.get('/api/admin/svs/rounds/current/applications?q=701', headers=admin).json['applications'][0]
-    r = client.put(f'/api/admin/applications/{app["id"]}', json={'answers': {'hours': [], 'role': None}},
+    r = client.put(f'/api/admin/applications/{app["id"]}', json={'answers': {'hours': [], 'discord_vc': None}},
                    headers=admin)
-    assert r.status_code == 200 and r.json['answers']['hours'] == [] and r.json['answers']['role'] is None
-    s = client.get('/api/admin/svs/rounds/current/summary', headers=admin).json
-    assert s['roles']['none'] == 1
-    assert client.get('/api/admin/svs/rounds/current/applications?role=none', headers=admin).json['total'] == 1
+    assert r.status_code == 200 and r.json['answers']['hours'] == [] and r.json['answers']['discord_vc'] is None
+    assert client.get('/api/admin/svs/rounds/current/applications?vc=none', headers=admin).json['total'] == 1

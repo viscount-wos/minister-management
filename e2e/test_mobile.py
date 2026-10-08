@@ -436,18 +436,17 @@ def test_svs_wizard_new_on_phone(phone, api, device, lang, locale):
     p.check('svs-3-troops', tappable=['wizard-back', 'wizard-next'] + [f'troop-{k}-furnace' for k in ('infantry', 'lancer', 'marksman')]
             + [f'tier-{k}-{n}' for k in ('infantry', 'lancer', 'marksman') for n in (10, 11)])
     ui.next_step(page)
-    # 4 role + VC: big radio cards
-    page.get_by_test_id('role-join').click()
+    # 4 Discord voice chat (no role question: the planner assigns leaders): big radio cards
     page.get_by_test_id('vc-yes').click()
-    expect(page.get_by_test_id('role-join')).to_have_attribute('aria-checked', 'true')
-    p.check('svs-4-role', tappable=['wizard-back', 'wizard-next', 'role-call', 'role-join', 'vc-yes', 'vc-no'])
+    expect(page.get_by_test_id('vc-yes')).to_have_attribute('aria-checked', 'true')
+    p.check('svs-4-vc', tappable=['wizard-back', 'wizard-next', 'vc-yes', 'vc-no'])
     ui.next_step(page)
     p.expect_nav_in_view()
     p.check('svs-5-review', tappable=['wizard-back', 'wizard-submit', 'review-edit-1', 'review-edit-2'])
     ui.submit(page)
     p.check('svs-success', tappable=['reopen-application'])
     _, app = api.call('GET', f'/api/events/svs/current/application/{fid}')
-    assert app['answers'] == {'hours': ['12:00', '13:00'], 'role': 'join', 'discord_vc': True, 'language': lang}
+    assert app['answers'] == {'hours': ['12:00', '13:00'], 'discord_vc': True, 'language': lang}
 
 
 # ------------------------------------------------------------------ closed / no round (Tyrant; restored after)

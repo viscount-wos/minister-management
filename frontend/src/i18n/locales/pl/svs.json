@@ -31,9 +31,8 @@
     "tierHint": "W SVS liczą się tylko wojska T10 i T11."
   },
   "step4": {
-    "title": "Twoja rola",
-    "desc": "Jak będziesz walczyć i czy możesz z nami rozmawiać?",
-    "roleTitle": "W bitwie będę…",
+    "title": "Czat głosowy",
+    "desc": "Czy możesz z nami rozmawiać podczas bitwy?",
     "vc": "Czy możesz dołączyć do czatu głosowego na Discordzie?",
     "vcHint": "Czat głosowy pomaga liderom podawać czas. Wystarczy słuchać."
   },
@@ -41,32 +40,23 @@
     "title": "Podsumowanie",
     "desc": "Sprawdź wszystko przed wysłaniem"
   },
-  "roles": {
-    "call": "Ogłaszać rajdy",
-    "callDesc": "Zakładam rajdy, do których dołączają inni",
-    "join": "Dołączać do rajdów",
-    "joinDesc": "Wysyłam wojska do rajdów innych graczy",
-    "none": "Brak roli"
-  },
   "errors": {
     "hoursRequired": "Wybierz co najmniej jedną godzinę",
     "troopsRequired": "Wybierz poziom obozu i poziom wojsk (T10 lub T11) dla każdego typu",
-    "roleRequired": "Wybierz rolę: ogłaszać rajdy lub dołączać do rajdów",
     "vcRequired": "Powiedz, czy możesz dołączyć do czatu głosowego na Discordzie"
   },
   "admin": {
     "adminSubtitle": "SVS: zapisy, godziny, wojska i eksporty",
     "defaultRoundName": "SVS {{date}}",
     "stats": {
-      "callers": "Ogłaszający rajdy",
-      "joiners": "Dołączający",
-      "vc": "VC Discord"
+      "vc": "VC Discord",
+      "avgHours": "Śr. godzin na gracza",
+      "allT11": "T11 we wszystkich trzech"
     },
     "byHour": "Gracze na godzinę (UTC)",
     "search": "Szukaj nazwy lub FID...",
     "col": {
-      "hours": "Godziny (UTC)",
-      "role": "Rola"
+      "hours": "Godziny (UTC)"
     },
     "filter": {
       "hours": "Godziny (UTC)",
@@ -74,7 +64,6 @@
     },
     "pill": {
       "hour": "Godzina {{v}} UTC",
-      "role": "Rola: {{v}}",
       "vcYes": "VC Discord: tak",
       "vcNo": "VC Discord: nie"
     },

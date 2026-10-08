@@ -31,9 +31,8 @@
     "tierHint": "En SVS solo cuentan las tropas T10 y T11."
   },
   "step4": {
-    "title": "Tu papel",
-    "desc": "¿Cómo lucharás y puedes hablar con nosotros?",
-    "roleTitle": "En la batalla voy a…",
+    "title": "Chat de voz",
+    "desc": "¿Puedes hablar con nosotros durante la batalla?",
     "vc": "¿Puedes unirte al chat de voz de Discord?",
     "vcHint": "El chat de voz ayuda a los líderes a marcar los tiempos. Basta con escuchar."
   },
@@ -41,32 +40,23 @@
     "title": "Revisión",
     "desc": "Comprueba todo antes de enviar"
   },
-  "roles": {
-    "call": "Lanzar rallies",
-    "callDesc": "Inicio rallies para que otros se unan",
-    "join": "Unirme a rallies",
-    "joinDesc": "Envío mis tropas a los rallies de otros jugadores",
-    "none": "Sin papel indicado"
-  },
   "errors": {
     "hoursRequired": "Elige al menos una hora",
     "troopsRequired": "Elige el nivel del campamento y el nivel de tropa (T10 o T11) para cada tipo",
-    "roleRequired": "Elige un papel: lanzar rallies o unirte a rallies",
     "vcRequired": "Indica si puedes unirte al chat de voz de Discord"
   },
   "admin": {
     "adminSubtitle": "SVS: inscripciones, horas, tropas y exportaciones",
     "defaultRoundName": "SVS {{date}}",
     "stats": {
-      "callers": "Lanzan rallies",
-      "joiners": "Se unen",
-      "vc": "VC de Discord"
+      "vc": "VC de Discord",
+      "avgHours": "Media de horas por jugador",
+      "allT11": "T11 en los tres"
     },
     "byHour": "Jugadores por hora (UTC)",
     "search": "Buscar nombre o FID...",
     "col": {
-      "hours": "Horas (UTC)",
-      "role": "Papel"
+      "hours": "Horas (UTC)"
     },
     "filter": {
       "hours": "Horas (UTC)",
@@ -74,7 +64,6 @@
     },
     "pill": {
       "hour": "Hora {{v}} UTC",
-      "role": "Papel: {{v}}",
       "vcYes": "VC de Discord: sí",
       "vcNo": "VC de Discord: no"
     },

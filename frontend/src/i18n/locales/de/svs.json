@@ -31,9 +31,8 @@
     "tierHint": "Bei SVS zählen nur T10- und T11-Truppen."
   },
   "step4": {
-    "title": "Deine Rolle",
-    "desc": "Wie kämpfst du, und kannst du mit uns reden?",
-    "roleTitle": "In der Schlacht werde ich…",
+    "title": "Sprachchat",
+    "desc": "Kannst du während der Schlacht mit uns reden?",
     "vc": "Kannst du dem Discord-Sprachchat beitreten?",
     "vcHint": "Der Sprachchat hilft den Anführern beim Timing. Zuhören reicht."
   },
@@ -41,32 +40,23 @@
     "title": "Überprüfen",
     "desc": "Prüfe alles, bevor du absendest"
   },
-  "roles": {
-    "call": "Sammelangriffe starten",
-    "callDesc": "Ich starte Sammelangriffe, denen andere beitreten",
-    "join": "Sammelangriffen beitreten",
-    "joinDesc": "Ich schicke meine Truppen in die Sammelangriffe anderer",
-    "none": "Keine Rolle angegeben"
-  },
   "errors": {
     "hoursRequired": "Wähle mindestens eine Stunde",
     "troopsRequired": "Wähle Lagerstufe und Truppenstufe (T10 oder T11) für jede Truppenart",
-    "roleRequired": "Wähle eine Rolle: Sammelangriffe starten oder beitreten",
     "vcRequired": "Sag uns, ob du dem Discord-Sprachchat beitreten kannst"
   },
   "admin": {
     "adminSubtitle": "SVS: Anmeldungen, Stunden, Truppen und Exporte",
     "defaultRoundName": "SVS {{date}}",
     "stats": {
-      "callers": "Starter",
-      "joiners": "Beitretende",
-      "vc": "Discord-VC"
+      "vc": "Discord-VC",
+      "avgHours": "Ø Stunden pro Spieler",
+      "allT11": "T11 in allen drei"
     },
     "byHour": "Spieler pro Stunde (UTC)",
     "search": "Name oder FID suchen...",
     "col": {
-      "hours": "Stunden (UTC)",
-      "role": "Rolle"
+      "hours": "Stunden (UTC)"
     },
     "filter": {
       "hours": "Stunden (UTC)",
@@ -74,7 +64,6 @@
     },
     "pill": {
       "hour": "Stunde {{v}} UTC",
-      "role": "Rolle: {{v}}",
       "vcYes": "Discord-VC: ja",
       "vcNo": "Discord-VC: nein"
     },

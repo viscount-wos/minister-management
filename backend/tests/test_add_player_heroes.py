@@ -48,12 +48,12 @@ def test_add_player_event_fields(client, admin):
     s = start_round(client, admin, 'S', event='svs')
     r = add(client, admin, s['id'], {'fid': '9101', 'profile': {'game_name': 'Svs', 'alliance': 'svs',
                                                                'troops': {'infantry': {'furnace_level': 'FC9'}}},
-                                     'answers': {'hours': ['12:00'], 'role': 'call'}})
+                                     'answers': {'hours': ['12:00'], 'role': 'call'}})  # old clients' role: dropped
     assert r.status_code == 201, r.json
-    assert r.json['answers'] == {'hours': ['12:00'], 'role': 'call', 'discord_vc': None, 'language': None}
+    assert r.json['answers'] == {'hours': ['12:00'], 'discord_vc': None, 'language': None}
     assert r.json['profile']['troops']['infantry'] == {'furnace_level': 'FC9', 'tier': None}
     # what IS sent is still validated with the event's rules
-    for body, field in [({'answers': {'hours': ['09:00']}}, 'answers.hours'), ({'answers': {'role': 'x'}}, 'answers.role'),
+    for body, field in [({'answers': {'hours': ['09:00']}}, 'answers.hours'), ({'answers': {'vc': 'x'}}, 'answers.vc'),
                         ({'profile': {'game_name': 'A', 'troops': {'lancer': {'tier': 9}}}}, 'profile.troops.lancer.tier')]:
         body = {'fid': '9102', **body}
         body.setdefault('profile', {'game_name': 'A'})

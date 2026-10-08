@@ -381,22 +381,22 @@ def validate_plan(doc, hero):
 # ---------------------------------------------------------------- double booking
 
 def iter_placements(plan):
-    """(ref, field path, where) for every placed player, in plan order. ``where`` = {group_id, leader_id, role,
+    """(ref, field path, where) for every placed player, in plan order. ``where`` = {group_id, leader_id, position,
     slot}. Paths use the NORMALISED order (leaders sorted by group then order)."""
     for i, ld in enumerate(plan['leaders']):
         base = {'group_id': ld['group_id'], 'leader_id': ld['id']}
         if ld['player']:
-            yield ld['player'], f'plan.leaders[{i}].player', dict(base, role='leader', slot=None)
+            yield ld['player'], f'plan.leaders[{i}].player', dict(base, position='leader', slot=None)
         for j, nj in enumerate(ld['named_joiners']):
             if nj['player']:
                 yield nj['player'], f'plan.leaders[{i}].named_joiners[{j}].player', \
-                    dict(base, role='named_joiner', slot=j)
+                    dict(base, position='named_joiner', slot=j)
         for j, ej in enumerate(ld['extra_joiners']):
-            yield ej['player'], f'plan.leaders[{i}].extra_joiners[{j}].player', dict(base, role='extra_joiner', slot=j)
+            yield ej['player'], f'plan.leaders[{i}].extra_joiners[{j}].player', dict(base, position='extra_joiner', slot=j)
     for gi, g in enumerate(plan['groups']):
         for j, p in enumerate(g.get('players') or []):
             yield p, f'plan.groups[{gi}].players[{j}]', {'group_id': g['id'], 'leader_id': None,
-                                                         'role': 'extra_group', 'slot': j}
+                                                         'position': 'extra_group', 'slot': j}
 
 
 def leader_labels(plan, names):

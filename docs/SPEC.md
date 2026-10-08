@@ -507,9 +507,10 @@ planner it describes comes later.
 3. **Troops**: per infantry / lancer / marksman the CAMP level (`FurnaceLevelSelect fcOnly`, FC10..FC1) and the tier
    as two big radio buttons **T11, T10** (never T8/T9 in SVS). All six required. Pre-filled from the shared profile;
    a stored T8/T9 (e.g. from Frost Dragon Tyrant) shows unselected and must be chosen.
-4. **Role** (radio cards, required): "Call rallies" (`call`) or "Join rallies" (`join`); **Discord voice chat**
+4. **Voice chat**: NO role question (owner decision: "SVS sign-up does not ask the role; the planner assigns
+   leaders"; an old client's `role` is ignored, stored roles stay but are never shown). **Discord voice chat**
    yes/no (required).
-5. **Review** + submit (Update when editing). NO gems, NO main furnace, NO power, NO Discord ID, no other roles.
+5. **Review** + submit (Update when editing). NO gems, NO main furnace, NO power, NO Discord ID, NO role.
 - Edit/resubmit by FID; closed round = Tyrant behaviour (new FIDs blocked after the closing time, existing sign-ups
   stay editable; no round = "not open"). Rate limits apply (generic routes).
 
@@ -532,12 +533,12 @@ Both events read and write the same per-FID `profile.troops` (`{type: {furnace_l
 - SVS ignores (never stores) `furnace_level`, `power`, `discord_id`, `timezone` from its form.
 
 ### Admin (Event Management → SVS: Players / Settings / Heroes; desktop-first)
-- Headline stats: total, rally callers, joiners, Discord VC (for the filtered set; "of N" when filtered).
-- "Players per hour (UTC)" bars, then role and alliance bars (shared `shared/filters/Breakdowns.tsx`, extracted from
+- Headline stats: total, average battle hours per player, players with T11 in all three troop types, Discord VC (for the filtered set; "of N" when filtered).
+- "Players per hour (UTC)" bars, then alliance bars (shared `shared/filters/Breakdowns.tsx`, extracted from
   Tyrant), then per-troop camp-level chips and tier chips (T11, T10, none); every bar/chip toggles a URL filter.
 - Filter bar (`shared/filters` `useUrlFilters` + `FilterControls`): search, alliances, hours (attends ALL chosen),
-  role, troop + min camp + min tier; More: Discord VC, submitted from/to, last N days. Pills + Clear.
-- Table: name / FID / alliance, hours, role, VC, troop line "Inf FC10 T11 · Lan FC9 T10 · Mar …", Strength (the
+  troop + min camp + min tier; More: Discord VC, submitted from/to, last N days. Pills + Clear.
+- Table: name / FID / alliance, hours, VC, troop line "Inf FC10 T11 · Lan FC9 T10 · Mar …", Strength (the
   Tyrant joiner-strength definition), submitted; sortable (incl. Strength); edit / delete; CSV + Excel exports
   respect the filters (`*_filtered` file names).
 - Settings: battle start (UTC) + duration with a live preview of the hours, closing time. Admin guide in 9 languages.
@@ -564,7 +565,7 @@ Both events read and write the same per-FID `profile.troops` (`{type: {furnace_l
   README "Credits". Admin "Heroes" tab = the filtered library by troop.
 
 ### MCP
-`list_applications(event="svs", hours, role, vc, alliance, troop, min_camp, min_tier, svs_filters)`,
+`list_applications(event="svs", hours, vc, alliance, troop, min_camp, min_tier, svs_filters)`,
 `get_svs_summary`, `add_player(event, fid, profile?, answers?)`, `get_heroes(max_gen?, troop?)` (public),
 `set_state_generation(generation)` (admin). See docs/MCP.md.
 
