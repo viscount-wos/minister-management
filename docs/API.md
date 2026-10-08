@@ -277,8 +277,7 @@ Player calls are the generic ones with `{event}` = `tyrant`. Tyrant requires `pr
 
 ```json
 // PUT /api/events/tyrant/current/application/{fid}
-{"profile": {"game_name": "Tyra", "alliance": "woo", "discord_id": "tyra#0001", "furnace_level": "FC8",
-             "power": 410500000,
+{"profile": {"game_name": "Tyra", "alliance": "woo", "discord_id": "tyra#0001", "power": 410500000,
              "troops": {"infantry": {"furnace_level": "FC5", "tier": 10}, "lancer": {"furnace_level": "FC9", "tier": 9},
                         "marksman": {"furnace_level": null, "tier": 11}}},
  "answers": {"availability": ["w1", "w3"], "discord_vc": true, "gem_spend": 10000,
@@ -291,12 +290,16 @@ Player calls are the generic ones with `{event}` = `tyrant`. Tyrant requires `pr
 - `profile.troops` (tyrant submits only): keys ⊆ infantry/lancer/marksman, each null or `{furnace_level, tier}`;
   `furnace_level` is that troop type's CAMP level, `tier` 1-11 (the UI offers T8-T11). Stored with all three keys.
   Errors name the exact field, e.g. `profile.troops.infantry.tier`.
-- **Fire Crystal only (owner rule p2d)**: on tyrant submits (player and admin edit) `profile.furnace_level` and every
+- **No main furnace (owner decision p2e)**: Tyrant does not ask the city furnace. A `profile.furnace_level` sent
+  on a tyrant submit or tyrant admin edit is IGNORED (not validated, not stored), so older clients keep working and
+  the shared profile's furnace (asked by Minister) is left alone. Tyrant admin rows, summary and exports carry no
+  furnace; the generic profile routes still return it.
+- **Fire Crystal camps only (owner rule p2d)**: on tyrant submits (player and admin edit) every
   `profile.troops.<type>.furnace_level` must be `FC1`..`FC10` (or null); a pre-FC code `1`..`30` →
-  `VALIDATION_ERROR` with that field. Any combination is allowed (no tier-vs-camp or camp-vs-furnace rule). The
-  generic profile / Minister routes still accept `1`..`30`. Values stored earlier (pre-FC) are not migrated: they
-  are returned and exported as stored, and only rejected when re-sent on a tyrant submit. The API keeps every
-  troop field optional; the Tyrant wizard requires the furnace and each camp level + tier.
+  `VALIDATION_ERROR` with that field. Any combination of camp level and tier is allowed. The generic profile /
+  Minister routes still accept `1`..`30`. Camp values stored earlier (pre-FC) are not migrated: they are returned
+  and exported as stored, and only rejected when re-sent on a tyrant submit. The API keeps every troop field
+  optional; the Tyrant wizard requires each camp level + tier.
 
 Round settings (`PUT /api/admin/rounds/{id}` `{"settings": {"windows": [...]}}`):
 `windows` = 1-12 `{"id": "w1", "start": "11:01", "end": "11:15", "rush": true}` (UTC; id `[a-z0-9_]{1,24}`, unique;
@@ -312,7 +315,6 @@ Admin (`{ref}` = tyrant round id or `current`; a non-tyrant round id → 404):
   |---|---|
   | `q` | FID, in-game name or Discord ID contains (case-insensitive) |
   | `alliance` | one tag or a comma list (any of them), case-insensitive |
-  | `min_furnace` | main furnace at least this code (FC5 = FC5 and up; pre-FC codes allowed) |
   | `min_power`, `max_power` | absolute power (whole numbers; the UI converts from millions) |
   | `min_gems`, `max_gems` | per-player est. max gem spend (a blank never matches a bound) |
   | `windows` | comma list of window ids: available in ALL of them |
@@ -328,9 +330,10 @@ Admin (`{ref}` = tyrant round id or `current`; a non-tyrant round id → 404):
   | `days` | submitted in the last N days (1-3650) |
 
   "FC10 camps with T11" = `?min_camp=FC10&min_tier=11` (troop defaults to all three); "who has T11" = `?min_tier=11`.
+  There is no main-furnace filter (p2e); an old URL's `min_furnace` is ignored like any unknown parameter.
 - `GET /api/admin/tyrant/rounds/{ref}/applications?<filters>&sort=&dir=&limit=&offset=` →
   `{round_id, total, applications: [admin application + profile + joiner_strength]}` (`total` after filters).
-  `sort` ∈ submitted (default) | updated | name | alliance | fid | furnace (by ordinal) | power | gems | strength,
+  `sort` ∈ submitted (default) | updated | name | alliance | fid | power | gems | strength,
   `dir` asc|desc (blanks always last). **Joiner strength** = Σ over infantry, lancer, marksman of (camp FC number,
   FC1=1 .. FC10=10, pre-FC or blank = 0) + (tier number, blank = 0): 0..63, 63 = FC10 camps with T11 everywhere;
   `null` when no camp level or tier is filled in at all.
@@ -338,12 +341,12 @@ Admin (`{ref}` = tyrant round id or `current`; a non-tyrant round id → 404):
   `{round_id, round_total (unfiltered), filters (the active, canonical filters), alliance_options (every tag of the
   round, unfiltered), total, opening_rush, discord_vc, windows: [{id,start,end,rush,count}],
   alliances: [{alliance, count}], roles: {role: n}, troop_tiers: {infantry: {"T11": n, ..., "none": n}, ...},
-  camp_levels: {infantry: {"FC10": n, ..., "FC1": n, "25": n, "none": n}, ...}, furnace_levels: {"FC10": n, ...,
-  "none": n}}` (highest first; legacy pre-FC codes after FC1; blanks last). No aggregate gem total (owner rule).
+  camp_levels: {infantry: {"FC10": n, ..., "FC1": n, "25": n, "none": n}, ...}}` (highest first; legacy pre-FC
+  codes after FC1; blanks last). No main-furnace counts (p2e) and no aggregate gem total (owner rules).
 - `GET /api/admin/tyrant/rounds/{ref}/export?<filters>` (also `/api/admin/rounds/{id}/export`, unfiltered) → xlsx
   (sheet "Tyrant Poll Results" + "Summary" with camp-level and tier counts per troop type); `GET .../export.csv?<filters>`
   → CSV (UTF-8 BOM). Columns: FID, In-Game Name, Alliance, Discord ID, one Yes/No column per window, Discord VC,
-  Furnace Level (code), Power (M), Est. Max Gem Spend, `<Troop> Camp Level` / `<Troop> Tier` ×3 (Infantry, Lancer,
+  Power (M), Est. Max Gem Spend, `<Troop> Camp Level` / `<Troop> Tier` ×3 (Infantry, Lancer,
   Marksman), Joiner Strength, five role Yes/No columns, Language, Submitted/Updated At (UTC). Formula-safe.
 - Delete: `DELETE /api/admin/applications/{id}` (profile kept). Edit: `PUT /api/admin/applications/{id}`.
 

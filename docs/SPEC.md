@@ -233,8 +233,9 @@ shared profiles. Event key `tyrant`; backend `events/tyrant/` (validation.py, lo
 
 ### Profile vs round split (decided)
 - **PROFILE** (per FID, reused by ministry/SVS): `game_name`, `alliance` (required for tyrant, as tyrantpoll),
-  `discord_id` (NEW nullable column, migration 3, free text ≤64), `furnace_level` (code, see "Furnace levels"),
-  `power` (absolute integer; the wizard asks "Power in Millions" like tyrantpoll and multiplies by 10^6),
+  `discord_id` (NEW nullable column, migration 3, free text ≤64), `furnace_level` (code, see "Furnace levels";
+  NOT asked or written by Tyrant since p2e, see "No main furnace in Tyrant"), `power` (absolute integer; the wizard
+  asks "Power in Millions" like tyrantpoll and multiplies by 10^6),
   `troops` = `{infantry|lancer|marksman: {furnace_level: code|null, tier: 1-11|null}}`. The tyrant spec validates
   `troops` strictly on tyrant submits (`EventSpec.validate_profile` hook, new); other events keep free-form JSON.
   Rationale: these describe the account and change slowly; SVS needs the same data.
@@ -254,9 +255,9 @@ shared profiles. Event key `tyrant`; backend `events/tyrant/` (validation.py, lo
 
 ### Wizard (owner: keep the wizard)
 tyrantpoll's 6 steps in its order: 1 Player Identity (FID first, then name, read-only FID, Discord ID, alliance),
-2 Availability (UTC note, Select All, windows, divider, Discord VC), 3 Player Stats (furnace dropdown, power in
-millions, est. max gem spend), 4 Troop Levels (furnace dropdown + T8-T11 per troop), 5 Roles Wanted, 6 Review with
-Edit per section, Submit/Update. Round flow exactly as the ministry wizard: FID lookup → NEW "New sign-up for
+2 Availability (UTC note, Select All, windows, divider, Discord VC), 3 Player Stats (power in millions, est. max gem
+spend; the furnace dropdown was removed in p2e), 4 Troop Levels (camp FC level dropdown + T8-T11 per troop),
+5 Roles Wanted, 6 Review with Edit per section, Submit/Update. Round flow exactly as the ministry wizard: FID lookup → NEW "New sign-up for
 <round>" (profile pre-filled, answers blank, "Use my last answers" on step 1 when an earlier tyrant application
 exists) or EDIT "Edit your sign-up for <round>" (all pre-filled); "Not you? Use a different FID"; closing time →
 closed card for new FIDs, edit still allowed; no round → "not open". Reuses ministry's `WizardSteps` (direction
@@ -266,8 +267,8 @@ follows the page: Arabic step 1 on the right, as both tyrantpoll and ministry do
 Runs inside the shared Event Management shell (see "Event Management admin"): `/admin/dashboard?event=tyrant`.
 Players tab (stats cards: total, opening
 rush, Discord VC, alliances, est. gems; breakdowns per window/role/alliance/troop tier; search name/FID/Discord,
-alliance filter, minimum-furnace filter, sortable server-paged table, delete; CSV + Excel export), Settings tab
-(windows editor, closing time). Endpoints in docs/API.md "Frost Dragon Tyrant". Admin guide: `/admin/guide?event=tyrant`.
+alliance filter, camp/tier filters (no furnace filter since p2e), sortable server-paged table, delete; CSV + Excel
+export), Settings tab (windows editor, closing time). Endpoints in docs/API.md "Frost Dragon Tyrant". Admin guide: `/admin/guide?event=tyrant`.
 - Exports use the CURRENT profile (as ministry), not the snapshot. CSV: UTF-8 BOM, formula-injection-safe (leading
   `= + - @ TAB CR` prefixed with `'`); xlsx: tyrantpoll's styled sheet + a Summary sheet, quote-prefixed text cells
   (`core/exports.py`, shared helpers).
@@ -276,31 +277,40 @@ alliance filter, minimum-furnace filter, sortable server-paged table, delete; CS
 Game facts (owner): each troop type has its own CAMP with its own FC level, which can lag the furnace (FC9 furnace,
 FC7 infantry camp). Asking only the furnace makes players look stronger than they are, so camp levels are the key
 strength signal. The best joiner has FC10 camps with T11 troops.
-- **FC1-FC10 only** in Tyrant, for the furnace and each camp (`FurnaceLevelSelect fcOnly`: FC10..FC1, no pre-FC
-  group). Any combination is allowed: NO rule tying T11 to a camp level and NO "camp ≤ furnace" rule (the owner
-  rejected cross-field rules as overcomplicated). Tiers stay T8-T11 in the UI (API 1-11). Minister (and SVS) keep
-  the full list incl. 1-30. Backend: `TyrantEvent.validate_profile` → `core.furnace.validate_fc_level`, so a pre-FC
-  code on a tyrant submit (player or admin edit) is `VALIDATION_ERROR` naming the field; the generic profile route
-  and Minister still accept 1-30.
+- **FC1-FC10 only** in Tyrant, for each camp (`FurnaceLevelSelect fcOnly`: FC10..FC1, no pre-FC group). Any
+  combination is allowed: NO rule tying T11 to a camp level (the owner rejected cross-field rules as
+  overcomplicated). Tiers stay T8-T11 in the UI (API 1-11). Minister (and SVS) keep the full list incl. 1-30.
+  Backend: `TyrantEvent.validate_profile` → `core.furnace.validate_fc_level`, so a pre-FC camp code on a tyrant
+  submit (player or admin edit) is `VALIDATION_ERROR` naming the field; the generic profile route and Minister
+  still accept 1-30. (p2d also required the main furnace as FC1-FC10; superseded, see below.)
 - **No data migration** (the owner's LAN copy holds pre-FC tyrant sign-ups): stored values stay as they are, are
   shown as they are in the admin (summary line, chips, exports), and the rule applies on submit. In the wizard a
-  saved pre-FC furnace / camp shows as unselected and must be re-picked.
+  saved pre-FC camp shows as unselected and must be re-picked.
 - **Wizard step 4**: per type "Infantry Camp (FC level)" etc. + one hint "Camps can be lower than your furnace: pick
-  your camp's level" (9 languages). Camp level AND tier are required for all three types; the furnace (step 3) is
-  required too (coordinator choice: "requires an FC choice" for legacy profiles, applied to everyone for one rule;
-  the API keeps them optional so MCP/API clients are unchanged).
+  your camp's level" (9 languages). Camp level AND tier are required for all three types (the API keeps them
+  optional so MCP/API clients are unchanged).
+- **No main furnace in Tyrant (owner decision p2e, SUPERSEDES p2d's "main furnace required in Tyrant")**: owner:
+  "we really don't need to ask furnace level of the city - but we do need to know the camp level of each troop type
+  (fc7, fc8, etc)". So: the wizard has no furnace field (step 3 = power + gems; the review has no furnace row); the
+  API ignores a `profile.furnace_level` sent on a tyrant submit / tyrant admin edit (`EventSpec.ignored_profile_fields`,
+  dropped before validation: old MCP/API clients don't break and cannot change the shared furnace through Tyrant);
+  the admin has no Furnace column, no "Furnace at least" filter, no furnace sort and no furnace stats; tyrant rows,
+  summary, CSV/Excel and MCP results carry no furnace; `min_furnace` is gone from the filters (an old URL's
+  `min_furnace` is ignored; the MCP `filters` object refuses it). Camp levels + tiers + Strength are the strength
+  signal. Untouched: the shared profile's `furnace_level` (stored values stay) and Minister, which still asks the
+  furnace with FC10..FC1 + 30..1.
 - **Joiner strength** (admin sort `strength`, column "Strength", export column, MCP rows): Σ over infantry, lancer,
   marksman of camp FC number (FC1=1..FC10=10; pre-FC or blank 0) + tier (blank 0). 0..63; 63 = FC10 camps + T11
   everywhere; null (sorted last) without any troop data. A SUM (not a min): one weak camp ranks a player below an
   otherwise equal one, but still above a player weak everywhere; it is simple to explain and to check by hand.
 - **Admin filters** (owner, replaces the earlier "minimum furnace" filter): one parser `events/tyrant/filters.py`
   used by the list, the summary and both exports (exports follow the current filters), and by the MCP tools. Keys,
-  identical in the API query and the admin URL: q, alliance (multi), min_furnace, min/max_power, min/max_gems,
+  identical in the API query and the admin URL: q, alliance (multi), min/max_power, min/max_gems,
   windows (ALL of), rush, vc, troop + min_camp + min_tier, exact `<type>_camp` / `<type>_tier` (the chips), roles +
   roles_mode, submitted_from/to, days. All AND. Details: docs/API.md.
 - **Admin UI** (`TyrantPlayers.tsx`): a filter card on top: search, alliance (multi), windows incl. "Opening rush",
   troop type (All three / one type), camp at least (FC10..FC1), tier (any / T10 or better / T11 only), and a "More
-  filters" expander (furnace at least, VC, power and gems ranges, roles any/all, submitted last N days / from-to).
+  filters" expander (VC, power and gems ranges, roles any/all, submitted last N days / from-to).
   Active filters are removable pills + one "Clear filters". The summary is recomputed for the filtered set
   ("N of M"); the troop card shows per type the CAMP level counts and the TIER counts as 44px chips; tapping a chip
   toggles the exact filter (highlighted, aria-pressed), several combine with AND; window/role/alliance bars are
@@ -324,7 +334,8 @@ from `slot_opening_rush`→w1, `slot_11_13`→w2, `slot_13_15`→w3, `slot_15_16
 
 ### Known gaps / accepted
 - `discord_id` is part of the public profile (anyone with an FID can read it, M6), like the name and alliance.
-- Profile-level troop/furnace values written by tyrant are visible in ministry (shared profile, by design).
+- Profile-level troop values written by tyrant are visible in ministry (shared profile, by design). Tyrant no
+  longer writes the furnace (p2e).
 
 ## Event Management admin (p2b/admin-shell)
 Owner: the admin was branded ministry-only ("Minister Administration" even on Frost Dragon Tyrant, login always landed
@@ -426,7 +437,8 @@ Most players use the site on a phone. Every milestone gets a 360-390px check (no
   'FC1'=31 ... 'FC10'=40, blank/invalid 0.
 - UI: ALWAYS a dropdown, never free text: the one shared `shared/FurnaceLevelSelect.tsx` (empty "Select...", then an
   optgroup "Fire Crystal" FC10..FC1, then "Pre-FC" Lv. 30..1; group names and "Lv." translated). Used by the ministry
-  wizard (ProfileFields), the Tyrant stats step, the Tyrant per-troop camp levels and the Tyrant admin filters.
+  wizard (ProfileFields), the Tyrant per-troop camp levels and the Tyrant admin camp filter (the Tyrant stats-step
+  furnace and the admin furnace filter were removed in p2e).
   Exception (owner, p2d): Frost Dragon Tyrant uses `fcOnly` (FC10..FC1 only); see "Troop camps and admin filters".
 - Codes are shown as-is in exports, tables and review steps.
 - Migration 4 rebuilds `profiles` with `furnace_level TEXT` (SQLite cannot change a column type and INTEGER affinity
