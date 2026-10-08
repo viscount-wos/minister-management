@@ -28,7 +28,7 @@ export default function UseLastAnswers({ previousRoundName, available, applied, 
           onClick={onUse}
           disabled={disabled}
           data-testid="use-last-answers"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50 shrink-0"
+          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50 shrink-0"
         >
           <History className="w-4 h-4" aria-hidden="true" />
           {t('profile:lastAnswers.button')}

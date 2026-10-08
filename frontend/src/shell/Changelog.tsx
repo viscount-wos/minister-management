@@ -18,20 +18,20 @@ export default function Changelog() {
   usePageTitle(t('changelog:title'));
 
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="min-h-screen px-3 sm:px-4 py-4 sm:py-8">
       <div className="max-w-2xl mx-auto">
         <button
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-2 text-accent hover:text-accent-dim transition-colors text-sm font-medium mb-6"
+          className="inline-flex items-center gap-2 min-h-[44px] text-accent hover:text-accent-dim transition-colors text-sm font-medium mb-4 sm:mb-6"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
           {t('changelog:backHome')}
         </button>
 
         <h1 className="text-3xl sm:text-4xl font-bold text-accent mb-2">
           {t('changelog:title')}
         </h1>
-        <p className="text-theme-dim mb-10 leading-relaxed">
+        <p className="text-theme-dim mb-6 sm:mb-10 leading-relaxed">
           {t('changelog:subtitle')}
         </p>
 
@@ -39,7 +39,7 @@ export default function Changelog() {
           {RELEASES.map((release, index) => (
             <section
               key={release.version}
-              className="bg-dark-card border border-theme-border rounded-xl p-5 sm:p-6"
+              className="bg-dark-card border border-theme-border rounded-xl p-4 sm:p-6"
             >
               {/* Wraps to two rows on a narrow screen rather than squashing */}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">

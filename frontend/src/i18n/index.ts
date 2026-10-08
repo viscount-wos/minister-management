@@ -1,5 +1,8 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { detectLanguage, saveLanguage } from './detect';
+
+export { saveLanguage } from './detect';
 
 // Translations live in ./locales/<lang>/<namespace>.json. English is the
 // reference: `npm run check:i18n` fails if any other language is missing a key,
@@ -60,11 +63,19 @@ export function applyDirection(lang: string): void {
 
 i18n.on('languageChanged', applyDirection);
 
+/** Switch language because the player chose it: applied AND remembered. */
+export function chooseLanguage(code: string): void {
+  saveLanguage(code);
+  void i18n.changeLanguage(code);
+}
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en',
+    // Saved choice > phone/browser language > English (./detect.ts). index.html has
+    // already set <html dir/lang> the same way before the first paint.
+    lng: detectLanguage(),
     fallbackLng: 'en',
     ns: [...NAMESPACES],
     defaultNS: 'common',

@@ -19,7 +19,7 @@ export default function EventPlaceholder({ ns, icon: Icon, status }: EventPlaceh
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-4">
-      <div className="max-w-xl w-full bg-dark-card border border-theme-border rounded-2xl p-8 sm:p-10 text-center">
+      <div className="max-w-xl w-full bg-dark-card border border-theme-border rounded-2xl p-5 sm:p-10 text-center">
         <div className="w-20 h-20 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-6">
           <Icon className="w-10 h-10 text-accent" aria-hidden="true" />
         </div>
@@ -34,7 +34,7 @@ export default function EventPlaceholder({ ns, icon: Icon, status }: EventPlaceh
 
         <button
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-2 text-accent hover:text-accent-dim transition-colors text-sm font-medium"
+          className="inline-flex items-center gap-2 min-h-[44px] text-accent hover:text-accent-dim transition-colors text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
           {t('common:nav.home')}

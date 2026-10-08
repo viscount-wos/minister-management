@@ -4,7 +4,8 @@ import { InputHTMLAttributes, ReactNode } from 'react';
 // so tests (and screen readers) can find it by its label.
 
 export const INPUT_CLASS =
-  'w-full px-4 py-3 bg-dark-input border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent';
+  // text-base (16px): iOS zooms the page into any smaller input on focus.
+  'w-full min-h-[44px] px-4 py-3 text-base bg-dark-input border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent';
 
 interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
   id: string;

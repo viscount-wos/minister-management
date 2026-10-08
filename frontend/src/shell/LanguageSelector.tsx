@@ -1,29 +1,30 @@
 import { useTranslation } from 'react-i18next';
-import { LANGUAGES } from '../i18n/index';
+import { Globe } from 'lucide-react';
+import { LANGUAGES, chooseLanguage } from '../i18n/index';
+import CompactSelect from './CompactSelect';
 
+// Language dropdown: globe icon + the current language in its own script; the
+// list shows all 9 by native name. A choice is remembered (localStorage
+// 'preferred_language'); <html dir/lang> follow via i18n/index.ts.
 export default function LanguageSelector() {
-  const { i18n } = useTranslation();
-
-  const handleLanguageChange = (langCode: string) => {
-    // <html dir> follows via the languageChanged listener in i18n/index.ts
-    i18n.changeLanguage(langCode);
-  };
+  const { t, i18n } = useTranslation();
+  const current = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
 
   return (
-    <div className="flex items-center gap-2 flex-wrap justify-end">
+    <CompactSelect
+      icon={Globe}
+      label={t('common:header.language')}
+      display={current.name}
+      displayLang={current.code}
+      value={current.code}
+      onChange={chooseLanguage}
+      testId="language-select"
+    >
       {LANGUAGES.map((lang) => (
-        <button
-          key={lang.code}
-          onClick={() => handleLanguageChange(lang.code)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            i18n.language === lang.code
-              ? 'bg-accent text-dark-bg'
-              : 'bg-dark-card border border-theme-border text-theme-dim hover:border-accent hover:text-theme-text'
-          }`}
-        >
+        <option key={lang.code} value={lang.code} lang={lang.code}>
           {lang.name}
-        </button>
+        </option>
       ))}
-    </div>
+    </CompactSelect>
   );
 }

@@ -66,13 +66,13 @@ export default function PublishedSchedule() {
   if (!data?.published) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center">
+        <div className="bg-dark-card rounded-2xl px-5 py-8 sm:p-12 border border-theme-border max-w-md w-full text-center">
           <Calendar className="w-16 h-16 text-theme-dim mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-theme-text mb-4">{t('ministry:schedule.noSchedule')}</h2>
           <p className="text-theme-dim mb-6">{t('ministry:schedule.noScheduleDesc')}</p>
           <button
             onClick={() => navigate(MINISTRY_PATHS.home)}
-            className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim"
+            className="flex items-center gap-2 mx-auto min-h-[44px] text-accent hover:text-accent-dim"
           >
             <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
             {t('ministry:update.backHome')}
@@ -91,21 +91,21 @@ export default function PublishedSchedule() {
   const translatedDayLabel = t(`admin:${dayKey}`, { defaultValue: data.day_label || dayKey });
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-5xl w-full">
+    <div className="min-h-[70vh] flex items-start sm:items-center justify-center px-2 py-3 sm:p-4">
+      <div className="bg-dark-card rounded-2xl p-4 sm:p-8 border border-theme-border max-w-5xl w-full">
         <button
           onClick={() => navigate(MINISTRY_PATHS.home)}
-          className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
+          className="flex items-center gap-2 min-h-[44px] text-theme-dim hover:text-theme-text mb-4 sm:mb-6"
         >
           <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
           {t('ministry:update.backHome')}
         </button>
 
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-accent mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-accent mb-2 break-words">
             {t('ministry:schedule.title')}
           </h2>
-          <p className="text-xl text-theme-dim">{translatedDayLabel}</p>
+          <p className="text-lg sm:text-xl text-theme-dim">{translatedDayLabel}</p>
         </div>
 
         {appsStillOpen && (
@@ -116,13 +116,13 @@ export default function PublishedSchedule() {
         )}
 
         <div className="flex justify-end mb-4">
-          <TimezoneSelector value={timezone} onChange={setTimezone} />
+          <TimezoneSelector value={timezone} onChange={setTimezone} label={t('common:header.timezone')} testId="schedule-timezone" />
         </div>
 
         {!hasAnyAssignments ? (
           <p className="text-center text-theme-dim py-8">{t('ministry:schedule.noAssignments')}</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
             {allSlots.map(slot => {
               const players = assignments[slot] || [];
               const displayTime = getSlotDisplayTime(slot, timezone);
@@ -130,7 +130,7 @@ export default function PublishedSchedule() {
               return (
                 <div
                   key={slot}
-                  className={`border rounded-lg p-3 ${
+                  className={`border rounded-lg p-2 sm:p-3 min-w-0 ${
                     isEmpty
                       ? 'border-theme-border/40 bg-dark-bg/50'
                       : 'border-theme-border bg-dark-bg'
@@ -140,7 +140,7 @@ export default function PublishedSchedule() {
                     isEmpty ? 'text-theme-dim' : 'text-accent'
                   }`}>
                     {displayTime}
-                    {slot === '23:50+' && <span className="text-xs opacity-60 ml-1">(+1d)</span>}
+                    {slot === '23:50+' && <span className="text-xs opacity-60 ms-1">(+1d)</span>}
                     {timezone !== 'UTC' && (
                       <span className="block text-xs text-theme-dim font-normal">
                         {slot.replace('+', '')} UTC
@@ -157,7 +157,7 @@ export default function PublishedSchedule() {
                         key={idx}
                         className="p-2 bg-accent/10 border border-accent/30 rounded-lg text-center"
                       >
-                        <div className="font-medium text-theme-text">
+                        <div className="font-medium text-theme-text text-sm sm:text-base break-words">
                           {player.alliance && (
                             <span className="text-accent">[{player.alliance}] </span>
                           )}

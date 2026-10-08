@@ -15,12 +15,13 @@
     "home": "Todos los eventos"
   },
   "header": {
-    "timezone": "Zona horaria de visualización"
+    "timezone": "Zona horaria de visualización",
+    "language": "Idioma"
   },
   "home": {
     "title": "Eventos del estado",
     "subtitle": "Elige un evento para inscribirte o consultar tu horario",
-    "welcome": "Bienvenido, {{state}}",
+    "welcome": "Bienvenidos, Estado #{{state}}",
     "status": {
       "open": "Abierto",
       "nextRelease": "Próxima versión",

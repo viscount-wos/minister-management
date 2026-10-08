@@ -46,7 +46,7 @@ export function SlotGrid({ dayType, selected, onToggle, timezone, heatmap = {}, 
 
   return (
     <div data-testid={`slot-grid-${dayType}`}>
-      <div className={`grid gap-3 ${compact ? 'grid-cols-6' : 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8'}`}>
+      <div className={`grid ${compact ? 'grid-cols-4 sm:grid-cols-6 gap-2' : 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5 sm:gap-3'}`}>
         {options.map(({ display, utcValue }) => {
           const isSelected = selected.includes(utcValue);
           const count = dayHeat[utcValue] || 0;
@@ -59,7 +59,7 @@ export function SlotGrid({ dayType, selected, onToggle, timezone, heatmap = {}, 
               disabled={disabled}
               data-testid={`slot-${dayType}-${utcValue}`}
               onClick={() => !disabled && onToggle(utcValue)}
-              className={`${compact ? 'p-2 text-sm' : 'p-3'} rounded-lg border-2 transition-all font-medium relative disabled:cursor-not-allowed ${
+              className={`${compact ? 'p-2 text-sm' : 'px-1 py-2 sm:p-3'} min-h-[48px] rounded-lg border-2 transition-all font-medium relative disabled:cursor-not-allowed ${
                 isSelected
                   ? 'bg-accent border-accent text-dark-bg'
                   : heat
@@ -70,7 +70,7 @@ export function SlotGrid({ dayType, selected, onToggle, timezone, heatmap = {}, 
             >
               {display}
               {timezone !== 'UTC' && (
-                <span className={`block text-xs mt-0.5 ${isSelected ? 'opacity-70' : 'opacity-50'}`}>{utcValue} UTC</span>
+                <span className={`block text-[11px] sm:text-xs mt-0.5 whitespace-nowrap ${isSelected ? 'opacity-70' : 'opacity-50'}`} dir="ltr">{utcValue} UTC</span>
               )}
               {isSelected && count > 0 && (
                 <span className="absolute top-0.5 end-1 text-[10px] font-bold opacity-70">{count}</span>
@@ -142,7 +142,7 @@ export default function TimeSlotPicker({
         <TimezoneSelector value={timezone} onChange={onTimezoneChange} label={t('common:header.timezone')} />
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-4 border-b border-theme-border" role="tablist">
+      <div className="flex gap-2 mb-4 border-b border-theme-border overflow-x-auto" role="tablist">
         {DAY_TYPES.map((dayType) => {
           const n = value[dayType]?.length ?? 0;
           return (
@@ -153,7 +153,7 @@ export default function TimeSlotPicker({
               aria-selected={active === dayType}
               data-testid={`day-tab-${dayType}`}
               onClick={() => setActive(dayType)}
-              className={`px-4 py-3 font-medium transition-colors border-b-2 ${
+              className={`px-4 py-3 min-h-[44px] whitespace-nowrap shrink-0 font-medium transition-colors border-b-2 ${
                 active === dayType ? 'border-accent text-accent' : 'border-transparent text-theme-dim hover:text-theme-text'
               } ${compact ? 'text-sm px-3 py-2' : ''}`}
             >

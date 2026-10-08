@@ -2,7 +2,7 @@
   "name": "Tyran Dragon de Givre",
   "tagline": "Disponibilités, stats, troupes et rôles pour le combat du Tyran",
   "home": {
-    "welcome": "Bienvenue, {{state}}",
+    "welcome": "Bienvenue, État #{{state}}",
     "currentRound": "Manche en cours : {{round}}",
     "subtitle": "Indiquez vos disponibilités et vos stats",
     "closeAt": "Fin des inscriptions : {{time}}",

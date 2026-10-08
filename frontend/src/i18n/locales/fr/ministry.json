@@ -9,7 +9,7 @@
     "subtitle": "Système d'Attribution des Ministres SVS État contre État",
     "adminDesc": "Gérer les joueurs et les attributions",
     "utcNote": "Toutes les heures sont enregistrées en UTC — utilisez le sélecteur de fuseau horaire sur les formulaires pour convertir à votre heure locale",
-    "welcome": "Bienvenue, {{state}}",
+    "welcome": "Bienvenue, État #{{state}}",
     "applicationsClosed": "Les candidatures sont désormais closes.",
     "applicationsCloseAt": "Clôture des candidatures : {{time}}",
     "currentRound": "Tour en cours : {{round}}",

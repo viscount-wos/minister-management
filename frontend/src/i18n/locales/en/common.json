@@ -15,12 +15,13 @@
     "home": "All events"
   },
   "header": {
-    "timezone": "Display timezone"
+    "timezone": "Display timezone",
+    "language": "Language"
   },
   "home": {
     "title": "State Events",
     "subtitle": "Pick an event to sign up or check your schedule",
-    "welcome": "Welcome, {{state}}",
+    "welcome": "Welcome, State #{{state}}",
     "status": {
       "open": "Open",
       "nextRelease": "Next release",

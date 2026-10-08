@@ -1,7 +1,8 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, AlertCircle, CheckCircle, XCircle, CalendarOff, Clock, Save } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, CalendarOff, Clock } from 'lucide-react';
+import { BackLink, STEP_TITLE, StatusCard, WIZARD_CARD, WIZARD_PAGE, WizardNav } from '../../shared/WizardChrome';
 import api, { Application, DayType, Heatmap, MinistrySettings, PlayerAssignments, Round, isApiError } from '../../shared/api';
 import { errorText } from '../../shared/apiErrors';
 import { FID_RE } from '../../shared/FidLookup';
@@ -46,27 +47,6 @@ const TOTAL_STEPS = 5;
 const DAY_STEP: Record<number, DayType> = { 2: 'construction', 3: 'research', 4: 'troop' };
 
 type Phase = 'loading' | 'noRound' | 'loadError' | 'closed' | 'wizard' | 'saved';
-
-function StatusCard({ icon, tone, title, body, testId, children }: {
-  icon: React.ReactNode;
-  tone: 'danger' | 'success' | 'dim';
-  title: string;
-  body?: string;
-  testId: string;
-  children?: React.ReactNode;
-}) {
-  const titleClass = tone === 'danger' ? 'text-danger' : tone === 'success' ? 'text-accent' : 'text-theme-text';
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center" data-testid={testId}>
-        <div className="flex justify-center mb-6">{icon}</div>
-        <h2 className={`text-3xl font-bold mb-4 ${titleClass}`}>{title}</h2>
-        {body && <p className="text-theme-dim mb-6">{body}</p>}
-        {children}
-      </div>
-    </div>
-  );
-}
 
 /** "Label: value" pair on the review step (v1.4 layout). */
 function ReviewItem({ label, children, testId }: { label: string; children: React.ReactNode; testId?: string }) {
@@ -310,22 +290,13 @@ export default function ApplicationWizard() {
     }
   };
 
-  const backHomeButton = (
-    <button
-      type="button"
-      onClick={() => navigate(MINISTRY_PATHS.home)}
-      className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim transition-colors"
-    >
-      <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
-      {t('ministry:update.backHome')}
-    </button>
-  );
+  const backHomeButton = <BackLink onClick={() => navigate(MINISTRY_PATHS.home)}>{t('ministry:update.backHome')}</BackLink>;
 
   // ------------------------------------------------------------ status states
 
   if (phase === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
         <p className="text-theme-dim">{t('ministry:form.loading')}</p>
       </div>
     );
@@ -369,7 +340,7 @@ export default function ApplicationWizard() {
         body={t('ministry:apply.closedBody', { round: round?.name ?? '' })}
       >
         <div className="flex flex-col gap-4">
-          <button type="button" onClick={changeFid} className="text-theme-dim hover:text-theme-text text-sm underline">
+          <button type="button" onClick={changeFid} className="min-h-[44px] text-theme-dim hover:text-theme-text text-sm underline">
             {t('ministry:apply.otherFid')}
           </button>
           {backHomeButton}
@@ -392,7 +363,7 @@ export default function ApplicationWizard() {
             type="button"
             data-testid="reopen-application"
             onClick={() => round && loadPlayer(fid, round)}
-            className="px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
+            className="min-h-[48px] px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
           >
             {t('ministry:apply.viewMine')}
           </button>
@@ -428,6 +399,7 @@ export default function ApplicationWizard() {
       type="number"
       min={0}
       step={integer ? 1 : 0.1}
+      inputMode={integer ? 'numeric' : 'decimal'}
       placeholder="0"
       label={t(label)}
       value={answers[key]}
@@ -437,11 +409,11 @@ export default function ApplicationWizard() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-4xl w-full" data-testid="wizard" data-mode={loaded ? mode : 'lookup'}>
+    <div className={WIZARD_PAGE}>
+      <div className={`${WIZARD_CARD} max-w-4xl`} data-testid="wizard" data-mode={loaded ? mode : 'lookup'}>
         {/* Which round this is for, and whether it is a new application or an edit */}
         <div className="text-center mb-6 space-y-1">
-          <p className="text-lg font-semibold text-theme-text" data-testid="application-heading" data-mode={loaded ? mode : 'lookup'}>
+          <p className="text-lg font-semibold text-theme-text break-words" data-testid="application-heading" data-mode={loaded ? mode : 'lookup'}>
             {!loaded
               ? t('ministry:apply.title')
               : mode === 'new'
@@ -461,7 +433,7 @@ export default function ApplicationWizard() {
         {/* Step 1: Player Information */}
         {step === 1 && (
           <div data-testid="wizard-step-1">
-            <h2 className="text-3xl font-bold text-accent mb-6 text-center" data-testid="wizard-step-title">
+            <h2 className={`${STEP_TITLE} mb-6`} data-testid="wizard-step-title">
               {t('ministry:form.step1Title')}
             </h2>
 
@@ -503,7 +475,7 @@ export default function ApplicationWizard() {
                         type="button"
                         onClick={changeFid}
                         data-testid="change-fid"
-                        className="underline hover:text-theme-text"
+                        className="min-h-[44px] underline hover:text-theme-text"
                       >
                         {t('profile:changeFid')}
                       </button>
@@ -538,7 +510,7 @@ export default function ApplicationWizard() {
         {/* Steps 2-4: Time Preferences per day type */}
         {dayType && (
           <div data-testid={`wizard-step-${step}`} data-day={dayType}>
-            <h2 className="text-3xl font-bold text-accent mb-4 text-center" data-testid="wizard-step-title">
+            <h2 className={`${STEP_TITLE} mb-4`} data-testid="wizard-step-title">
               {dayTypeLabel(dayType, researchDay)}
             </h2>
             <div className="flex flex-wrap items-center justify-center gap-4 mb-4">
@@ -561,11 +533,11 @@ export default function ApplicationWizard() {
         {/* Step 5: Review */}
         {step === 5 && (
           <div data-testid="wizard-step-5">
-            <h2 className="text-3xl font-bold text-accent mb-6 text-center" data-testid="wizard-step-title">
+            <h2 className={`${STEP_TITLE} mb-6`} data-testid="wizard-step-title">
               {t('ministry:form.step3Title')}
             </h2>
             <div className="space-y-4">
-              <div className="bg-dark-bg p-6 rounded-lg border border-theme-border" data-testid="review-player">
+              <div className="bg-dark-bg p-4 sm:p-6 rounded-lg border border-theme-border" data-testid="review-player">
                 <h3 className="font-semibold text-lg mb-4 text-accent">{t('profile:playerInfo')}</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <ReviewItem label={t('profile:gameName')} testId="review-game-name">
@@ -593,7 +565,7 @@ export default function ApplicationWizard() {
                   )}
                 </div>
               </div>
-              <div className="bg-dark-bg p-6 rounded-lg border border-theme-border" data-testid="review-times">
+              <div className="bg-dark-bg p-4 sm:p-6 rounded-lg border border-theme-border" data-testid="review-times">
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                   <h3 className="font-semibold text-lg text-accent">{t('ministry:form.timePreferences')}</h3>
                   <TimezoneSelector value={timezone} onChange={handleTimezone} label={t('common:header.timezone')} />
@@ -632,42 +604,15 @@ export default function ApplicationWizard() {
           </div>
         )}
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8">
-          <button
-            type="button"
-            onClick={handleBack}
-            data-testid="wizard-back"
-            className="flex items-center gap-2 px-6 py-3 border-2 border-theme-border rounded-lg hover:bg-dark-card-hover font-medium transition-colors text-theme-text"
-          >
-            <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
-            {t('ministry:form.back')}
-          </button>
-          {step < TOTAL_STEPS ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={busy}
-              data-testid="wizard-next"
-              className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {busy ? t('ministry:form.loading') : t('ministry:form.next')}
-              <ArrowRight className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={submit}
-              disabled={busy}
-              data-testid="wizard-submit"
-              data-mode={mode}
-              className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {busy ? t('ministry:form.loading') : mode === 'edit' ? t('ministry:form.update') : t('ministry:form.submit')}
-              {mode === 'edit' ? <Save className="w-5 h-5" aria-hidden="true" /> : <CheckCircle className="w-5 h-5" aria-hidden="true" />}
-            </button>
-          )}
-        </div>
+        {/* Back / Next (sticky on phones) */}
+        <WizardNav
+          isLast={step >= TOTAL_STEPS}
+          busy={busy}
+          mode={mode}
+          onBack={handleBack}
+          onNext={handleNext}
+          onSubmit={submit}
+        />
       </div>
     </div>
   );

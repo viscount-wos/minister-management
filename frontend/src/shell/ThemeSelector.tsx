@@ -2,35 +2,38 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Palette } from 'lucide-react';
 import { THEMES, ThemeId, applyTheme, getSavedTheme, saveTheme } from '../shared/theme';
+import CompactSelect from './CompactSelect';
 
+// Theme dropdown: palette icon + theme name (icon only on phones; the name is
+// still the select's value for screen readers). Remembered in localStorage.
 export default function ThemeSelector() {
   const { t } = useTranslation();
   const [theme, setTheme] = useState<ThemeId>(getSavedTheme);
 
-  const handleThemeChange = (id: ThemeId) => {
-    applyTheme(id);
-    saveTheme(id);
-    setTheme(id);
+  const handleThemeChange = (value: string) => {
+    const option = THEMES.find((x) => x.id === value);
+    if (!option) return;
+    applyTheme(option.id);
+    saveTheme(option.id);
+    setTheme(option.id);
   };
+  const current = THEMES.find((x) => x.id === theme) ?? THEMES[0];
 
   return (
-    <div className="flex items-center gap-2 flex-wrap justify-end">
-      <Palette className="w-4 h-4 text-theme-dim shrink-0" aria-hidden="true" />
-      <span className="sr-only">{t('common:theme.title')}</span>
+    <CompactSelect
+      icon={Palette}
+      label={t('common:theme.title')}
+      display={t(current.labelKey)}
+      value={theme}
+      onChange={handleThemeChange}
+      testId="theme-select"
+      textFromSm
+    >
       {THEMES.map((option) => (
-        <button
-          key={option.id}
-          onClick={() => handleThemeChange(option.id)}
-          aria-pressed={theme === option.id}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            theme === option.id
-              ? 'bg-accent text-dark-bg'
-              : 'bg-dark-card border border-theme-border text-theme-dim hover:border-accent hover:text-theme-text'
-          }`}
-        >
+        <option key={option.id} value={option.id}>
           {t(option.labelKey)}
-        </button>
+        </option>
       ))}
-    </div>
+    </CompactSelect>
   );
 }

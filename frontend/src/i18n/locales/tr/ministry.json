@@ -9,7 +9,7 @@
     "subtitle": "SVS Eyalet-Eyalet Bakan Atama Sistemi",
     "adminDesc": "Oyuncuları ve atamaları yönetin",
     "utcNote": "Tüm saatler UTC olarak saklanır — yerel saatinize dönüştürmek için formlardaki saat dilimi seçicisini kullanın",
-    "welcome": "Hoş geldiniz, {{state}}",
+    "welcome": "Hoş geldiniz, Eyalet #{{state}}",
     "applicationsClosed": "Başvurular kapandı.",
     "applicationsCloseAt": "Başvuru kapanış: {{time}}",
     "currentRound": "Mevcut tur: {{round}}",

@@ -15,12 +15,13 @@
     "home": "Tous les événements"
   },
   "header": {
-    "timezone": "Fuseau horaire d'affichage"
+    "timezone": "Fuseau horaire d'affichage",
+    "language": "Langue"
   },
   "home": {
     "title": "Événements de l'État",
     "subtitle": "Choisissez un événement pour vous inscrire ou consulter votre planning",
-    "welcome": "Bienvenue, {{state}}",
+    "welcome": "Bienvenue, État #{{state}}",
     "status": {
       "open": "Ouvert",
       "nextRelease": "Prochaine version",

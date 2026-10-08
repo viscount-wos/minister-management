@@ -6,6 +6,7 @@ import api, { Round, isApiError } from '../../shared/api';
 import { TyrantSettings, tyrantApi } from './api';
 import { TYRANT_PATHS } from './paths';
 import { usePageTitle } from '../../shared/usePageTitle';
+import Tile, { LinkButton, PageHero } from '../../shared/Tile';
 
 // Frost Dragon Tyrant landing page (same layout as the ministry home).
 export default function TyrantPage() {
@@ -42,11 +43,11 @@ export default function TyrantPage() {
   }, [closingTime]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-[70vh] flex items-start sm:items-center justify-center px-3 py-4 sm:p-4">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-4">
           {stateNumber && (
-            <p className="text-2xl text-theme-text font-semibold" data-testid="welcome">
+            <p className="text-lg sm:text-2xl text-theme-text font-semibold" data-testid="welcome">
               {t('tyrant:home.welcome', { state: stateNumber })}
             </p>
           )}
@@ -63,14 +64,11 @@ export default function TyrantPage() {
           )}
         </div>
 
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-accent mb-4">{t('tyrant:name')}</h1>
-          <p className="text-xl text-theme-dim">{t('tyrant:home.subtitle')}</p>
-        </div>
+        <PageHero title={t('tyrant:name')} subtitle={t('tyrant:home.subtitle')} />
 
         {noRound && (
           <div
-            className="mb-8 p-5 rounded-2xl border border-theme-border bg-dark-card flex items-center justify-center gap-3 text-center"
+            className="mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl border border-theme-border bg-dark-card flex items-center justify-center gap-3 text-center"
             data-testid="no-round-banner"
           >
             <CalendarOff className="w-6 h-6 text-theme-dim shrink-0" aria-hidden="true" />
@@ -78,64 +76,37 @@ export default function TyrantPage() {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <button
+        <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
+          <Tile
+            testId="tyrant-apply-tile"
             onClick={() => !noRound && navigate(TYRANT_PATHS.apply)}
             disabled={noRound}
-            data-testid="tyrant-apply-tile"
-            className={`bg-dark-card rounded-2xl p-8 border border-theme-border transition-all duration-300 group ${
-              noRound ? 'opacity-50 cursor-not-allowed' : 'hover:bg-dark-card-hover transform hover:-translate-y-2'
-            }`}
-          >
-            <div className="flex flex-col items-center text-center">
-              <div
-                className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-colors ${
-                  noRound ? 'bg-theme-dim/20' : 'bg-accent/20 group-hover:bg-accent/30'
-                }`}
-              >
-                <FileText className={`w-10 h-10 ${noRound ? 'text-theme-dim' : 'text-accent'}`} aria-hidden="true" />
-              </div>
-              <h2 className="text-2xl font-bold text-theme-text mb-3">{t('tyrant:home.applyTile')}</h2>
-              <p className="text-theme-dim">
-                {noRound
-                  ? t('tyrant:apply.notOpenTitle')
-                  : isClosed
-                    ? t('tyrant:home.applyTileClosedDesc')
-                    : t('tyrant:home.applyTileDesc')}
-              </p>
-            </div>
-          </button>
-
-          <button
+            icon={FileText}
+            title={t('tyrant:home.applyTile')}
+            description={
+              noRound
+                ? t('tyrant:apply.notOpenTitle')
+                : isClosed
+                  ? t('tyrant:home.applyTileClosedDesc')
+                  : t('tyrant:home.applyTileDesc')
+            }
+          />
+          <Tile
+            testId="tyrant-admin-tile"
             onClick={() => navigate(TYRANT_PATHS.admin)}
-            data-testid="tyrant-admin-tile"
-            className="bg-dark-card rounded-2xl p-8 border border-theme-border hover:bg-dark-card-hover transform hover:-translate-y-2 transition-all duration-300 group"
-          >
-            <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mb-6 group-hover:bg-accent/30 transition-colors">
-                <Shield className="w-10 h-10 text-accent" aria-hidden="true" />
-              </div>
-              <h2 className="text-2xl font-bold text-theme-text mb-3">{t('admin:title')}</h2>
-              <p className="text-theme-dim">{t('tyrant:home.adminDesc')}</p>
-            </div>
-          </button>
+            icon={Shield}
+            title={t('admin:title')}
+            description={t('tyrant:home.adminDesc')}
+          />
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 text-accent hover:text-accent-dim transition-colors text-sm font-medium"
-          >
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
+        <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <LinkButton icon={ArrowLeft} accent flipInRtl onClick={() => navigate('/')}>
             {t('common:nav.home')}
-          </button>
-          <button
-            onClick={() => navigate('/changelog')}
-            className="inline-flex items-center gap-2 text-theme-dim hover:text-accent transition-colors text-sm font-medium"
-          >
-            <Sparkles className="w-4 h-4" aria-hidden="true" />
+          </LinkButton>
+          <LinkButton icon={Sparkles} onClick={() => navigate('/changelog')}>
             {t('changelog:linkText')}
-          </button>
+          </LinkButton>
         </div>
 
         <div className="mt-4 text-center text-theme-dim text-sm">

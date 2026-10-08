@@ -9,7 +9,7 @@
     "subtitle": "SVS 주 대 주 장관 배정 시스템",
     "adminDesc": "플레이어 및 배정 관리",
     "utcNote": "모든 시간은 UTC로 저장됩니다 — 양식에서 시간대 선택기를 사용하여 현지 시간으로 변환하세요",
-    "welcome": "환영합니다, {{state}}",
+    "welcome": "{{state}}주 여러분, 환영합니다",
     "applicationsClosed": "신청이 마감되었습니다.",
     "applicationsCloseAt": "신청 마감: {{time}}",
     "currentRound": "현재 라운드: {{round}}",

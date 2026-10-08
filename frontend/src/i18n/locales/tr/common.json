@@ -15,12 +15,13 @@
     "home": "Tüm etkinlikler"
   },
   "header": {
-    "timezone": "Görüntülenen saat dilimi"
+    "timezone": "Görüntülenen saat dilimi",
+    "language": "Dil"
   },
   "home": {
     "title": "Eyalet Etkinlikleri",
     "subtitle": "Kayıt olmak veya programını görmek için bir etkinlik seç",
-    "welcome": "Hoş geldiniz, {{state}}",
+    "welcome": "Hoş geldiniz, Eyalet #{{state}}",
     "status": {
       "open": "Açık",
       "nextRelease": "Sonraki sürüm",

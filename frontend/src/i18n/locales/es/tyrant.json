@@ -2,7 +2,7 @@
   "name": "Tirano Dragón de Escarcha",
   "tagline": "Disponibilidad, estadísticas, tropas y roles para la batalla del Tirano",
   "home": {
-    "welcome": "Bienvenido, {{state}}",
+    "welcome": "Bienvenidos, Estado #{{state}}",
     "currentRound": "Ronda actual: {{round}}",
     "subtitle": "Registra tu disponibilidad y estadísticas",
     "closeAt": "Las inscripciones cierran: {{time}}",

@@ -2,7 +2,7 @@
   "name": "Frost Dragon Tyrant",
   "tagline": "Availability, stats, troops and roles for the Tyrant fight",
   "home": {
-    "welcome": "Welcome, {{state}}",
+    "welcome": "Welcome, State #{{state}}",
     "currentRound": "Current round: {{round}}",
     "subtitle": "Register your availability and stats",
     "closeAt": "Sign-ups close: {{time}}",

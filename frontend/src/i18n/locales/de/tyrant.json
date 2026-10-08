@@ -2,7 +2,7 @@
   "name": "Frostdrachen-Tyrann",
   "tagline": "Verfügbarkeit, Werte, Truppen und Rollen für den Tyrannen-Kampf",
   "home": {
-    "welcome": "Willkommen, {{state}}",
+    "welcome": "Willkommen, Staat #{{state}}",
     "currentRound": "Aktuelle Runde: {{round}}",
     "subtitle": "Trage deine Verfügbarkeit und Werte ein",
     "closeAt": "Anmeldeschluss: {{time}}",

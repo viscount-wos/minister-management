@@ -1,7 +1,8 @@
 import { FormEvent, ReactNode, useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, AlertCircle, CheckCircle, XCircle, CalendarOff, Clock, Save, Pencil } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, CalendarOff, Clock, Pencil } from 'lucide-react';
+import { BackLink, STEP_TITLE, StatusCard, WIZARD_CARD, WIZARD_PAGE, WizardNav } from '../../shared/WizardChrome';
 import type { Round } from '../../shared/api';
 import { ApiError, isApiError } from '../../shared/api';
 import { errorText } from '../../shared/apiErrors';
@@ -109,27 +110,6 @@ const FIELD_LABELS: [RegExp, string][] = [
   [/^answers\.roles/, 'tyrant:step5.title'],
 ];
 
-function StatusCard({ icon, tone, title, body, testId, children }: {
-  icon: ReactNode;
-  tone: 'danger' | 'success' | 'dim';
-  title: string;
-  body?: string;
-  testId: string;
-  children?: ReactNode;
-}) {
-  const titleClass = tone === 'danger' ? 'text-danger' : tone === 'success' ? 'text-accent' : 'text-theme-text';
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center" data-testid={testId}>
-        <div className="flex justify-center mb-6">{icon}</div>
-        <h2 className={`text-3xl font-bold mb-4 ${titleClass}`}>{title}</h2>
-        {body && <p className="text-theme-dim mb-6">{body}</p>}
-        {children}
-      </div>
-    </div>
-  );
-}
-
 function Select({ id, label, value, onChange, children, invalid }: {
   id: string;
   label: string;
@@ -168,7 +148,7 @@ function CheckRow({ id, checked, onChange, children, tag, emphasis }: {
   return (
     <label
       htmlFor={id}
-      className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+      className={`flex items-center gap-3 min-h-[52px] px-4 py-3 rounded-lg border cursor-pointer transition-colors ${
         checked ? 'border-accent bg-accent/10' : 'border-theme-border bg-dark-bg hover:bg-dark-card-hover'
       } ${emphasis ? 'font-semibold' : ''}`}
     >
@@ -180,8 +160,8 @@ function CheckRow({ id, checked, onChange, children, tag, emphasis }: {
         onChange={(e) => onChange(e.target.checked)}
         className="w-5 h-5 shrink-0 accent-accent"
       />
-      <span className="text-theme-text">{children}</span>
-      {tag && <span className="ms-auto px-2 py-1 rounded bg-accent/20 text-accent text-xs font-semibold">{tag}</span>}
+      <span className="text-theme-text min-w-0 break-words">{children}</span>
+      {tag && <span className="ms-auto shrink-0 px-2 py-1 rounded bg-accent/20 text-accent text-xs font-semibold">{tag}</span>}
     </label>
   );
 }
@@ -412,22 +392,13 @@ export default function TyrantWizard() {
     }
   };
 
-  const backHomeButton = (
-    <button
-      type="button"
-      onClick={() => navigate(TYRANT_PATHS.home)}
-      className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim transition-colors"
-    >
-      <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
-      {t('tyrant:apply.backHome')}
-    </button>
-  );
+  const backHomeButton = <BackLink onClick={() => navigate(TYRANT_PATHS.home)}>{t('tyrant:apply.backHome')}</BackLink>;
 
   // ------------------------------------------------------------ status states
 
   if (phase === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
         <p className="text-theme-dim">{t('ministry:form.loading')}</p>
       </div>
     );
@@ -468,7 +439,7 @@ export default function TyrantWizard() {
         body={t('tyrant:apply.closedBody', { round: round?.name ?? '' })}
       >
         <div className="flex flex-col gap-4">
-          <button type="button" onClick={changeFid} className="text-theme-dim hover:text-theme-text text-sm underline">
+          <button type="button" onClick={changeFid} className="min-h-[44px] text-theme-dim hover:text-theme-text text-sm underline">
             {t('tyrant:apply.otherFid')}
           </button>
           {backHomeButton}
@@ -490,7 +461,7 @@ export default function TyrantWizard() {
             type="button"
             data-testid="reopen-application"
             onClick={() => round && loadPlayer(fid, round)}
-            className="px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
+            className="min-h-[48px] px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
           >
             {t('tyrant:apply.viewMine')}
           </button>
@@ -517,7 +488,7 @@ export default function TyrantWizard() {
 
   const stepHeader = (n: number) => (
     <div className="text-center mb-6">
-      <h2 className="text-3xl font-bold text-accent mb-2" data-testid="wizard-step-title">
+      <h2 className={`${STEP_TITLE} mb-2`} data-testid="wizard-step-title">
         {t(`tyrant:step${n}.title`)}
       </h2>
       <p className="text-theme-dim">{t(`tyrant:step${n}.desc`)}</p>
@@ -586,10 +557,10 @@ export default function TyrantWizard() {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-3xl w-full" data-testid="wizard" data-mode={loaded ? mode : 'lookup'}>
+    <div className={WIZARD_PAGE}>
+      <div className={`${WIZARD_CARD} max-w-3xl`} data-testid="wizard" data-mode={loaded ? mode : 'lookup'}>
         <div className="text-center mb-6 space-y-1">
-          <p className="text-lg font-semibold text-theme-text" data-testid="application-heading" data-mode={loaded ? mode : 'lookup'}>
+          <p className="text-lg font-semibold text-theme-text break-words" data-testid="application-heading" data-mode={loaded ? mode : 'lookup'}>
             {!loaded
               ? t('tyrant:apply.title')
               : mode === 'new'
@@ -653,7 +624,7 @@ export default function TyrantWizard() {
                   hint={
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <span data-testid="profile-status">{knownProfile ? t('profile:prefilled') : t('profile:newProfile')}</span>
-                      <button type="button" onClick={changeFid} data-testid="change-fid" className="underline hover:text-theme-text">
+                      <button type="button" onClick={changeFid} data-testid="change-fid" className="min-h-[44px] underline hover:text-theme-text">
                         {t('profile:changeFid')}
                       </button>
                     </span>
@@ -787,7 +758,7 @@ export default function TyrantWizard() {
                 return (
                   <div key={kind} className="bg-dark-bg p-4 rounded-lg border border-theme-border" data-testid={`troop-${kind}`}>
                     <h3 className="font-semibold text-lg text-accent mb-3">{t(`tyrant:step4.${kind}`)}</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3 sm:gap-4">
                       <FurnaceLevelSelect
                         id={`troop-${kind}-furnace`}
                         label={t('tyrant:step4.fcLevel')}
@@ -843,14 +814,14 @@ export default function TyrantWizard() {
             {stepHeader(6)}
             <div className="space-y-4">
               {reviewSections.map((sec) => (
-                <div key={sec.step} className="bg-dark-bg p-5 rounded-lg border border-theme-border" data-testid={`review-section-${sec.step}`}>
+                <div key={sec.step} className="bg-dark-bg p-4 sm:p-5 rounded-lg border border-theme-border" data-testid={`review-section-${sec.step}`}>
                   <div className="flex items-center justify-between gap-3 mb-3">
-                    <h3 className="font-semibold text-lg text-accent">{t(`tyrant:step${sec.step}.title`)}</h3>
+                    <h3 className="font-semibold text-lg text-accent min-w-0 break-words">{t(`tyrant:step${sec.step}.title`)}</h3>
                     <button
                       type="button"
                       onClick={() => setStep(sec.step)}
                       data-testid={`review-edit-${sec.step}`}
-                      className="flex items-center gap-1 px-3 py-1 text-sm border border-theme-border rounded-lg text-theme-text hover:bg-dark-card-hover"
+                      className="flex items-center gap-1 min-h-[44px] px-3 py-1 text-sm border border-theme-border rounded-lg text-theme-text hover:bg-dark-card-hover shrink-0"
                     >
                       <Pencil className="w-4 h-4" aria-hidden="true" />
                       {t('tyrant:step6.edit')}
@@ -859,8 +830,8 @@ export default function TyrantWizard() {
                   <div className="divide-y divide-theme-border/50">
                     {sec.rows.map(([label, value, key]) => (
                       <div key={key} className="flex items-center justify-between gap-4 py-2 text-sm" data-testid={`review-${key}`}>
-                        <span className="text-theme-dim">{label}</span>
-                        <span className="font-medium text-theme-text text-end">{value}</span>
+                        <span className="text-theme-dim min-w-0 break-words">{label}</span>
+                        <span className="font-medium text-theme-text text-end min-w-0 break-words">{value}</span>
                       </div>
                     ))}
                   </div>
@@ -877,41 +848,14 @@ export default function TyrantWizard() {
           </div>
         )}
 
-        <div className="flex justify-between mt-8">
-          <button
-            type="button"
-            onClick={handleBack}
-            data-testid="wizard-back"
-            className="flex items-center gap-2 px-6 py-3 border-2 border-theme-border rounded-lg hover:bg-dark-card-hover font-medium transition-colors text-theme-text"
-          >
-            <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
-            {t('ministry:form.back')}
-          </button>
-          {step < TOTAL_STEPS ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={busy}
-              data-testid="wizard-next"
-              className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {busy ? t('ministry:form.loading') : t('ministry:form.next')}
-              <ArrowRight className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={submit}
-              disabled={busy}
-              data-testid="wizard-submit"
-              data-mode={mode}
-              className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {busy ? t('ministry:form.loading') : mode === 'edit' ? t('ministry:form.update') : t('ministry:form.submit')}
-              {mode === 'edit' ? <Save className="w-5 h-5" aria-hidden="true" /> : <CheckCircle className="w-5 h-5" aria-hidden="true" />}
-            </button>
-          )}
-        </div>
+        <WizardNav
+          isLast={step >= TOTAL_STEPS}
+          busy={busy}
+          mode={mode}
+          onBack={handleBack}
+          onNext={handleNext}
+          onSubmit={submit}
+        />
       </div>
     </div>
   );

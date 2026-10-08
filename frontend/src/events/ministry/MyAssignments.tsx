@@ -21,7 +21,7 @@ export default function MyAssignments({
   const published = data.published_days ?? Object.keys(data.assignments ?? {});
   const days = activeDaysInOrder(researchDay).filter((d) => published.includes(d));
   return (
-    <div className="bg-success/10 border border-success/30 rounded-lg p-5" data-testid="my-assignments">
+    <div className="bg-success/10 border border-success/30 rounded-lg p-4 sm:p-5" data-testid="my-assignments">
       <h3 className="text-lg font-semibold text-success mb-3">{t('ministry:update.currentAssignments')}</h3>
       {days.length === 0 && (
         <p className="text-theme-dim text-sm italic" data-testid="my-assignments-none">{t('ministry:update.noAssignments')}</p>
@@ -31,7 +31,7 @@ export default function MyAssignments({
           const slots = data.assignments?.[day] || [];
           return (
             <div key={day} className="flex flex-wrap items-center gap-3" data-testid={`my-assignments-${day}`}>
-              <span className="font-medium text-theme-text min-w-[200px]">{t(`admin:${day}`)}:</span>
+              <span className="font-medium text-theme-text sm:min-w-[200px]">{t(`admin:${day}`)}:</span>
               {slots.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {slots.map((s, i) => (

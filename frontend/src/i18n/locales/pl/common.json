@@ -15,12 +15,13 @@
     "home": "Wszystkie wydarzenia"
   },
   "header": {
-    "timezone": "Wyświetlana strefa czasowa"
+    "timezone": "Wyświetlana strefa czasowa",
+    "language": "Język"
   },
   "home": {
     "title": "Wydarzenia stanu",
     "subtitle": "Wybierz wydarzenie, aby się zapisać lub sprawdzić harmonogram",
-    "welcome": "Witaj, {{state}}",
+    "welcome": "Witamy w Stanie #{{state}}",
     "status": {
       "open": "Otwarte",
       "nextRelease": "Następna wersja",

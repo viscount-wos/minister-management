@@ -2,7 +2,7 @@
   "name": "霜龙暴君",
   "tagline": "暴君之战的可用时间、数据、兵种和角色",
   "home": {
-    "welcome": "欢迎，{{state}}",
+    "welcome": "欢迎，{{state}}州的各位",
     "currentRound": "当前轮次：{{round}}",
     "subtitle": "登记你的可用时间和数据",
     "closeAt": "报名截止：{{time}}",

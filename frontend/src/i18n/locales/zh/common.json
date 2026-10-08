@@ -15,12 +15,13 @@
     "home": "所有活动"
   },
   "header": {
-    "timezone": "显示时区"
+    "timezone": "显示时区",
+    "language": "语言"
   },
   "home": {
     "title": "州活动",
     "subtitle": "选择一个活动进行报名或查看日程",
-    "welcome": "欢迎，{{state}}",
+    "welcome": "欢迎，{{state}}州的各位",
     "status": {
       "open": "开放中",
       "nextRelease": "下个版本",

@@ -2,7 +2,7 @@
   "name": "Tyran Mroźnego Smoka",
   "tagline": "Dostępność, statystyki, wojska i role na walkę z Tyranem",
   "home": {
-    "welcome": "Witaj, {{state}}",
+    "welcome": "Witamy w Stanie #{{state}}",
     "currentRound": "Bieżąca runda: {{round}}",
     "subtitle": "Zgłoś swoją dostępność i statystyki",
     "closeAt": "Zapisy do: {{time}}",

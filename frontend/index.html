@@ -1,10 +1,37 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>State Events · Whiteout Survival</title>
+    <script>
+      // Runs before the first paint, so Arabic never flashes left-to-right and the
+      // saved theme never flashes the default. Same rules as src/i18n/detect.ts and
+      // src/shared/theme.ts (keep them in step): saved language > first supported
+      // phone/browser language (base code) > English. No IP / geolocation.
+      (function () {
+        var supported = ['en', 'es', 'fr', 'de', 'pl', 'ko', 'zh', 'tr', 'ar'];
+        var lang = null, theme = null;
+        try {
+          lang = localStorage.getItem('preferred_language');
+          theme = localStorage.getItem('preferred_theme');
+        } catch (e) {}
+        if (supported.indexOf(lang) < 0) {
+          lang = null;
+          var list = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+          for (var i = 0; i < list.length && !lang; i++) {
+            var base = String(list[i] || '').toLowerCase().split(/[-_]/)[0];
+            if (supported.indexOf(base) >= 0) lang = base;
+          }
+        }
+        lang = lang || 'en';
+        var root = document.documentElement;
+        root.lang = lang;
+        root.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        if (theme === 'reading' || theme === 'low-glare') root.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

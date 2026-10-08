@@ -20,12 +20,93 @@ export const TIMEZONES: TimezoneOption[] = [
 
 const TZ_STORAGE_KEY = 'preferred_timezone';
 
+// Other names browsers report for zones in the list above.
+const TZ_ALIASES: Record<string, string> = {
+  'Etc/UTC': 'UTC',
+  'Etc/GMT': 'UTC',
+  'Etc/Universal': 'UTC',
+  'Etc/Zulu': 'UTC',
+  GMT: 'UTC',
+  'Asia/Istanbul': 'Europe/Istanbul',
+  Turkey: 'Europe/Istanbul',
+  'Asia/Chongqing': 'Asia/Shanghai',
+  'Asia/Harbin': 'Asia/Shanghai',
+  PRC: 'Asia/Shanghai',
+  ROK: 'Asia/Seoul',
+  'US/Eastern': 'America/New_York',
+  'US/Central': 'America/Chicago',
+  'US/Pacific': 'America/Los_Angeles',
+};
+
+/** True when the browser knows this IANA zone. */
+export function isValidTimezone(tz: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The phone/browser's own timezone (Intl), mapped onto the list when it is one of
+ * ours (or an alias), else the zone itself (the selectors add it as an extra
+ * option), else UTC. Never IP / geolocation.
+ */
+export function detectTimezone(): string {
+  let tz = '';
+  try {
+    tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  } catch {
+    tz = '';
+  }
+  tz = TZ_ALIASES[tz] ?? tz;
+  if (!tz) return 'UTC';
+  if (TIMEZONES.some((o) => o.id === tz)) return tz;
+  return isValidTimezone(tz) ? tz : 'UTC';
+}
+
+/** Saved choice, else the detected timezone (not saved: only a choice is remembered). */
 export function getSavedTimezone(): string {
   try {
-    return localStorage.getItem(TZ_STORAGE_KEY) || 'UTC';
+    const saved = localStorage.getItem(TZ_STORAGE_KEY);
+    if (saved && isValidTimezone(saved)) return saved;
   } catch {
-    return 'UTC';
+    // localStorage not available
   }
+  return detectTimezone();
+}
+
+/** Offset of a zone right now, e.g. "+1", "-4", "+5:30". */
+export function currentOffset(tz: string, at: Date = new Date()): string {
+  try {
+    const part = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'shortOffset' })
+      .formatToParts(at)
+      .find((p) => p.type === 'timeZoneName')?.value;
+    const m = part?.match(/GMT([+-]\d{1,2}(?::\d{2})?)?/);
+    if (m) return m[1] ?? '+0';
+  } catch {
+    // older browsers: no shortOffset
+  }
+  return '';
+}
+
+/**
+ * Option for any zone: one of the list, or a zone outside it (detected, or a
+ * stored profile value) labelled by its city, e.g. "London (UTC+1)".
+ */
+export function timezoneOption(tz: string): TimezoneOption {
+  const known = TIMEZONES.find((o) => o.id === tz);
+  if (known) return known;
+  const city = tz.split('/').pop()?.replace(/_/g, ' ') || tz;
+  return { id: tz, label: city, offset: currentOffset(tz) };
+}
+
+/** Short tag for compact controls: "UTC", "KST", "ET", or the city for other zones. */
+export function timezoneShortLabel(tz: string): string {
+  const known = TIMEZONES.find((o) => o.id === tz);
+  if (known) return known.label.split(' ')[0];
+  return timezoneOption(tz).label;
 }
 
 export function saveTimezone(tz: string): void {
@@ -125,6 +206,5 @@ export function generatePlayerTimeSlots(timezone: string): { display: string; ut
  * Get the timezone abbreviation for display.
  */
 export function getTimezoneAbbr(timezoneId: string): string {
-  const tz = TIMEZONES.find((t) => t.id === timezoneId);
-  return tz ? tz.label.split(' ')[0] : timezoneId;
+  return timezoneShortLabel(timezoneId);
 }

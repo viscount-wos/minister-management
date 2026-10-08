@@ -2,7 +2,7 @@
   "name": "Ayaz Ejderhası Tiranı",
   "tagline": "Tiran savaşı için müsaitlik, istatistikler, birlikler ve roller",
   "home": {
-    "welcome": "Hoş geldin, {{state}}",
+    "welcome": "Hoş geldiniz, Eyalet #{{state}}",
     "currentRound": "Mevcut tur: {{round}}",
     "subtitle": "Müsaitlik durumunuzu ve istatistiklerinizi kaydedin",
     "closeAt": "Kayıtlar kapanıyor: {{time}}",

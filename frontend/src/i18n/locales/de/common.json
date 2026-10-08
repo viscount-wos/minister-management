@@ -15,12 +15,13 @@
     "home": "Alle Events"
   },
   "header": {
-    "timezone": "Angezeigte Zeitzone"
+    "timezone": "Angezeigte Zeitzone",
+    "language": "Sprache"
   },
   "home": {
     "title": "Staats-Events",
     "subtitle": "Wähle ein Event, um dich anzumelden oder deinen Plan anzusehen",
-    "welcome": "Willkommen, {{state}}",
+    "welcome": "Willkommen, Staat #{{state}}",
     "status": {
       "open": "Offen",
       "nextRelease": "Nächste Version",

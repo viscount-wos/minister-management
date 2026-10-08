@@ -10,38 +10,38 @@ export default function PlayerGuide() {
   usePageTitle(t('guide:player.title'), t('ministry:event.name'));
 
   return (
-    <div className="min-h-screen bg-dark-bg py-8 px-4">
+    <div className="min-h-screen bg-dark-bg py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-3xl mx-auto">
         <button
           onClick={() => navigate(MINISTRY_PATHS.home)}
-          className="flex items-center gap-2 text-theme-dim hover:text-accent transition-colors mb-6"
+          className="flex items-center gap-2 min-h-[44px] text-theme-dim hover:text-accent transition-colors mb-4 sm:mb-6"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
           {t('ministry:update.backHome')}
         </button>
 
-        <h1 className="text-4xl font-bold text-accent mb-2">{t('guide:player.title')}</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-accent mb-2 break-words">{t('guide:player.title')}</h1>
         <p className="text-theme-dim mb-8">{t('guide:player.subtitle')}</p>
 
         <div className="space-y-8">
           {/* What is this system? */}
-          <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+          <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 bg-accent/20 rounded-full flex items-center justify-center">
                 <Lightbulb className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('guide:player.whatIsTitle')}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-theme-text min-w-0 break-words">{t('guide:player.whatIsTitle')}</h2>
             </div>
             <p className="text-theme-dim leading-relaxed">{t('guide:player.whatIsBody')}</p>
           </section>
 
           {/* Step 1: Submitting */}
-          <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+          <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 bg-accent/20 rounded-full flex items-center justify-center">
                 <FileText className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('guide:player.submitTitle')}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-theme-text min-w-0 break-words">{t('guide:player.submitTitle')}</h2>
             </div>
             <div className="space-y-4 text-theme-dim leading-relaxed">
               <p className="p-3 bg-accent/10 border border-accent/30 rounded-lg text-accent text-sm">
@@ -49,7 +49,7 @@ export default function PlayerGuide() {
               </p>
               <div>
                 <h3 className="text-lg font-semibold text-theme-text mb-2">{t('guide:player.step1Header')}</h3>
-                <ul className="list-disc list-inside space-y-1 ml-2">
+                <ul className="list-disc list-inside space-y-1 ms-2">
                   <li>{t('guide:player.step1Fid')}</li>
                   <li>{t('guide:player.step1Alliance')}</li>
                   <li>{t('guide:player.step1Speedups')}</li>
@@ -58,7 +58,7 @@ export default function PlayerGuide() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-theme-text mb-2">{t('guide:player.step2Header')}</h3>
-                <ul className="list-disc list-inside space-y-1 ml-2">
+                <ul className="list-disc list-inside space-y-1 ms-2">
                   <li>{t('guide:player.step2Select')}</li>
                   <li>{t('guide:player.step2Days')}</li>
                   <li>{t('guide:player.step2Timezone')}</li>
@@ -73,12 +73,12 @@ export default function PlayerGuide() {
           </section>
 
           {/* Heat Map */}
-          <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+          <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 bg-accent/20 rounded-full flex items-center justify-center">
                 <Palette className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('guide:player.heatmapTitle')}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-theme-text min-w-0 break-words">{t('guide:player.heatmapTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-3">
               <p>{t('guide:player.heatmapBody')}</p>
@@ -101,16 +101,16 @@ export default function PlayerGuide() {
           </section>
 
           {/* Viewing & Updating */}
-          <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+          <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-success/20 rounded-full flex items-center justify-center">
                 <Edit className="w-5 h-5 text-success" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('guide:player.updateTitle')}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-theme-text min-w-0 break-words">{t('guide:player.updateTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-3">
               <p>{t('guide:player.updateBody1')}</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
+              <ul className="list-disc list-inside space-y-1 ms-2">
                 <li>{t('guide:player.updateStep1')}</li>
                 <li>{t('guide:player.updateStep2')}</li>
                 <li>{t('guide:player.updateStep3')}</li>
@@ -121,16 +121,16 @@ export default function PlayerGuide() {
           </section>
 
           {/* Understanding Assignments */}
-          <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+          <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 bg-accent/20 rounded-full flex items-center justify-center">
                 <Clock className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('guide:player.assignmentsTitle')}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-theme-text min-w-0 break-words">{t('guide:player.assignmentsTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-3">
               <p>{t('guide:player.assignmentsBody')}</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
+              <ul className="list-disc list-inside space-y-1 ms-2">
                 <li>{t('guide:player.assignmentsPoint1')}</li>
                 <li>{t('guide:player.assignmentsPoint2')}</li>
                 <li>{t('guide:player.assignmentsPoint3')}</li>
@@ -140,12 +140,12 @@ export default function PlayerGuide() {
           </section>
 
           {/* Timezone */}
-          <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+          <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 bg-accent/20 rounded-full flex items-center justify-center">
                 <Globe className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('guide:player.timezoneTitle')}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-theme-text min-w-0 break-words">{t('guide:player.timezoneTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-3">
               <p>{t('guide:player.timezoneBody')}</p>
