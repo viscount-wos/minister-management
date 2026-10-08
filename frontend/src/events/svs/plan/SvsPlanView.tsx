@@ -12,6 +12,8 @@ import { usePageTitle } from '../../../shared/usePageTitle';
 import { useTimezone } from '../../../shared/TimezoneContext';
 import { formatTimeInTimezone } from '../../../shared/timezone';
 import { planApi } from './api';
+import { SVS_PATHS } from '../paths';
+import GuideLink from '../../../shared/guide/GuideLink';
 import { HeroTile, MinimumsList, RatioBar, TEAM, petBuffLabel } from './bits';
 import { hasMinimums } from './model';
 import type { PlanView, ViewGroup, ViewLeader, ViewPerson, ViewSide } from './model';
@@ -338,6 +340,8 @@ export default function SvsPlanView() {
               </span>
             )}
           </p>
+          {/* Help: the SVS guide's static "reading the plan" section (it shows nothing of this plan) */}
+          <GuideLink to={SVS_PATHS.planHelp} testId="plan-help-link" label="guide:common.planHelp" />
         </header>
 
         {/* Find me */}

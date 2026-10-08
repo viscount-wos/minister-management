@@ -16,6 +16,7 @@ import { useFormatDateTime } from '../../shared/DateTime';
 import { useTimezone } from '../../shared/TimezoneContext';
 import { formatTimeInTimezone, timezoneShortLabel } from '../../shared/timezone';
 import FidHelp from '../../shared/FidHelp';
+import GuideLink from '../../shared/guide/GuideLink';
 import {
   SVS_TIERS,
   SvsApplication,
@@ -532,6 +533,7 @@ export default function SvsWizard() {
                   onChange={(e) => setFidInput(e.target.value)}
                 />
                 <FidHelp />
+                <GuideLink to={SVS_PATHS.guide} testId="svs-wizard-guide-link" />
               </form>
             ) : (
               <div className="space-y-4" data-testid="profile-fields">

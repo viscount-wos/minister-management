@@ -31,6 +31,7 @@ import { MINISTRY_PATHS } from './paths';
 import { usePageTitle } from '../../shared/usePageTitle';
 import { useFormatDateTime } from '../../shared/DateTime';
 import FidHelp from '../../shared/FidHelp';
+import GuideLink from '../../shared/guide/GuideLink';
 
 // The ministry application WIZARD, restored from v1.4's PlayerForm:
 //   1 Player information (+ speedups)   2 Construction day times
@@ -459,6 +460,7 @@ export default function ApplicationWizard() {
                   onChange={(e) => setFidInput(e.target.value)}
                 />
                 <FidHelp />
+                <GuideLink to={MINISTRY_PATHS.guide} testId="ministry-wizard-guide-link" />
               </form>
             ) : (
               <div className="space-y-4">

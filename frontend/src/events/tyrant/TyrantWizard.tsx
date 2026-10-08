@@ -29,6 +29,7 @@ import { TYRANT_PATHS } from './paths';
 import { usePageTitle } from '../../shared/usePageTitle';
 import { useFormatDateTime } from '../../shared/DateTime';
 import FidHelp from '../../shared/FidHelp';
+import GuideLink from '../../shared/guide/GuideLink';
 
 // The Frost Dragon Tyrant sign-up WIZARD, ported from the live tyrantpoll app
 // (templates/poll.html), same 6 steps in the same order:
@@ -619,6 +620,7 @@ export default function TyrantWizard() {
                   onChange={(e) => setFidInput(e.target.value)}
                 />
                 <FidHelp />
+                <GuideLink to={TYRANT_PATHS.guide} testId="tyrant-wizard-guide-link" />
               </form>
             ) : (
               <div className="space-y-4" data-testid="profile-fields">
