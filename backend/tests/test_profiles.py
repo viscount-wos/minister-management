@@ -64,3 +64,16 @@ def test_global_settings(client, admin):
     assert client.get('/api/settings/public').json == {'state_number': '2807'}
     r = client.put('/api/admin/settings', json={'state_number': ''}, headers=admin)
     assert r.status_code == 400 and r.json['field'] == 'state_number'
+
+
+def test_public_profile_put(client):
+    r = client.put('/api/profile/3003', json={'game_name': 'Dee', 'alliance': 'dd', 'power': 5})
+    assert r.status_code == 201 and r.json['created'] and r.json['profile']['alliance'] == 'DD'
+    r = client.put('/api/profile/3003', json={'timezone': 'UTC'})
+    assert r.status_code == 200 and r.json['profile']['game_name'] == 'Dee' and r.json['profile']['power'] == 5
+    r = client.put('/api/profile/3004', json={'alliance': 'X'})
+    assert r.status_code == 400 and r.json['field'] == 'game_name'
+    r = client.put('/api/profile/3003', json={'fid': '1', 'game_name': 'X'})
+    assert r.status_code == 400 and r.json['field'] == 'fid'
+    r = client.put('/api/profile/abc', json={'game_name': 'X'})
+    assert r.status_code == 400 and r.json['field'] == 'fid'

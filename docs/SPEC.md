@@ -94,6 +94,33 @@ Admin (Authorization: Bearer <signed token>):
 - GET  /api/admin/rounds/<id>/export (xlsx)
 - ministry: auto-assign / get / update assignments, publish/unpublish, export-json/import, scoped by round id.
 
+### Backend phase 1 deviations / decisions (p1/backend-core)
+Final shape is in docs/API.md. Where it differs from the sketch above:
+- All list responses are wrapped in an object (`GET /api/events` -> `{"events": [...]}`) so every response is a JSON
+  object (simpler for the MCP server and error handling). Errors are always `{error, code, field}`.
+- `closing_time` lives only in the `rounds.closing_time` column, not inside `rounds.settings`.
+- The round-scoped assignments table is named `ministry_assignments` (event-specific; tyrant/svs will have their own).
+  `player_id` everywhere = `profiles.id`; v1.4 player ids are kept as profile ids by the migration.
+- Ministry admin routes are `/api/admin/ministry/rounds/<id|current>/...` (auto-assign, assignments/<day>, publish,
+  unpublish, export, export-json, import). Generic xlsx export is `/api/admin/rounds/<id>/export`.
+- Added: `GET /api/admin/me`, `GET/PUT /api/admin/settings`, `PUT /api/profile/<fid>` (public, for MCP
+  update_profile; same trust model as the application PUT), `GET /api/admin/rounds/<id>`, `GET /api/admin/applications/<id>`,
+  `GET /api/admin/profiles/<fid>`, `is_closed_for_new` on rounds.
+- v1.4 endpoints are removed, not shimmed: the frontend must be rewired (map in docs/API.md).
+- Fresh installs start with NO rounds; an admin opens one with start-new-round.
+- Migration: when the v1.4 DB has no stored `time_slot_scheme`, it is inferred from stored slots (:20/:50 = max_slots)
+  rather than v1.4's "pin max_slots if any assignments" (a running v1.4 without the key was using exact_alignment).
+  Orphan v1.4 assignments (player deleted) stay only in `legacy_assignments`. Migration tests use an inline v1.4
+  fixture (tests/test_migration.py); tests/fixtures is owned by the e2e/fixtures worker.
+- Small behaviour fixes vs v1.4: auto-assign walks a player's preferences in sorted order (v1.4 iterated a Python set,
+  so slot choice depended on hash order); `preferred_times` on assignment cards is the day's own preferences (v1.4
+  returned every day type's, with duplicates); a sticky placement on a slot that doesn't exist in the current scheme
+  is re-placed instead of the player vanishing; manual assignment saves reject unknown slots/players and duplicates.
+- Excel export keeps v1.4's per-day sheets (with their UNASSIGNED section) and adds an `Unassigned` summary sheet.
+- Auth: a SECRET_KEY that is missing or a known placeholder is replaced by a random per-process key outside
+  development; a role whose password env var is unset cannot log in (v1.4 silently fell back to admin123/minister123).
+- `PRAGMA foreign_keys=ON` on every connection (v1.4 never enabled it).
+
 ## MCP server (phase 1b, in front of the API)
 Separate process `mcp/` (Python, official `mcp` SDK, streamable HTTP), talks to the app ONLY via the HTTP API above.
 Tools (first cut): list_events, get_current_round, get_profile, update_profile, get_application, submit_application,

@@ -110,6 +110,18 @@ def public_get_profile(fid):
     return jsonify(profile_to_json(row))
 
 
+@bp.route('/api/profile/<fid>', methods=['PUT'])
+def public_put_profile(fid):
+    """Players have no login: anyone with the FID may update its profile (same trust model as
+    applications). Body: partial profile fields; game_name required when creating."""
+    fid = validate_fid(fid)
+    data = get_json_body()
+    if data.get('fid') is not None and str(data['fid']).strip() != fid:
+        raise validation_error('fid does not match the FID in the URL', 'fid')
+    profile, created = upsert_profile(fid, validate_profile_fields(data, field_prefix=''), field_prefix='')
+    return jsonify({'profile': profile, 'created': created}), (201 if created else 200)
+
+
 @bp.route('/api/admin/profiles', methods=['GET'])
 @require_admin
 def admin_list_profiles():

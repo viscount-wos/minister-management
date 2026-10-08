@@ -8,6 +8,7 @@ Raise ``ApiError`` (or one of the helpers) anywhere inside a request; the
 handler registered by ``register_error_handlers`` turns it into JSON.
 """
 import logging
+import sqlite3
 
 from flask import jsonify, request
 from werkzeug.exceptions import HTTPException
@@ -74,6 +75,13 @@ def register_error_handlers(app):
     def _http_error(err):
         code = _HTTP_CODES.get(err.code, 'HTTP_ERROR')
         return jsonify({'error': err.description or err.name, 'code': code, 'field': None}), err.code
+
+    @app.errorhandler(sqlite3.IntegrityError)
+    def _integrity(err):
+        # e.g. two simultaneous first submissions for one FID; the client can simply retry
+        logger.warning('Integrity error on %s %s: %s', request.method, request.path, err)
+        return jsonify({'error': 'Conflicting concurrent change, please retry', 'code': 'CONFLICT',
+                        'field': None}), 409
 
     @app.errorhandler(Exception)
     def _unhandled(err):
