@@ -42,12 +42,24 @@ export function GuideSection({
 }
 
 /**
- * "Label: text" -> the label in bold, so a phone reader can skim the steps. Only a short lead (<= 48 chars) ending
- * in ": " (or the full-width "：") counts, so times like 05:00 never split.
+ * A short label, not a sentence: no sentence punctuation or commas, no open bracket, not a Korean sentence ending
+ * (…다), at most 5 words, and at most 10 characters when it contains Chinese characters (no spaces between words).
+ */
+function isLabel(lead: string): boolean {
+  const l = lead.trim();
+  if (/[.。?？!！,，،]/.test(l) || /다$/.test(l)) return false;
+  if ((l.match(/[(（]/g) || []).length !== (l.match(/[)）]/g) || []).length) return false; // "(e.g: …" is not a label
+  if (/[\u3400-\u9fff]/.test(l)) return l.length <= 10;
+  return l.split(/\s+/).length <= 5;
+}
+
+/**
+ * "Label: text" -> the label in bold, so a phone reader can skim the steps. Only a short label (see isLabel) followed
+ * by ": " (or the full-width "：") counts, so times like 05:00 and sentences ending in a colon stay plain.
  */
 export function LeadText({ text }: { text: string }) {
   const m = text.match(/^([^:：]{1,48}?)(: |：)([\s\S]+)$/);
-  if (!m) return <>{text}</>;
+  if (!m || !isLabel(m[1])) return <>{text}</>;
   return (
     <>
       <strong className="font-semibold text-theme-text">
