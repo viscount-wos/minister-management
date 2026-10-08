@@ -361,3 +361,37 @@ python3 scripts/parity/run_parity.py              # full table, exit 1 while C/F
 python3 scripts/parity/run_parity.py --self-test  # proves a real logic bug is caught
 <backend venv>/bin/python scripts/parity/probe_migration.py
 ```
+
+---
+
+## 5. Milestone 1c resolution (branch `p1c/backend-fixes`)
+
+Re-checked against every finding above after the fixes. Tests: `cd backend && venv/bin/python -m pytest` →
+127 passed (Python 3.14); same suite in `python:3.11-slim` → 125 passed, 2 skipped (no `git` in the container
+for the v1.4-source test). Parity: `python3 scripts/parity/run_parity.py` → exit 0, "no regressions (15 scenarios,
+1652 step comparisons)", 0 BENIGN; `--self-test` still catches the injected bug.
+
+| id | status | how / why |
+|---|---|---|
+| C (parity) | Fixed | Crystals imported exactly (`_exact_number`); points match v1.4 (Half Crystal: 25,000 / 7,750). |
+| F (parity) | Fixed | FID trimmed on import when unambiguous, exact-then-trimmed lookup everywhere, updates by id: no 404, no fork. Harness classifies the trim as EXPECTED (documented). |
+| H1 | Fixed | Normal boot refuses a v1.4 file (`LegacyDatabaseError`); import via `python -m core.migrate` / `MIGRATE_V14=1`. Migration 2 adds guard VIEWs + settings triggers; the real v1.4 code (`git show 5454016`) cannot boot on a migrated or fresh v2 DB and its submit/settings writes fail with nothing written (`tests/test_legacy_import.py::test_stray_v14_instance_fails_loudly`). Runbook: `docs/DEPLOY-CUTOVER.md` (not executed). |
+| H2 | Fixed | `--max-instances 1` in DEPLOYMENT.md and the runbook; `BEGIN IMMEDIATE` before version/legacy checks, one transaction (two-process race test: one migrates, one no-op, one backup); production refuses missing/placeholder `SECRET_KEY`. |
+| H3 | Deferred (other branch) | Frontend rewire is owned by `p1b/frontend-wiring`; out of scope here. API changes it must adopt are listed in docs/API.md ("Removed in 1c", "Changed in 1c"). |
+| M1 | Fixed | Exact crystal import + rows logged (`fractional_crystal_fids`); unchanged legacy fraction accepted on resubmit/admin edit; new fractions still 400. |
+| M2 | Fixed | Rules in SPEC "Milestone 1c decisions": strings end to end, leading zeros significant, >2^53 safe, trim-when-unique on import, exact-then-trimmed lookup (admin routes included), canonical FID only for NEW profiles, legacy rows writable under their stored FID, `upsert_profile` by id; 4-char legacy alliance accepted when unchanged. |
+| M3 | Fixed | In-process limiter per IP (right-most trusted X-Forwarded-For hop) + global budget, exponential backoff, 429 `TOO_MANY_ATTEMPTS`; SHA-256 digests compared with `compare_digest` for both roles; CORS off unless `CORS_ORIGINS`. Long passwords: warning only (refusing could lock out the live admin). |
+| M4 | Fixed | Compose binds `127.0.0.1`; placeholder key/passwords only with `FLASK_ENV=development` + `ALLOW_INSECURE_DEV=1`, otherwise `ConfigError`; forged placeholder-key token → 401 in production. |
+| M5 | Fixed | Cells starting with `= + - @` TAB CR written as quote-prefixed text in every sheet incl. `Unassigned`; 0 formula cells (probe + test). |
+| M6 | Accepted (owner) + minimised | Documented in API.md "What an FID gives a stranger". Public profile drops `id`/`created_at`/`updated_at`; public application drops `id`/`player_id`/`profile_snapshot`/`created_at`; own assignments now published days only. No rate limit / audit log on public writes (deferred, noted in SPEC). |
+| L1 | Fixed | Backup written as `.bak.partial`, renamed after COMMIT, deleted on failure; stale partials removed under the lock; `schema_version` created inside the transaction. |
+| L2 | Fixed | `BEGIN IMMEDIATE` around round update and publish/unpublish; `database is locked` → 503 `RETRY` + `Retry-After`. |
+| L3 | Fixed | Remap re-syncs the shared 23:50 boundary (earlier day if occupied, else later). Parity oracle applies the same rule via a v1.4 re-save; no differences. |
+| L4 | Fixed | Import runs each entry in a savepoint; `sqlite3.Error` reported per entry. |
+| L5 | Fixed | `exported_at` = UTC ISO `Z`; xlsx filename date in UTC. |
+| L6 | Accepted | Documented in SPEC "Known / accepted" (naive = UTC, unparseable legacy closing time, free-text timezone). |
+| L7 | Fixed | SQLite `casefold()` function (Python, Unicode-aware) for alliance filters and `q` search; LIKE wildcards escaped. |
+| L8 | Accepted | Documented in `core/auth.py`, API.md and SPEC (no per-token revocation; rotate `SECRET_KEY`). |
+| L9 | Deferred (other branch) | Frontend items belong to the frontend branches. |
+| Benign 1-4 | Fixed / documented | null instead of `''`; Excel ties by id ASC; prefs sorted on import and input; heat-map orphans documented. Added to SPEC deviations; harness reports 0 BENIGN. |
+| BACKEND_ISSUES (frontend-wiring 1, 2; mcp 1-4) | Fixed | Published days pruned on research-day switch and filtered publicly; closed rounds → 409 `ROUND_CLOSED` (reopen via status); own assignments = published only; `current` on generic admin round routes; `?limit/offset` + `total`; unknown public schedule day → 400. MCP 5-8 (actor header, public rate limits, change notifications) not addressed. |

@@ -1,14 +1,20 @@
 version: '3.8'
 
+# LOCAL DEVELOPMENT ONLY. Binds to 127.0.0.1 so the dev admin is never reachable from the network.
+# The placeholder secrets below are accepted only because BOTH FLASK_ENV=development and
+# ALLOW_INSECURE_DEV=1 are set; without them the app refuses to start. Never deploy this file.
+# A v1.4 database in ./data must be imported explicitly first (the app refuses to boot on it):
+#   docker compose run --rm app python -m core.migrate
 services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "127.0.0.1:${HOST_PORT:-8080}:8080"
     volumes:
       - ./data:/app/data
     environment:
       - FLASK_ENV=development
+      - ALLOW_INSECURE_DEV=1
       - SECRET_KEY=dev-secret-key-change-in-production
       - ADMIN_PASSWORD=admin123
       - MINISTER_PASSWORD=minister123

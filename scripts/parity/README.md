@@ -23,7 +23,10 @@ The apps run under `$PARITY_PYTHON` (default: the backend-core venv) with `PYTHO
   deviation "auto-assign walks a player's preferences in sorted order". **This is the oracle.**
 - `old_int`: `old_sorted` on a copy with REAL crystal values cast to int, to attribute the cascade of the
   one known data change (migration truncates `12.5` fire crystals) to a single root cause.
-- `new`: phase-1 backend on a copy migrated by its own startup.
+- `new`: phase-1 backend on a copy migrated with the explicit import (`core.db.migrate(allow_v14=True)`, what
+  `python -m core.migrate` runs; since milestone 1c a normal boot refuses a v1.4 file), then booted normally.
+  The oracle sides also re-save the occupied shared-23:50 day right after the scheme switch (S5): that is exactly the
+  documented 1c boundary re-sync (L3) expressed in v1.4 terms.
 
 ## Script (per scenario)
 S0 after migration: points per player/day, heatmap, export-json, assignments per day, public schedule
@@ -38,3 +41,9 @@ awkward FIDs, a brand-new FID, then closing time in the past (edit allowed, new 
 `OK` identical; `EXPECTED` explained by a documented deviation (SPEC "Backend phase 1 deviations" /
 API.md); `BENIGN` cosmetic and undocumented (doc gap, does not fail the run); `REGRESSION` anything else.
 Normalisers are applied only when needed (leave-one-out), so each label is a real explanation.
+
+Milestone 1c state: exit 0, 0 REGRESSION, 0 BENIGN in all 15 scenarios. The former regressions C (crystal
+truncation) and F (FID whitespace) are fixed; the remaining differences are EXPECTED and documented in docs/SPEC.md:
+FID whitespace trimmed by the import, absent strings are null, heat map ignores deleted players' preferences,
+`preferred_times` per day, the extra `Unassigned` sheet, the sorted preference walk, and a player's own assignments
+listing published days only.

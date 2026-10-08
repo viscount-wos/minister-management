@@ -47,7 +47,7 @@ def _race_worker(path, barrier, q):
     sys.modules['dotenv'] = _m
     barrier.wait()
     try:
-        q.put(('ok', str(coredb.migrate(path))[:200]))
+        q.put(('ok', str(coredb.migrate(path, allow_v14=True))[:200]))
     except Exception as e:  # noqa: BLE001
         q.put(('error', f'{type(e).__name__}: {e}'))
 
@@ -76,7 +76,7 @@ def probe_fail_halfway(tmp):
         raise RuntimeError('simulated crash after import, before COMMIT')
     coredb._import_v14 = boom
     try:
-        coredb.migrate(p)
+        coredb.migrate(p, allow_v14=True)
         print('PROBE fail_halfway: no exception?!')
     except RuntimeError:
         pass
@@ -86,11 +86,11 @@ def probe_fail_halfway(tmp):
     extra = {k: v for k, v in after.items() if k not in before}
     same = {k: v for k, v in after.items() if k in before} == before
     baks = glob.glob(p + '.pre-v2-*.bak')
-    print(f'PROBE fail_halfway: v1.4 tables+rows unchanged={same}; extra tables={extra} '
-          f'(schema_version is created before the migration transaction); backups left={len(baks)}')
-    coredb.migrate(p)
+    print(f'PROBE fail_halfway: v1.4 tables+rows unchanged={same}; extra tables={extra}; '
+          f'backups left={len(baks)} (1c: expect no extra tables and 0 backups)')
+    coredb.migrate(p, allow_v14=True)
     c2 = counts(p)
-    coredb.migrate(p)
+    coredb.migrate(p, allow_v14=True)
     c3 = counts(p)
     print(f'PROBE rerun_after_failure: migrated rounds={c2.get("rounds")} apps={c2.get("applications")}; '
           f'second rerun no-op={c2 == c3}; backups now={len(glob.glob(p + ".pre-v2-*.bak"))}')
@@ -99,7 +99,7 @@ def probe_fail_halfway(tmp):
 def probe_old_revision_after_migration(tmp):
     """Cloud Run rollout: an old v1.4 instance (re)starts against the already-migrated file."""
     p = fresh(tmp, 'mixed.db')
-    coredb.migrate(p)
+    coredb.migrate(p, allow_v14=True)
     old_dir = os.path.join(tmp, 'v14')
     os.makedirs(old_dir, exist_ok=True)
     for f in ('app.py', 'database.py'):
@@ -124,7 +124,7 @@ print('v1.4 sees players:', len(c.get('/api/admin/players', headers={{'Authoriza
     print(f'PROBE old_v14_revision_on_migrated_db: {r.stdout.strip()!r} {r.stderr.strip()[-200:]!r}; '
           f'tables now: players={c.get("players")} legacy_players={c.get("legacy_players")} '
           f'profiles={c.get("profiles")} settings={c.get("settings")}')
-    coredb.migrate(p)
+    coredb.migrate(p, allow_v14=True)
     con = sqlite3.connect(p)
     lost = con.execute("select count(*) from players").fetchone()[0]
     inprof = con.execute("select count(*) from profiles where fid='555000111'").fetchone()[0]
@@ -134,6 +134,7 @@ print('v1.4 sees players:', len(c.get('/api/admin/players', headers={{'Authoriza
 
 def probe_fid_and_admin_edit(tmp):
     p = fresh(tmp, 'fid.db')
+    coredb.migrate(p, allow_v14=True)  # the v1.4 import is explicit since milestone 1c
     from app import create_app
     app = create_app({'DATABASE_PATH': p, 'SECRET_KEY': 'probe-key-xxxxxxxxxxxxxxxxxxxxxxxx', 'ADMIN_PASSWORD': 'a',
                       'MINISTER_PASSWORD': 'm', 'STATIC_DIR': '/nonexistent'})
@@ -142,7 +143,7 @@ def probe_fid_and_admin_edit(tmp):
     rid = c.get('/api/events/ministry/current').json['id']
     apps = {a['fid']: a for a in c.get(f'/api/admin/rounds/{rid}/applications', headers=h).json['applications']}
     ws = F.CASES['fid_trailing_space']
-    a = apps[ws]
+    a = apps.get(ws) or apps[ws.strip()]  # 1c: the import trims FID whitespace
     r = c.put(f'/api/admin/applications/{a["id"]}', json={'answers': {'general_speedups_days': 3}}, headers=h)
     print(f'PROBE admin_edit_trailing_space_fid_application: {r.status_code} {r.json}')
     r = c.get('/api/admin/profiles/330000777%20', headers=h)

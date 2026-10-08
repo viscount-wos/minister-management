@@ -126,9 +126,11 @@ def make_v14_db(path, settings=SETTINGS, assignments=ASSIGNMENTS):
     conn.close()
 
 
-def build_app(db_path):
+def build_app(db_path, migrate_v14=True):
+    """migrate_v14=True = the explicit one-off import (env MIGRATE_V14=1); a normal boot passes False."""
     return create_app({'TESTING': True, 'DATABASE_PATH': db_path, 'SECRET_KEY': 'migration-test-key',
-                       'ADMIN_PASSWORD': ADMIN_PW, 'MINISTER_PASSWORD': 'm', 'STATIC_DIR': '/nonexistent'})
+                       'ADMIN_PASSWORD': ADMIN_PW, 'MINISTER_PASSWORD': 'm', 'STATIC_DIR': '/nonexistent',
+                       'MIGRATE_V14': migrate_v14})
 
 
 def ro(path):
@@ -171,7 +173,7 @@ def test_migration_preserves_everything(legacy_path):
         assert f'legacy_{t}' in tables
     assert 'players' not in tables and 'time_preferences' not in tables and 'assignments' not in tables
     assert conn.execute('SELECT COUNT(*) FROM legacy_players').fetchone()[0] == len(PLAYERS)
-    assert [tuple(r) for r in conn.execute('SELECT version FROM schema_version')] == [(1,)]
+    assert [tuple(r) for r in conn.execute('SELECT version FROM schema_version ORDER BY version')] == [(1,), (2,)]
 
     # one open imported ministry round with the old global settings
     rounds = conn.execute('SELECT * FROM rounds').fetchall()
@@ -291,11 +293,15 @@ def test_failed_migration_rolls_back(legacy_path, monkeypatch):
     conn = ro(legacy_path)
     tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     assert 'players' in tables and 'legacy_players' not in tables and 'profiles' not in tables
-    assert conn.execute('SELECT COUNT(*) FROM schema_version').fetchone()[0] == 0
+    # schema_version is created INSIDE the migration transaction now, so it rolled back too
+    assert 'schema_version' not in tables
     conn.close()
+    # L1: a failed attempt leaves no backup (neither final nor partial) behind
+    assert glob.glob(legacy_path + '.pre-v2-*') == []
     monkeypatch.undo()
     build_app(legacy_path)  # retry succeeds
     assert ro(legacy_path).execute('SELECT COUNT(*) FROM profiles').fetchone()[0] == len(PLAYERS)
+    assert len(glob.glob(legacy_path + '.pre-v2-*.bak')) == 1 and not glob.glob(legacy_path + '*.partial')
 
 
 def test_fresh_db_gets_v2_schema_without_rounds(tmp_path):

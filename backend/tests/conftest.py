@@ -62,3 +62,17 @@ def apply(client, fid, name=None, alliance='ABC', answers=None, event='ministry'
 
 def prefs(construction=(), research=(), troop=()):
     return {'construction': list(construction), 'research': list(research), 'troop': list(troop)}
+
+
+def profile_id(client, admin, fid):
+    """Internal profile id (= player_id) via the admin API; public responses no longer carry it."""
+    r = client.get(f'/api/admin/profiles/{fid}', headers=admin)
+    assert r.status_code == 200, r.json
+    return r.json['id']
+
+
+def application_id(client, admin, fid, round_id=None):
+    if round_id is None:
+        round_id = client.get('/api/events/ministry/current').json['id']
+    apps = client.get(f'/api/admin/rounds/{round_id}/applications', headers=admin).json['applications']
+    return next(a['id'] for a in apps if a['fid'] == fid)
