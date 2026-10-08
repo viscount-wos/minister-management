@@ -681,6 +681,64 @@ LATER = {
     },
 }
 
+# Event Management guide (guide:svsAdmin.plan*): one section about the Battle plan tab.
+GUIDE = {
+    'en': {'planTitle': 'Battle plan',
+           'planBody': 'Build the SVS plan on a computer: pick Single alliance or Main + Counter, add rally leaders to each group and fill in their heroes, troop ratio, pet-buff moment and joiners. Everything saves by itself.',
+           'plan1': 'Drag heroes from the palette on the right into any slot, or click a slot and then a hero. Only heroes up to the state hero generation are offered.',
+           'plan2': 'Find players by typing a name, FID or alliance. Someone already in the plan shows where they are; "Move here" moves them. Quick add covers players who did not sign up (with an FID they get a sign-up).',
+           'plan3': 'Each group can set joining rules (camp level and tier per troop type); named joiners below them get a warning. A disguise (PFP hero + alias) is what the enemy sees on the day.',
+           'plan4': 'Share makes a secret read-only link for the state (phone friendly, with Find me). New link replaces it; Turn off sharing stops it. If someone else saved meanwhile you see a warning to reload: nothing is overwritten.'},
+    'es': {'planTitle': 'Plan de batalla',
+           'planBody': 'Prepara el plan de SVS en un ordenador: elige Una sola alianza o Principal + Contraataque, añade líderes de rally a cada grupo y completa sus héroes, proporción de tropas, momento de las mejoras de mascota y participantes. Todo se guarda solo.',
+           'plan1': 'Arrastra héroes desde la paleta de la derecha a cualquier casilla, o haz clic en una casilla y luego en un héroe. Solo se ofrecen héroes hasta la generación del estado.',
+           'plan2': 'Busca jugadores escribiendo nombre, FID o alianza. Si alguien ya está en el plan se indica dónde; «Mover aquí» lo mueve. Añadir rápido sirve para quien no se inscribió (con FID se le crea la inscripción).',
+           'plan3': 'Cada grupo puede fijar reglas de entrada (nivel de campamento y de tropa por tipo); los participantes con nombre por debajo reciben un aviso. El disfraz (héroe de foto + alias) es lo que ve el enemigo ese día.',
+           'plan4': 'Compartir crea un enlace secreto de solo lectura para el estado (apto para móvil, con Encuéntrame). Nuevo enlace lo reemplaza; Dejar de compartir lo corta. Si otra persona guardó antes verás un aviso para recargar: no se sobrescribe nada.'},
+    'fr': {'planTitle': 'Plan de bataille',
+           'planBody': "Préparez le plan SVS sur ordinateur : choisissez Une seule alliance ou Principale + Contre, ajoutez des chefs de rassemblement à chaque groupe et renseignez leurs héros, ratio de troupes, moment des bonus de familier et participants. Tout s'enregistre tout seul.",
+           'plan1': "Glissez des héros depuis la palette à droite vers n'importe quelle case, ou cliquez une case puis un héros. Seuls les héros jusqu'à la génération de l'État sont proposés.",
+           'plan2': "Trouvez des joueurs en tapant un nom, un FID ou une alliance. Un joueur déjà dans le plan indique où il est ; « Déplacer ici » le déplace. L'ajout rapide couvre ceux qui ne se sont pas inscrits (avec un FID, ils reçoivent une inscription).",
+           'plan3': "Chaque groupe peut fixer des règles (niveau de camp et palier par type de troupe) ; les participants nommés en dessous reçoivent un avertissement. Le déguisement (héros de photo + alias) est ce que l'ennemi voit le jour J.",
+           'plan4': "Partager crée un lien secret en lecture seule pour l'État (adapté au téléphone, avec Me trouver). Nouveau lien le remplace ; Arrêter le partage le coupe. Si quelqu'un d'autre a enregistré entre-temps, un avertissement demande de recharger : rien n'est écrasé."},
+    'de': {'planTitle': 'Schlachtplan',
+           'planBody': 'Erstelle den SVS-Plan am Computer: Wähle Eine Allianz oder Haupt + Konter, füge jeder Gruppe Rally-Leiter hinzu und trage Helden, Truppenverhältnis, Haustier-Buff-Zeitpunkt und Beitretende ein. Alles speichert sich selbst.',
+           'plan1': 'Ziehe Helden aus der Palette rechts in ein Feld, oder klicke ein Feld und dann einen Helden. Nur Helden bis zur Heldengeneration des Staats werden angeboten.',
+           'plan2': 'Finde Spieler über Name, FID oder Allianz. Wer schon im Plan ist, zeigt wo; „Hierher verschieben“ verschiebt ihn. Schnell hinzufügen deckt Spieler ohne Anmeldung ab (mit FID bekommen sie eine Anmeldung).',
+           'plan3': 'Jede Gruppe kann Beitrittsregeln setzen (Lagerstufe und Truppenstufe pro Truppenart); benannte Beitretende darunter bekommen eine Warnung. Die Tarnung (Profilbild-Held + Alias) sieht der Gegner am Kampftag.',
+           'plan4': 'Teilen erstellt einen geheimen Nur-Lesen-Link für den Staat (handyfreundlich, mit Finde mich). Neuer Link ersetzt ihn; Teilen beenden stoppt ihn. Hat jemand anderes zwischendurch gespeichert, erscheint ein Hinweis zum Neuladen: nichts wird überschrieben.'},
+    'pl': {'planTitle': 'Plan bitwy',
+           'planBody': 'Przygotuj plan SVS na komputerze: wybierz Jeden sojusz lub Główny + Kontra, dodaj liderów rajdów do każdej grupy i uzupełnij bohaterów, proporcje wojsk, moment buffów zwierzaka i dołączających. Wszystko zapisuje się samo.',
+           'plan1': 'Przeciągaj bohaterów z palety po prawej na dowolne pole albo kliknij pole, a potem bohatera. Dostępni są tylko bohaterowie do generacji stanu.',
+           'plan2': 'Szukaj graczy po nazwie, FID lub sojuszu. Gracz już w planie pokazuje, gdzie jest; „Przenieś tutaj” go przenosi. Szybkie dodanie obejmuje graczy bez zapisu (z FID dostają zapis).',
+           'plan3': 'Każda grupa może ustalić zasady dołączania (poziom obozu i wojsk dla typu); imienni dołączający poniżej dostają ostrzeżenie. Przebranie (bohater na zdjęciu + alias) widzi wróg w dniu bitwy.',
+           'plan4': 'Udostępnij tworzy tajny link tylko do odczytu dla stanu (wygodny na telefonie, ze Znajdź mnie). Nowy link go zastępuje; Wyłącz udostępnianie go wyłącza. Jeśli ktoś inny zapisał w międzyczasie, zobaczysz prośbę o odświeżenie: nic nie zostanie nadpisane.'},
+    'ko': {'planTitle': '전투 계획',
+           'planBody': '컴퓨터에서 SVS 계획을 만드세요: 단일 연맹 또는 메인 + 카운터를 고르고, 각 그룹에 집결 리더를 추가해 영웅, 병력 비율, 펫 버프 시점, 참여자를 채우세요. 모두 자동 저장됩니다.',
+           'plan1': '오른쪽 팔레트의 영웅을 원하는 칸으로 끌거나, 칸을 누른 뒤 영웅을 누르세요. 서버 영웅 세대까지의 영웅만 표시됩니다.',
+           'plan2': '이름, FID, 연맹을 입력해 플레이어를 찾으세요. 이미 계획에 있는 플레이어는 위치가 표시되며 "여기로 이동"으로 옮깁니다. 빠른 추가로 미신청자도 넣을 수 있습니다 (FID가 있으면 신청이 만들어집니다).',
+           'plan3': '그룹마다 참여 규칙(병종별 병영 레벨과 티어)을 정할 수 있고, 미달하는 지정 참여자에게는 경고가 표시됩니다. 위장(프로필 영웅 + 별칭)은 당일 적이 보는 모습입니다.',
+           'plan4': '공유를 누르면 서버용 비밀 읽기 전용 링크가 만들어집니다 (휴대폰용, 내 위치 찾기 포함). 새 링크는 기존 링크를 대체하고, 공유 끄기는 링크를 멈춥니다. 그사이 다른 사람이 저장했다면 새로고침 안내가 나오며, 아무것도 덮어쓰지 않습니다.'},
+    'zh': {'planTitle': '作战计划',
+           'planBody': '在电脑上制定 SVS 计划：选择单一联盟或主力 + 反击，为每组添加集结队长，并填写英雄、兵种比例、宠物增益时机和加入者。所有内容自动保存。',
+           'plan1': '把右侧面板中的英雄拖到任意格子，或先点格子再点英雄。只提供不超过本州英雄世代的英雄。',
+           'plan2': '输入名称、FID 或联盟查找玩家。已在计划中的玩家会显示所在位置；点“移到这里”即可移动。快速添加可加入未报名的玩家（有 FID 时会为其报名）。',
+           'plan3': '每组可设置加入规则（各兵种的兵营等级和阶级）；低于要求的指定加入者会显示警告。伪装（头像英雄 + 化名）是当天敌人看到的样子。',
+           'plan4': '“分享”会为全州生成一个秘密只读链接（适合手机，含“找到我”）。“新链接”会取代旧链接；“关闭分享”会停用链接。如果期间有人保存过，你会看到重新加载的提示，不会覆盖任何内容。'},
+    'tr': {'planTitle': 'Savaş planı',
+           'planBody': "SVS planını bilgisayarda hazırla: Tek ittifak ya da Ana + Karşı seç, her gruba ralli liderleri ekle ve kahramanlarını, birlik oranını, evcil hayvan güçlendirme anını ve katılımcıları doldur. Her şey kendiliğinden kaydedilir.",
+           'plan1': 'Sağdaki paletten kahramanları istediğin kutuya sürükle ya da önce kutuya, sonra kahramana tıkla. Yalnızca eyaletin kahraman nesline kadar olanlar sunulur.',
+           'plan2': 'Oyuncuları isim, FID veya ittifakla bul. Planda olan biri nerede olduğunu gösterir; "Buraya taşı" onu taşır. Hızlı ekle, kaydolmayan oyuncular içindir (FID ile kayıtları oluşturulur).',
+           'plan3': 'Her grup katılım kuralları koyabilir (birlik türü başına kamp seviyesi ve kademe); altında kalan isimli katılımcılar uyarı alır. Kılık (profil kahramanı + takma ad) savaş günü düşmanın gördüğüdür.',
+           'plan4': 'Paylaş, eyalet için gizli ve salt okunur bir bağlantı oluşturur (telefona uygun, Beni bul ile). Yeni bağlantı eskisinin yerini alır; Paylaşımı kapat onu durdurur. Bu arada başka biri kaydettiyse yeniden yükleme uyarısı görürsün: hiçbir şeyin üzerine yazılmaz.'},
+    'ar': {'planTitle': 'خطة المعركة',
+           'planBody': 'جهّز خطة SVS على الحاسوب: اختر تحالفًا واحدًا أو رئيسي + مضاد، وأضف قادة حشود لكل مجموعة واملأ أبطالهم ونسبة القوات وموعد تعزيزات الحيوان الأليف والمنضمين. يُحفظ كل شيء تلقائيًا.',
+           'plan1': 'اسحب الأبطال من اللوحة على اليمين إلى أي خانة، أو اضغط خانة ثم بطلًا. لا تُعرض إلا الأبطال حتى جيل أبطال الولاية.',
+           'plan2': 'ابحث عن اللاعبين بالاسم أو المعرف أو التحالف. من كان في الخطة يظهر مكانه؛ «انقل إلى هنا» ينقله. الإضافة السريعة لمن لم يسجّل (مع المعرف يُنشأ له تسجيل).',
+           'plan3': 'يمكن لكل مجموعة تحديد شروط الانضمام (مستوى المعسكر والقوات لكل نوع)؛ ويظهر تحذير للمنضمين المسمّين الأقل منها. التنكر (بطل الصورة + الاسم المستعار) هو ما يراه العدو يوم المعركة.',
+           'plan4': '«مشاركة» تنشئ رابطًا سريًا للقراءة فقط للولاية (مناسب للهاتف، مع «ابحث عني»). «رابط جديد» يستبدله؛ «إيقاف المشاركة» يوقفه. إن حفظ شخص آخر في الأثناء يظهر تنبيه لإعادة التحميل: لا يُكتب فوق أي شيء.'},
+}
+
 
 def put(tree, dotted, value):
     parts = dotted.split('.')
@@ -705,6 +763,10 @@ def main():
         for k, by_lang in LATER.items():
             put(data, k, by_lang[lang])
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        gpath = LOC / lang / 'guide.json'
+        gd = json.loads(gpath.read_text(encoding='utf-8'))
+        gd['svsAdmin'].update(GUIDE[lang])
+        gpath.write_text(json.dumps(gd, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         cpath = LOC / lang / 'changelog.json'
         c = json.loads(cpath.read_text(encoding='utf-8'))
         out = {}

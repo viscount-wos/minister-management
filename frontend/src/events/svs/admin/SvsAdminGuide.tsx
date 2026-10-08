@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { LucideIcon, Settings, RefreshCw, CalendarClock, BarChart3, Filter, FileSpreadsheet, UserPlus, Users, Image } from 'lucide-react';
+import { LucideIcon, Settings, RefreshCw, CalendarClock, BarChart3, Filter, FileSpreadsheet, UserPlus, Users, Image, Swords } from 'lucide-react';
 
 // SVS admin guide (body only; admin/AdminGuidePage adds the title, back button and event switch).
 
@@ -56,6 +56,10 @@ export default function SvsAdminGuide() {
         </Section>
         <Section icon={UserPlus} title={k('addTitle')}>
           <p>{k('addBody')}</p>
+        </Section>
+        <Section icon={Swords} title={k('planTitle')}>
+          <p>{k('planBody')}</p>
+          {list('plan1', 'plan2', 'plan3', 'plan4')}
         </Section>
         <Section icon={Image} title={k('heroesTitle')}>
           <p>{k('heroesBody')}</p>

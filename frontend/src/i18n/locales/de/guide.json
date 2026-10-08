@@ -185,6 +185,12 @@
     "addTitle": "Spieler hinzufügen",
     "addBody": "Für Spieler ohne Anmeldung: Spieler hinzufügen legt ihre Anmeldung nur mit ID und Spielname an; Stunden, Sprachchat und Truppen sind optional. Hat er in der Runde schon eine Anmeldung, bearbeite diese.",
     "heroesTitle": "Helden",
-    "heroesBody": "Der Reiter Helden zeigt die Heldenbibliothek der Planer bis zur Heldengeneration des Staates (dort oder in den Minister-Einstellungen einstellbar). Seltene und epische Helden haben keine Generation und werden immer gezeigt."
+    "heroesBody": "Der Reiter Helden zeigt die Heldenbibliothek der Planer bis zur Heldengeneration des Staates (dort oder in den Minister-Einstellungen einstellbar). Seltene und epische Helden haben keine Generation und werden immer gezeigt.",
+    "planTitle": "Schlachtplan",
+    "planBody": "Erstelle den SVS-Plan am Computer: Wähle Eine Allianz oder Haupt + Konter, füge jeder Gruppe Rally-Leiter hinzu und trage Helden, Truppenverhältnis, Haustier-Buff-Zeitpunkt und Beitretende ein. Alles speichert sich selbst.",
+    "plan1": "Ziehe Helden aus der Palette rechts in ein Feld, oder klicke ein Feld und dann einen Helden. Nur Helden bis zur Heldengeneration des Staats werden angeboten.",
+    "plan2": "Finde Spieler über Name, FID oder Allianz. Wer schon im Plan ist, zeigt wo; „Hierher verschieben“ verschiebt ihn. Schnell hinzufügen deckt Spieler ohne Anmeldung ab (mit FID bekommen sie eine Anmeldung).",
+    "plan3": "Jede Gruppe kann Beitrittsregeln setzen (Lagerstufe und Truppenstufe pro Truppenart); benannte Beitretende darunter bekommen eine Warnung. Die Tarnung (Profilbild-Held + Alias) sieht der Gegner am Kampftag.",
+    "plan4": "Teilen erstellt einen geheimen Nur-Lesen-Link für den Staat (handyfreundlich, mit Finde mich). Neuer Link ersetzt ihn; Teilen beenden stoppt ihn. Hat jemand anderes zwischendurch gespeichert, erscheint ein Hinweis zum Neuladen: nichts wird überschrieben."
   }
 }

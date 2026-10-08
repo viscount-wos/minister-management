@@ -185,6 +185,12 @@
     "addTitle": "Dodaj gracza",
     "addBody": "Dla graczy bez zapisu: Dodaj gracza tworzy zapis tylko z ID i nazwą w grze; godziny, czat głosowy i wojska są opcjonalne. Jeśli gracz ma już zapis w rundzie, edytuj tamten.",
     "heroesTitle": "Bohaterowie",
-    "heroesBody": "Zakładka Bohaterowie pokazuje bibliotekę bohaterów dla planujących, do generacji bohaterów stanu (ustawisz ją tam lub w ustawieniach Ministra). Rzadcy i epiccy bohaterowie nie mają generacji i są zawsze widoczni."
+    "heroesBody": "Zakładka Bohaterowie pokazuje bibliotekę bohaterów dla planujących, do generacji bohaterów stanu (ustawisz ją tam lub w ustawieniach Ministra). Rzadcy i epiccy bohaterowie nie mają generacji i są zawsze widoczni.",
+    "planTitle": "Plan bitwy",
+    "planBody": "Przygotuj plan SVS na komputerze: wybierz Jeden sojusz lub Główny + Kontra, dodaj liderów rajdów do każdej grupy i uzupełnij bohaterów, proporcje wojsk, moment buffów zwierzaka i dołączających. Wszystko zapisuje się samo.",
+    "plan1": "Przeciągaj bohaterów z palety po prawej na dowolne pole albo kliknij pole, a potem bohatera. Dostępni są tylko bohaterowie do generacji stanu.",
+    "plan2": "Szukaj graczy po nazwie, FID lub sojuszu. Gracz już w planie pokazuje, gdzie jest; „Przenieś tutaj” go przenosi. Szybkie dodanie obejmuje graczy bez zapisu (z FID dostają zapis).",
+    "plan3": "Każda grupa może ustalić zasady dołączania (poziom obozu i wojsk dla typu); imienni dołączający poniżej dostają ostrzeżenie. Przebranie (bohater na zdjęciu + alias) widzi wróg w dniu bitwy.",
+    "plan4": "Udostępnij tworzy tajny link tylko do odczytu dla stanu (wygodny na telefonie, ze Znajdź mnie). Nowy link go zastępuje; Wyłącz udostępnianie go wyłącza. Jeśli ktoś inny zapisał w międzyczasie, zobaczysz prośbę o odświeżenie: nic nie zostanie nadpisane."
   }
 }

@@ -185,6 +185,12 @@
     "addTitle": "Oyuncu ekle",
     "addBody": "Kaydolmayan oyuncular için: Oyuncu ekle, yalnızca kimlik ve oyun içi isimle kayıt oluşturur; saatler, sesli sohbet ve birlikler isteğe bağlıdır. Turda zaten kaydı varsa onu düzenle.",
     "heroesTitle": "Kahramanlar",
-    "heroesBody": "Kahramanlar sekmesi, planlayıcıların kullanacağı kahraman kütüphanesini eyaletin kahraman nesline kadar gösterir (orada veya Bakan ayarlarında değiştirilir). Nadir ve epik kahramanların nesli yoktur ve her zaman gösterilir."
+    "heroesBody": "Kahramanlar sekmesi, planlayıcıların kullanacağı kahraman kütüphanesini eyaletin kahraman nesline kadar gösterir (orada veya Bakan ayarlarında değiştirilir). Nadir ve epik kahramanların nesli yoktur ve her zaman gösterilir.",
+    "planTitle": "Savaş planı",
+    "planBody": "SVS planını bilgisayarda hazırla: Tek ittifak ya da Ana + Karşı seç, her gruba ralli liderleri ekle ve kahramanlarını, birlik oranını, evcil hayvan güçlendirme anını ve katılımcıları doldur. Her şey kendiliğinden kaydedilir.",
+    "plan1": "Sağdaki paletten kahramanları istediğin kutuya sürükle ya da önce kutuya, sonra kahramana tıkla. Yalnızca eyaletin kahraman nesline kadar olanlar sunulur.",
+    "plan2": "Oyuncuları isim, FID veya ittifakla bul. Planda olan biri nerede olduğunu gösterir; \"Buraya taşı\" onu taşır. Hızlı ekle, kaydolmayan oyuncular içindir (FID ile kayıtları oluşturulur).",
+    "plan3": "Her grup katılım kuralları koyabilir (birlik türü başına kamp seviyesi ve kademe); altında kalan isimli katılımcılar uyarı alır. Kılık (profil kahramanı + takma ad) savaş günü düşmanın gördüğüdür.",
+    "plan4": "Paylaş, eyalet için gizli ve salt okunur bir bağlantı oluşturur (telefona uygun, Beni bul ile). Yeni bağlantı eskisinin yerini alır; Paylaşımı kapat onu durdurur. Bu arada başka biri kaydettiyse yeniden yükleme uyarısı görürsün: hiçbir şeyin üzerine yazılmaz."
   }
 }

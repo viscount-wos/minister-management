@@ -185,6 +185,12 @@
     "addTitle": "Añadir un jugador",
     "addBody": "Para quienes no se inscribieron: Añadir jugador crea su inscripción solo con el ID y el nombre en el juego; horas, chat de voz y tropas son opcionales. Si ya tiene una inscripción en la ronda, edita esa.",
     "heroesTitle": "Héroes",
-    "heroesBody": "La pestaña Héroes muestra la biblioteca de héroes que usarán los planificadores, hasta la generación de héroes del estado (se ajusta allí o en los ajustes de Ministro). Los héroes raros y épicos no tienen generación y siempre aparecen."
+    "heroesBody": "La pestaña Héroes muestra la biblioteca de héroes que usarán los planificadores, hasta la generación de héroes del estado (se ajusta allí o en los ajustes de Ministro). Los héroes raros y épicos no tienen generación y siempre aparecen.",
+    "planTitle": "Plan de batalla",
+    "planBody": "Prepara el plan de SVS en un ordenador: elige Una sola alianza o Principal + Contraataque, añade líderes de rally a cada grupo y completa sus héroes, proporción de tropas, momento de las mejoras de mascota y participantes. Todo se guarda solo.",
+    "plan1": "Arrastra héroes desde la paleta de la derecha a cualquier casilla, o haz clic en una casilla y luego en un héroe. Solo se ofrecen héroes hasta la generación del estado.",
+    "plan2": "Busca jugadores escribiendo nombre, FID o alianza. Si alguien ya está en el plan se indica dónde; «Mover aquí» lo mueve. Añadir rápido sirve para quien no se inscribió (con FID se le crea la inscripción).",
+    "plan3": "Cada grupo puede fijar reglas de entrada (nivel de campamento y de tropa por tipo); los participantes con nombre por debajo reciben un aviso. El disfraz (héroe de foto + alias) es lo que ve el enemigo ese día.",
+    "plan4": "Compartir crea un enlace secreto de solo lectura para el estado (apto para móvil, con Encuéntrame). Nuevo enlace lo reemplaza; Dejar de compartir lo corta. Si otra persona guardó antes verás un aviso para recargar: no se sobrescribe nada."
   }
 }

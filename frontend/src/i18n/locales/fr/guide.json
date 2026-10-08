@@ -185,6 +185,12 @@
     "addTitle": "Ajouter un joueur",
     "addBody": "Pour ceux qui ne se sont pas inscrits : Ajouter un joueur crée leur inscription avec seulement l'ID et le nom en jeu ; heures, vocal et troupes sont facultatifs. S'il a déjà une inscription dans la manche, modifiez-la plutôt.",
     "heroesTitle": "Héros",
-    "heroesBody": "L'onglet Héros montre la bibliothèque de héros des planificateurs, jusqu'à la génération de héros de l'État (réglable là ou dans les réglages Ministre). Les héros rares et épiques n'ont pas de génération et sont toujours affichés."
+    "heroesBody": "L'onglet Héros montre la bibliothèque de héros des planificateurs, jusqu'à la génération de héros de l'État (réglable là ou dans les réglages Ministre). Les héros rares et épiques n'ont pas de génération et sont toujours affichés.",
+    "planTitle": "Plan de bataille",
+    "planBody": "Préparez le plan SVS sur ordinateur : choisissez Une seule alliance ou Principale + Contre, ajoutez des chefs de rassemblement à chaque groupe et renseignez leurs héros, ratio de troupes, moment des bonus de familier et participants. Tout s'enregistre tout seul.",
+    "plan1": "Glissez des héros depuis la palette à droite vers n'importe quelle case, ou cliquez une case puis un héros. Seuls les héros jusqu'à la génération de l'État sont proposés.",
+    "plan2": "Trouvez des joueurs en tapant un nom, un FID ou une alliance. Un joueur déjà dans le plan indique où il est ; « Déplacer ici » le déplace. L'ajout rapide couvre ceux qui ne se sont pas inscrits (avec un FID, ils reçoivent une inscription).",
+    "plan3": "Chaque groupe peut fixer des règles (niveau de camp et palier par type de troupe) ; les participants nommés en dessous reçoivent un avertissement. Le déguisement (héros de photo + alias) est ce que l'ennemi voit le jour J.",
+    "plan4": "Partager crée un lien secret en lecture seule pour l'État (adapté au téléphone, avec Me trouver). Nouveau lien le remplace ; Arrêter le partage le coupe. Si quelqu'un d'autre a enregistré entre-temps, un avertissement demande de recharger : rien n'est écrasé."
   }
 }

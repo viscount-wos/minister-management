@@ -185,6 +185,12 @@
     "addTitle": "Add a player",
     "addBody": "For players who didn't sign up: Add player creates their sign-up with just the player ID and in-game name; hours, voice chat and troops are optional. If they already have a sign-up in the round, edit that one instead.",
     "heroesTitle": "Heroes",
-    "heroesBody": "The Heroes tab shows the hero library planners will use, up to the state's hero generation (set it there or in Minister settings). Rare and epic heroes have no generation and are always shown."
+    "heroesBody": "The Heroes tab shows the hero library planners will use, up to the state's hero generation (set it there or in Minister settings). Rare and epic heroes have no generation and are always shown.",
+    "planTitle": "Battle plan",
+    "planBody": "Build the SVS plan on a computer: pick Single alliance or Main + Counter, add rally leaders to each group and fill in their heroes, troop ratio, pet-buff moment and joiners. Everything saves by itself.",
+    "plan1": "Drag heroes from the palette on the right into any slot, or click a slot and then a hero. Only heroes up to the state hero generation are offered.",
+    "plan2": "Find players by typing a name, FID or alliance. Someone already in the plan shows where they are; \"Move here\" moves them. Quick add covers players who did not sign up (with an FID they get a sign-up).",
+    "plan3": "Each group can set joining rules (camp level and tier per troop type); named joiners below them get a warning. A disguise (PFP hero + alias) is what the enemy sees on the day.",
+    "plan4": "Share makes a secret read-only link for the state (phone friendly, with Find me). New link replaces it; Turn off sharing stops it. If someone else saved meanwhile you see a warning to reload: nothing is overwritten."
   }
 }
