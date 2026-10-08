@@ -9,7 +9,7 @@ from core.auth import require_admin
 from core.db import get_db
 from core.errors import not_found
 from core.rounds import paginate, require_current_round, require_round
-from events.tyrant import logic
+from events.tyrant import filters, logic
 
 bp = Blueprint('tyrant', __name__)
 
@@ -27,20 +27,21 @@ def resolve_round(ref):
     return row
 
 
+def _filters(rnd):
+    return filters.parse_filters(request.args, logic.round_settings(rnd))
+
+
 @bp.route('/api/admin/tyrant/rounds/<ref>/applications', methods=['GET'])
 @require_admin
 def admin_list(ref):
-    """?q= (FID, name or Discord ID) &alliance= &sort=submitted|updated|name|alliance|fid|furnace|power|gems|strength
-    &dir=asc|desc &min_furnace=<code> &min_camp=FC1..FC10 &min_tier=1..11|T11 &troop=infantry|lancer|marksman|all
-    &limit= &offset= -> {round_id, total, applications: [...]}"""
+    """Filters: see events/tyrant/filters.py (q, alliance, min_furnace, min/max_power, min/max_gems, windows, rush,
+    vc, troop, min_camp, min_tier, <type>_camp, <type>_tier, roles, roles_mode, submitted_from/to, days; AND).
+    &sort=submitted|updated|name|alliance|fid|furnace|power|gems|strength &dir=asc|desc &limit= &offset=
+    -> {round_id, total, applications: [...]} (total = after filters)."""
     rnd = resolve_round(ref)
-    apps = logic.filter_and_sort(logic.round_applications(get_db(), rnd),
-                                 q=request.args.get('q', ''), alliance=request.args.get('alliance', ''),
+    apps = logic.filter_and_sort(logic.round_applications(get_db(), rnd), _filters(rnd), logic.round_settings(rnd),
                                  sort=request.args.get('sort') or 'submitted',
-                                 direction=(request.args.get('dir') or 'desc').lower(),
-                                 min_furnace=request.args.get('min_furnace', ''),
-                                 min_camp=request.args.get('min_camp', ''), min_tier=request.args.get('min_tier', ''),
-                                 troop=request.args.get('troop', ''))
+                                 direction=(request.args.get('dir') or 'desc').lower())
     body = {'round_id': rnd['id']}
     body.update(paginate(apps, 'applications'))
     return jsonify(body)
@@ -49,20 +50,27 @@ def admin_list(ref):
 @bp.route('/api/admin/tyrant/rounds/<ref>/summary', methods=['GET'])
 @require_admin
 def admin_summary(ref):
+    """Same filters as the list: the counts are computed for the FILTERED set. Also returns round_total
+    (unfiltered) and alliance_options (every alliance of the round, for the filter picker)."""
     rnd = resolve_round(ref)
-    apps = logic.filter_and_sort(logic.round_applications(get_db(), rnd), alliance=request.args.get('alliance', ''))
-    out = {'round_id': rnd['id']}
-    out.update(logic.summary(apps, logic.round_settings(rnd)))
+    settings = logic.round_settings(rnd)
+    every = logic.round_applications(get_db(), rnd)
+    out = {'round_id': rnd['id'], 'round_total': len(every), 'filters': _filters(rnd)}
+    out.update(logic.summary(filters.apply_filters(every, out['filters'], settings), settings))
+    out['alliance_options'] = sorted({(a['profile'].get('alliance') or '').strip().upper() for a in every} - {''})
     return jsonify(out)
 
 
 @bp.route('/api/admin/tyrant/rounds/<ref>/export', methods=['GET'])
 @require_admin
 def admin_export_xlsx(ref):
-    return logic.export_xlsx_response(get_db(), resolve_round(ref))
+    """Same filters as the list (the download is the filtered view)."""
+    rnd = resolve_round(ref)
+    return logic.export_xlsx_response(get_db(), rnd, _filters(rnd))
 
 
 @bp.route('/api/admin/tyrant/rounds/<ref>/export.csv', methods=['GET'])
 @require_admin
 def admin_export_csv(ref):
-    return logic.export_csv_response(get_db(), resolve_round(ref))
+    rnd = resolve_round(ref)
+    return logic.export_csv_response(get_db(), rnd, _filters(rnd))

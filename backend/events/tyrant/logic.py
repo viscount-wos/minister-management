@@ -14,17 +14,17 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from core.exports import append_safe, to_csv_bytes
-from core.furnace import FURNACE_LEVELS, fc_number, furnace_ordinal, validate_fc_level, validate_furnace
+from core.furnace import FURNACE_LEVELS, fc_number, furnace_ordinal
 from core.validation import validate_number
 from core.errors import validation_error
 from events import EventSpec
+from events.tyrant import filters as tf
 from events.tyrant import validation as tv
 
 EVENT = 'tyrant'
 ROLE_LABELS = {'rally_leader': 'Rally Leader', 'joiner': 'Joiner', 'gathering': 'Gathering/Looting',
                'battle_mgmt': 'Battle Management', 'event_prep': 'Event Preparation'}
 SORT_KEYS = ('submitted', 'updated', 'name', 'alliance', 'fid', 'furnace', 'power', 'gems', 'strength')
-TROOP_FILTERS = tv.TROOP_TYPES + ('all',)
 
 
 def round_settings(round_row):
@@ -96,57 +96,9 @@ def joiner_strength(profile):
     return total if any_value else None
 
 
-def _parse_min_tier(value):
-    if value is None or (isinstance(value, str) and not value.strip()):
-        return None
-    s = str(value).strip().upper()
-    s = s[1:] if s.startswith('T') else s
-    if not s.isdigit() or not tv.TROOP_TIER_RANGE[0] <= int(s) <= tv.TROOP_TIER_RANGE[1]:
-        raise validation_error('min_tier must be a tier 1-11 (e.g. 11 or T11)', 'min_tier')
-    return int(s)
-
-
-def troop_filter(min_camp=None, min_tier=None, troop=None):
-    """Predicate on a profile, or None when no troop filter is set.
-
-    ``min_camp`` an FC code (FC10 = FC10 camps only; pre-FC/blank camps never match), ``min_tier`` 1-11 or 'T11',
-    ``troop`` infantry|lancer|marksman|all (default all: EVERY troop type must meet the minimums)."""
-    camp_floor = validate_fc_level(min_camp, 'min_camp') if min_camp else None
-    tier_floor = _parse_min_tier(min_tier)
-    troop = (troop or 'all').strip().lower()
-    if troop not in TROOP_FILTERS:
-        raise validation_error('troop must be one of ' + ', '.join(TROOP_FILTERS), 'troop')
-    if camp_floor is None and tier_floor is None:
-        return None
-    kinds = tv.TROOP_TYPES if troop == 'all' else (troop,)
-    floor = fc_number(camp_floor)
-
-    def ok(profile):
-        for kind in kinds:
-            if camp_floor and fc_number(_troop(profile, kind, 'furnace_level')) < floor:
-                return False
-            if tier_floor and (_troop(profile, kind, 'tier') or 0) < tier_floor:
-                return False
-        return True
-    return ok
-
-
-def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='desc', min_furnace=None,
-                    min_camp=None, min_tier=None, troop=None):
-    if alliance:
-        a = alliance.strip().casefold()
-        apps = [x for x in apps if (x['profile'].get('alliance') or '').strip().casefold() == a]
-    if q:
-        needle = q.strip().casefold()
-        apps = [x for x in apps if needle in (x['fid'] or '').casefold()
-                or needle in (x['profile'].get('game_name') or '').casefold()
-                or needle in (x['profile'].get('discord_id') or '').casefold()]
-    if min_furnace:
-        floor = furnace_ordinal(validate_furnace(min_furnace, 'min_furnace'))
-        apps = [x for x in apps if furnace_ordinal(x['profile'].get('furnace_level')) >= floor]
-    pred = troop_filter(min_camp, min_tier, troop)
-    if pred:
-        apps = [x for x in apps if pred(x['profile'])]
+def filter_and_sort(apps, filters=None, settings=None, sort='submitted', direction='desc'):
+    """``filters``: the dict of events.tyrant.filters.parse_filters (all AND); then sort (blanks always last)."""
+    apps = tf.apply_filters(apps, filters or {}, settings or {})
     if sort not in SORT_KEYS:
         raise validation_error('sort must be one of ' + ', '.join(SORT_KEYS), 'sort')
     if direction not in ('asc', 'desc'):
@@ -172,7 +124,7 @@ def summary(apps, settings):
     windows = settings.get('windows') or []
     win_counts = Counter()
     rush_ids = {w['id'] for w in windows if w.get('rush')}
-    opening_rush = vc = gems = 0
+    opening_rush = vc = 0
     roles = Counter()
     alliances = Counter()
     furnace = Counter()
@@ -187,7 +139,6 @@ def summary(apps, settings):
             opening_rush += 1
         if ans.get('discord_vc'):
             vc += 1
-        gems += ans.get('gem_spend') or 0
         for r in ans.get('roles') or []:
             roles[r] += 1
         alliances[(prof.get('alliance') or '').strip().upper() or None] += 1
@@ -200,7 +151,6 @@ def summary(apps, settings):
         'total': len(apps),
         'opening_rush': opening_rush,
         'discord_vc': vc,
-        'gem_spend_total': gems,
         'windows': [dict(w, count=win_counts.get(w['id'], 0)) for w in windows],
         'alliances': [{'alliance': k, 'count': v}
                       for k, v in sorted(alliances.items(), key=lambda kv: (-kv[1], kv[0] or '~'))],
@@ -291,7 +241,6 @@ def build_workbook(apps, settings, round_row):
     sm.append(['Total players', s['total']])
     sm.append(['Opening rush', s['opening_rush']])
     sm.append(['Discord VC', s['discord_vc']])
-    sm.append(['Est. gem spend (total)', s['gem_spend_total']])
     sm.append([])
     sm.append(['Window (UTC)', 'Players'])
     for w in s['windows']:
@@ -326,14 +275,16 @@ def _download(data, mimetype, round_row, ext):
     return Response(data, mimetype=mimetype, headers={'Content-Disposition': f'attachment; filename={filename}'})
 
 
-def export_xlsx_response(db, round_row):
-    apps = round_applications(db, round_row)
+def export_xlsx_response(db, round_row, filters=None):
+    settings = round_settings(round_row)
+    apps = tf.apply_filters(round_applications(db, round_row), filters or {}, settings)
     return _download(build_workbook(apps, round_settings(round_row), round_row),
                      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', round_row, 'xlsx')
 
 
-def export_csv_response(db, round_row):
-    apps = round_applications(db, round_row)
+def export_csv_response(db, round_row, filters=None):
+    settings = round_settings(round_row)
+    apps = tf.apply_filters(round_applications(db, round_row), filters or {}, settings)
     return _download(build_csv(apps, round_settings(round_row)), 'text/csv; charset=utf-8', round_row, 'csv')
 
 

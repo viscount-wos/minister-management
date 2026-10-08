@@ -240,7 +240,9 @@ def test_admin_list_filter_search_sort_paging(client, admin):
 def test_admin_summary(client, admin):
     rnd = _seed(client, admin)
     s = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/summary', headers=admin).json
-    assert s['total'] == 3 and s['opening_rush'] == 2 and s['discord_vc'] == 2 and s['gem_spend_total'] == 50000
+    assert s['total'] == 3 and s['opening_rush'] == 2 and s['discord_vc'] == 2
+    assert 'gem_spend_total' not in s  # owner: no aggregate gem total anywhere
+    assert s['round_total'] == 3 and s['alliance_options'] == ['AAA', 'BBB']
     assert {w['id']: w['count'] for w in s['windows']} == {'w1': 2, 'w2': 1, 'w3': 1, 'w4': 0, 'w5': 0}
     assert s['alliances'] == [{'alliance': 'AAA', 'count': 2}, {'alliance': 'BBB', 'count': 1}]
     assert s['roles'] == {'rally_leader': 1, 'joiner': 1, 'gathering': 1, 'battle_mgmt': 0, 'event_prep': 0}
@@ -248,7 +250,8 @@ def test_admin_summary(client, admin):
     assert s['troop_tiers']['marksman'] == {'T11': 1, 'none': 2}
     assert s['furnace_levels'] == {'FC10': 1, '30': 1, 'none': 1}  # FC above pre-FC, blanks last
     s = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/summary?alliance=BBB', headers=admin).json
-    assert s['total'] == 1 and s['opening_rush'] == 0
+    assert s['total'] == 1 and s['opening_rush'] == 0 and s['round_total'] == 3
+    assert s['alliance_options'] == ['AAA', 'BBB']  # the picker keeps every alliance of the round
 
 
 def test_exports_are_formula_safe(client, admin):
@@ -432,3 +435,48 @@ def test_exports_camp_columns(client, admin):
     assert vals['43'] == 'FC10' and vals['44'] == '25'
     summary = [[c.value for c in row] for row in wb['Summary'].iter_rows()]
     assert ['Lancer camp level', 'Players'] in summary and ['FC9', 1] in summary
+
+
+def test_column_filters(client, admin):
+    rnd = _seed(client, admin)  # 21 Zed AAA FC10 900M gems 50000 w1+w2 VC rally; 22 amy BBB '30' 100M no gems w3
+    #                              no VC joiner+gathering; 23 AAA no stats gems 0 w1 VC no roles
+    q = lambda qs: _fids(client, admin, rnd, qs)  # noqa: E731
+    assert q('alliance=aaa,bbb') == ['21', '22', '23'] and q('alliance=bbb') == ['22']
+    assert q('min_power=100000000&max_power=500000000') == ['22'] and q('min_power=1') == ['21', '22']
+    assert q('min_gems=1') == ['21'] and q('max_gems=0') == ['23'] and q('min_gems=0') == ['21', '23']
+    assert q('windows=w1') == ['21', '23'] and q('windows=w1,w2') == ['21'] and q('rush=1') == ['21', '23']
+    assert q('vc=yes') == ['21', '23'] and q('vc=no') == ['22'] and q('vc=any') == ['21', '22', '23']
+    assert q('roles=joiner,rally_leader') == ['21', '22'] and q('roles=joiner,gathering&roles_mode=all') == ['22']
+    assert q('roles=joiner,rally_leader&roles_mode=all') == []
+    assert q('min_furnace=FC1') == ['21']
+    today = __import__('datetime').datetime.now(__import__('datetime').timezone.utc).strftime('%Y-%m-%d')
+    assert q(f'submitted_from={today}&submitted_to={today}') == ['21', '22', '23']
+    assert q('submitted_to=2000-01-01') == [] and q('days=1') == ['21', '22', '23']
+    assert q('alliance=AAA&vc=yes&rush=1&min_gems=1') == ['21']  # AND
+    # exact per-troop values (the summary chips), incl. 'none'
+    assert q('infantry_camp=FC5') == ['21'] and q('infantry_camp=none') == ['23'] and q('marksman_tier=11') == ['21']
+    assert q('infantry_tier=T8&infantry_camp=FC1') == ['22'] and q('lancer_tier=none') == ['22', '23']
+    base = f'/api/admin/tyrant/rounds/{rnd["id"]}/applications'
+    for qs, field in (('windows=w9', 'windows'), ('vc=maybe', 'vc'), ('rush=x', 'rush'), ('roles=boss', 'roles'),
+                      ('roles=joiner&roles_mode=some', 'roles_mode'), ('submitted_from=2026-13-01', 'submitted_from'),
+                      ('days=0', 'days'), ('min_power=-1', 'min_power'), ('max_gems=1.5', 'max_gems'),
+                      ('infantry_camp=FC11', 'infantry_camp'), ('lancer_tier=12', 'lancer_tier')):
+        r = client.get(f'{base}?{qs}', headers=admin)
+        assert r.status_code == 400 and r.json['field'] == field, (qs, r.json)
+
+
+def test_summary_and_exports_follow_filters(client, admin):
+    rnd = _seed_camps(client, admin)
+    s = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/summary?lancer_camp=FC10', headers=admin).json
+    assert s['total'] == 2 and s['round_total'] == 5 and s['filters'] == {'lancer_camp': 'FC10'}
+    assert s['camp_levels']['lancer'] == {'FC10': 2} and s['troop_tiers']['marksman'] == {'T11': 1, 'T10': 1}
+    s = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/summary?min_camp=FC10&min_tier=11', headers=admin).json
+    assert s['total'] == 1 and s['camp_levels']['infantry'] == {'FC10': 1}
+    r = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/export.csv?min_camp=FC10&min_tier=T11', headers=admin)
+    rows = list(csv.reader(io.StringIO(r.data.decode('utf-8-sig'))))
+    assert [row[0] for row in rows[1:]] == ['41']
+    r = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/export?min_tier=11', headers=admin)
+    ws = openpyxl.load_workbook(io.BytesIO(r.data))['Tyrant Poll Results']
+    assert sorted(ws.cell(row=i, column=1).value for i in range(2, ws.max_row + 1)) == ['41', '42']
+    assert client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/export.csv?min_tier=99',
+                      headers=admin).json['field'] == 'min_tier'
