@@ -4,11 +4,23 @@
   "playerIDOptional": "ID gracza (FID) - opcjonalne",
   "playerIDPlaceholder": "Wpisz swoje unikalne ID gracza",
   "fidRequired": "ID gracza (FID) jest wymagane",
-  "playerAlreadyExists": "Gracz o tym FID lub tej nazwie już istnieje. Skorzystaj ze strony aktualizacji, aby zmienić swoje zgłoszenie.",
   "furnaceLevel": "Poz. pieca",
   "alliance": "Tag sojuszu",
   "alliancePlaceholder": "Maks. 3 znaki (np. ABC)",
   "playerInfo": "Informacje o graczu",
   "enterPlayerID": "Podaj ID gracza",
-  "allianceRequired": "Tag sojuszu jest wymagany"
+  "allianceRequired": "Tag sojuszu jest wymagany",
+  "fidDigitsOnly": "ID gracza (FID) może zawierać tylko cyfry",
+  "continue": "Dalej",
+  "timezone": "Twoja strefa czasowa",
+  "optional": "opcjonalnie",
+  "prefilled": "Witaj ponownie! Uzupełniliśmy Twój zapisany profil.",
+  "newProfile": "Nowy gracz: uzupełnij swój profil.",
+  "changeFid": "To nie Ty? Użyj innego FID",
+  "lastAnswers": {
+    "button": "Użyj moich ostatnich odpowiedzi",
+    "hint": "Zgłaszałeś się wcześniej? Skopiuj odpowiedzi z {{round}}.",
+    "applied": "Skopiowano odpowiedzi z {{round}}. Sprawdź je i zapisz.",
+    "previousRound": "poprzedniej rundy"
+  }
 }

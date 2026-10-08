@@ -6,16 +6,15 @@
   "home": {
     "title": "Whiteout Survival Bakanlık Yönetimi",
     "subtitle": "SVS Eyalet-Eyalet Bakanlık Atama Sistemi",
-    "submitNew": "Yeni Başvuru Gönder",
-    "updateExisting": "Atamayı Gör / Bilgi Güncelle",
-    "submitDesc": "Bakanlık pozisyonları için hızlandırmalarınızı ve zaman tercihlerinizi gönderin",
-    "updateDesc": "Mevcut bakanlık atamanızı kontrol edin veya gönderdiğiniz bilgileri güncelleyin",
     "adminDesc": "Oyuncuları ve atamaları yönetin",
     "utcNote": "Tüm saatler UTC olarak saklanır — yerel saatinize dönüştürmek için formlardaki saat dilimi seçicisini kullanın",
     "welcome": "Hoş geldiniz, {{state}}",
     "applicationsClosed": "Başvurular kapandı.",
     "applicationsCloseAt": "Başvuru kapanış: {{time}}",
-    "applicationsClosedCard": "Başvurular kapandı. Yeni başvurular artık kabul edilmiyor."
+    "currentRound": "Mevcut tur: {{round}}",
+    "applyTile": "Başvur veya güncelle",
+    "applyTileDesc": "Yeni başvuru yapmak veya başvurunuzu düzenlemek için oyuncu kimliğinizi girin",
+    "applyTileClosedDesc": "Yeni başvurular kapandı. Mevcut bir başvuruyu yine de düzenleyebilirsiniz."
   },
   "form": {
     "step1Title": "Oyuncu Bilgileri",
@@ -60,18 +59,14 @@
     "heatmapLegend": "Renk talebi gösterir: Mavi = Düşük, Kırmızı = Yüksek",
     "noTimeSlotsConfirm": "Bu gün için herhangi bir zaman dilimi seçmediniz. Devam etmek istediğinizden emin misiniz?",
     "selectAllAvailable": "Pozisyon alma şansınızı en üst düzeye çıkarmak için müsait olduğunuz TÜM zamanları seçin.",
-    "applicationsClosedDesc": "Yeni başvurular artık kabul edilmiyor. Daha önce gönderdiyseniz, ana sayfadan bilgilerinizi güncelleyebilirsiniz."
+    "applicationsClosedDesc": "Yeni başvurular artık kabul edilmiyor. Daha önce gönderdiyseniz, ana sayfadan bilgilerinizi güncelleyebilirsiniz.",
+    "applicantCount": "Başvuran: {{n}}"
   },
   "update": {
-    "title": "Gönderiminizi Güncelleyin",
     "currentAssignments": "Mevcut Atamalarınız",
     "noAssignments": "Henüz herhangi bir zaman dilimine atanmadınız.",
     "noneAssigned": "Yok",
     "assignmentDisclaimer": "Atanan zamanlar değişebilir ve oyun içi atamalar onaylanana kadar kesinleşmiş sayılmaz. Güncellemeler için sık sık kontrol edin.",
-    "enterFID": "Güncellemek için Oyuncu ID'nizi (FID) girin",
-    "fidLabel": "Oyuncu ID (FID)",
-    "load": "Verilerimi Yükle",
-    "notFound": "Bu Oyuncu ID için gönderim bulunamadı",
     "backHome": "Ana Sayfaya Dön"
   },
   "schedule": {
@@ -83,5 +78,22 @@
     "unfilled": "— Açık —",
     "timesNote": "Yukarıda bir saat dilimi seçilmedikçe tüm saatler UTC'dir.",
     "disclaimer": "Başvurular hâlâ açık. Başvurular kapanana kadar atanan saatler değişebilir."
+  },
+  "apply": {
+    "title": "Bakanlık başvurusu",
+    "enterFid": "Başvurunuzu başlatmak veya düzenlemek için oyuncu kimliğinizi (FID) girin.",
+    "newFor": "{{round}} için yeni başvuru",
+    "editFor": "{{round}} başvurunuzu düzenleyin",
+    "notOpenTitle": "Başvurular açık değil",
+    "notOpenBody": "Şu anda açık bir bakanlık turu yok. Daha sonra tekrar bakın.",
+    "closedBody": "{{round}} için artık yeni başvuru alınmıyor. Zaten başvurduysanız düzenlemek için o oyuncu kimliğini girin.",
+    "closedButEditable": "Yeni oyuncular için başvurular kapandı. Kendi başvurunuzu yine de güncelleyebilirsiniz.",
+    "otherFid": "Başka bir oyuncu kimliği kullan",
+    "answersTitle": "Bu tur için hızlandırmalar",
+    "answersBlankNote": "Bu yeni bir tur, bu yüzden bu cevaplar boş başlar.",
+    "answersEditNote": "Bunlar bu tur için kaydettiğiniz cevaplar.",
+    "savedNew": "{{round}} başvurunuz gönderildi.",
+    "savedEdit": "{{round}} başvurunuz güncellendi.",
+    "viewMine": "Başvurumu görüntüle"
   }
 }

@@ -6,16 +6,15 @@
   "home": {
     "title": "Whiteout Survival Ministeriumsverwaltung",
     "subtitle": "SVS Staat-gegen-Staat Ministeriumszuweisungssystem",
-    "submitNew": "Neue Bewerbung einreichen",
-    "updateExisting": "Zuweisung ansehen / Daten aktualisieren",
-    "submitDesc": "Reichen Sie Ihre Beschleunigungen und Zeitpräferenzen für Ministeriumsposten ein",
-    "updateDesc": "Prüfen Sie Ihre aktuelle Ministeriumszuweisung oder aktualisieren Sie Ihre eingereichten Daten",
     "adminDesc": "Spieler und Zuweisungen verwalten",
     "utcNote": "Alle Zeiten werden in UTC gespeichert — verwenden Sie die Zeitzonenauswahl in den Formularen, um in Ihre Ortszeit umzurechnen",
     "welcome": "Willkommen, {{state}}",
     "applicationsClosed": "Die Bewerbungsphase ist jetzt geschlossen.",
     "applicationsCloseAt": "Bewerbungsschluss: {{time}}",
-    "applicationsClosedCard": "Die Bewerbungsphase ist geschlossen. Neue Einreichungen werden nicht mehr angenommen."
+    "currentRound": "Aktuelle Runde: {{round}}",
+    "applyTile": "Bewerben oder ändern",
+    "applyTileDesc": "Gib deine Spieler-ID ein, um dich neu zu bewerben oder deine Bewerbung zu ändern",
+    "applyTileClosedDesc": "Neue Bewerbungen sind geschlossen. Bestehende Bewerbungen kannst du weiterhin ändern."
   },
   "form": {
     "step1Title": "Spielerinformationen",
@@ -60,18 +59,14 @@
     "heatmapLegend": "Farbe zeigt Nachfrage an: Blau = niedrig, Rot = hoch",
     "noTimeSlotsConfirm": "Sie haben für diesen Tag keine Zeitfenster ausgewählt. Möchten Sie wirklich fortfahren?",
     "selectAllAvailable": "Wählen Sie ALLE Zeiten aus, zu denen Sie verfügbar sind, um die besten Chancen auf einen Posten zu sichern.",
-    "applicationsClosedDesc": "Neue Bewerbungen werden nicht mehr angenommen. Wenn Sie bereits eingereicht haben, können Sie Ihre Daten weiterhin über die Startseite aktualisieren."
+    "applicationsClosedDesc": "Neue Bewerbungen werden nicht mehr angenommen. Wenn Sie bereits eingereicht haben, können Sie Ihre Daten weiterhin über die Startseite aktualisieren.",
+    "applicantCount": "Bewerber: {{n}}"
   },
   "update": {
-    "title": "Ihre Einreichung aktualisieren",
     "currentAssignments": "Ihre aktuellen Zuweisungen",
     "noAssignments": "Sie wurden noch keinen Zeitfenstern zugewiesen.",
     "noneAssigned": "Keine",
     "assignmentDisclaimer": "Zugewiesene Zeiten können sich ändern und gelten erst als endgültig, wenn die Ernennungen im Spiel bestätigt sind. Schauen Sie regelmäßig nach Aktualisierungen.",
-    "enterFID": "Geben Sie Ihre Spieler-ID (FID) ein, um zu aktualisieren",
-    "fidLabel": "Spieler-ID (FID)",
-    "load": "Meine Daten laden",
-    "notFound": "Keine Einreichung für diese Spieler-ID gefunden",
     "backHome": "Zurück zur Startseite"
   },
   "schedule": {
@@ -83,5 +78,22 @@
     "unfilled": "— Offen —",
     "timesNote": "Alle Zeiten sind in UTC, sofern oben keine Zeitzone ausgewählt ist.",
     "disclaimer": "Die Bewerbungsphase läuft noch. Zugewiesene Zeiten können sich bis zum Bewerbungsschluss ändern."
+  },
+  "apply": {
+    "title": "Ministeriumsbewerbung",
+    "enterFid": "Gib deine Spieler-ID (FID) ein, um deine Bewerbung zu starten oder zu ändern.",
+    "newFor": "Neue Bewerbung für {{round}}",
+    "editFor": "Bearbeite deine Bewerbung für {{round}}",
+    "notOpenTitle": "Bewerbungen sind nicht geöffnet",
+    "notOpenBody": "Derzeit ist keine Ministeriumsrunde geöffnet. Schau später wieder vorbei.",
+    "closedBody": "Für {{round}} werden keine neuen Bewerbungen mehr angenommen. Wenn du dich schon beworben hast, gib diese Spieler-ID ein, um sie zu ändern.",
+    "closedButEditable": "Für neue Spieler sind Bewerbungen geschlossen. Deine kannst du noch ändern.",
+    "otherFid": "Andere Spieler-ID verwenden",
+    "answersTitle": "Beschleuniger für diese Runde",
+    "answersBlankNote": "Das ist eine neue Runde, daher sind diese Antworten zunächst leer.",
+    "answersEditNote": "Das sind die Antworten, die du für diese Runde gespeichert hast.",
+    "savedNew": "Deine Bewerbung für {{round}} wurde abgeschickt.",
+    "savedEdit": "Deine Bewerbung für {{round}} wurde aktualisiert.",
+    "viewMine": "Meine Bewerbung ansehen"
   }
 }

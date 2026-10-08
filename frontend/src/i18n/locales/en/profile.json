@@ -4,11 +4,23 @@
   "playerIDOptional": "Player ID (FID) - Optional",
   "playerIDPlaceholder": "Enter your unique Player ID",
   "fidRequired": "Player ID (FID) is required",
-  "playerAlreadyExists": "A player with this FID or name already exists. Use the Update page to modify your submission.",
   "furnaceLevel": "Furnace Lv.",
   "alliance": "Alliance Tag",
   "alliancePlaceholder": "3 chars max (e.g. ABC)",
   "playerInfo": "Player Information",
   "enterPlayerID": "Please enter a Player ID",
-  "allianceRequired": "Alliance tag is required"
+  "allianceRequired": "Alliance tag is required",
+  "fidDigitsOnly": "Player ID (FID) must be digits only",
+  "continue": "Continue",
+  "timezone": "Your timezone",
+  "optional": "optional",
+  "prefilled": "Welcome back! We filled in your saved profile.",
+  "newProfile": "New player: please fill in your profile.",
+  "changeFid": "Not you? Use a different FID",
+  "lastAnswers": {
+    "button": "Use my last answers",
+    "hint": "Applied before? Copy your answers from {{round}}.",
+    "applied": "Copied your answers from {{round}}. Check them, then save.",
+    "previousRound": "your previous round"
+  }
 }

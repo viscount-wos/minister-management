@@ -24,7 +24,8 @@
     "status": {
       "open": "Ouvert",
       "nextRelease": "Prochaine version",
-      "comingSoon": "Bientôt disponible"
+      "comingSoon": "Bientôt disponible",
+      "notOpen": "Pas encore ouvert"
     }
   },
   "placeholder": {
@@ -33,5 +34,15 @@
     "comingSoonTitle": "Bientôt disponible",
     "comingSoonBody": "Cet événement est encore en préparation. Revenez plus tard."
   },
-  "footer": "avec les compliments du vicomte, de rien 😂"
+  "footer": "avec les compliments du vicomte, de rien 😂",
+  "errors": {
+    "generic": "Une erreur s'est produite. Veuillez réessayer.",
+    "applicationsClosed": "Les candidatures pour ce tour sont closes.",
+    "noCurrentRound": "Les candidatures ne sont pas ouvertes pour le moment.",
+    "notFound": "Introuvable.",
+    "conflict": "Quelqu'un a enregistré au même moment. Veuillez réessayer.",
+    "network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
+    "invalidField": "Veuillez vérifier ce champ : {{field}}",
+    "invalidInput": "Certaines informations ne sont pas valides. Vérifiez-les et réessayez."
+  }
 }

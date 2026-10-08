@@ -24,7 +24,8 @@
     "status": {
       "open": "Abierto",
       "nextRelease": "Próxima versión",
-      "comingSoon": "Próximamente"
+      "comingSoon": "Próximamente",
+      "notOpen": "Aún no abierto"
     }
   },
   "placeholder": {
@@ -33,5 +34,15 @@
     "comingSoonTitle": "Próximamente",
     "comingSoonBody": "Este evento aún se está planificando. Vuelve más tarde."
   },
-  "footer": "cortesía del vizconde, de nada 😂"
+  "footer": "cortesía del vizconde, de nada 😂",
+  "errors": {
+    "generic": "Algo salió mal. Inténtalo de nuevo.",
+    "applicationsClosed": "Las solicitudes de esta ronda están cerradas.",
+    "noCurrentRound": "Las solicitudes no están abiertas ahora mismo.",
+    "notFound": "No encontrado.",
+    "conflict": "Alguien guardó al mismo tiempo. Inténtalo de nuevo.",
+    "network": "No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.",
+    "invalidField": "Revisa este campo: {{field}}",
+    "invalidInput": "Parte de la información no es válida. Revísala e inténtalo de nuevo."
+  }
 }

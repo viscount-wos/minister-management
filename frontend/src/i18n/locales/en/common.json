@@ -24,7 +24,8 @@
     "status": {
       "open": "Open",
       "nextRelease": "Next release",
-      "comingSoon": "Coming soon"
+      "comingSoon": "Coming soon",
+      "notOpen": "Not open yet"
     }
   },
   "placeholder": {
@@ -33,5 +34,15 @@
     "comingSoonTitle": "Coming soon",
     "comingSoonBody": "This event is still being planned. Check back later."
   },
-  "footer": "compliments of the viscount, you're welcome 😂"
+  "footer": "compliments of the viscount, you're welcome 😂",
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "applicationsClosed": "Applications are closed for this round.",
+    "noCurrentRound": "Applications are not open right now.",
+    "notFound": "Not found.",
+    "conflict": "Someone saved at the same moment. Please try again.",
+    "network": "Could not reach the server. Check your connection and try again.",
+    "invalidField": "Please check this field: {{field}}",
+    "invalidInput": "Some of the information is not valid. Please check it and try again."
+  }
 }

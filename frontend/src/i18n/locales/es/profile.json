@@ -4,11 +4,23 @@
   "playerIDOptional": "ID de Jugador (FID) - Opcional",
   "playerIDPlaceholder": "Ingresa tu ID de Jugador único",
   "fidRequired": "El ID de Jugador (FID) es obligatorio",
-  "playerAlreadyExists": "Ya existe un jugador con este FID o nombre. Usa la página de Actualizar para modificar tu envío.",
   "furnaceLevel": "Nv. de Horno",
   "alliance": "Etiqueta de Alianza",
   "alliancePlaceholder": "Máx. 3 caracteres (ej. ABC)",
   "playerInfo": "Información del Jugador",
   "enterPlayerID": "Por favor ingresa un ID de Jugador",
-  "allianceRequired": "La etiqueta de alianza es obligatoria"
+  "allianceRequired": "La etiqueta de alianza es obligatoria",
+  "fidDigitsOnly": "El ID de jugador (FID) solo puede tener números",
+  "continue": "Continuar",
+  "timezone": "Tu zona horaria",
+  "optional": "opcional",
+  "prefilled": "¡Bienvenido de nuevo! Rellenamos tu perfil guardado.",
+  "newProfile": "Jugador nuevo: completa tu perfil.",
+  "changeFid": "¿No eres tú? Usa otro FID",
+  "lastAnswers": {
+    "button": "Usar mis últimas respuestas",
+    "hint": "¿Ya te inscribiste antes? Copia tus respuestas de {{round}}.",
+    "applied": "Se copiaron tus respuestas de {{round}}. Revísalas y guarda.",
+    "previousRound": "tu ronda anterior"
+  }
 }

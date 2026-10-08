@@ -6,16 +6,15 @@
   "home": {
     "title": "화이트아웃 서바이벌 장관 관리",
     "subtitle": "SVS 주 대 주 장관 배정 시스템",
-    "submitNew": "새 신청서 제출",
-    "updateExisting": "배정 확인 / 정보 업데이트",
-    "submitDesc": "장관직을 위한 가속과 시간 선호도를 제출하세요",
-    "updateDesc": "현재 배정을 확인하거나 제출한 정보를 업데이트하세요",
     "adminDesc": "플레이어 및 배정 관리",
     "utcNote": "모든 시간은 UTC로 저장됩니다 — 양식에서 시간대 선택기를 사용하여 현지 시간으로 변환하세요",
     "welcome": "환영합니다, {{state}}",
     "applicationsClosed": "신청이 마감되었습니다.",
     "applicationsCloseAt": "신청 마감: {{time}}",
-    "applicationsClosedCard": "신청이 마감되었습니다. 새로운 제출은 더 이상 받지 않습니다."
+    "currentRound": "현재 라운드: {{round}}",
+    "applyTile": "신청 또는 수정",
+    "applyTileDesc": "플레이어 ID를 입력해 새로 신청하거나 신청서를 수정하세요",
+    "applyTileClosedDesc": "신규 신청은 마감되었습니다. 기존 신청서는 계속 수정할 수 있습니다."
   },
   "form": {
     "step1Title": "플레이어 정보",
@@ -60,18 +59,14 @@
     "heatmapLegend": "색상은 수요를 나타냅니다: 파란색 = 낮음, 빨간색 = 높음",
     "noTimeSlotsConfirm": "이 날에 대한 시간대를 선택하지 않았습니다. 계속하시겠습니까?",
     "selectAllAvailable": "가능한 모든 시간을 선택하여 자리를 확보할 최상의 기회를 보장하세요.",
-    "applicationsClosedDesc": "새로운 신청은 더 이상 받지 않습니다. 이미 제출한 경우 홈 페이지에서 정보를 업데이트할 수 있습니다."
+    "applicationsClosedDesc": "새로운 신청은 더 이상 받지 않습니다. 이미 제출한 경우 홈 페이지에서 정보를 업데이트할 수 있습니다.",
+    "applicantCount": "신청자: {{n}}"
   },
   "update": {
-    "title": "제출 내용 업데이트",
     "currentAssignments": "현재 배정",
     "noAssignments": "아직 배정된 시간이 없습니다.",
     "noneAssigned": "없음",
     "assignmentDisclaimer": "배정된 시간은 변경될 수 있으며, 게임 내 임명이 확인될 때까지 최종 확정으로 간주되지 않습니다. 업데이트를 자주 확인하세요.",
-    "enterFID": "업데이트할 플레이어 ID (FID)를 입력하세요",
-    "fidLabel": "플레이어 ID (FID)",
-    "load": "내 데이터 로드",
-    "notFound": "이 플레이어 ID에 대한 제출 내용을 찾을 수 없습니다",
     "backHome": "홈으로 돌아가기"
   },
   "schedule": {
@@ -83,5 +78,22 @@
     "unfilled": "— 공석 —",
     "timesNote": "위에서 시간대를 선택하지 않으면 모든 시간은 UTC입니다.",
     "disclaimer": "신청이 아직 진행 중입니다. 신청이 마감될 때까지 배정 시간이 변경될 수 있습니다."
+  },
+  "apply": {
+    "title": "장관직 신청",
+    "enterFid": "플레이어 ID(FID)를 입력해 신청을 시작하거나 수정하세요.",
+    "newFor": "{{round}} 신규 신청",
+    "editFor": "{{round}} 신청서 수정",
+    "notOpenTitle": "신청 기간이 아닙니다",
+    "notOpenBody": "현재 열려 있는 장관직 라운드가 없습니다. 나중에 다시 확인하세요.",
+    "closedBody": "{{round}} 신규 신청은 더 이상 받지 않습니다. 이미 신청했다면 해당 플레이어 ID를 입력해 수정하세요.",
+    "closedButEditable": "신규 플레이어 신청은 마감되었습니다. 내 신청서는 계속 수정할 수 있습니다.",
+    "otherFid": "다른 플레이어 ID 사용",
+    "answersTitle": "이번 라운드 가속",
+    "answersBlankNote": "새 라운드이므로 답변이 비어 있는 상태로 시작합니다.",
+    "answersEditNote": "이번 라운드에 저장한 답변입니다.",
+    "savedNew": "{{round}} 신청이 제출되었습니다.",
+    "savedEdit": "{{round}} 신청서가 수정되었습니다.",
+    "viewMine": "내 신청서 보기"
   }
 }

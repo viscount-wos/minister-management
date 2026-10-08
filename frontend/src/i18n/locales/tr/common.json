@@ -24,7 +24,8 @@
     "status": {
       "open": "Açık",
       "nextRelease": "Sonraki sürüm",
-      "comingSoon": "Yakında"
+      "comingSoon": "Yakında",
+      "notOpen": "Henüz açık değil"
     }
   },
   "placeholder": {
@@ -33,5 +34,15 @@
     "comingSoonTitle": "Yakında",
     "comingSoonBody": "Bu etkinlik hâlâ planlanıyor. Daha sonra tekrar bak."
   },
-  "footer": "vikontun ikramıdır, rica ederim 😂"
+  "footer": "vikontun ikramıdır, rica ederim 😂",
+  "errors": {
+    "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+    "applicationsClosed": "Bu tur için başvurular kapandı.",
+    "noCurrentRound": "Başvurular şu anda açık değil.",
+    "notFound": "Bulunamadı.",
+    "conflict": "Biri aynı anda kaydetti. Lütfen tekrar deneyin.",
+    "network": "Sunucuya ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+    "invalidField": "Lütfen bu alanı kontrol edin: {{field}}",
+    "invalidInput": "Bazı bilgiler geçersiz. Lütfen kontrol edip tekrar deneyin."
+  }
 }

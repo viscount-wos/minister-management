@@ -6,16 +6,15 @@
   "home": {
     "title": "Whiteout Survival Ministry Management",
     "subtitle": "SVS State vs State Ministry Assignment System",
-    "submitNew": "Submit New Application",
-    "updateExisting": "View Assignment / Update Info",
-    "submitDesc": "Submit your speedups and time preferences for ministry positions",
-    "updateDesc": "Check your current ministry assignment or update your submitted information",
     "adminDesc": "Manage players and assignments",
     "utcNote": "All times stored in UTC — use the timezone selector on forms to convert to your local time",
     "welcome": "Welcome, {{state}}",
     "applicationsClosed": "Applications are now closed.",
     "applicationsCloseAt": "Applications close: {{time}}",
-    "applicationsClosedCard": "Applications are closed. New submissions are no longer accepted."
+    "currentRound": "Current round: {{round}}",
+    "applyTile": "Apply or update",
+    "applyTileDesc": "Enter your Player ID to start a new application or edit yours",
+    "applyTileClosedDesc": "New applications are closed. You can still edit an existing application."
   },
   "form": {
     "step1Title": "Player Information",
@@ -60,18 +59,14 @@
     "heatmapLegend": "Color indicates demand: Blue = Low, Red = High",
     "noTimeSlotsConfirm": "You have not selected any time slots for this day. Are you sure you want to continue?",
     "selectAllAvailable": "Select ALL times you are available to ensure the best chance of securing a position.",
-    "applicationsClosedDesc": "New applications are no longer being accepted. If you already submitted, you can still update your information from the home page."
+    "applicationsClosedDesc": "New applications are no longer being accepted. If you already submitted, you can still update your information from the home page.",
+    "applicantCount": "Applicants: {{n}}"
   },
   "update": {
-    "title": "Update Your Submission",
     "currentAssignments": "Your Current Assignments",
     "noAssignments": "You have not been assigned to any slots yet.",
     "noneAssigned": "None",
     "assignmentDisclaimer": "Assigned times are subject to change and not considered final until in-game appointments are confirmed. Check back frequently for updates.",
-    "enterFID": "Enter your Player ID (FID) to update",
-    "fidLabel": "Player ID (FID)",
-    "load": "Load My Data",
-    "notFound": "No submission found for this Player ID",
     "backHome": "Back to Home"
   },
   "schedule": {
@@ -83,5 +78,22 @@
     "unfilled": "— Open —",
     "timesNote": "All times are in UTC unless a timezone is selected above.",
     "disclaimer": "Applications are still open. Assigned times may change until applications close."
+  },
+  "apply": {
+    "title": "Ministry application",
+    "enterFid": "Enter your Player ID (FID) to start or edit your application.",
+    "newFor": "New application for {{round}}",
+    "editFor": "Edit your application for {{round}}",
+    "notOpenTitle": "Applications are not open",
+    "notOpenBody": "There is no open ministry round right now. Check back later.",
+    "closedBody": "New applications for {{round}} are no longer accepted. If you already applied, enter that Player ID to edit it.",
+    "closedButEditable": "Applications are closed for new players. You can still update yours.",
+    "otherFid": "Use a different Player ID",
+    "answersTitle": "Speedups for this round",
+    "answersBlankNote": "This is a new round, so these answers start blank.",
+    "answersEditNote": "These are the answers you saved for this round.",
+    "savedNew": "Your application for {{round}} has been submitted.",
+    "savedEdit": "Your application for {{round}} has been updated.",
+    "viewMine": "View my application"
   }
 }

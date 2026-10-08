@@ -6,16 +6,15 @@
   "home": {
     "title": "Zarządzanie Ministerstwami Whiteout Survival",
     "subtitle": "System przydziału stanowisk ministerialnych SVS (Stan kontra Stan)",
-    "submitNew": "Złóż nowy wniosek",
-    "updateExisting": "Zobacz przydział / zaktualizuj dane",
-    "submitDesc": "Prześlij swoje przyspieszenia i preferowane godziny, aby ubiegać się o stanowisko ministerialne",
-    "updateDesc": "Sprawdź swój obecny przydział ministerialny lub zaktualizuj przesłane dane",
     "adminDesc": "Zarządzaj graczami i przydziałami",
     "utcNote": "Wszystkie godziny są zapisywane w UTC — użyj selektora strefy czasowej w formularzu, aby przeliczyć je na czas lokalny",
     "welcome": "Witaj, {{state}}",
     "applicationsClosed": "Nabór wniosków został zamknięty.",
     "applicationsCloseAt": "Nabór wniosków zamyka się: {{time}}",
-    "applicationsClosedCard": "Nabór wniosków jest zamknięty. Nowe zgłoszenia nie są już przyjmowane."
+    "currentRound": "Bieżąca runda: {{round}}",
+    "applyTile": "Zgłoś się lub zaktualizuj",
+    "applyTileDesc": "Wpisz swoje ID gracza, aby złożyć nowe zgłoszenie lub edytować swoje",
+    "applyTileClosedDesc": "Nowe zgłoszenia są zamknięte. Nadal możesz edytować istniejące zgłoszenie."
   },
   "form": {
     "step1Title": "Informacje o graczu",
@@ -60,18 +59,14 @@
     "heatmapLegend": "Kolor oznacza zainteresowanie: niebieski = małe, czerwony = duże",
     "noTimeSlotsConfirm": "Nie wybrano żadnych przedziałów czasowych na ten dzień. Czy na pewno chcesz kontynuować?",
     "selectAllAvailable": "Zaznacz WSZYSTKIE godziny, w których jesteś dostępny, aby mieć jak największą szansę na otrzymanie stanowiska.",
-    "applicationsClosedDesc": "Nowe wnioski nie są już przyjmowane. Jeśli Twoje zgłoszenie zostało już wysłane, nadal możesz zaktualizować swoje dane ze strony głównej."
+    "applicationsClosedDesc": "Nowe wnioski nie są już przyjmowane. Jeśli Twoje zgłoszenie zostało już wysłane, nadal możesz zaktualizować swoje dane ze strony głównej.",
+    "applicantCount": "Zgłoszeń: {{n}}"
   },
   "update": {
-    "title": "Zaktualizuj swoje zgłoszenie",
     "currentAssignments": "Twoje obecne przydziały",
     "noAssignments": "Nie masz jeszcze przydzielonych żadnych przedziałów czasowych.",
     "noneAssigned": "Brak",
     "assignmentDisclaimer": "Przydzielone godziny mogą ulec zmianie i nie są ostateczne, dopóki nominacje w grze nie zostaną potwierdzone. Sprawdzaj regularnie, czy nie pojawiły się aktualizacje.",
-    "enterFID": "Podaj swoje ID gracza (FID), aby zaktualizować dane",
-    "fidLabel": "ID gracza (FID)",
-    "load": "Wczytaj moje dane",
-    "notFound": "Nie znaleziono zgłoszenia dla tego ID gracza",
     "backHome": "Powrót do strony głównej"
   },
   "schedule": {
@@ -83,5 +78,22 @@
     "unfilled": "— Wolne —",
     "timesNote": "Wszystkie godziny są podane w UTC, chyba że powyżej wybrano strefę czasową.",
     "disclaimer": "Nabór jest nadal otwarty. Przydzielone godziny mogą się zmienić do czasu zamknięcia naboru."
+  },
+  "apply": {
+    "title": "Zgłoszenie do ministerstwa",
+    "enterFid": "Wpisz swoje ID gracza (FID), aby rozpocząć lub edytować zgłoszenie.",
+    "newFor": "Nowe zgłoszenie: {{round}}",
+    "editFor": "Edytuj swoje zgłoszenie: {{round}}",
+    "notOpenTitle": "Zgłoszenia nie są otwarte",
+    "notOpenBody": "Obecnie nie ma otwartej rundy ministerstwa. Zajrzyj później.",
+    "closedBody": "Nowe zgłoszenia do {{round}} nie są już przyjmowane. Jeśli już się zgłosiłeś, wpisz to ID gracza, aby je edytować.",
+    "closedButEditable": "Zgłoszenia dla nowych graczy są zamknięte. Nadal możesz zaktualizować swoje.",
+    "otherFid": "Użyj innego ID gracza",
+    "answersTitle": "Przyspieszenia w tej rundzie",
+    "answersBlankNote": "To nowa runda, więc te odpowiedzi są na początku puste.",
+    "answersEditNote": "To odpowiedzi zapisane przez Ciebie w tej rundzie.",
+    "savedNew": "Twoje zgłoszenie do {{round}} zostało wysłane.",
+    "savedEdit": "Twoje zgłoszenie do {{round}} zostało zaktualizowane.",
+    "viewMine": "Zobacz moje zgłoszenie"
   }
 }

@@ -4,11 +4,23 @@
   "playerIDOptional": "Spieler-ID (FID) - Optional",
   "playerIDPlaceholder": "Geben Sie Ihre eindeutige Spieler-ID ein",
   "fidRequired": "Spieler-ID (FID) ist erforderlich",
-  "playerAlreadyExists": "Ein Spieler mit dieser FID oder diesem Namen existiert bereits. Verwenden Sie die Aktualisierungsseite, um Ihre Einreichung zu ändern.",
   "furnaceLevel": "Ofen-Lv.",
   "alliance": "Allianz-Tag",
   "alliancePlaceholder": "Max. 3 Zeichen (z. B. ABC)",
   "playerInfo": "Spielerinformationen",
   "enterPlayerID": "Bitte geben Sie eine Spieler-ID ein",
-  "allianceRequired": "Allianz-Tag ist erforderlich"
+  "allianceRequired": "Allianz-Tag ist erforderlich",
+  "fidDigitsOnly": "Die Spieler-ID (FID) darf nur Ziffern enthalten",
+  "continue": "Weiter",
+  "timezone": "Deine Zeitzone",
+  "optional": "optional",
+  "prefilled": "Willkommen zurück! Wir haben dein gespeichertes Profil eingetragen.",
+  "newProfile": "Neuer Spieler: Bitte fülle dein Profil aus.",
+  "changeFid": "Nicht du? Andere FID verwenden",
+  "lastAnswers": {
+    "button": "Meine letzten Antworten übernehmen",
+    "hint": "Schon einmal beworben? Übernimm deine Antworten aus {{round}}.",
+    "applied": "Deine Antworten aus {{round}} wurden übernommen. Prüfe sie und speichere dann.",
+    "previousRound": "deiner letzten Runde"
+  }
 }

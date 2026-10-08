@@ -24,7 +24,8 @@
     "status": {
       "open": "Otwarte",
       "nextRelease": "Następna wersja",
-      "comingSoon": "Wkrótce"
+      "comingSoon": "Wkrótce",
+      "notOpen": "Jeszcze nieotwarte"
     }
   },
   "placeholder": {
@@ -33,5 +34,15 @@
     "comingSoonTitle": "Wkrótce",
     "comingSoonBody": "To wydarzenie jest jeszcze planowane. Zajrzyj później."
   },
-  "footer": "z pozdrowieniami od wicehrabiego, nie ma za co 😂"
+  "footer": "z pozdrowieniami od wicehrabiego, nie ma za co 😂",
+  "errors": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+    "applicationsClosed": "Zgłoszenia w tej rundzie są zamknięte.",
+    "noCurrentRound": "Zgłoszenia nie są teraz otwarte.",
+    "notFound": "Nie znaleziono.",
+    "conflict": "Ktoś zapisał w tym samym momencie. Spróbuj ponownie.",
+    "network": "Nie można połączyć się z serwerem. Sprawdź połączenie i spróbuj ponownie.",
+    "invalidField": "Sprawdź to pole: {{field}}",
+    "invalidInput": "Część danych jest nieprawidłowa. Sprawdź je i spróbuj ponownie."
+  }
 }
