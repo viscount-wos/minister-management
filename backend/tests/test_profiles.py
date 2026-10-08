@@ -58,10 +58,11 @@ def test_delete_profile_cascades_applications_and_assignments(client, admin):
 
 
 def test_global_settings(client, admin):
-    assert client.get('/api/settings/public').json == {'state_number': None}  # unset until an admin sets it
+    # state unset until an admin sets it; hero generation defaults to the newest in the library (17)
+    assert client.get('/api/settings/public').json == {'state_number': None, 'state_generation': 17}
     r = client.put('/api/admin/settings', json={'state_number': '2807'}, headers=admin)
-    assert r.json == {'state_number': '2807'}
-    assert client.get('/api/settings/public').json == {'state_number': '2807'}
+    assert r.json == {'state_number': '2807', 'state_generation': 17}
+    assert client.get('/api/settings/public').json == {'state_number': '2807', 'state_generation': 17}
     r = client.put('/api/admin/settings', json={'state_number': ''}, headers=admin)
     assert r.status_code == 400 and r.json['field'] == 'state_number'
 

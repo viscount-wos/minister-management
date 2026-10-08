@@ -1,8 +1,7 @@
 """Event registry. The set of event keys is fixed: ministry, tyrant, svs, tal.
 
 Each event provides an ``EventSpec``. Core modules (rounds, applications) call
-these hooks so they stay event-agnostic. Ministry and tyrant override the hooks;
-svs uses the generic spec until its phase lands (free-form JSON answers);
+these hooks so they stay event-agnostic. Ministry, tyrant and svs override the hooks;
 tal has no rounds yet ("coming soon").
 """
 from core.errors import ApiError, not_found, validation_error
@@ -44,14 +43,19 @@ class EventSpec:
             return {k: v for k, v in profile.items() if k not in self.ignored_profile_fields}
         return profile
 
-    def validate_profile(self, fields, existing=None):
+    # Profile fields an ADMIN must give when creating a sign-up for a player with no profile yet ("add player").
+    admin_required_profile_fields = ('game_name',)
+
+    def validate_profile(self, fields, existing=None, admin=False):
         """Event-specific checks on the (already core-validated) profile fields sent with an
-        application, e.g. tyrant's troop-level structure. Returns the fields to store."""
+        application, e.g. tyrant's troop-level structure. Returns the fields to store.
+        ``admin``: an admin create/edit, which may leave optional values blank."""
         return fields
 
-    def validate_answers(self, answers, round_, existing=None):
+    def validate_answers(self, answers, round_, existing=None, admin=False):
         """Validate/normalise answers. ``existing``: the answers currently stored for this
-        application (None when new), so legacy values can be accepted when re-sent unchanged."""
+        application (None when new), so legacy values can be accepted when re-sent unchanged.
+        ``admin``: an admin create/edit ("add player"), which may leave answers a player must give blank."""
         if answers is None:
             answers = {}
         if not isinstance(answers, dict):
@@ -108,5 +112,6 @@ def register_defaults():
     register(MinistryEvent())
     from events.tyrant.logic import TyrantEvent
     register(TyrantEvent())
-    register(GenericEvent('svs'))
+    from events.svs.logic import SvsEvent
+    register(SvsEvent())
     register(GenericEvent('tal', has_rounds=False))

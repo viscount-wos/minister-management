@@ -277,10 +277,11 @@ def test_excel_export(client, admin):
         assert ['Monday - Construction', '2', 'BBB', 'Bob', 2880] in un
 
 
-def test_export_unsupported_event(client, admin):
+def test_generic_export_every_event(client, admin):
+    # every event with rounds exports now (svs since v2.2.0); the generic route serves the event's xlsx
     rnd = start_round(client, admin, 'S', event='svs')
     r = client.get(f'/api/admin/rounds/{rnd["id"]}/export', headers=admin)
-    assert r.status_code == 400 and r.json['code'] == 'EXPORT_NOT_SUPPORTED'
+    assert r.status_code == 200 and r.headers['Content-Disposition'].endswith('.xlsx')
 
 
 def test_export_json_import_roundtrip(client, admin):

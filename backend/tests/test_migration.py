@@ -251,7 +251,7 @@ def test_migrated_db_works_through_api(legacy_path):
     thu = c.post(f'/api/admin/ministry/rounds/{cur["id"]}/auto-assign', json={'day': 'thursday'}, headers=h).json
     assert thu['assignments']['14:20'][0]['fid'] == '1005' and thu['assignments']['14:20'][0]['is_sticky']
     assert c.get('/api/events/ministry/current/schedule/thursday').json['published'] is True
-    assert c.get('/api/settings/public').json == {'state_number': '2807'}
+    assert c.get('/api/settings/public').json['state_number'] == '2807'
     # start a new round: imported round kept, previous-application points at it
     c.post('/api/admin/events/ministry/start-new-round', json={'name': 'Next'}, headers=h)
     prev = c.get('/api/events/ministry/previous-application/1001').json

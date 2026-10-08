@@ -102,10 +102,11 @@ def _harden_config(cfg):
 
 
 def create_app(config=None):
-    from core import applications, auth, db, profiles, rounds, security, settings
+    from core import applications, auth, db, heroes, profiles, rounds, security, settings
     from core.errors import ApiError, register_error_handlers
     from events import register_defaults
     from events.ministry import routes as ministry_routes
+    from events.svs import routes as svs_routes
     from events.tyrant import routes as tyrant_routes
 
     app = Flask(__name__, static_folder=None)
@@ -122,10 +123,11 @@ def create_app(config=None):
     register_error_handlers(app)
     db.init_app(app)
 
-    for module in (auth, settings, profiles, rounds, applications):
+    for module in (auth, settings, profiles, rounds, applications, heroes):
         app.register_blueprint(module.bp)
     app.register_blueprint(ministry_routes.bp)
     app.register_blueprint(tyrant_routes.bp)
+    app.register_blueprint(svs_routes.bp)
 
     @app.route('/health', methods=['GET'])
     def health():

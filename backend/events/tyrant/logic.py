@@ -17,6 +17,7 @@ from openpyxl.utils import get_column_letter
 
 from core.exports import append_safe, to_csv_bytes
 from core.furnace import FURNACE_LEVELS, fc_number, furnace_ordinal
+from core.troops import merge_troops, stored_troops
 from core.validation import validate_number
 from core.errors import validation_error
 from events import EventSpec
@@ -312,15 +313,16 @@ class TyrantEvent(EventSpec):
     def public_settings(self, settings):
         return {'windows': settings.get('windows') or []}
 
-    def validate_profile(self, fields, existing=None):
+    def validate_profile(self, fields, existing=None, admin=False):
         if 'troops' in fields:
-            fields['troops'] = tv.validate_troops(fields['troops'])
+            # shared merge rule (core/troops.py): a blank never clears what SVS (or an earlier sign-up) stored
+            fields['troops'] = merge_troops(stored_troops(existing), tv.validate_troops(fields['troops']))
         if fields.get('power') is not None:
             # power arrives as an absolute number (the UI converts "millions"); cap at 10^13 is core's
             fields['power'] = validate_number(fields['power'], 'profile.power', maximum=10 ** 13, integer=True)
         return fields
 
-    def validate_answers(self, answers, round_, existing=None):
+    def validate_answers(self, answers, round_, existing=None, admin=False):
         return tv.validate_answers(answers, round_settings(round_), existing=existing)
 
     def decorate_application(self, app, round_):

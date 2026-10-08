@@ -1,12 +1,13 @@
 """Applications: one per (round, player). Generic across events; answers are validated by the event spec."""
 import json
+import sqlite3
 
 from flask import Blueprint, jsonify, request
 
 from core.ratelimit import rate_limited
 from core.auth import require_admin
 from core.db import get_db
-from core.errors import ApiError, get_json_body, not_found, validation_error
+from core.errors import ApiError, conflict, get_json_body, not_found, validation_error
 from core.profiles import (find_profile, get_profile_by_id, profile_to_json, public_profile,
                            resolve_fid_for_write, snapshot, upsert_profile, validate_profile_fields)
 from core.rounds import (current_round_row, get_round_row, paginate, require_current_round, require_writable,
@@ -196,6 +197,48 @@ def admin_list_applications(ref):
     return jsonify(body)
 
 
+@bp.route('/api/admin/rounds/<ref>/applications', methods=['POST'])
+@require_admin
+def admin_create_application(ref):
+    """Admin "add player": create a sign-up in a round for someone who didn't sign up themselves.
+
+    Body: {fid (required), profile?: {...}, answers?: {...}}. ``<ref>`` is a round id or ``current`` (+ ``?event=``).
+    Uses the event's own validation in ADMIN mode: answers a player must give (e.g. SVS hours/role/VC, troop
+    levels) may be left blank; anything that IS sent must be valid. A FID with no profile yet needs
+    ``profile.game_name`` (``EventSpec.admin_required_profile_fields``). No closing-time check (admins may add after
+    the closing time); closed rounds are read-only (409 ROUND_CLOSED). If the FID already has an application in the
+    round: 409 APPLICATION_EXISTS (edit that one instead). -> 201 {application (admin shape), profile_created}.
+    """
+    rnd = resolve_round_ref(ref)
+    require_writable(rnd)
+    spec = get_event(rnd['event'])
+    data = get_json_body()
+    store_fid, existing_profile = resolve_fid_for_write(data.get('fid'))
+    if existing_profile is not None and get_application(rnd['id'], existing_profile['id']):
+        raise conflict(f'FID {store_fid} already has a sign-up in this round; edit that one instead',
+                       code='APPLICATION_EXISTS')
+    fields = spec.validate_profile(validate_profile_fields(spec.strip_ignored_profile_fields(data.get('profile')),
+                                                           existing=existing_profile),
+                                   existing=existing_profile, admin=True)
+    answers = spec.validate_answers(data.get('answers'), rnd, existing=None, admin=True)
+    profile, profile_created = upsert_profile(store_fid, fields, required=spec.admin_required_profile_fields,
+                                              commit=False, existing=existing_profile)
+    try:
+        app_row, created = save_application(rnd, profile, answers, commit=False)
+    except sqlite3.IntegrityError:
+        created = False
+    if not created:  # a concurrent submit won the race
+        get_db().rollback()
+        raise conflict(f'FID {store_fid} already has a sign-up in this round; edit that one instead',
+                       code='APPLICATION_EXISTS')
+    get_db().commit()
+    out = application_to_json(app_row, rnd)
+    out['profile'] = profile
+    out = spec.decorate_application(out, rnd)
+    out['profile_created'] = profile_created
+    return jsonify(out), 201
+
+
 @bp.route('/api/admin/applications/<int:app_id>', methods=['GET'])
 @require_admin
 def admin_get_application(app_id):
@@ -225,14 +268,14 @@ def admin_update_application(app_id):
     existing_profile = get_profile_by_id(row['player_id'])
     fields = spec.validate_profile(validate_profile_fields(spec.strip_ignored_profile_fields(data.get('profile')),
                                                            existing=existing_profile),
-                                   existing=existing_profile)
+                                   existing=existing_profile, admin=True)
     stored = json.loads(row['answers'] or '{}')
     answers = dict(stored)
     if 'answers' in data:
         if not isinstance(data['answers'], dict):
             raise validation_error('answers must be an object', 'answers')
         answers.update(data['answers'])
-    answers = spec.validate_answers(answers, rnd, existing=stored)
+    answers = spec.validate_answers(answers, rnd, existing=stored, admin=True)
     # update BY ID: the application already names its profile, whatever its (legacy) FID looks like
     profile, _ = upsert_profile(row['fid'], fields, required=('game_name',), commit=False,
                                 existing=existing_profile)

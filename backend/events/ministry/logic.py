@@ -695,7 +695,7 @@ class MinistryEvent(EventSpec):
         s['published_days'] = active_published_days(s)
         return s
 
-    def validate_answers(self, answers, round_, existing=None):
+    def validate_answers(self, answers, round_, existing=None, admin=False):
         return mv.validate_answers(answers, existing=existing)
 
     def decorate_application(self, app, round_):

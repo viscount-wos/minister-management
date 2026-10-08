@@ -1,0 +1,528 @@
+{
+ "version": 1,
+ "source": "whiteoutsurvival.wiki (scraped 2026-10-08, hero-test/build.py)",
+ "attribution": "Hero names and artwork (c) Century Games. Whiteout Survival is a trademark of Century Games.",
+ "max_generation": 17,
+ "heroes": [
+  {
+   "slug": "eugene",
+   "name": "Eugene",
+   "troop": "infantry",
+   "generation": null,
+   "rarity": "rare",
+   "image": "/heroes/eugene.webp"
+  },
+  {
+   "slug": "smith",
+   "name": "Smith",
+   "troop": "infantry",
+   "generation": null,
+   "rarity": "rare",
+   "image": "/heroes/smith.webp"
+  },
+  {
+   "slug": "charlie",
+   "name": "Charlie",
+   "troop": "lancer",
+   "generation": null,
+   "rarity": "rare",
+   "image": "/heroes/charlie.webp"
+  },
+  {
+   "slug": "cloris",
+   "name": "Cloris",
+   "troop": "marksman",
+   "generation": null,
+   "rarity": "rare",
+   "image": "/heroes/cloris.webp"
+  },
+  {
+   "slug": "sergey",
+   "name": "Sergey",
+   "troop": "infantry",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/sergey.webp"
+  },
+  {
+   "slug": "jessie",
+   "name": "Jessie",
+   "troop": "lancer",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/jessie.webp"
+  },
+  {
+   "slug": "ling-xue",
+   "name": "Ling Xue",
+   "troop": "lancer",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/ling-xue.webp"
+  },
+  {
+   "slug": "lumak-bokan",
+   "name": "Lumak Bokan",
+   "troop": "lancer",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/lumak-bokan.webp"
+  },
+  {
+   "slug": "patrick",
+   "name": "Patrick",
+   "troop": "lancer",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/patrick.webp"
+  },
+  {
+   "slug": "bahiti",
+   "name": "Bahiti",
+   "troop": "marksman",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/bahiti.webp"
+  },
+  {
+   "slug": "gina",
+   "name": "Gina",
+   "troop": "marksman",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/gina.webp"
+  },
+  {
+   "slug": "jasser",
+   "name": "Jasser",
+   "troop": "marksman",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/jasser.webp"
+  },
+  {
+   "slug": "seo-yoon",
+   "name": "Seo-yoon",
+   "troop": "marksman",
+   "generation": null,
+   "rarity": "epic",
+   "image": "/heroes/seo-yoon.webp"
+  },
+  {
+   "slug": "jeronimo",
+   "name": "Jeronimo",
+   "troop": "infantry",
+   "generation": 1,
+   "rarity": "mythic",
+   "image": "/heroes/jeronimo.webp"
+  },
+  {
+   "slug": "natalia",
+   "name": "Natalia",
+   "troop": "infantry",
+   "generation": 1,
+   "rarity": "mythic",
+   "image": "/heroes/natalia.webp"
+  },
+  {
+   "slug": "molly",
+   "name": "Molly",
+   "troop": "lancer",
+   "generation": 1,
+   "rarity": "mythic",
+   "image": "/heroes/molly.webp"
+  },
+  {
+   "slug": "zinman",
+   "name": "Zinman",
+   "troop": "marksman",
+   "generation": 1,
+   "rarity": "mythic",
+   "image": "/heroes/zinman.webp"
+  },
+  {
+   "slug": "flint",
+   "name": "Flint",
+   "troop": "infantry",
+   "generation": 2,
+   "rarity": "mythic",
+   "image": "/heroes/flint.webp"
+  },
+  {
+   "slug": "philly",
+   "name": "Philly",
+   "troop": "lancer",
+   "generation": 2,
+   "rarity": "mythic",
+   "image": "/heroes/philly.webp"
+  },
+  {
+   "slug": "alonso",
+   "name": "Alonso",
+   "troop": "marksman",
+   "generation": 2,
+   "rarity": "mythic",
+   "image": "/heroes/alonso.webp"
+  },
+  {
+   "slug": "logan",
+   "name": "Logan",
+   "troop": "infantry",
+   "generation": 3,
+   "rarity": "mythic",
+   "image": "/heroes/logan.webp"
+  },
+  {
+   "slug": "mia",
+   "name": "Mia",
+   "troop": "lancer",
+   "generation": 3,
+   "rarity": "mythic",
+   "image": "/heroes/mia.webp"
+  },
+  {
+   "slug": "greg",
+   "name": "Greg",
+   "troop": "marksman",
+   "generation": 3,
+   "rarity": "mythic",
+   "image": "/heroes/greg.webp"
+  },
+  {
+   "slug": "ahmose",
+   "name": "Ahmose",
+   "troop": "infantry",
+   "generation": 4,
+   "rarity": "mythic",
+   "image": "/heroes/ahmose.webp"
+  },
+  {
+   "slug": "reina",
+   "name": "Reina",
+   "troop": "lancer",
+   "generation": 4,
+   "rarity": "mythic",
+   "image": "/heroes/reina.webp"
+  },
+  {
+   "slug": "lynn",
+   "name": "Lynn",
+   "troop": "marksman",
+   "generation": 4,
+   "rarity": "mythic",
+   "image": "/heroes/lynn.webp"
+  },
+  {
+   "slug": "hector",
+   "name": "Hector",
+   "troop": "infantry",
+   "generation": 5,
+   "rarity": "mythic",
+   "image": "/heroes/hector.webp"
+  },
+  {
+   "slug": "norah",
+   "name": "Norah",
+   "troop": "lancer",
+   "generation": 5,
+   "rarity": "mythic",
+   "image": "/heroes/norah.webp"
+  },
+  {
+   "slug": "gwen",
+   "name": "Gwen",
+   "troop": "marksman",
+   "generation": 5,
+   "rarity": "mythic",
+   "image": "/heroes/gwen.webp"
+  },
+  {
+   "slug": "wu-ming",
+   "name": "Wu Ming",
+   "troop": "infantry",
+   "generation": 6,
+   "rarity": "mythic",
+   "image": "/heroes/wu-ming.webp"
+  },
+  {
+   "slug": "renee",
+   "name": "Renee",
+   "troop": "lancer",
+   "generation": 6,
+   "rarity": "mythic",
+   "image": "/heroes/renee.webp"
+  },
+  {
+   "slug": "wayne",
+   "name": "Wayne",
+   "troop": "marksman",
+   "generation": 6,
+   "rarity": "mythic",
+   "image": "/heroes/wayne.webp"
+  },
+  {
+   "slug": "edith",
+   "name": "Edith",
+   "troop": "infantry",
+   "generation": 7,
+   "rarity": "mythic",
+   "image": "/heroes/edith.webp"
+  },
+  {
+   "slug": "gordon",
+   "name": "Gordon",
+   "troop": "lancer",
+   "generation": 7,
+   "rarity": "mythic",
+   "image": "/heroes/gordon.webp"
+  },
+  {
+   "slug": "bradley",
+   "name": "Bradley",
+   "troop": "marksman",
+   "generation": 7,
+   "rarity": "mythic",
+   "image": "/heroes/bradley.webp"
+  },
+  {
+   "slug": "gatot",
+   "name": "Gatot",
+   "troop": "infantry",
+   "generation": 8,
+   "rarity": "mythic",
+   "image": "/heroes/gatot.webp"
+  },
+  {
+   "slug": "sonya",
+   "name": "Sonya",
+   "troop": "lancer",
+   "generation": 8,
+   "rarity": "mythic",
+   "image": "/heroes/sonya.webp"
+  },
+  {
+   "slug": "hendrik",
+   "name": "Hendrik",
+   "troop": "marksman",
+   "generation": 8,
+   "rarity": "mythic",
+   "image": "/heroes/hendrik.webp"
+  },
+  {
+   "slug": "magnus",
+   "name": "Magnus",
+   "troop": "infantry",
+   "generation": 9,
+   "rarity": "mythic",
+   "image": "/heroes/magnus.webp"
+  },
+  {
+   "slug": "fred",
+   "name": "Fred",
+   "troop": "lancer",
+   "generation": 9,
+   "rarity": "mythic",
+   "image": "/heroes/fred.webp"
+  },
+  {
+   "slug": "xura",
+   "name": "Xura",
+   "troop": "marksman",
+   "generation": 9,
+   "rarity": "mythic",
+   "image": "/heroes/xura.webp"
+  },
+  {
+   "slug": "gregory",
+   "name": "Gregory",
+   "troop": "infantry",
+   "generation": 10,
+   "rarity": "mythic",
+   "image": "/heroes/gregory.webp"
+  },
+  {
+   "slug": "freya",
+   "name": "Freya",
+   "troop": "lancer",
+   "generation": 10,
+   "rarity": "mythic",
+   "image": "/heroes/freya.webp"
+  },
+  {
+   "slug": "blanchette",
+   "name": "Blanchette",
+   "troop": "marksman",
+   "generation": 10,
+   "rarity": "mythic",
+   "image": "/heroes/blanchette.webp"
+  },
+  {
+   "slug": "eleonora",
+   "name": "Eleonora",
+   "troop": "infantry",
+   "generation": 11,
+   "rarity": "mythic",
+   "image": "/heroes/eleonora.webp"
+  },
+  {
+   "slug": "lloyd",
+   "name": "Lloyd",
+   "troop": "lancer",
+   "generation": 11,
+   "rarity": "mythic",
+   "image": "/heroes/lloyd.webp"
+  },
+  {
+   "slug": "rufus",
+   "name": "Rufus",
+   "troop": "marksman",
+   "generation": 11,
+   "rarity": "mythic",
+   "image": "/heroes/rufus.webp"
+  },
+  {
+   "slug": "hervor",
+   "name": "Hervor",
+   "troop": "infantry",
+   "generation": 12,
+   "rarity": "mythic",
+   "image": "/heroes/hervor.webp"
+  },
+  {
+   "slug": "karol",
+   "name": "Karol",
+   "troop": "lancer",
+   "generation": 12,
+   "rarity": "mythic",
+   "image": "/heroes/karol.webp"
+  },
+  {
+   "slug": "ligeia",
+   "name": "Ligeia",
+   "troop": "marksman",
+   "generation": 12,
+   "rarity": "mythic",
+   "image": "/heroes/ligeia.webp"
+  },
+  {
+   "slug": "gisela",
+   "name": "Gisela",
+   "troop": "infantry",
+   "generation": 13,
+   "rarity": "mythic",
+   "image": "/heroes/gisela.webp"
+  },
+  {
+   "slug": "flora",
+   "name": "Flora",
+   "troop": "lancer",
+   "generation": 13,
+   "rarity": "mythic",
+   "image": "/heroes/flora.webp"
+  },
+  {
+   "slug": "vulcanus",
+   "name": "Vulcanus",
+   "troop": "marksman",
+   "generation": 13,
+   "rarity": "mythic",
+   "image": "/heroes/vulcanus.webp"
+  },
+  {
+   "slug": "elif",
+   "name": "Elif",
+   "troop": "infantry",
+   "generation": 14,
+   "rarity": "mythic",
+   "image": "/heroes/elif.webp"
+  },
+  {
+   "slug": "dominic",
+   "name": "Dominic",
+   "troop": "lancer",
+   "generation": 14,
+   "rarity": "mythic",
+   "image": "/heroes/dominic.webp"
+  },
+  {
+   "slug": "cara",
+   "name": "Cara",
+   "troop": "marksman",
+   "generation": 14,
+   "rarity": "mythic",
+   "image": "/heroes/cara.webp"
+  },
+  {
+   "slug": "hank",
+   "name": "Hank",
+   "troop": "infantry",
+   "generation": 15,
+   "rarity": "mythic",
+   "image": "/heroes/hank.webp"
+  },
+  {
+   "slug": "estrella",
+   "name": "Estrella",
+   "troop": "lancer",
+   "generation": 15,
+   "rarity": "mythic",
+   "image": "/heroes/estrella.webp"
+  },
+  {
+   "slug": "viveca",
+   "name": "Viveca",
+   "troop": "marksman",
+   "generation": 15,
+   "rarity": "mythic",
+   "image": "/heroes/viveca.webp"
+  },
+  {
+   "slug": "seigel",
+   "name": "Seigel",
+   "troop": "infantry",
+   "generation": 16,
+   "rarity": "mythic",
+   "image": "/heroes/seigel.webp"
+  },
+  {
+   "slug": "ursar",
+   "name": "Ursar",
+   "troop": "lancer",
+   "generation": 16,
+   "rarity": "mythic",
+   "image": "/heroes/ursar.webp"
+  },
+  {
+   "slug": "aisling",
+   "name": "Aisling",
+   "troop": "marksman",
+   "generation": 16,
+   "rarity": "mythic",
+   "image": "/heroes/aisling.webp"
+  },
+  {
+   "slug": "aiden",
+   "name": "Aiden",
+   "troop": "infantry",
+   "generation": 17,
+   "rarity": "mythic",
+   "image": "/heroes/aiden.webp"
+  },
+  {
+   "slug": "bertha",
+   "name": "Bertha",
+   "troop": "lancer",
+   "generation": 17,
+   "rarity": "mythic",
+   "image": "/heroes/bertha.webp"
+  },
+  {
+   "slug": "eleanor",
+   "name": "Eleanor",
+   "troop": "marksman",
+   "generation": 17,
+   "rarity": "mythic",
+   "image": "/heroes/eleanor.webp"
+  }
+ ]
+}
