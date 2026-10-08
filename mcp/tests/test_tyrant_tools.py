@@ -5,7 +5,7 @@ from conftest import call, fid
 
 pytestmark = pytest.mark.anyio
 
-TROOPS = {'infantry': {'furnace_level': 'FC5', 'tier': 10}, 'lancer': None, 'marksman': {'furnace_level': '30', 'tier': 9}}
+TROOPS = {'infantry': {'furnace_level': 'FC5', 'tier': 10}, 'lancer': None, 'marksman': {'furnace_level': 'FC3', 'tier': 9}}
 
 
 def answers(**kw):
@@ -39,6 +39,13 @@ async def test_tyrant_submit_get_previous_and_validation(public, admin, api):
             'event': 'tyrant', 'fid': f, 'answers': answers(),
             'profile': {'troops': {'infantry': {'furnace_level': 'FC12'}}}})
         assert err and data['field'] == 'profile.troops.infantry.furnace_level'
+        # Tyrant: FC1-FC10 only for the furnace and every camp (pre-FC -> VALIDATION_ERROR)
+        for prof_bad, field in [({'furnace_level': '30'}, 'profile.furnace_level'),
+                                ({'troops': {'lancer': {'furnace_level': '25', 'tier': 10}}},
+                                 'profile.troops.lancer.furnace_level')]:
+            err, data = await call(c, 'submit_application', {'event': 'tyrant', 'fid': f, 'answers': answers(),
+                                                             'profile': prof_bad})
+            assert err and data['code'] == 'VALIDATION_ERROR' and data['field'] == field, data
         err, data = await call(c, 'submit_application', {'event': 'tyrant', 'fid': fid(), 'answers': answers(),
                                                          'profile': {'game_name': 'NoAlliance'}})
         assert err and data['field'] == 'profile.alliance'
@@ -71,7 +78,8 @@ async def test_tyrant_admin_list_and_summary(public, admin, api):
         err, data = await call(c, 'get_tyrant_summary', {})
         assert not err, data
         assert data['round_id'] == rnd['id'] and data['total'] == 3 and data['opening_rush'] == 2
-        assert data['discord_vc'] == 1 and data['roles']['joiner'] == 3
+        assert data['discord_vc'] == 1 and data['roles']['joiner'] == 3 and 'gem_spend_total' not in data
+        assert data['camp_levels']['infantry'] == {'FC5': 3} and data['camp_levels']['lancer'] == {'none': 3}
         assert {w['id']: w['count'] for w in data['windows']}['w4'] == 1
         assert data['furnace_levels'] == {'FC10': 3} and data['troop_tiers']['infantry'] == {'T10': 3}
         err, data = await call(c, 'get_tyrant_summary', {'round_id': rnd['id'], 'alliance': 'AAA'})
@@ -79,3 +87,42 @@ async def test_tyrant_admin_list_and_summary(public, admin, api):
         ministry = api.start_round('MCP ministry for tyrant check')
         err, data = await call(c, 'get_tyrant_summary', {'round_id': ministry['id']})
         assert err and data['code'] == 'NOT_FOUND'
+
+
+def _full(camp, tier):
+    return {k: {'furnace_level': camp, 'tier': tier} for k in ('infantry', 'lancer', 'marksman')}
+
+
+async def test_tyrant_troop_filters_one_call(public, admin, api):
+    """'who has T11' and 'FC10 camps with T11' are ONE list_applications call; the summary takes the same filters."""
+    rnd = api.start_round('MCP FDT camps', event='tyrant')
+    best, t11_fc9, t10 = fid(), fid(), fid()
+    lancer9 = _full('FC10', 11)
+    lancer9['lancer'] = {'furnace_level': 'FC9', 'tier': 11}
+    async with public() as c:
+        for f, troops, vc in ((best, _full('FC10', 11), True), (t11_fc9, lancer9, False), (t10, _full('FC10', 10), True)):
+            err, data = await call(c, 'submit_application', {
+                'event': 'tyrant', 'fid': f, 'answers': answers(discord_vc=vc),
+                'profile': {'game_name': f'J{f}', 'alliance': 'JJJ', 'furnace_level': 'FC10', 'troops': troops}})
+            assert not err, data
+    async with admin() as c:
+        err, data = await call(c, 'list_applications', {'event': 'tyrant', 'min_tier': 11})
+        assert not err, data
+        assert data['round_id'] == rnd['id'] and sorted(a['fid'] for a in data['applications']) == sorted([best, t11_fc9])
+        err, data = await call(c, 'list_applications', {'event': 'tyrant', 'min_camp': 'FC10', 'min_tier': 'T11'})
+        assert not err and [a['fid'] for a in data['applications']] == [best] and data['total'] == 1
+        assert data['applications'][0]['joiner_strength'] == 63
+        err, data = await call(c, 'list_applications', {'event': 'tyrant', 'min_camp': 'FC10', 'troop': 'infantry'})
+        assert not err and data['total'] == 3
+        err, data = await call(c, 'list_applications', {'event': 'tyrant', 'sort': 'strength', 'direction': 'desc'})
+        assert not err and data['applications'][0]['fid'] == best and data['applications'][-1]['fid'] == t10
+        err, data = await call(c, 'list_applications', {'event': 'tyrant', 'filters': {
+            'camp': {'lancer': 'FC9'}, 'vc': False}})
+        assert not err and [a['fid'] for a in data['applications']] == [t11_fc9]
+        err, data = await call(c, 'list_applications', {'event': 'tyrant', 'min_camp': '30'})
+        assert err and data['code'] == 'VALIDATION_ERROR' and data['field'] == 'min_camp'
+        err, data = await call(c, 'get_tyrant_summary', {'min_camp': 'FC10', 'min_tier': 11})
+        assert not err and data['total'] == 1 and data['round_total'] == 3
+        assert data['camp_levels']['lancer'] == {'FC10': 1} and data['troop_tiers']['marksman'] == {'T11': 1}
+        err, data = await call(c, 'get_tyrant_summary', {'filters': {'tier': {'marksman': 10}}})
+        assert not err and data['total'] == 1 and data['filters'] == {'marksman_tier': 10}
