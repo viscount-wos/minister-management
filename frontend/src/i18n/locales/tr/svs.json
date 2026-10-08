@@ -331,6 +331,12 @@
       "selected": "{{n}} seçildi",
       "add": "Seçili {{n}} oyuncuyu ralliye ekle…",
       "clear": "Seçimi temizle"
+    },
+    "deletePlan": {
+      "leader": "{{leader}} ({{group}}) rallisini yönetiyor; savaş planından da kaldırılacak. Ralli kartı lidersiz olarak kalır.",
+      "joiner": "{{leader}} ({{group}}) ile Katılımcı {{n}}; savaş planından da kaldırılacak.",
+      "extra": "{{leader}} ({{group}}) ile ek katılımcı; savaş planından da kaldırılacak.",
+      "group": "{{group}} içinde; savaş planından da kaldırılacak."
     }
   }
 }

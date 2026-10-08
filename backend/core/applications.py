@@ -101,11 +101,18 @@ def save_application(round_row, profile_json, answers, commit=True):
 
 
 def delete_application_row(app_row):
+    """Delete one application; the event hook (ministry assignments, the SVS battle plan) runs in the same
+    transaction. Returns the hook's extra response fields (a dict, possibly empty)."""
     db = get_db()
     spec = get_event(app_row['event'], need_rounds=False)
-    spec.on_application_deleted(db, app_row['round_id'], app_row['player_id'])
-    db.execute('DELETE FROM applications WHERE id = ?', (app_row['id'],))
-    db.commit()
+    try:
+        extra = spec.on_application_deleted(db, app_row['round_id'], app_row['player_id']) or {}
+        db.execute('DELETE FROM applications WHERE id = ?', (app_row['id'],))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    return extra
 
 
 # ---------------------------------------------------------------- public routes
@@ -293,8 +300,9 @@ def admin_delete_application(app_id):
     if not row:
         raise not_found('Application not found')
     require_writable(get_round_row(row['round_id']))
-    delete_application_row(row)
-    return jsonify({'deleted': True, 'id': app_id})
+    body = {'deleted': True, 'id': app_id}
+    body.update(delete_application_row(row))  # SVS: plan_removed + plan_revision
+    return jsonify(body)
 
 
 @bp.route('/api/admin/rounds/<ref>/export', methods=['GET'])

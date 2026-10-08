@@ -553,6 +553,46 @@ Both events read and write the same per-FID `profile.troops` (`{type: {furnace_l
   profile): answers a player must give may be blank, anything given must be valid. 409 `APPLICATION_EXISTS` if the
   FID already signed up in that round (the dialog says "edit that one instead"). Admin edits use the same lenient mode.
 
+### Admin Edit / Remove in the SVS and Frost Dragon Tyrant lists (v2.2.1, p8/admin-edit)
+Owner: "in the admin section for SVS we should also be able to edit players"; Tyrant had the same gap, so both.
+Minister already had its own edit (unchanged).
+- Each row: a pencil (Edit) and a bin (Remove) icon button, 44px, `aria-label` "Edit <name>" / "Remove <name>" and
+  the same tooltip (`admin/PlayerRowActions.tsx`). SVS keeps Add to rally in front of them.
+- Edit = `AddPlayerDialog` in EDIT mode (one form for add and edit, not a second one): FID read-only, name, alliance,
+  then the event's fields prefilled. SVS: hour chips from the round's hours plus any hour this sign-up kept from an
+  earlier start/duration (dashed chip, "old"), Discord VC (blank allowed), camp FC + tier T10/T11 per troop. Tyrant:
+  time windows (+ kept old window ids), Discord VC, roles, power (millions), gem spend, Discord ID, camp FC + tier
+  T8-T11. A note says what is SHARED with other events (name, alliance, troops; Tyrant also power and Discord ID).
+- Save = `PUT /api/admin/applications/{id}` (admin mode, so blanks are allowed where the API allows them). Only what
+  changed is sent for name, alliance, power, Discord ID and troops (a legacy 4-character tag or an off-form T9 is never
+  re-sent by an edit that doesn't touch it); answers are sent whole (merged by the API anyway). Troops follow the one
+  merge rule: a blank level keeps what is stored (hint under the troop cards).
+- Errors land on their field: the dialog puts {field, message} in `admin/dialogErrors.tsx` context, each field shows
+  `InlineError` + `aria-invalid`, focus moves to the first invalid control, and the bottom alert only shows errors no
+  field claimed. Client checks reuse the wizard's messages (Tyrant power/gems); server errors use `errorText` (codes
+  translated, field labels added for Tyrant answers).
+- After save the row is patched in place (`setApps(map)`), only the summary is re-fetched: filters (URL), page, sort
+  and scroll stay. A toast (`useToast`, fixed bottom, `role=status`) confirms. Focus returns to the row's pencil.
+- Remove = a confirm dialog naming the player ([TAG] name · FID; Cancel focused, Esc cancels). SVS re-reads the plan
+  when it opens and, if the player is in it, says where: "They are Joiner 2 with Rally Caller 01 (Main); they will be
+  removed from the battle plan too" (leader / joiner / extra / extra-group sentences).
+- **Decision: remove from the plan server-side, atomically** (not "block while in the plan"): blocking would force a
+  trip to the planner for every no-show, and the planner already has the "take a player out" semantics. The SVS
+  `EventSpec.on_application_deleted` hook takes the write lock (`BEGIN IMMEDIATE`) and, in the SAME transaction as the
+  DELETE, removes every placement of that FID with the planner's Move semantics (`plan._remove_at`: a leader card
+  stays with its heroes and no player, a named slot keeps its heroes/ratio, an extra joiner / group entry goes) and
+  bumps the plan revision by 1, so an open planner gets 409 PLAN_CONFLICT instead of silently re-adding the player.
+  The DELETE response adds `plan_removed` (where they were, with the planner's labels) and `plan_revision`; nothing
+  changes when they weren't in the plan. A rollback undoes both.
+- Closed rounds: Edit/Remove stay visible but `aria-disabled` with the tooltip "This round is closed..." (plus one
+  sr-only description), clicks do nothing; the server refuses with 409 ROUND_CLOSED anyway. Add to rally stays hidden.
+- Tyrant `decorate_application` now adds `joiner_strength` too, so the PUT response can replace a row as-is.
+- Fixed on the way: the SVS table's horizontal scroller is `relative`; the Plan column's sr-only "Not in plan" text
+  (position:absolute) escaped it and widened the page to 579px on a 390px phone.
+- Known gaps: deleting a whole PROFILE (`DELETE /api/admin/profiles/{fid}`) still does not touch SVS plans (that
+  route deletes applications in SQL, without the event hook); the What's new block title stays "Rallies from the
+  players list" (shared with a parallel branch).
+
 ### Hero library foundation (for the planner, later)
 - Data: `backend/gamedata/heroes.json` (version 1; 65 heroes: slug, name, troop, generation 1-17 or null for
   rare/epic, rarity, image) + `frontend/public/heroes/<slug>.webp` (256 px), built reproducibly by

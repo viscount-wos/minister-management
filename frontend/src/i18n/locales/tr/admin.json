@@ -154,5 +154,24 @@
     "count": "Nesil {{gen}}'e kadar {{n}} kahraman",
     "generation": "Eyalet kahraman nesli",
     "generationDesc": "Eyaletindeki en yeni kahraman nesli. Daha sonraki nesillerin kahramanları asla önerilmez. Tüm eyalete uygulanır."
+  },
+  "playerEdit": {
+    "desc": "Bu oyuncunun bu turdaki kaydını değiştirin.",
+    "shared": "Ad, ittifak ve birlikler diğer etkinliklerle paylaşılır: burada yapılan değişiklik her yerde görünür.",
+    "sharedTyrant": "Ad, ittifak, birlikler, güç ve Discord ID diğer etkinliklerle paylaşılır: burada yapılan değişiklik her yerde görünür.",
+    "troopsHint": "Boş bırakılan seviye kayıtlı değeri korur.",
+    "fidFixed": "Oyuncu ID değiştirilemez.",
+    "editLabel": "{{name}} düzenle",
+    "deleteLabel": "{{name}} kaldır",
+    "closed": "Bu tur kapalı: oyuncular düzenlenemez veya kaldırılamaz.",
+    "old": "eski",
+    "oldHour": "Artık bu savaşta yok; kaydından korunuyor.",
+    "oldWindow": "Artık bu turda yok; kaydından korunuyor.",
+    "deleteTitle": "{{name}} kaldırılsın mı?",
+    "deleteBody": "Bu, oyuncunun bu turdaki kaydını siler. Profili (ad, ittifak, birlikler) diğer etkinlikler için korunur.",
+    "deleteConfirm": "Kaldır",
+    "saved": "{{name}} kaydedildi.",
+    "removed": "{{name}} bu turdan kaldırıldı.",
+    "removedPlan": "{{name}} bu turdan ve savaş planından kaldırıldı."
   }
 }

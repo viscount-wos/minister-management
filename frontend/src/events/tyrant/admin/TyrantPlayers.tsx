@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Trash2, FileSpreadsheet, FileText, ChevronUp, ChevronDown, AlertCircle, SlidersHorizontal } from 'lucide-react';
+import { Search, FileSpreadsheet, FileText, ChevronUp, ChevronDown, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import { Round, downloadBlob } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
 import { useFormatDateTime } from '../../../shared/DateTime';
@@ -9,7 +9,10 @@ import { useUrlFilters, splitList, joinList } from '../../../shared/filters/useU
 import { CheckboxMenu, ChipButton, FilterPill, FilterPills } from '../../../shared/filters/FilterControls';
 import { Bars, DebouncedInput, StatCard } from '../../../shared/filters/Breakdowns';
 import AddPlayerDialog, { AddPlayerButton } from '../../../admin/AddPlayerDialog';
-import TroopFields, { TroopValues, blankTroopValues, filledTroops } from '../../../admin/TroopFields';
+import TroopFields, { TroopValues, blankTroopValues, changedTroops, filledTroops } from '../../../admin/TroopFields';
+import { InlineError, useDialogError } from '../../../admin/dialogErrors';
+import { ClosedRoundNote, DeletePlayerDialog, PlayerRowActions, useToast } from '../../../admin/PlayerRowActions';
+import { Field } from '../../../shared/fields';
 import {
   FILTER_KEYS,
   FilterKey,
@@ -58,6 +61,169 @@ const millions = (abs: string | undefined) => (abs ? String(Math.round((Number(a
 const fromMillions = (m: string) => (m.trim() && Number.isFinite(Number(m)) && Number(m) >= 0 ? String(Math.round(Number(m) * 1e6)) : '');
 const wholeOrBlank = (v: string) => (/^\d+$/.test(v.trim()) ? v.trim() : '');
 const tierValue = (label: string) => (label === 'none' ? 'none' : label.replace(/^T/, ''));
+const toMillions = (p: number | null | undefined) => (p == null ? '' : String(Math.round((p / 1_000_000) * 100) / 100));
+
+/** Tyrant answers + profile extras for the add/edit dialog (add shows windows, VC, roles, troops; edit adds power,
+ * gems and Discord ID, as the wizard asks them). */
+interface TyrantForm {
+  windows: string[];
+  vc: '' | 'yes' | 'no';
+  roles: Role[];
+  troops: TroopValues;
+  power_m: string;
+  gems: string;
+  discord_id: string;
+}
+const blankForm = (): TyrantForm => ({ windows: [], vc: '', roles: [], troops: blankTroopValues(), power_m: '', gems: '', discord_id: '' });
+
+interface EditState {
+  app: TyrantAdminApplication;
+  el: HTMLElement;
+  form: TyrantForm;
+  before: TroopValues;
+}
+
+function TyrantAnswerFields({
+  value,
+  onChange,
+  windows,
+  oldWindows = [],
+  prefix,
+  full = false,
+  troopsHint,
+}: {
+  value: TyrantForm;
+  onChange: (f: (s: TyrantForm) => TyrantForm) => void;
+  windows: TyrantSettings['windows'];
+  oldWindows?: string[];
+  prefix: string;
+  /** Edit: also power, gems and Discord ID. */
+  full?: boolean;
+  troopsHint?: string;
+}) {
+  const { t } = useTranslation();
+  const winErr = useDialogError('answers.availability');
+  const vcErr = useDialogError('answers.discord_vc');
+  const rolesErr = useDialogError('answers.roles');
+  const powerErr = useDialogError('profile.power');
+  const gemsErr = useDialogError('answers.gem_spend');
+  const discordErr = useDialogError('profile.discord_id');
+  const chosen = (n: number, none: string) => (n ? t('tyrant:admin.filter.selected', { n }) : none);
+  return (
+    <>
+      <div>
+        <p className="block text-sm font-medium text-theme-text mb-2" id={`${prefix}-windows-label`}>
+          {t('tyrant:step2.title')}
+        </p>
+        <div
+          className={`flex flex-wrap gap-2 ${winErr ? 'p-1 rounded-lg ring-2 ring-danger' : ''}`}
+          role="group"
+          aria-labelledby={`${prefix}-windows-label`}
+          aria-describedby={winErr ? `${prefix}-windows-error` : undefined}
+          data-testid={`${prefix}-windows`}
+        >
+          {[...windows.map((w) => ({ id: w.id, w })), ...oldWindows.map((id) => ({ id, w: null }))].map(({ id, w }) => {
+            const on = value.windows.includes(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={on}
+                data-testid={`${prefix}-window-${id}`}
+                data-old={w ? undefined : 'true'}
+                title={w ? undefined : t('admin:playerEdit.oldWindow')}
+                onClick={() => onChange((s) => ({ ...s, windows: on ? s.windows.filter((x) => x !== id) : [...s.windows, id] }))}
+                className={`min-h-[44px] px-3 rounded-lg border-2 text-sm font-semibold ${w ? '' : 'border-dashed'} ${on ? 'bg-accent border-accent text-dark-bg' : 'border-theme-border text-theme-text hover:border-accent'}`}
+              >
+                {w ? <Range start={w.start} end={w.end} /> : <bdi dir="ltr">{id}</bdi>}
+                {!w && <span className="ms-1 text-xs font-normal">({t('admin:playerEdit.old')})</span>}
+              </button>
+            );
+          })}
+        </div>
+        <InlineError id={`${prefix}-windows-error`} message={winErr} />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor={`${prefix}-vc`} className="block text-sm font-medium text-theme-text mb-2">
+            {t('tyrant:step2.discordVc')}
+          </label>
+          <select
+            id={`${prefix}-vc`}
+            data-testid={`${prefix}-vc`}
+            value={value.vc}
+            aria-invalid={!!vcErr || undefined}
+            onChange={(e) => onChange((s) => ({ ...s, vc: e.target.value as TyrantForm['vc'] }))}
+            className={`${SELECT_CLASS} ${vcErr ? 'border-danger' : 'border-theme-border'}`}
+          >
+            <option value="">—</option>
+            <option value="yes">{t('common:yes')}</option>
+            <option value="no">{t('common:no')}</option>
+          </select>
+          <InlineError id={`${prefix}-vc-error`} message={vcErr} />
+        </div>
+        <div>
+          <CheckboxMenu
+            id={`${prefix}-roles`}
+            label={t('tyrant:step5.title')}
+            summary={chosen(value.roles.length, '—')}
+            options={ROLES.map((r) => ({ value: r, label: t(`tyrant:roles.${r}`) }))}
+            selected={value.roles}
+            onToggle={(r) => onChange((s) => ({ ...s, roles: ROLES.filter((x) => (x === r ? !s.roles.includes(r as Role) : s.roles.includes(x))) }))}
+          />
+          <InlineError id={`${prefix}-roles-error`} message={rolesErr} />
+        </div>
+      </div>
+      {full && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <Field
+              id={`${prefix}-power`}
+              label={t('tyrant:step3.power')}
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder={t('tyrant:step3.powerPlaceholder')}
+              value={value.power_m}
+              invalid={!!powerErr}
+              aria-describedby={powerErr ? `${prefix}-power-error` : undefined}
+              onChange={(e) => onChange((s) => ({ ...s, power_m: e.target.value }))}
+            />
+            <InlineError id={`${prefix}-power-error`} message={powerErr} />
+          </div>
+          <div>
+            <Field
+              id={`${prefix}-gems`}
+              label={t('tyrant:step3.gemSpend')}
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder={t('tyrant:step3.gemPlaceholder')}
+              value={value.gems}
+              invalid={!!gemsErr}
+              aria-describedby={gemsErr ? `${prefix}-gems-error` : undefined}
+              onChange={(e) => onChange((s) => ({ ...s, gems: e.target.value }))}
+            />
+            <InlineError id={`${prefix}-gems-error`} message={gemsErr} />
+          </div>
+          <div>
+            <Field
+              id={`${prefix}-discord-id`}
+              label={t('tyrant:fields.discordId')}
+              maxLength={64}
+              autoComplete="off"
+              placeholder={t('tyrant:fields.discordPlaceholder')}
+              value={value.discord_id}
+              invalid={!!discordErr}
+              aria-describedby={discordErr ? `${prefix}-discord-id-error` : undefined}
+              onChange={(e) => onChange((s) => ({ ...s, discord_id: e.target.value }))}
+            />
+            <InlineError id={`${prefix}-discord-id-error`} message={discordErr} />
+          </div>
+        </div>
+      )}
+      <TroopFields value={value.troops} onChange={(tr) => onChange((s) => ({ ...s, troops: tr }))} tiers={[...TIERS].reverse()} idPrefix={prefix} hint={troopsHint} />
+    </>
+  );
+}
 
 export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
   const { t } = useTranslation();
@@ -77,12 +243,10 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
   const [moreOpen, setMoreOpen] = useState(moreActive > 0);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState('');
-  const [add, setAdd] = useState<{ windows: string[]; vc: '' | 'yes' | 'no'; roles: Role[]; troops: TroopValues }>({
-    windows: [],
-    vc: '',
-    roles: [],
-    troops: blankTroopValues(),
-  });
+  const [add, setAdd] = useState<TyrantForm>(blankForm);
+  const [editing, setEditing] = useState<EditState | null>(null);
+  const [deleting, setDeleting] = useState<{ app: TyrantAdminApplication; el: HTMLElement } | null>(null);
+  const toast = useToast();
   const sort: SortKey = SORT_KEYS.includes(v.sort as SortKey) ? (v.sort as SortKey) : 'submitted';
   const dir: 'asc' | 'desc' = v.dir === 'asc' ? 'asc' : 'desc';
 
@@ -137,13 +301,44 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
   /** Toggle an exact single-value filter (the summary chips): the same value again removes it. */
   const toggleExact = (key: FilterKey, value: string) => F.set({ [key]: v[key] === value ? null : value });
 
+  // ------------------------------------------------------------ edit / remove (v2.2.1)
+  const openEdit = (a: TyrantAdminApplication, el: HTMLElement) => {
+    const tr = parseTroops(a.profile.troops);
+    const troops: TroopValues = { infantry: { ...tr.infantry }, lancer: { ...tr.lancer }, marksman: { ...tr.marksman } };
+    setEditing({
+      app: a,
+      el,
+      before: troops,
+      form: {
+        windows: [...(a.answers.availability ?? [])],
+        vc: a.answers.discord_vc ? 'yes' : 'no',
+        roles: [...(a.answers.roles ?? [])],
+        troops,
+        power_m: toMillions(a.profile.power),
+        gems: a.answers.gem_spend != null ? String(a.answers.gem_spend) : '',
+        discord_id: a.profile.discord_id ?? '',
+      },
+    });
+  };
+  const closeEdit = () => {
+    const el = editing?.el;
+    setEditing(null);
+    el?.focus();
+  };
+  const closeDelete = () => {
+    const el = deleting?.el;
+    setDeleting(null);
+    el?.focus();
+  };
   const remove = async (a: TyrantAdminApplication) => {
-    if (!window.confirm(t('tyrant:admin.confirmDelete', { name: a.profile.game_name }))) return;
     try {
       await tyrantApi.admin.deleteApplication(a.id);
+      setDeleting(null);
+      toast.show(t('admin:playerEdit.removed', { name: a.profile.game_name }));
       onChanged();
       load();
     } catch (e) {
+      setDeleting(null);
       setError(errorText(t, e, 'admin:deleteError'));
     }
   };
@@ -517,7 +712,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
           {!readOnly && (
             <AddPlayerButton
               onClick={() => {
-                setAdd({ windows: [], vc: '', roles: [], troops: blankTroopValues() });
+                setAdd(blankForm());
                 setAdding(true);
               }}
             />
@@ -547,7 +742,8 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
           </p>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
+          <ClosedRoundNote show={readOnly} />
           <table className="w-full text-sm" data-testid="tyrant-table">
             <thead className="border-b border-theme-border">
               <tr>
@@ -562,7 +758,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                 {th(null, t('tyrant:fields.discordId'))}
                 {th(null, t('tyrant:step5.title'))}
                 {th('submitted', t('tyrant:admin.col.submitted'))}
-                {!readOnly && th(null, t('admin:actions'))}
+                {th(null, t('admin:actions'))}
               </tr>
             </thead>
             <tbody>
@@ -614,19 +810,15 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                     <td className="px-2 py-2 text-xs text-theme-dim whitespace-nowrap">
                       {fmt(a.created_at, { withZone: false, weekday: false, isolate: false })}
                     </td>
-                    {!readOnly && (
-                      <td className="px-2 py-2">
-                        <button
-                          type="button"
-                          onClick={() => remove(a)}
-                          data-testid={`delete-${a.fid}`}
-                          aria-label={t('admin:delete')}
-                          className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-danger hover:bg-danger/10 rounded-lg"
-                        >
-                          <Trash2 className="w-4 h-4" aria-hidden="true" />
-                        </button>
-                      </td>
-                    )}
+                    <td className="px-2 py-2">
+                      <PlayerRowActions
+                        fid={a.fid}
+                        name={a.profile.game_name}
+                        readOnly={readOnly}
+                        onEdit={(el) => openEdit(a, el)}
+                        onDelete={(el) => setDeleting({ app: a, el })}
+                      />
+                    </td>
                   </tr>
                 );
               })}
@@ -686,55 +878,77 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
             return { answers, ...(troops ? { profile: { troops } } : {}) };
           }}
         >
-          <div>
-            <p className="block text-sm font-medium text-theme-text mb-2">{t('tyrant:step2.title')}</p>
-            <div className="flex flex-wrap gap-2" data-testid="add-windows">
-              {windows.map((w) => {
-                const on = add.windows.includes(w.id);
-                return (
-                  <button
-                    key={w.id}
-                    type="button"
-                    aria-pressed={on}
-                    data-testid={`add-window-${w.id}`}
-                    onClick={() => setAdd((s) => ({ ...s, windows: on ? s.windows.filter((x) => x !== w.id) : [...s.windows, w.id] }))}
-                    className={`min-h-[44px] px-3 rounded-lg border-2 text-sm font-semibold ${on ? 'bg-accent border-accent text-dark-bg' : 'border-theme-border text-theme-text hover:border-accent'}`}
-                  >
-                    <Range start={w.start} end={w.end} />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="add-vc" className="block text-sm font-medium text-theme-text mb-2">
-                {t('tyrant:step2.discordVc')}
-              </label>
-              <select
-                id="add-vc"
-                data-testid="add-vc"
-                value={add.vc}
-                onChange={(e) => setAdd((s) => ({ ...s, vc: e.target.value as '' | 'yes' | 'no' }))}
-                className={`${SELECT_CLASS} border-theme-border`}
-              >
-                <option value="">—</option>
-                <option value="yes">{t('common:yes')}</option>
-                <option value="no">{t('common:no')}</option>
-              </select>
-            </div>
-            <CheckboxMenu
-              id="add-roles"
-              label={t('tyrant:step5.title')}
-              summary={chosen(add.roles.length, '—')}
-              options={ROLES.map((r) => ({ value: r, label: t(`tyrant:roles.${r}`) }))}
-              selected={add.roles}
-              onToggle={(r) => setAdd((s) => ({ ...s, roles: ROLES.filter((x) => (x === r ? !s.roles.includes(r as Role) : s.roles.includes(x))) }))}
-            />
-          </div>
-          <TroopFields value={add.troops} onChange={(tr) => setAdd((s) => ({ ...s, troops: tr }))} tiers={[...TIERS].reverse()} />
+          <TyrantAnswerFields value={add} onChange={setAdd} windows={windows} prefix="add" />
         </AddPlayerDialog>
       )}
+
+      {editing && (
+        <AddPlayerDialog
+          event="tyrant"
+          roundId={round.id}
+          edit={{ appId: editing.app.id, fid: editing.app.fid, name: editing.app.profile.game_name, alliance: editing.app.profile.alliance ?? '' }}
+          sharedNote={t('admin:playerEdit.sharedTyrant')}
+          onClose={closeEdit}
+          validate={() => {
+            const p = editing.form.power_m.trim();
+            if (p && !(Number.isFinite(Number(p)) && Number(p) >= 0)) return { field: 'profile.power', message: t('tyrant:errors.power') };
+            const g = editing.form.gems.trim();
+            if (g && !/^\d{1,10}$/.test(g)) return { field: 'answers.gem_spend', message: t('tyrant:errors.gems') };
+            return null;
+          }}
+          onSaved={(raw, name) => {
+            const u = raw as TyrantAdminApplication;
+            setApps((list) => list.map((x) => (x.id === u.id ? { ...x, ...u } : x)));
+            closeEdit();
+            toast.show(t('admin:playerEdit.saved', { name }));
+            tyrantApi.admin
+              .summary(round.id, filters)
+              .then(setSummary)
+              .catch(() => undefined);
+          }}
+          extra={() => {
+            const f = editing.form;
+            const before = editing.app;
+            const known = windows.map((w) => w.id);
+            const all = [...known, ...(before.answers.availability ?? []).filter((id) => !known.includes(id))];
+            const answers: Record<string, unknown> = {
+              availability: all.filter((id) => f.windows.includes(id)),
+              roles: f.roles,
+              discord_vc: f.vc === 'yes',
+              gem_spend: f.gems.trim() ? parseInt(f.gems, 10) : null,
+            };
+            const profile: Record<string, unknown> = {};
+            const pm = f.power_m.trim();
+            const power = pm ? Math.round(Number(pm) * 1_000_000) : null;
+            if (pm !== toMillions(before.profile.power)) profile.power = power;
+            if (f.discord_id.trim() !== (before.profile.discord_id ?? '')) profile.discord_id = f.discord_id.trim() || null;
+            const troops = changedTroops(f.troops, editing.before);
+            if (troops) profile.troops = troops;
+            return { answers, ...(Object.keys(profile).length ? { profile } : {}) };
+          }}
+        >
+          <TyrantAnswerFields
+            value={editing.form}
+            onChange={(fn) => setEditing((e) => (e ? { ...e, form: fn(e.form) } : e))}
+            windows={windows}
+            oldWindows={(editing.app.answers.availability ?? []).filter((id) => !windowIds.has(id))}
+            prefix="edit"
+            full
+            troopsHint={t('admin:playerEdit.troopsHint')}
+          />
+        </AddPlayerDialog>
+      )}
+
+      {deleting && (
+        <DeletePlayerDialog
+          name={deleting.app.profile.game_name}
+          alliance={deleting.app.profile.alliance}
+          fid={deleting.app.fid}
+          onConfirm={() => remove(deleting.app)}
+          onClose={closeDelete}
+        />
+      )}
+      {toast.node}
     </div>
   );
 }

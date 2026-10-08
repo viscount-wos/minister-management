@@ -282,8 +282,12 @@ Ministry round settings: `research_day` (`tuesday`|`friday`), `show_fire_crystal
   `ROUND_CLOSED`. FID already signed up in that round → **409 `APPLICATION_EXISTS`** ("FID … already has a sign-up in
   this round; edit that one instead"). `{ref}` = id or `current` + `?event=`. MCP: `add_player`.
 - `GET /api/admin/applications/{id}` → one, same shape.
-- `PUT /api/admin/applications/{id}` `{"profile"?: {...partial...}, "answers"?: {...partial, merged then validated...}}` → updated application. No closing-time check. Validated in admin mode (SVS: blanks allowed).
-- `DELETE /api/admin/applications/{id}` → `{"deleted": true, "id": 12}`; also removes that player's assignments in the round. Profile kept.
+- `PUT /api/admin/applications/{id}` `{"profile"?: {...partial...}, "answers"?: {...partial, merged then validated...}}` → updated application. No closing-time check; a closed round → 409 `ROUND_CLOSED`. Validated in admin mode (SVS: blanks allowed). Profile fields change the SHARED profile (name, alliance, troops, power, Discord ID show in every event; troops merge per type+field, a blank never clears; an event's `ignored_profile_fields` are dropped, e.g. SVS ignores `discord_id`). Errors are 400 `VALIDATION_ERROR` with the exact `field` (`profile.game_name`, `profile.troops.infantry.tier`, `answers.gem_spend`, `answers.hours`, ...). The response carries the event decorations (SVS and, since v2.2.1, Tyrant `joiner_strength`) so a list row can be replaced in place.
+- `DELETE /api/admin/applications/{id}` → `{"deleted": true, "id": 12}`; also removes that player's assignments in the round (Minister). Profile kept. Closed round → 409 `ROUND_CLOSED`.
+  **SVS (v2.2.1):** the player is also taken out of that round's battle plan in the same transaction (leader card
+  stays with no player; named slot keeps its heroes; extra joiner / extra-group entry removed) and the plan revision
+  goes up by 1 when anything was removed. Response adds `"plan_removed": [{position, group_id, leader_id, slot,
+  group_name, group_kind, leader_label}]` (`[]` if they weren't in the plan) and `"plan_revision": n`.
 - `GET /api/admin/rounds/{id}/export` → xlsx (event-specific; ministry below).
 
 ### Profiles

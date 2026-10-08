@@ -331,6 +331,12 @@
       "selected": "{{n}} ausgewählt",
       "add": "{{n}} Ausgewählte zur Rallye…",
       "clear": "Auswahl aufheben"
+    },
+    "deletePlan": {
+      "leader": "Er führt die Rallye {{leader}} ({{group}}); er wird auch aus dem Schlachtplan entfernt. Die Rallye-Karte bleibt ohne Anführer bestehen.",
+      "joiner": "Er ist Mitläufer {{n}} bei {{leader}} ({{group}}); er wird auch aus dem Schlachtplan entfernt.",
+      "extra": "Er ist zusätzlicher Mitläufer bei {{leader}} ({{group}}); er wird auch aus dem Schlachtplan entfernt.",
+      "group": "Er ist in {{group}}; er wird auch aus dem Schlachtplan entfernt."
     }
   }
 }

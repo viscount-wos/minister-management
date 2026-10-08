@@ -69,6 +69,7 @@ export interface ProfileInput {
   furnace_level?: string | null;
   power?: number | null;
   troops?: unknown;
+  discord_id?: string | null;
 }
 
 /** GET /api/settings/public (and the admin settings). state_generation: the state's hero generation (1..17). */
@@ -429,10 +430,12 @@ export const api = {
     /** Admin "add player": a sign-up for someone who didn't sign up (any event). 409 APPLICATION_EXISTS if the FID has one. */
     addPlayer: (roundId: number, body: { fid: string; profile?: Record<string, unknown>; answers?: Record<string, unknown> }) =>
       request<AdminApplication & { profile_created: boolean }>('POST', `/api/admin/rounds/${roundId}/applications`, { admin: true, body }),
-    updateApplication: (id: number, body: { profile?: ProfileInput; answers?: Partial<MinistryAnswers> }) =>
-      request<AdminApplication>('PUT', `/api/admin/applications/${id}`, { admin: true, body }),
+    /** Admin edit (every event): partial profile + answers, merged then validated in admin mode. */
+    updateApplication: <T = AdminApplication>(id: number, body: { profile?: ProfileInput; answers?: Partial<MinistryAnswers> | Record<string, unknown> }) =>
+      request<T>('PUT', `/api/admin/applications/${id}`, { admin: true, body }),
+    /** SVS also answers plan_removed (where the player was in the battle plan; [] if nowhere) + plan_revision. */
     deleteApplication: (id: number) =>
-      request<{ deleted: boolean; id: number }>('DELETE', `/api/admin/applications/${id}`, { admin: true }),
+      request<{ deleted: boolean; id: number; plan_removed?: Record<string, unknown>[]; plan_revision?: number }>('DELETE', `/api/admin/applications/${id}`, { admin: true }),
     exportRound: (roundId: number) => request<Blob>('GET', `/api/admin/rounds/${roundId}/export`, { admin: true, blob: true }),
 
     profiles: (query: { alliance?: string; q?: string } = {}) =>

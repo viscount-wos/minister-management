@@ -714,6 +714,7 @@ class MinistryEvent(EventSpec):
 
     def on_application_deleted(self, db, round_id, player_id):
         db.execute('DELETE FROM ministry_assignments WHERE round_id = ? AND player_id = ?', (round_id, player_id))
+        return {}
 
     def export_round(self, round_):
         from core.db import get_db
