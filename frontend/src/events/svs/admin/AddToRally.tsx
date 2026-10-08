@@ -5,6 +5,7 @@
 // The change is ONE server call (POST …/plan/place) applied atomically to the stored plan with the revision this menu
 // loaded; on 409 PLAN_CONFLICT the plan is re-read and the call retried ONCE if the choice still applies.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, ArrowLeft, Crown, Loader2, Swords, Users, X } from 'lucide-react';
 import { isApiError, type Round } from '../../../shared/api';
@@ -73,11 +74,13 @@ export default function AddToRally({ round, anchor, players, onClose, onDone, on
       left = Math.max(8, Math.min(left, vw - w - 8));
       const below = vh - r.bottom - 12;
       const above = r.top - 12;
-      const h = panel.current?.scrollHeight ?? 400;
-      if (below >= Math.min(h, 320) || below >= above) setPos({ top: r.bottom + 4, left, maxH: Math.max(200, below) });
+      const h = (panel.current?.scrollHeight ?? 400) + 2; // + borders
+      if (h <= below) setPos({ top: r.bottom + 4, left, maxH: below });
+      else if (h <= above) setPos({ top: r.top - 4 - h, left, maxH: above });
       else {
-        const maxH = Math.max(200, above);
-        setPos({ top: Math.max(8, r.top - 4 - Math.min(h, maxH)), left, maxH });
+        // taller than either side: as much as fits, shifted up from the bottom of the window
+        const maxH = vh - 16;
+        setPos({ top: Math.max(8, vh - 8 - Math.min(h, maxH)), left, maxH });
       }
     };
     place();
@@ -233,7 +236,8 @@ export default function AddToRally({ round, anchor, players, onClose, onDone, on
 
   // ------------------------------------------------------------ render
   const title = bulk ? t('svs:players.add.bulkTitle', { n: players.length }) : t('svs:players.add.title');
-  return (
+  // A portal: an ancestor with a transform would otherwise become the containing block of `position: fixed`.
+  return createPortal(
     <div
       ref={panel}
       role="dialog"
@@ -434,6 +438,7 @@ export default function AddToRally({ round, anchor, players, onClose, onDone, on
           )}
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }
