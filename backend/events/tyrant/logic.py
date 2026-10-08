@@ -14,7 +14,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from core.exports import append_safe, to_csv_bytes
-from core.furnace import FURNACE_LEVELS, furnace_ordinal, validate_furnace
+from core.furnace import FURNACE_LEVELS, fc_number, furnace_ordinal, validate_fc_level, validate_furnace
 from core.validation import validate_number
 from core.errors import validation_error
 from events import EventSpec
@@ -23,7 +23,8 @@ from events.tyrant import validation as tv
 EVENT = 'tyrant'
 ROLE_LABELS = {'rally_leader': 'Rally Leader', 'joiner': 'Joiner', 'gathering': 'Gathering/Looting',
                'battle_mgmt': 'Battle Management', 'event_prep': 'Event Preparation'}
-SORT_KEYS = ('submitted', 'updated', 'name', 'alliance', 'fid', 'furnace', 'power', 'gems')
+SORT_KEYS = ('submitted', 'updated', 'name', 'alliance', 'fid', 'furnace', 'power', 'gems', 'strength')
+TROOP_FILTERS = tv.TROOP_TYPES + ('all',)
 
 
 def round_settings(round_row):
@@ -60,6 +61,7 @@ def round_applications(db, round_row):
         prof['id'] = r['pid']
         prof['fid'] = r['fid']
         app['profile'] = profile_to_json(prof)
+        app['joiner_strength'] = joiner_strength(app['profile'])
         out.append(app)
     return out
 
@@ -79,7 +81,58 @@ def _troop(profile, kind, key):
     return None
 
 
-def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='desc', min_furnace=None):
+def joiner_strength(profile):
+    """Joiner strength (admin sort key, owner rule p2d): the sum over infantry, lancer and marksman of
+    camp FC number (FC1=1 .. FC10=10; pre-FC or blank = 0) + tier number (T8=8 .. T11=11; blank = 0).
+    0..63; 63 = FC10 camps with T11 troops in all three. None when no camp level or tier is filled in at all
+    (sorted last). A sum, not a min: it ranks a player with one weak camp below an otherwise equal one, but
+    still above a player who is weak everywhere."""
+    total, any_value = 0, False
+    for kind in tv.TROOP_TYPES:
+        camp, tier = _troop(profile, kind, 'furnace_level'), _troop(profile, kind, 'tier')
+        if camp or tier:
+            any_value = True
+        total += fc_number(camp) + (tier or 0)
+    return total if any_value else None
+
+
+def _parse_min_tier(value):
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    s = str(value).strip().upper()
+    s = s[1:] if s.startswith('T') else s
+    if not s.isdigit() or not tv.TROOP_TIER_RANGE[0] <= int(s) <= tv.TROOP_TIER_RANGE[1]:
+        raise validation_error('min_tier must be a tier 1-11 (e.g. 11 or T11)', 'min_tier')
+    return int(s)
+
+
+def troop_filter(min_camp=None, min_tier=None, troop=None):
+    """Predicate on a profile, or None when no troop filter is set.
+
+    ``min_camp`` an FC code (FC10 = FC10 camps only; pre-FC/blank camps never match), ``min_tier`` 1-11 or 'T11',
+    ``troop`` infantry|lancer|marksman|all (default all: EVERY troop type must meet the minimums)."""
+    camp_floor = validate_fc_level(min_camp, 'min_camp') if min_camp else None
+    tier_floor = _parse_min_tier(min_tier)
+    troop = (troop or 'all').strip().lower()
+    if troop not in TROOP_FILTERS:
+        raise validation_error('troop must be one of ' + ', '.join(TROOP_FILTERS), 'troop')
+    if camp_floor is None and tier_floor is None:
+        return None
+    kinds = tv.TROOP_TYPES if troop == 'all' else (troop,)
+    floor = fc_number(camp_floor)
+
+    def ok(profile):
+        for kind in kinds:
+            if camp_floor and fc_number(_troop(profile, kind, 'furnace_level')) < floor:
+                return False
+            if tier_floor and (_troop(profile, kind, 'tier') or 0) < tier_floor:
+                return False
+        return True
+    return ok
+
+
+def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='desc', min_furnace=None,
+                    min_camp=None, min_tier=None, troop=None):
     if alliance:
         a = alliance.strip().casefold()
         apps = [x for x in apps if (x['profile'].get('alliance') or '').strip().casefold() == a]
@@ -91,6 +144,9 @@ def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='de
     if min_furnace:
         floor = furnace_ordinal(validate_furnace(min_furnace, 'min_furnace'))
         apps = [x for x in apps if furnace_ordinal(x['profile'].get('furnace_level')) >= floor]
+    pred = troop_filter(min_camp, min_tier, troop)
+    if pred:
+        apps = [x for x in apps if pred(x['profile'])]
     if sort not in SORT_KEYS:
         raise validation_error('sort must be one of ' + ', '.join(SORT_KEYS), 'sort')
     if direction not in ('asc', 'desc'):
@@ -104,6 +160,7 @@ def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='de
         'furnace': lambda x: furnace_ordinal(x['profile'].get('furnace_level')) or None,
         'power': lambda x: x['profile'].get('power'),
         'gems': lambda x: x['answers'].get('gem_spend'),
+        'strength': lambda x: x.get('joiner_strength'),
     }[sort]
     present = [x for x in apps if keyfn(x) is not None]
     missing = [x for x in apps if keyfn(x) is None]  # blanks always last
@@ -120,6 +177,7 @@ def summary(apps, settings):
     alliances = Counter()
     furnace = Counter()
     troops = {k: Counter() for k in tv.TROOP_TYPES}
+    camps = {k: Counter() for k in tv.TROOP_TYPES}
     for a in apps:
         ans, prof = a['answers'], a['profile']
         avail = set(ans.get('availability') or [])
@@ -137,6 +195,7 @@ def summary(apps, settings):
         for kind in tv.TROOP_TYPES:
             tier = _troop(prof, kind, 'tier')
             troops[kind][f'T{tier}' if tier else 'none'] += 1
+            camps[kind][_troop(prof, kind, 'furnace_level') or 'none'] += 1
     return {
         'total': len(apps),
         'opening_rush': opening_rush,
@@ -147,6 +206,8 @@ def summary(apps, settings):
                       for k, v in sorted(alliances.items(), key=lambda kv: (-kv[1], kv[0] or '~'))],
         'roles': {r: roles.get(r, 0) for r in tv.ROLES},
         'troop_tiers': {k: dict(sorted(c.items(), key=lambda kv: _tier_sort(kv[0]))) for k, c in troops.items()},
+        # camp level per troop type: FC10 first, legacy pre-FC codes (shown as stored) after FC1, 'none' last
+        'camp_levels': {k: dict(sorted(c.items(), key=lambda kv: _furnace_sort(kv[0]))) for k, c in camps.items()},
         'furnace_levels': dict(sorted(furnace.items(), key=lambda kv: _furnace_sort(kv[0]))),
     }
 
@@ -169,7 +230,8 @@ def export_header(settings):
     return (['FID', 'In-Game Name', 'Alliance', 'Discord ID']
             + [_window_label(w) for w in settings['windows']]
             + ['Discord VC', 'Furnace Level', 'Power (M)', 'Est. Max Gem Spend']
-            + [f'{k.capitalize()} {p}' for k in tv.TROOP_TYPES for p in ('Furnace Level', 'T-Level')]
+            + [f'{k.capitalize()} {p}' for k in tv.TROOP_TYPES for p in ('Camp Level', 'Tier')]
+            + ['Joiner Strength']
             + [ROLE_LABELS[r] for r in tv.ROLES]
             + ['Language', 'Submitted At (UTC)', 'Updated At (UTC)'])
 
@@ -187,6 +249,7 @@ def export_rows(apps, settings):
         for kind in tv.TROOP_TYPES:
             fl, tier = _troop(prof, kind, 'furnace_level'), _troop(prof, kind, 'tier')
             row += [fl, f'T{tier}' if tier else None]
+        row += [a.get('joiner_strength')]
         roles = set(ans.get('roles') or [])
         row += [yes(r in roles) for r in tv.ROLES]
         row += [ans.get('language'), a['created_at'], a['updated_at']]
@@ -241,6 +304,14 @@ def build_workbook(apps, settings, round_row):
     sm.append(['Alliance', 'Players'])
     for a in s['alliances']:
         append_safe(sm, [a['alliance'] or '(none)', a['count']])
+    for kind in tv.TROOP_TYPES:
+        sm.append([])
+        sm.append([f'{kind.capitalize()} camp level', 'Players'])
+        for code, n in s['camp_levels'][kind].items():
+            sm.append([code, n])
+        sm.append([f'{kind.capitalize()} tier', 'Players'])
+        for tier, n in s['troop_tiers'][kind].items():
+            sm.append([tier, n])
     for col in ('A', 'B'):
         sm.column_dimensions[col].width = 28
     for c in sm['A']:
@@ -283,6 +354,8 @@ class TyrantEvent(EventSpec):
         return {'windows': settings.get('windows') or []}
 
     def validate_profile(self, fields, existing=None):
+        if 'furnace_level' in fields:  # Tyrant: FC1-FC10 only (core/profiles.py already normalised the code)
+            fields['furnace_level'] = tv.validate_profile_furnace(fields['furnace_level'])
         if 'troops' in fields:
             fields['troops'] = tv.validate_troops(fields['troops'])
         if fields.get('power') is not None:

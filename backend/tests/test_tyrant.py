@@ -7,7 +7,7 @@ import openpyxl
 from tests.conftest import start_round
 
 EVENT = 'tyrant'
-TROOPS = {'infantry': {'furnace_level': 'FC5', 'tier': 10}, 'lancer': {'furnace_level': '28', 'tier': 9},
+TROOPS = {'infantry': {'furnace_level': 'FC5', 'tier': 10}, 'lancer': {'furnace_level': 'FC3', 'tier': 9},
           'marksman': {'furnace_level': None, 'tier': 11}}
 
 
@@ -102,6 +102,11 @@ def test_strict_troop_validation(client, admin):
         ({'furnace_level': 'FC11'}, 'profile.furnace_level'),
         ({'furnace_level': '31'}, 'profile.furnace_level'),
         ({'furnace_level': 0}, 'profile.furnace_level'),
+        # Tyrant: Fire Crystal levels only (owner rule p2d), for the furnace and every camp
+        ({'furnace_level': '30'}, 'profile.furnace_level'),
+        ({'furnace_level': 25}, 'profile.furnace_level'),
+        ({'troops': {'lancer': {'furnace_level': '28', 'tier': 9}}}, 'profile.troops.lancer.furnace_level'),
+        ({'troops': {'marksman': {'furnace_level': 1}}}, 'profile.troops.marksman.furnace_level'),
         ({'power': -5}, 'profile.power'),
         ({'discord_id': 'x' * 65}, 'profile.discord_id'),
     ]
@@ -180,7 +185,11 @@ def _seed(client, admin):
     put(client, '21', profile={'game_name': 'Zed', 'alliance': 'AAA', 'furnace_level': 'FC10', 'power': 900_000_000,
                                'troops': TROOPS, 'discord_id': 'zed'},
         answers=good_answers(availability=['w1', 'w2'], roles=['rally_leader'], gem_spend=50000))
-    put(client, '22', profile={'game_name': 'amy', 'alliance': 'BBB', 'furnace_level': '30', 'power': 100_000_000,
+    # 22 has a LEGACY pre-FC furnace '30' (stored through the generic profile route, as Minister / pre-p2d tyrant
+    # sign-ups did); the tyrant submit doesn't resend it, so it stays as stored
+    assert client.put('/api/admin/profiles/22', json={'game_name': 'amy', 'furnace_level': '30'},
+                      headers=admin).status_code in (200, 201)
+    put(client, '22', profile={'game_name': 'amy', 'alliance': 'BBB', 'power': 100_000_000,
                                'troops': {'infantry': {'furnace_level': 'FC1', 'tier': 8}}},
         answers=good_answers(availability=['w3'], discord_vc=False, roles=['joiner', 'gathering'], gem_spend=None))
     put(client, '23', profile={'game_name': '=HYPERLINK("x")', 'alliance': 'aaa'},
@@ -252,7 +261,10 @@ def test_exports_are_formula_safe(client, admin):
     by = {row[0]: dict(zip(head, row)) for row in rows[1:]}
     assert by['23']['In-Game Name'] == '\'=HYPERLINK("x")'
     assert by['21']['Furnace Level'] == 'FC10' and by['22']['Furnace Level'] == '30' and by['21']['Power (M)'] == '900.0'
-    assert by['21']['Infantry Furnace Level'] == 'FC5' and by['21']['Infantry T-Level'] == 'T10'
+    assert by['21']['Infantry Camp Level'] == 'FC5' and by['21']['Infantry Tier'] == 'T10'
+    assert by['21']['Lancer Camp Level'] == 'FC3' and by['21']['Marksman Camp Level'] == ''
+    assert by['21']['Marksman Tier'] == 'T11' and by['21']['Joiner Strength'] == str(5 + 10 + 3 + 9 + 0 + 11)
+    assert by['23']['Joiner Strength'] == ''
     assert by['21']['Rally Leader'] == 'Yes' and by['22']['Rally Leader'] == 'No'
     for url in (f'/api/admin/tyrant/rounds/{rnd["id"]}/export', f'/api/admin/rounds/{rnd["id"]}/export'):
         r = client.get(url, headers=admin)
@@ -285,3 +297,138 @@ def test_ministry_ignores_tyrant_profile_fields(client, admin):
     r = client.put('/api/events/ministry/current/application/31',
                    json={'profile': {'game_name': 'M', 'alliance': 'MMM', 'troops': {'infantry': 5}}, 'answers': {}})
     assert r.status_code == 201 and r.json['profile']['troops'] == {'infantry': 5}
+
+
+# ---------------------------------------------------------------- p2d: FC-only camps, filters, strength
+
+def _full(camp, tier):
+    return {k: {'furnace_level': camp, 'tier': tier} for k in ('infantry', 'lancer', 'marksman')}
+
+
+def _seed_camps(client, admin):
+    """41 = FC10 camps + T11 everywhere (the best joiner), 42 = FC10/T11 but FC9 lancer camp,
+    43 = FC10 camps with T10 marksmen, 44 = LEGACY pre-FC camps (stored before the rule), 45 = no troop data."""
+    rnd = start_round(client, admin, 'FDT camps', event=EVENT)
+    assert put(client, '41', profile={'furnace_level': 'FC10', 'troops': _full('FC10', 11)}).status_code == 201
+    t42 = _full('FC10', 11)
+    t42['lancer'] = {'furnace_level': 'FC9', 'tier': 11}
+    assert put(client, '42', profile={'furnace_level': 'FC10', 'troops': t42}).status_code == 201
+    t43 = _full('FC10', 11)
+    t43['marksman'] = {'furnace_level': 'FC10', 'tier': 10}
+    assert put(client, '43', profile={'furnace_level': 'FC8', 'troops': t43}).status_code == 201
+    # legacy row: the generic profile route keeps free-form troops and pre-FC codes (no data migration, owner rule)
+    r = client.put('/api/admin/profiles/44', json={'game_name': 'Old', 'alliance': 'OLD', 'furnace_level': '25',
+                                                  'troops': _full('25', 10)}, headers=admin)
+    assert r.status_code in (200, 201), r.json
+    assert put(client, '44', profile={'game_name': 'Old', 'alliance': 'OLD'}).status_code == 201
+    assert put(client, '45').status_code == 201
+    return rnd
+
+
+def _fids(client, admin, rnd, qs):
+    r = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/applications?{qs}', headers=admin)
+    assert r.status_code == 200, r.json
+    return sorted(a['fid'] for a in r.json['applications'])
+
+
+def test_tyrant_furnace_and_camps_fc_only_but_any_combination(client, admin):
+    start_round(client, admin, 'FDT', event=EVENT)
+    # any combination: camps above or below the furnace, T11 in an FC1 camp, T8 in an FC10 camp
+    t = {'infantry': {'furnace_level': 'FC1', 'tier': 11}, 'lancer': {'furnace_level': 'fc10', 'tier': 8},
+         'marksman': {'furnace_level': 'FC9', 'tier': 9}}
+    r = put(client, '51', profile={'furnace_level': 'FC2', 'troops': t})
+    assert r.status_code == 201, r.json
+    assert r.json['profile']['troops']['lancer'] == {'furnace_level': 'FC10', 'tier': 8}  # normalised
+    r = put(client, '51', profile={'furnace_level': '30'})
+    assert r.status_code == 400 and r.json['code'] == 'VALIDATION_ERROR' and r.json['field'] == 'profile.furnace_level'
+    r = put(client, '51', profile={'troops': {'infantry': {'furnace_level': '30', 'tier': 11}}})
+    assert r.status_code == 400 and r.json['field'] == 'profile.troops.infantry.furnace_level'
+    assert client.get('/api/profile/51').json['furnace_level'] == 'FC2'  # nothing written
+    # admin edits go through the same rule
+    aid = client.get('/api/admin/tyrant/rounds/current/applications', headers=admin).json['applications'][0]['id']
+    r = client.put(f'/api/admin/applications/{aid}', json={'profile': {'furnace_level': '12'}}, headers=admin)
+    assert r.status_code == 400 and r.json['field'] == 'profile.furnace_level'
+
+
+def test_minister_keeps_pre_fc_levels(client, admin):
+    start_round(client, admin, 'M', event='ministry')
+    r = client.put('/api/events/ministry/current/application/61',
+                   json={'profile': {'game_name': 'M', 'alliance': 'MMM', 'furnace_level': '30'}, 'answers': {}})
+    assert r.status_code == 201 and r.json['profile']['furnace_level'] == '30'
+    assert client.put('/api/profile/61', json={'furnace_level': '1'}).json['profile']['furnace_level'] == '1'
+
+
+def test_legacy_pre_fc_values_shown_as_stored(client, admin):
+    rnd = _seed_camps(client, admin)
+    apps = {a['fid']: a for a in client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/applications',
+                                             headers=admin).json['applications']}
+    assert apps['44']['profile']['furnace_level'] == '25'
+    assert apps['44']['profile']['troops']['infantry'] == {'furnace_level': '25', 'tier': 10}
+    # resubmitting the legacy camp level is refused: the new rule applies on submit
+    r = put(client, '44', profile={'troops': _full('25', 10)})
+    assert r.status_code == 400 and r.json['field'] == 'profile.troops.infantry.furnace_level'
+
+
+def test_admin_camp_and_tier_filters(client, admin):
+    rnd = _seed_camps(client, admin)
+    # 'FC10 camps with T11' in all three troop types: ONE query
+    assert _fids(client, admin, rnd, 'min_camp=FC10&min_tier=T11') == ['41']
+    assert _fids(client, admin, rnd, 'min_camp=fc10&min_tier=11&troop=all') == ['41']
+    assert _fids(client, admin, rnd, 'min_tier=11') == ['41', '42']  # 'who has T11' everywhere
+    assert _fids(client, admin, rnd, 'min_tier=11&troop=marksman') == ['41', '42']
+    assert _fids(client, admin, rnd, 'min_tier=11&troop=infantry') == ['41', '42', '43']
+    assert _fids(client, admin, rnd, 'min_camp=FC10&troop=lancer') == ['41', '43']
+    assert _fids(client, admin, rnd, 'min_camp=FC9') == ['41', '42', '43']
+    assert _fids(client, admin, rnd, 'min_camp=FC1') == ['41', '42', '43']  # legacy pre-FC camps never match
+    assert _fids(client, admin, rnd, 'min_tier=10') == ['41', '42', '43', '44']
+    assert _fids(client, admin, rnd, 'troop=lancer') == ['41', '42', '43', '44', '45']  # troop alone: no filter
+    assert _fids(client, admin, rnd, 'min_tier=T11&min_furnace=FC10') == ['41', '42']  # combines with others
+    base = f'/api/admin/tyrant/rounds/{rnd["id"]}/applications'
+    for qs, field in (('min_camp=25', 'min_camp'), ('min_camp=FC11', 'min_camp'), ('min_tier=12', 'min_tier'),
+                      ('min_tier=Tx', 'min_tier'), ('min_tier=0', 'min_tier'), ('troop=archer&min_tier=8', 'troop')):
+        r = client.get(f'{base}?{qs}', headers=admin)
+        assert r.status_code == 400 and r.json['code'] == 'VALIDATION_ERROR' and r.json['field'] == field, qs
+
+
+def test_joiner_strength_sort(client, admin):
+    rnd = _seed_camps(client, admin)
+    r = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/applications?sort=strength&dir=desc', headers=admin).json
+    got = [(a['fid'], a['joiner_strength']) for a in r['applications']]
+    # 41: 3*(10+11)=63; 42: 63-1=62; 43: 63-1=62; 44: pre-FC camps count 0 -> 3*10=30; 45: no data -> None, last
+    assert got[0] == ('41', 63) and {f for f, _ in got[1:3]} == {'42', '43'} and got[1][1] == got[2][1] == 62
+    assert got[3:] == [('44', 30), ('45', None)]
+    r = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/applications?sort=strength&dir=asc', headers=admin).json
+    assert [a['fid'] for a in r['applications']][0] == '44' and r['applications'][-1]['fid'] == '45'  # blanks last
+
+
+def test_summary_camp_level_counts(client, admin):
+    rnd = _seed_camps(client, admin)
+    s = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/summary', headers=admin).json
+    assert s['camp_levels']['infantry'] == {'FC10': 3, '25': 1, 'none': 1}
+    assert s['camp_levels']['lancer'] == {'FC10': 2, 'FC9': 1, '25': 1, 'none': 1}
+    assert list(s['camp_levels']['lancer']) == ['FC10', 'FC9', '25', 'none']  # FC high first, legacy, blanks last
+    assert s['troop_tiers']['marksman'] == {'T11': 2, 'T10': 2, 'none': 1}
+
+
+def test_exports_camp_columns(client, admin):
+    rnd = _seed_camps(client, admin)
+    r = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/export.csv', headers=admin)
+    rows = list(csv.reader(io.StringIO(r.data.decode('utf-8-sig'))))
+    head = rows[0]
+    for k in ('Infantry', 'Lancer', 'Marksman'):
+        assert f'{k} Camp Level' in head and f'{k} Tier' in head
+    assert head.index('Infantry Tier') == head.index('Infantry Camp Level') + 1
+    by = {row[0]: dict(zip(head, row)) for row in rows[1:]}
+    assert by['42']['Lancer Camp Level'] == 'FC9' and by['42']['Lancer Tier'] == 'T11'
+    assert by['44']['Infantry Camp Level'] == '25'  # legacy shown as stored
+    assert by['41']['Joiner Strength'] == '63' and by['45']['Joiner Strength'] == ''
+    wb = openpyxl.load_workbook(io.BytesIO(client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/export',
+                                                      headers=admin).data))
+    ws = wb['Tyrant Poll Results']
+    xhead = [c.value for c in ws[1]]
+    assert xhead == head
+    col = xhead.index('Marksman Camp Level') + 1
+    vals = {ws.cell(row=i, column=1).value: ws.cell(row=i, column=col).value for i in range(2, ws.max_row + 1)}
+    assert vals['43'] == 'FC10' and vals['44'] == '25'
+    summary = [[c.value for c in row] for row in wb['Summary'].iter_rows()]
+    assert ['Lancer camp level', 'Players'] in summary and ['FC9', 1] in summary

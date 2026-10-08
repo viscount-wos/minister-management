@@ -84,3 +84,16 @@ def test_migration_4_converts_integers(tmp_path, monkeypatch):
     assert con.execute('SELECT COUNT(*) FROM applications').fetchone()[0] == 0
     con.close()
     assert core_db.migrate(p) == {}  # idempotent
+
+
+def test_fc_only_helpers():
+    from core.errors import ApiError
+    from core.furnace import FC_LEVELS, fc_number, is_fc, validate_fc_level
+    assert FC_LEVELS == tuple(f'FC{n}' for n in range(10, 0, -1))
+    assert validate_fc_level('fc7') == 'FC7' and validate_fc_level(' ') is None and validate_fc_level(None) is None
+    for bad in ('30', 30, '1', 'FC11', 'FC0', 'x', True):
+        with pytest.raises(ApiError) as e:
+            validate_fc_level(bad, 'profile.troops.infantry.furnace_level')
+        assert e.value.field == 'profile.troops.infantry.furnace_level'
+    assert fc_number('FC10') == 10 and fc_number('fc1') == 1 and fc_number('30') == 0 and fc_number(None) == 0
+    assert is_fc('FC3') and not is_fc('3')

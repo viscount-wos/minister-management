@@ -45,3 +45,28 @@ def furnace_ordinal(code):
     if c is None:
         return 0
     return PRE_FC_MAX + int(c[2:]) if c.startswith('FC') else int(c)
+
+
+# Fire Crystal levels only (FC10 .. FC1). Frost Dragon Tyrant offers these alone (owner rule, p2d): the furnace and
+# every troop camp of a Tyrant sign-up must be FC1-FC10. Minister (and SVS) keep the full list above.
+FC_LEVELS = FURNACE_LEVELS[:FC_MAX]
+
+
+def is_fc(code):
+    return isinstance(code, str) and code in FC_LEVELS
+
+
+def fc_number(code):
+    """'FC7' -> 7; a pre-FC level, blank or anything invalid -> 0."""
+    c = normalize_furnace(code)
+    return int(c[2:]) if c and c.startswith('FC') else 0
+
+
+def validate_fc_level(value, field='furnace_level'):
+    """None/'' -> None; otherwise 'FC1'..'FC10' (normalised, 'fc5' -> 'FC5') or VALIDATION_ERROR naming ``field``."""
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    code = normalize_furnace(value)
+    if not is_fc(code):
+        raise validation_error(f'{field} must be one of FC1-FC10', field)
+    return code

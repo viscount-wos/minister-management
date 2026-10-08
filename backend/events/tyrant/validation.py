@@ -6,15 +6,19 @@ Option lists are the ones of the live tyrantpoll app (templates/poll.html):
 - "can listen in Discord VC" (bool);
 - estimated max gem spend: tyrantpoll had a free-text box ("e.g. 10000"); here a whole number of gems;
 - roles: Rally Leader, Joiner, Gathering/Looting, Battle Management, Event Preparation;
-- troops (PROFILE field ``troops``): per troop type a furnace level and a tier T8-T11, each optional.
+- troops (PROFILE field ``troops``): per troop type its CAMP level (key ``furnace_level``, kept for compatibility)
+  and a tier (the UI offers T8-T11), each optional in the API (the wizard requires all six).
 
-Furnace levels (profile ``furnace_level`` and each troop's ``furnace_level``) are the shared string codes of
-core/furnace.py: 'FC1'..'FC10' or '1'..'30' (tyrantpoll offered FC1-FC10 only; the owner wants the full list).
+Furnace levels: Tyrant accepts Fire Crystal levels ONLY (owner rule, p2d): the profile ``furnace_level`` and each
+troop camp's ``furnace_level`` must be 'FC1'..'FC10' (``core.furnace.validate_fc_level``). Any combination is fine:
+no rule ties a tier to a camp level, and a camp may be above or below the furnace. Pre-FC codes ('1'..'30') stored
+earlier (e.g. by Minister, or before this rule) are kept and shown as they are; they are only rejected when SENT
+on a Tyrant submit. Minister keeps the full list (core/profiles.py).
 """
 import re
 
 from core.errors import validation_error
-from core.furnace import validate_furnace
+from core.furnace import validate_fc_level
 from core.validation import validate_bool, validate_number
 
 ROLES = ('rally_leader', 'joiner', 'gathering', 'battle_mgmt', 'event_prep')
@@ -138,8 +142,15 @@ def _troop_level(value, field, lo, hi):
     return validate_number(value, field, minimum=lo, maximum=hi, integer=True)
 
 
+def validate_profile_furnace(value, field='profile.furnace_level'):
+    """Tyrant furnace: FC1-FC10 or blank."""
+    return validate_fc_level(value, field)
+
+
 def validate_troops(value, field='profile.troops'):
-    """Canonical troop levels: {infantry|lancer|marksman: {furnace_level: code|null, tier: 1-11|null}}."""
+    """Canonical troop levels: {infantry|lancer|marksman: {furnace_level: 'FC1'..'FC10'|null, tier: 1-11|null}}.
+
+    ``furnace_level`` is the troop's CAMP level (camps can lag the furnace)."""
     if value is None:
         return None
     if not isinstance(value, dict):
@@ -156,6 +167,6 @@ def validate_troops(value, field='profile.troops'):
             continue
         if not isinstance(entry, dict) or set(entry) - {'furnace_level', 'tier'}:
             raise validation_error('troop entry must be {furnace_level, tier}', f)
-        out[kind] = {'furnace_level': validate_furnace(entry.get('furnace_level'), f + '.furnace_level'),
+        out[kind] = {'furnace_level': validate_fc_level(entry.get('furnace_level'), f + '.furnace_level'),
                      'tier': _troop_level(entry.get('tier'), f + '.tier', *TROOP_TIER_RANGE)}
     return out
