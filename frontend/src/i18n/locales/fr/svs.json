@@ -101,8 +101,8 @@
     "minimumsHint": "Niveau de camp et palier minimum par type de troupe. Les participants nommés en dessous reçoivent un avertissement.",
     "minCamp": "{{troop}} : niveau de camp minimum",
     "minTier": "{{troop}} : palier minimum",
-    "anyCamp": "Tout camp",
-    "anyTier": "Tout",
+    "anyCamp": "Tous",
+    "anyTier": "Tous",
     "notes": "Notes",
     "addNotes": "Ajouter des notes",
     "notesPlaceholder": "Ce que l'État doit savoir sur ce groupe",
@@ -256,13 +256,13 @@
     "troopRatio": "Ratio de troupes",
     "petNotSet": "non défini",
     "disguise": "En jeu : photo de {{hero}}",
-    "leadWith": "Mener avec {{hero}}",
     "anyHero": "Au choix",
     "ownRatio": "Ratio propre",
-    "sameRatio": "Ratio du chef",
     "noLeaders": "Pas encore de chef de rassemblement.",
     "notFoundTitle": "Ce lien de plan ne fonctionne pas",
     "notFoundBody": "Il a peut-être été remplacé par un nouveau lien ou désactivé. Demandez le lien actuel à vos chefs.",
-    "timesNote": "Les horaires de bataille sont en heure du jeu (UTC)."
+    "timesNote": "Les horaires de bataille sont en heure du jeu (UTC).",
+    "joinersRatioNote": "Les participants utilisent le ratio du chef, sauf si un ratio propre est indiqué.",
+    "localTimes": "{{range}} chez vous"
   }
 }

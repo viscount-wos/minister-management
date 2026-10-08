@@ -101,7 +101,7 @@
     "minimumsHint": "Minimum camp level and tier per troop type. Named joiners below them get a warning.",
     "minCamp": "{{troop}}: minimum camp level",
     "minTier": "{{troop}}: minimum tier",
-    "anyCamp": "Any camp",
+    "anyCamp": "Any",
     "anyTier": "Any",
     "notes": "Notes",
     "addNotes": "Add notes",
@@ -256,13 +256,13 @@
     "troopRatio": "Troop ratio",
     "petNotSet": "not set",
     "disguise": "In game: {{hero}} picture",
-    "leadWith": "Lead with {{hero}}",
     "anyHero": "Any",
     "ownRatio": "Own ratio",
-    "sameRatio": "Leader's troop ratio",
     "noLeaders": "No rally leaders yet.",
     "notFoundTitle": "This plan link doesn't work",
     "notFoundBody": "It may have been replaced by a new link or turned off. Ask your leaders for the current link.",
-    "timesNote": "Battle times are game time (UTC)."
+    "timesNote": "Battle times are game time (UTC).",
+    "joinersRatioNote": "Joiners use the leader's troop ratio unless an own ratio is shown.",
+    "localTimes": "{{range}} your time"
   }
 }

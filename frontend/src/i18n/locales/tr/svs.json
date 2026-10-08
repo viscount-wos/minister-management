@@ -101,8 +101,8 @@
     "minimumsHint": "Birlik türü başına en düşük kamp seviyesi ve kademe. Altında kalan isimli katılımcılar uyarı alır.",
     "minCamp": "{{troop}}: en düşük kamp seviyesi",
     "minTier": "{{troop}}: en düşük kademe",
-    "anyCamp": "Fark etmez",
-    "anyTier": "Fark etmez",
+    "anyCamp": "Hepsi",
+    "anyTier": "Hepsi",
     "notes": "Notlar",
     "addNotes": "Not ekle",
     "notesPlaceholder": "Eyaletin bu grup hakkında bilmesi gerekenler",
@@ -256,13 +256,13 @@
     "troopRatio": "Birlik oranı",
     "petNotSet": "ayarlanmadı",
     "disguise": "Oyunda: {{hero}} resmi",
-    "leadWith": "{{hero}} ile öne geç",
     "anyHero": "Serbest",
     "ownRatio": "Kendi oranı",
-    "sameRatio": "Liderin birlik oranı",
     "noLeaders": "Henüz ralli lideri yok.",
     "notFoundTitle": "Bu plan bağlantısı çalışmıyor",
     "notFoundBody": "Yeni bir bağlantıyla değiştirilmiş ya da kapatılmış olabilir. Güncel bağlantıyı liderlerinden iste.",
-    "timesNote": "Savaş saatleri oyun saatidir (UTC)."
+    "timesNote": "Savaş saatleri oyun saatidir (UTC).",
+    "joinersRatioNote": "Kendi oranı gösterilmedikçe katılımcılar liderin birlik oranını kullanır.",
+    "localTimes": "senin saatinle {{range}}"
   }
 }

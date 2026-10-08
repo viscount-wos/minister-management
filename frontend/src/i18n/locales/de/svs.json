@@ -101,8 +101,8 @@
     "minimumsHint": "Mindest-Lagerstufe und -Truppenstufe pro Truppenart. Benannte Beitretende darunter bekommen eine Warnung.",
     "minCamp": "{{troop}}: Mindest-Lagerstufe",
     "minTier": "{{troop}}: Mindest-Truppenstufe",
-    "anyCamp": "Beliebig",
-    "anyTier": "Beliebig",
+    "anyCamp": "Alle",
+    "anyTier": "Alle",
     "notes": "Notizen",
     "addNotes": "Notizen hinzufügen",
     "notesPlaceholder": "Was der Staat über diese Gruppe wissen sollte",
@@ -256,13 +256,13 @@
     "troopRatio": "Truppenverhältnis",
     "petNotSet": "nicht gesetzt",
     "disguise": "Im Spiel: Bild von {{hero}}",
-    "leadWith": "Mit {{hero}} anführen",
     "anyHero": "Beliebig",
     "ownRatio": "Eigenes Verhältnis",
-    "sameRatio": "Verhältnis des Leiters",
     "noLeaders": "Noch keine Rally-Leiter.",
     "notFoundTitle": "Dieser Plan-Link funktioniert nicht",
     "notFoundBody": "Er wurde vielleicht durch einen neuen Link ersetzt oder abgeschaltet. Frag deine Leiter nach dem aktuellen Link.",
-    "timesNote": "Kampfzeiten sind Spielzeit (UTC)."
+    "timesNote": "Kampfzeiten sind Spielzeit (UTC).",
+    "joinersRatioNote": "Beitretende nutzen das Truppenverhältnis des Leiters, außer ein eigenes ist angegeben.",
+    "localTimes": "{{range}} deine Zeit"
   }
 }

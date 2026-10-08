@@ -101,8 +101,8 @@
     "minimumsHint": "Minimalny poziom obozu i wojsk dla każdego typu. Imienni dołączający poniżej dostają ostrzeżenie.",
     "minCamp": "{{troop}}: minimalny poziom obozu",
     "minTier": "{{troop}}: minimalny poziom wojsk",
-    "anyCamp": "Dowolny",
-    "anyTier": "Dowolny",
+    "anyCamp": "Każdy",
+    "anyTier": "Każdy",
     "notes": "Notatki",
     "addNotes": "Dodaj notatki",
     "notesPlaceholder": "Co stan powinien wiedzieć o tej grupie",
@@ -256,13 +256,13 @@
     "troopRatio": "Proporcje wojsk",
     "petNotSet": "nieustawione",
     "disguise": "W grze: zdjęcie {{hero}}",
-    "leadWith": "Prowadź bohaterem {{hero}}",
     "anyHero": "Dowolny",
     "ownRatio": "Własne proporcje",
-    "sameRatio": "Proporcje lidera",
     "noLeaders": "Nie ma jeszcze liderów rajdów.",
     "notFoundTitle": "Ten link do planu nie działa",
     "notFoundBody": "Mógł zostać zastąpiony nowym linkiem albo wyłączony. Poproś liderów o aktualny link.",
-    "timesNote": "Godziny bitwy to czas gry (UTC)."
+    "timesNote": "Godziny bitwy to czas gry (UTC).",
+    "joinersRatioNote": "Dołączający używają proporcji lidera, chyba że podano własne.",
+    "localTimes": "{{range}} Twój czas"
   }
 }

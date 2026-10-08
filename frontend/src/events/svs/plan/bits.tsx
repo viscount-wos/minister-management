@@ -26,7 +26,7 @@ export function RatioBar({ ratio, compact = false, labels = true, testid }: { ra
   }
   return (
     <div data-testid={testid} data-ratio={`${ratio.inf}/${ratio.lan}/${ratio.mks}`}>
-      <div className={`flex w-full overflow-hidden rounded-full bg-dark-input ${compact ? 'h-2' : 'h-3'}`} dir="ltr" aria-hidden="true">
+      <div className={`flex w-full overflow-hidden rounded-full bg-dark-input ${compact ? 'h-2' : 'h-3'}`} aria-hidden="true">
         {RATIO_KEYS.map((k) => (ratio[k] > 0 ? <div key={k} className={SEG[k]} style={{ width: `${ratio[k]}%` }} /> : null))}
       </div>
       {labels && <div className={`mt-1 flex flex-wrap gap-x-3 gap-y-0.5 ${compact ? 'text-[11px]' : 'text-xs'}`}>

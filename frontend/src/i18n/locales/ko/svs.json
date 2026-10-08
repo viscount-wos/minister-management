@@ -101,8 +101,8 @@
     "minimumsHint": "병종별 최소 병영 레벨과 티어. 이보다 낮은 지정 참여자에게는 경고가 표시됩니다.",
     "minCamp": "{{troop}}: 최소 병영 레벨",
     "minTier": "{{troop}}: 최소 티어",
-    "anyCamp": "제한 없음",
-    "anyTier": "제한 없음",
+    "anyCamp": "전체",
+    "anyTier": "전체",
     "notes": "메모",
     "addNotes": "메모 추가",
     "notesPlaceholder": "이 그룹에 대해 서버가 알아야 할 내용",
@@ -256,13 +256,13 @@
     "troopRatio": "병력 비율",
     "petNotSet": "미설정",
     "disguise": "게임 내: {{hero}} 사진",
-    "leadWith": "{{hero}}(으)로 선두",
     "anyHero": "자유",
     "ownRatio": "개별 비율",
-    "sameRatio": "리더의 병력 비율",
     "noLeaders": "아직 집결 리더가 없습니다.",
     "notFoundTitle": "이 계획 링크는 작동하지 않습니다",
     "notFoundBody": "새 링크로 바뀌었거나 꺼졌을 수 있습니다. 리더에게 현재 링크를 요청하세요.",
-    "timesNote": "전투 시간은 게임 시간(UTC)입니다."
+    "timesNote": "전투 시간은 게임 시간(UTC)입니다.",
+    "joinersRatioNote": "개별 비율이 표시되지 않으면 참여자는 리더의 병력 비율을 따릅니다.",
+    "localTimes": "내 시간 {{range}}"
   }
 }

@@ -139,26 +139,23 @@ function LeaderView({ l, group, spots, found }: { l: ViewLeader; group: ViewGrou
                     <span className="text-theme-dim me-1.5">{i + 1}.</span>
                     <Name p={j.player} spotId={spot} found={found} />
                   </div>
-                  <div className="flex flex-wrap gap-3">
+                  <div className={l.split ? 'grid grid-cols-2 gap-2' : ''}>
                     {sides.map((s) => {
                       const js = j[s];
                       if (!js) return null;
                       return (
-                        <div key={s} className="flex items-center gap-2 min-w-0">
+                        <div key={s} className="flex items-center gap-2 min-w-0" data-testid={`view-joiner-${s}`}>
                           <HeroTile hero={js.lead_hero} size="sm" />
                           <div className="min-w-0 text-xs">
                             {l.split && <div className={`font-bold ${team.text}`}>{t(`svs:plan.side.${s}`)}</div>}
-                            <div className="text-theme-dim">{t('svs:view.leadWith', { hero: js.lead_hero?.name ?? t('svs:view.anyHero') })}</div>
-                            {js.ratio_overridden && js.ratio ? (
+                            {!l.split && <div className="text-theme-dim">{t('svs:plan.leadHeroShort')}</div>}
+                            {js.ratio_overridden && js.ratio && (
                               <span className="block text-warning font-semibold" data-testid="view-own-ratio">
                                 {t('svs:view.ownRatio')}:{' '}
                                 <bdi dir="ltr">
-                                  {t('tyrant:admin.troopShort.infantry')} {js.ratio.inf}% · {t('tyrant:admin.troopShort.lancer')} {js.ratio.lan}% ·{' '}
-                                  {t('tyrant:admin.troopShort.marksman')} {js.ratio.mks}%
+                                  {js.ratio.inf}/{js.ratio.lan}/{js.ratio.mks}
                                 </bdi>
                               </span>
-                            ) : (
-                              <span className="block text-theme-dim">{t('svs:view.sameRatio')}</span>
                             )}
                           </div>
                         </div>
@@ -169,6 +166,7 @@ function LeaderView({ l, group, spots, found }: { l: ViewLeader; group: ViewGrou
               );
             })}
           </ol>
+          <p className="mt-1.5 text-[11px] text-theme-dim">{t('svs:view.joinersRatioNote')}</p>
         </section>
       )}
 
@@ -333,8 +331,12 @@ export default function SvsPlanView() {
             <Clock className="w-4 h-4" aria-hidden="true" />
             <bdi dir="ltr">
               {plan.battle.start}–{plan.battle.end} UTC
-              {local(plan.battle.start) && ` (${formatTimeInTimezone(plan.battle.start, timezone)}–${formatTimeInTimezone(plan.battle.end, timezone)})`}
             </bdi>
+            {local(plan.battle.start) && (
+              <span>
+                ({t('svs:view.localTimes', { range: `\u2066${formatTimeInTimezone(plan.battle.start, timezone)}–${formatTimeInTimezone(plan.battle.end, timezone)}\u2069` })})
+              </span>
+            )}
           </p>
         </header>
 

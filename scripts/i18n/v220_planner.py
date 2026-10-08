@@ -651,6 +651,36 @@ CHANGELOG = {
     'ar': 'خطط معركة SVS: يمكن للقادة مشاركة خطة ليرى الجميع دورهم وأبطالهم ونسبة قواتهم والتوقيتات. اكتب اسمك في «ابحث عني» للانتقال إلى مكانك.',
 }
 
+# Keys superseded during the build (kept out of the locale files) and keys added later (all languages in one place).
+DROP = {'view.leadWith', 'view.sameRatio'}
+LATER = {
+    # short words: they sit in narrow selects
+    'plan.anyCamp': {'en': 'Any', 'es': 'Todos', 'fr': 'Tous', 'de': 'Alle', 'pl': 'Każdy', 'ko': '전체', 'zh': '不限', 'tr': 'Hepsi', 'ar': 'الكل'},
+    'plan.anyTier': {'en': 'Any', 'es': 'Todos', 'fr': 'Tous', 'de': 'Alle', 'pl': 'Każdy', 'ko': '전체', 'zh': '不限', 'tr': 'Hepsi', 'ar': 'الكل'},
+    'view.joinersRatioNote': {
+        'en': "Joiners use the leader's troop ratio unless an own ratio is shown.",
+        'es': 'Los participantes usan la proporción del líder salvo que se indique una propia.',
+        'fr': "Les participants utilisent le ratio du chef, sauf si un ratio propre est indiqué.",
+        'de': 'Beitretende nutzen das Truppenverhältnis des Leiters, außer ein eigenes ist angegeben.',
+        'pl': 'Dołączający używają proporcji lidera, chyba że podano własne.',
+        'ko': '개별 비율이 표시되지 않으면 참여자는 리더의 병력 비율을 따릅니다.',
+        'zh': '除非标明专属比例，加入者使用队长的兵种比例。',
+        'tr': 'Kendi oranı gösterilmedikçe katılımcılar liderin birlik oranını kullanır.',
+        'ar': 'يستخدم المنضمون نسبة قوات القائد ما لم تُذكر نسبة خاصة.',
+    },
+    'view.localTimes': {
+        'en': '{{range}} your time',
+        'es': '{{range}} tu hora',
+        'fr': '{{range}} chez vous',
+        'de': '{{range}} deine Zeit',
+        'pl': '{{range}} Twój czas',
+        'ko': '내 시간 {{range}}',
+        'zh': '你的时间 {{range}}',
+        'tr': 'senin saatinle {{range}}',
+        'ar': '{{range}} بتوقيتك',
+    },
+}
+
 
 def put(tree, dotted, value):
     parts = dotted.split('.')
@@ -670,7 +700,10 @@ def main():
         data.pop('plan', None)
         data.pop('view', None)
         for k, v in zip(keys, vals):
-            put(data, k, v)
+            if k not in DROP:
+                put(data, k, v)
+        for k, by_lang in LATER.items():
+            put(data, k, by_lang[lang])
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         cpath = LOC / lang / 'changelog.json'
         c = json.loads(cpath.read_text(encoding='utf-8'))

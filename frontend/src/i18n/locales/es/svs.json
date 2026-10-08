@@ -101,8 +101,8 @@
     "minimumsHint": "Nivel mínimo de campamento y de tropa por tipo. Los participantes con nombre por debajo reciben un aviso.",
     "minCamp": "{{troop}}: nivel mínimo de campamento",
     "minTier": "{{troop}}: nivel mínimo de tropa",
-    "anyCamp": "Cualquiera",
-    "anyTier": "Cualquiera",
+    "anyCamp": "Todos",
+    "anyTier": "Todos",
     "notes": "Notas",
     "addNotes": "Añadir notas",
     "notesPlaceholder": "Lo que el estado debe saber de este grupo",
@@ -256,13 +256,13 @@
     "troopRatio": "Proporción de tropas",
     "petNotSet": "sin definir",
     "disguise": "En el juego: foto de {{hero}}",
-    "leadWith": "Lidera con {{hero}}",
     "anyHero": "Cualquiera",
     "ownRatio": "Proporción propia",
-    "sameRatio": "Proporción del líder",
     "noLeaders": "Aún no hay líderes de rally.",
     "notFoundTitle": "Este enlace del plan no funciona",
     "notFoundBody": "Puede que lo hayan cambiado por uno nuevo o desactivado. Pide el enlace actual a tus líderes.",
-    "timesNote": "Las horas de batalla son hora del juego (UTC)."
+    "timesNote": "Las horas de batalla son hora del juego (UTC).",
+    "joinersRatioNote": "Los participantes usan la proporción del líder salvo que se indique una propia.",
+    "localTimes": "{{range}} tu hora"
   }
 }

@@ -256,13 +256,13 @@
     "troopRatio": "兵种比例",
     "petNotSet": "未设置",
     "disguise": "游戏中：{{hero}} 头像",
-    "leadWith": "用 {{hero}} 带队",
     "anyHero": "任意",
     "ownRatio": "专属比例",
-    "sameRatio": "队长的兵种比例",
     "noLeaders": "还没有集结队长。",
     "notFoundTitle": "这个计划链接无法使用",
     "notFoundBody": "它可能已被新链接取代或已关闭。请向队长索取当前链接。",
-    "timesNote": "战斗时间为游戏时间（UTC）。"
+    "timesNote": "战斗时间为游戏时间（UTC）。",
+    "joinersRatioNote": "除非标明专属比例，加入者使用队长的兵种比例。",
+    "localTimes": "你的时间 {{range}}"
   }
 }
