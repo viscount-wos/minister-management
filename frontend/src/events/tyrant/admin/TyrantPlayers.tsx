@@ -319,6 +319,110 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
         </div>
       )}
 
+      {/* ---------------------------------------------------------------- stats (for the filtered set) */}
+      {summary && (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard
+              testId="stat-total"
+              label={t('tyrant:admin.stats.total')}
+              value={summary.total}
+              sub={filtered ? t('tyrant:admin.ofRound', { total: summary.round_total }) : undefined}
+            />
+            <StatCard testId="stat-opening-rush" label={t('tyrant:admin.stats.openingRush')} value={summary.opening_rush} />
+            <StatCard testId="stat-discord-vc" label={t('tyrant:admin.stats.discordVc')} value={summary.discord_vc} />
+            <StatCard testId="stat-alliances" label={t('tyrant:admin.stats.alliances')} value={summary.alliances.filter((a) => a.alliance).length} />
+          </div>
+
+          {/* breakdowns right under the headline stats (owner); rows are filters too */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <Bars
+              testId="by-window"
+              title={t('tyrant:admin.byWindow')}
+              total={summary.total}
+              rows={summary.windows.map((w) => ({
+                key: w.id,
+                n: w.count,
+                active: splitList(filters.windows).includes(w.id),
+                onClick: () => F.toggleInList('windows', w.id),
+                label: w.rush ? (
+                  <>
+                    {t('tyrant:step2.openingRush')} <Range start={w.start} end={w.end} />
+                  </>
+                ) : (
+                  <Range start={w.start} end={w.end} />
+                ),
+              }))}
+            />
+            <Bars
+              testId="by-role"
+              title={t('tyrant:admin.byRole')}
+              total={summary.total}
+              rows={ROLES.map((r) => ({
+                key: r,
+                n: summary.roles[r] ?? 0,
+                label: t(`tyrant:roles.${r}`),
+                active: rolesSel.includes(r),
+                onClick: () => F.toggleInList('roles', r),
+              }))}
+            />
+            <Bars
+              testId="by-alliance"
+              title={t('tyrant:admin.byAlliance')}
+              total={summary.total}
+              rows={summary.alliances.map((a) => ({
+                key: a.alliance ?? 'none',
+                n: a.count,
+                label: a.alliance ?? t('tyrant:admin.none'),
+                active: !!a.alliance && allianceSel.includes(a.alliance),
+                onClick: () => {
+                  if (a.alliance) F.toggleInList('alliance', a.alliance);
+                },
+              }))}
+            />
+          </div>
+
+          <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5" data-testid="by-troop">
+            <h3 className="font-semibold text-accent">{t('tyrant:admin.byTroop')}</h3>
+            <p className="text-xs text-theme-dim mb-3">{t('tyrant:admin.chipHint')}</p>
+            <div className="grid lg:grid-cols-3 gap-4">
+              {TROOP_TYPES.map((k: TroopType) => (
+                <div key={k} data-testid={`by-troop-${k}`} className="space-y-2">
+                  <div className="text-theme-text font-semibold">{t(`tyrant:step4.${k}`)}</div>
+                  <div className="text-xs text-theme-dim">{t('tyrant:admin.campRow')}</div>
+                  <div className="flex flex-wrap gap-1.5" data-testid={`camp-chips-${k}`}>
+                    {Object.entries(summary.camp_levels?.[k] ?? {}).map(([code, n]) => (
+                      <ChipButton
+                        key={code}
+                        testId={`chip-${k}-camp-${code}`}
+                        active={v[`${k}_camp` as FilterKey] === code}
+                        onClick={() => toggleExact(`${k}_camp` as FilterKey, code)}
+                      >
+                        <bdi dir="ltr">{code === 'none' ? t('tyrant:admin.none') : code}</bdi>: <b data-testid="chip-count">{n}</b>
+                      </ChipButton>
+                    ))}
+                  </div>
+                  <div className="text-xs text-theme-dim">{t('tyrant:admin.tierRow')}</div>
+                  <div className="flex flex-wrap gap-1.5" data-testid={`tier-chips-${k}`}>
+                    {Object.entries(summary.troop_tiers[k] ?? {}).map(([tier, n]) => (
+                      <ChipButton
+                        key={tier}
+                        testId={`chip-${k}-tier-${tier}`}
+                        active={v[`${k}_tier` as FilterKey] === tierValue(tier)}
+                        onClick={() => toggleExact(`${k}_tier` as FilterKey, tierValue(tier))}
+                      >
+                        <bdi dir="ltr">{tier === 'none' ? t('tyrant:admin.none') : tier}</bdi>: <b data-testid="chip-count">{n}</b>
+                      </ChipButton>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </>
+      )}
+
       {/* ---------------------------------------------------------------- filter bar */}
       <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5 space-y-4" data-testid="tyrant-filters">
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 items-end">
@@ -480,110 +584,6 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
 
         <FilterPills pills={pills} onClear={clearAll} />
       </div>
-
-      {/* ---------------------------------------------------------------- stats (for the filtered set) */}
-      {summary && (
-        <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard
-              testId="stat-total"
-              label={t('tyrant:admin.stats.total')}
-              value={summary.total}
-              sub={filtered ? t('tyrant:admin.ofRound', { total: summary.round_total }) : undefined}
-            />
-            <StatCard testId="stat-opening-rush" label={t('tyrant:admin.stats.openingRush')} value={summary.opening_rush} />
-            <StatCard testId="stat-discord-vc" label={t('tyrant:admin.stats.discordVc')} value={summary.discord_vc} />
-            <StatCard testId="stat-alliances" label={t('tyrant:admin.stats.alliances')} value={summary.alliances.filter((a) => a.alliance).length} />
-          </div>
-
-          {/* breakdowns right under the headline stats (owner); rows are filters too */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <Bars
-              testId="by-window"
-              title={t('tyrant:admin.byWindow')}
-              total={summary.total}
-              rows={summary.windows.map((w) => ({
-                key: w.id,
-                n: w.count,
-                active: splitList(filters.windows).includes(w.id),
-                onClick: () => F.toggleInList('windows', w.id),
-                label: w.rush ? (
-                  <>
-                    {t('tyrant:step2.openingRush')} <Range start={w.start} end={w.end} />
-                  </>
-                ) : (
-                  <Range start={w.start} end={w.end} />
-                ),
-              }))}
-            />
-            <Bars
-              testId="by-role"
-              title={t('tyrant:admin.byRole')}
-              total={summary.total}
-              rows={ROLES.map((r) => ({
-                key: r,
-                n: summary.roles[r] ?? 0,
-                label: t(`tyrant:roles.${r}`),
-                active: rolesSel.includes(r),
-                onClick: () => F.toggleInList('roles', r),
-              }))}
-            />
-            <Bars
-              testId="by-alliance"
-              title={t('tyrant:admin.byAlliance')}
-              total={summary.total}
-              rows={summary.alliances.map((a) => ({
-                key: a.alliance ?? 'none',
-                n: a.count,
-                label: a.alliance ?? t('tyrant:admin.none'),
-                active: !!a.alliance && allianceSel.includes(a.alliance),
-                onClick: () => {
-                  if (a.alliance) F.toggleInList('alliance', a.alliance);
-                },
-              }))}
-            />
-          </div>
-
-          <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5" data-testid="by-troop">
-            <h3 className="font-semibold text-accent">{t('tyrant:admin.byTroop')}</h3>
-            <p className="text-xs text-theme-dim mb-3">{t('tyrant:admin.chipHint')}</p>
-            <div className="grid lg:grid-cols-3 gap-4">
-              {TROOP_TYPES.map((k: TroopType) => (
-                <div key={k} data-testid={`by-troop-${k}`} className="space-y-2">
-                  <div className="text-theme-text font-semibold">{t(`tyrant:step4.${k}`)}</div>
-                  <div className="text-xs text-theme-dim">{t('tyrant:admin.campRow')}</div>
-                  <div className="flex flex-wrap gap-1.5" data-testid={`camp-chips-${k}`}>
-                    {Object.entries(summary.camp_levels?.[k] ?? {}).map(([code, n]) => (
-                      <ChipButton
-                        key={code}
-                        testId={`chip-${k}-camp-${code}`}
-                        active={v[`${k}_camp` as FilterKey] === code}
-                        onClick={() => toggleExact(`${k}_camp` as FilterKey, code)}
-                      >
-                        <bdi dir="ltr">{code === 'none' ? t('tyrant:admin.none') : code}</bdi>: <b data-testid="chip-count">{n}</b>
-                      </ChipButton>
-                    ))}
-                  </div>
-                  <div className="text-xs text-theme-dim">{t('tyrant:admin.tierRow')}</div>
-                  <div className="flex flex-wrap gap-1.5" data-testid={`tier-chips-${k}`}>
-                    {Object.entries(summary.troop_tiers[k] ?? {}).map(([tier, n]) => (
-                      <ChipButton
-                        key={tier}
-                        testId={`chip-${k}-tier-${tier}`}
-                        active={v[`${k}_tier` as FilterKey] === tierValue(tier)}
-                        onClick={() => toggleExact(`${k}_tier` as FilterKey, tierValue(tier))}
-                      >
-                        <bdi dir="ltr">{tier === 'none' ? t('tyrant:admin.none') : tier}</bdi>: <b data-testid="chip-count">{n}</b>
-                      </ChipButton>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </>
-      )}
 
       {/* ---------------------------------------------------------------- table */}
       <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5">
