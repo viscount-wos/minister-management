@@ -34,6 +34,10 @@ uses different `{{placeholders}}`. It also flags static `t('ns:key')` usages in
 It lives inside `frontend/` because the Docker build stage only copies `frontend/`.
 
 ## Language and direction
-The app starts in English every visit (unchanged from v1.4; nothing is persisted).
-Changing language sets `<html dir>` (rtl for Arabic) and `<html lang>` via the
-`languageChanged` listener in `index.ts`.
+Start language (`detect.ts`): the player's saved choice (`localStorage.preferred_language`,
+written by `chooseLanguage()` when they pick one in the header dropdown) > the first
+supported language in `navigator.languages`, matched on the base code (`es-MX` -> es,
+`zh-TW` -> zh, `ar-SA` -> ar) > English. Never IP/geolocation. `index.html` runs the same
+rules inline before the first paint so `<html dir/lang>` are right immediately (keep the
+two in step). Changing language sets `<html dir>` (rtl for Arabic) and `<html lang>` via
+the `languageChanged` listener in `index.ts`.

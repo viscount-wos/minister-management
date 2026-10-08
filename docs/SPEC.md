@@ -313,7 +313,8 @@ on ministry). Decided: ONE blanket admin called **Event Management**, context-aw
 - **Page titles**: index.html is "State Events · Whiteout Survival"; every page sets `document.title` via
   `shared/usePageTitle` = parts + `common:appTitle` ("State Events"), e.g. "Frost Dragon Tyrant · State Events",
   "Frost Dragon Tyrant · Event Management · State Events", translated, follows language changes.
-- **State number**: no hardcoded 2694 anywhere in the UI; the welcome line is hidden until an admin sets one.
+- **State number**: no hardcoded 2694 anywhere in the UI; the welcome line is hidden until an admin sets one
+  (wording "Welcome, State #N" since p2c/mobile).
   Backend change (trivial, noted): `core/settings.py` `DEFAULTS['state_number']` is now `None` (public settings
   return `null` when unset; v1.4 defaulted to "2694").
 - 'TAG' placeholder: none left (alliance placeholders are translated `profile:alliancePlaceholder`).
@@ -331,6 +332,44 @@ on ministry). Decided: ONE blanket admin called **Event Management**, context-aw
 - NOT renamed (not front-facing): event key `ministry` in API/DB/MCP, file/folder names, i18n key names, test ids.
   The backend's generic xlsx export still names its file `ministry_<round>_<date>.xlsx` (only reached via
   the API/MCP; the UI names its downloads itself).
+
+## Phone-first (owner rule, p2c/mobile)
+Most players use the site on a phone. Every milestone gets a 360-390px check (no sideways scroll, tap targets
+>= 44px, step indicator inside the card, Arabic RTL); `e2e/test_mobile.py` enforces it.
+- **Header** (`shell/Header.tsx`, `shell/CompactSelect.tsx`): ONE row on every width: the "All events" link (icon
+  only below `sm`) and three compact dropdowns, each a 44px chip with a NATIVE `<select>` stretched invisibly over
+  it: timezone (clock + short zone: `UTC`, `KST`, `ET`, or the city of a detected zone), language (globe + the
+  current language in its own script; options = the 9 native names), theme (palette + theme name; icon only below
+  `sm`). Why native selects under a chip: phones get their own picker (iOS wheel, Android sheet), keyboards and
+  screen readers get a real labelled select (`common:header.timezone|language`, `common:theme.title`), no custom
+  popup to maintain, and the visible part stays small. At 360px the row uses about 300px. Test ids:
+  `header-timezone`, `language-select`, `theme-select` (+ `-chip` on the visible box), `site-header`, `nav-home`.
+  The pills are gone (e2e `ui.switch_language` selects the option).
+- **Language auto-detect** (`i18n/detect.ts`): saved choice (`localStorage.preferred_language`, written only when
+  the player picks one) > first supported language in `navigator.languages`, matched on the base code (`es-MX` ->
+  es, `zh-TW`/`zh-HK` -> zh, `ar-*` -> ar) > English. No IP / geolocation (wrong for expats and VPN users, needs a
+  third party or a permission prompt). The language IS remembered now (v1.4 started in English every visit).
+- **First paint**: an inline script in `index.html` applies the same rules (and the saved theme) before the first
+  paint, so `<html dir/lang>` is right before any JS bundle loads: no LTR flash for Arabic. Keep it in step with
+  `detect.ts` / `theme.ts`.
+- **Timezone auto-detect** (`shared/timezone.ts`): saved choice (`preferred_timezone`) > the browser's
+  `Intl.DateTimeFormat().resolvedOptions().timeZone`, mapped onto the list (aliases such as `Etc/UTC` -> UTC,
+  `Asia/Istanbul` -> Europe/Istanbul); a zone outside the list is offered as an extra option labelled by city and
+  current offset ("Berlin (UTC+2)") > UTC. The detected zone is not saved; only a choice is.
+- **Welcome line**: "Welcome, State #2807" (`common|ministry|tyrant:home.welcome`, 9 languages, the game's word for
+  state: Estado, État, Staat, Stan, 주, 州, Eyalet, الولاية); still hidden while the state number is unset.
+- **Wizards** (`shared/WizardChrome.tsx`, shared by Minister and Tyrant): phone paddings, step circles 32px with
+  flexible connectors (always inside the card), step titles 2xl, and the Back/Next bar (`wizard-nav`) is STICKY at
+  the bottom of the screen below `sm` (static row from `sm` up), 48px buttons. Hour grids: 4 columns, 48px buttons,
+  local time + UTC fit without clipping. Inputs are 16px (no iOS zoom on focus) and >= 44px; keyboards: FID
+  `numeric`, speedup days `decimal`, crystals `numeric`, Tyrant power `decimal`, gems `numeric`.
+- **Tiles** (`shared/Tile.tsx`): a compact row (icon beside text) on phones, the original tall card from `sm` up.
+- **Admin on phones: usable, not perfect.** Event switch, tab bar and day tabs scroll sideways inside their own
+  container; tables scroll inside `overflow-x-auto`; round selector full width; buttons 44px. Assignment board:
+  `MouseSensor` (5px), `TouchSensor` (long press 250 ms, tolerance 8px, so a swipe still scrolls) and
+  `KeyboardSensor`; plus a TAP-TO-MOVE fallback below `lg`: the move icon on a card (`move-<fid>`) picks it, every
+  slot then shows "Move here" / "Swap here" (`move-here-<slot>`, `move-here-unassigned`), with a cancel banner
+  (`move-banner`). Same move/swap/sticky rules as drag-and-drop (one `moveTo`). The hover tooltip is mouse-only.
 
 ## Furnace levels (owner rule, phase 2; applies to EVERY event)
 - Two kinds: pre-FC furnaces 1-30, Fire Crystal furnaces FC1-FC10 (nothing above FC10). Most players are FC.
@@ -357,7 +396,7 @@ admin password via the API. Nothing in the MCP server bypasses API validation.
 ## Frontend layout (target)
 ```
 frontend/src/
-  shell/        Layout, Header (language/theme/timezone selectors), Home with one tile per event, Changelog
+  shell/        Layout, Header (timezone/language/theme dropdowns in one row), Home with one tile per event, Changelog
   shared/       api client, FID lookup, profile fields, field components, "use my last answers"
   events/ministry/ events/tyrant/ events/svs/ events/tal/
   i18n/         index.ts + locales/<lang>/<namespace>.json  (namespaces: common, profile, ministry, tyrant, svs, tal, admin, guide, changelog)

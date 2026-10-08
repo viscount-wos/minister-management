@@ -31,7 +31,8 @@ none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gi
 
 ## Where things live
 
-- **`ui.py`**: routes, legacy redirects, language buttons, selectors, flow helpers
+- **`ui.py`**: routes, legacy redirects, the header dropdowns (`switch_language` picks an option in
+  `language-select`; also `theme-select`, `header-timezone`), selectors, flow helpers
   (`open_application`, `pick_slots`, ...), the raw-key detector and a small `Api` client used only
   to arrange state (start a round, set a closing time, seed an application).
 - UI strings are read from the app's own locale files: `ui.tr('ar', 'ministry:apply.newFor',
@@ -48,7 +49,7 @@ none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gi
 
 `test_i18n.py`
 - raw-key detector unit test (dotted keys, `ns:key`, `{{var}}`), and a live DOM check
-- home: heading, one tile per event, all 9 language buttons
+- home: heading, one tile per event, ONE language dropdown listing the 9 native names (no pills)
 - every public page (`/`, `/minister`, `/minister/apply`, `/admin`, `/minister/guide`, `/changelog`)
   in all 9 languages without raw keys; the home heading changes in every language
 - the application form in new and edit mode, all 9 languages
@@ -104,8 +105,26 @@ none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gi
 - admin: event switch, stats cards/breakdowns, search, alliance + furnace filters, sorting, CSV + Excel download,
   windows editor + closing time, delete, 9 languages; Start new round -> NEW + Use my last answers -> saved
 
+`test_mobile.py` (phones: Playwright device emulation on chromium: iPhone 13 390px, Pixel 7 412px, and a
+360px Android context)
+- every player page in en and ar (auto-detected from the context locale): home, Minister home/guide/schedule,
+  Tyrant home, SVS placeholder, changelog: no sideways scroll (`scrollWidth <= viewport`), header controls in ONE
+  row and >= 44px, key buttons >= 44px, no input under 16px (iOS zoom); a screenshot of each
+- the full Minister wizard NEW (KST timezone, so hours show local + UTC) and the full Tyrant wizard NEW, every step:
+  step circles inside the card, sticky Back/Next on screen, hour buttons >= 44px with no clipped text, mobile
+  keyboards (`inputmode`: FID numeric, days/power decimal, gems numeric), saved and checked through the API
+- the language dropdown switching to Arabic (`dir=rtl`), remembered after reload; theme remembered
+- auto-detect: locale `tr-TR` -> Turkish, `ar-SA` -> Arabic RTL, `es-MX`, `zh-TW`, `xx`/`pt-BR` -> English; a saved
+  choice beats the browser language; `dir/lang` already right with the JS bundle blocked (first paint)
+- timezone auto-detect via `timezone_id` (KST, ET, a zone outside the list: Berlin, UTC); a saved choice wins
+- Tyrant closed and no-round states (restored afterwards), admin dashboards on a phone, tap-to-move on the
+  assignment board (move icon -> Move here; persists, sticky; back to Unassigned)
+- screenshots: `artifacts/<run>/mobile/<device>-<lang>-<page>.png`
+
+Desktop tests pin `locale=en-US`, `timezone_id=UTC` (conftest) because the app now auto-detects both.
+
 ## Not covered
 
-Drag-and-drop between slots (the assignment save path is exercised through the lock toggle), JSON
-import, profile admin endpoints (no UI yet), themes, timezone conversions, mobile viewport,
-Firefox/WebKit. Test data is not cleaned up; use a throwaway data dir.
+Drag-and-drop between slots with a real mouse or a long-press touch drag (the save path is exercised
+through the lock toggle and tap-to-move), JSON import, profile admin endpoints (no UI yet), timezone
+conversions beyond display, real iOS Safari/WebKit (phones are emulated on chromium). Test data is not cleaned up; use a throwaway data dir.
