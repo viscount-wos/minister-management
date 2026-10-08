@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Crown, Flame, Castle, Swords, Shield, Sparkles, LucideIcon } from 'lucide-react';
-import axios from 'axios';
+import api from '../shared/api';
 import { MINISTRY_PATHS } from '../events/ministry/paths';
 
-type TileStatus = 'open' | 'nextRelease' | 'comingSoon';
+type TileStatus = 'open' | 'notOpen' | 'nextRelease' | 'comingSoon';
 
 interface EventTile {
   key: 'ministry' | 'tyrant' | 'svs' | 'tal';
@@ -31,11 +31,15 @@ export default function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [stateNumber, setStateNumber] = useState('2694');
+  // Live events show "Open" only while they have an open round.
+  const [openEvents, setOpenEvents] = useState<Set<string> | null>(null);
 
   useEffect(() => {
-    // Same endpoint (and default) the ministry home has always used.
-    axios.get('/api/settings/state-number')
-      .then(res => setStateNumber(res.data.state_number || '2694'))
+    api.publicSettings()
+      .then(s => setStateNumber(s.state_number || '2694'))
+      .catch(() => {});
+    api.events()
+      .then(res => setOpenEvents(new Set(res.events.filter(e => e.current_round).map(e => e.key))))
       .catch(() => {});
   }, []);
 
@@ -54,11 +58,14 @@ export default function Home() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {EVENTS.map(({ key, path, icon: Icon, status }) => {
-            const live = status === 'open';
+          {EVENTS.map(({ key, path, icon: Icon, status: baseStatus }) => {
+            const status: TileStatus =
+              baseStatus === 'open' && openEvents && !openEvents.has(key) ? 'notOpen' : baseStatus;
+            const live = baseStatus === 'open';
             return (
               <button
                 key={key}
+                data-testid={`event-tile-${key}`}
                 onClick={() => navigate(path)}
                 className="bg-dark-card rounded-2xl p-8 border border-theme-border hover:bg-dark-card-hover transform hover:-translate-y-2 transition-all duration-300 group"
               >
@@ -74,7 +81,7 @@ export default function Home() {
                   <p className="text-theme-dim mb-4">{t(taglineKey(key))}</p>
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                      live
+                      status === 'open'
                         ? 'bg-success/20 text-success'
                         : 'bg-dark-input border border-theme-border text-theme-dim'
                     }`}

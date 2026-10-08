@@ -12,7 +12,8 @@ import {
   DragStartEvent,
 } from '@dnd-kit/core';
 import { Sparkles, Download, AlertCircle, Globe, EyeOff, Lock, Unlock, Link2 } from 'lucide-react';
-import axios from 'axios';
+import api, { Round, downloadBlob } from '../../../shared/api';
+import { errorText } from '../../../shared/apiErrors';
 import TimezoneSelector from '../../../shared/TimezoneSelector';
 import { useTimezone } from '../../../shared/TimezoneContext';
 import { generateAssignmentSlots, getSlotDisplayTime, TimeSlotScheme } from '../../../shared/timezone';
@@ -46,13 +47,14 @@ const generateTimeSlots = generateAssignmentSlots;
 const PLAYER_CARD_CLASS = 'bg-accent/15 border-accent/40 text-accent';
 
 // Draggable player card
-function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { player: AssignedPlayer; sourceSlot: string; onToggleLock?: (player: AssignedPlayer, slot: string) => void; timezone?: string }) {
+function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone, disabled }: { player: AssignedPlayer; sourceSlot: string; onToggleLock?: (player: AssignedPlayer, slot: string) => void; timezone?: string; disabled?: boolean }) {
   const { t } = useTranslation();
   const [showTooltip, setShowTooltip] = useState(false);
   const dragId = `player-${player.player_id}-${sourceSlot}`;
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: dragId,
     data: { player, sourceSlot },
+    disabled,
   });
 
   const style = transform ? {
@@ -70,7 +72,8 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
       style={style}
       {...attributes}
       {...listeners}
-      className={`p-3 border-2 rounded-lg cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow relative ${
+      data-testid={`card-${player.fid}`}
+      className={`p-3 border-2 rounded-lg ${disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} hover:shadow-md transition-shadow relative ${
         player.is_sticky ? 'bg-warning/15 border-warning/50 text-accent' : PLAYER_CARD_CLASS
       }`}
       onMouseEnter={() => setShowTooltip(true)}
@@ -82,10 +85,10 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
           <div className="font-semibold text-accent truncate">
             {player.alliance && <span>[{player.alliance}] </span>}{player.game_name}
           </div>
-          <div className="text-xs text-theme-dim mt-1">FID: {player.fid} • {(player.points ?? 0).toLocaleString()} pts</div>
+          <div className="text-xs text-theme-dim mt-1">{t('admin:fid')}: {player.fid} • {t('admin:pointsShort', { n: (player.points ?? 0).toLocaleString() })}</div>
           {preferredTimes && preferredTimes.length > 0 ? (
             <div className="mt-2 border-t border-theme-border pt-2">
-              <div className="text-xs font-medium text-theme-dim mb-1">{t('admin:requestedTimes', 'Requested Times')}:</div>
+              <div className="text-xs font-medium text-theme-dim mb-1">{t('admin:requestedTimes')}:</div>
               <div className="flex flex-wrap gap-1">
                 {preferredTimes.map((time) => (
                   <span key={time} className="text-xs px-1.5 py-0.5 bg-accent/15 text-accent rounded">
@@ -96,7 +99,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
             </div>
           ) : (
             <div className="mt-2 border-t border-theme-border pt-2 text-xs text-theme-dim italic">
-              {t('admin:noTimePref', 'No time preferences set')}
+              {t('admin:noTimePref')}
             </div>
           )}
           {/* Arrow */}
@@ -113,7 +116,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
             />
           ) : (
             <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold text-accent">
-              {player.game_name.charAt(0).toUpperCase()}
+              {(player.game_name || '?').charAt(0).toUpperCase()}
             </div>
           )}
           {player.stove_lv_content && (
@@ -127,7 +130,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
         <div className="min-w-0 flex-1">
           <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
           <div className="text-xs opacity-75">
-            {player.fid} • {(player.points ?? 0).toLocaleString()} pts
+            {player.fid} • {t('admin:pointsShort', { n: (player.points ?? 0).toLocaleString() })}
           </div>
         </div>
         {sourceSlot !== 'unassigned' && onToggleLock && (
@@ -139,7 +142,8 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
             className={`flex-shrink-0 p-1 rounded transition-colors ${
               player.is_sticky ? 'text-warning hover:text-accent-light' : 'text-theme-dim hover:text-accent opacity-40 hover:opacity-100'
             }`}
-            title={player.is_sticky ? 'Click to unlock' : 'Click to lock'}
+            title={player.is_sticky ? t('admin:clickToUnlock') : t('admin:clickToLock')}
+            aria-label={player.is_sticky ? t('admin:clickToUnlock') : t('admin:clickToLock')}
           >
             {player.is_sticky ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
           </button>
@@ -151,6 +155,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
 
 // Static player card (for overlay while dragging)
 function PlayerCard({ player }: { player: AssignedPlayer }) {
+  const { t } = useTranslation();
   return (
     <div
       className={`p-3 border-2 rounded-lg shadow-lg ${PLAYER_CARD_CLASS}`}
@@ -165,7 +170,7 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
             />
           ) : (
             <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold text-accent">
-              {player.game_name.charAt(0).toUpperCase()}
+              {(player.game_name || '?').charAt(0).toUpperCase()}
             </div>
           )}
           {player.stove_lv_content && (
@@ -179,7 +184,7 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
         <div className="min-w-0">
           <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
           <div className="text-xs opacity-75">
-            {player.fid} • {(player.points ?? 0).toLocaleString()} pts
+            {player.fid} • {t('admin:pointsShort', { n: (player.points ?? 0).toLocaleString() })}
           </div>
         </div>
       </div>
@@ -244,7 +249,13 @@ function DroppableUnassigned({ children, isOver }: { children: React.ReactNode; 
   );
 }
 
-export default function AssignmentManagement() {
+interface AssignmentManagementProps {
+  round: Round;
+  readOnly: boolean;
+  onRoundUpdated: (r: Round) => void;
+}
+
+export default function AssignmentManagement({ round, readOnly, onRoundUpdated }: AssignmentManagementProps) {
   const { t } = useTranslation();
   const [selectedDay, setSelectedDay] = useState('monday');
   const [loading, setLoading] = useState(false);
@@ -253,10 +264,11 @@ export default function AssignmentManagement() {
   const [unassignedPlayers, setUnassignedPlayers] = useState<UnassignedPlayer[]>([]);
   const [activePlayer, setActivePlayer] = useState<AssignedPlayer | null>(null);
   const [overSlotId, setOverSlotId] = useState<string | null>(null);
-  const [researchDay, setResearchDay] = useState<'tuesday' | 'friday'>('tuesday');
   const { timezone, setTimezone } = useTimezone();
-  const [publishedDays, setPublishedDays] = useState<string[]>([]);
-  const [timeSlotScheme, setTimeSlotScheme] = useState<TimeSlotScheme>('exact_alignment');
+  // Per-round settings come from the selected round (the dashboard keeps it fresh).
+  const researchDay = round.settings.research_day;
+  const publishedDays = round.settings.published_days;
+  const timeSlotScheme: TimeSlotScheme = round.settings.time_slot_scheme;
 
   const DAY_TABS = activeDaysInOrder(researchDay);
 
@@ -282,118 +294,58 @@ export default function AssignmentManagement() {
     return null;
   })();
 
+  // Research day may have changed in Settings: keep the day tab valid.
   useEffect(() => {
-    fetchResearchDay();
-    fetchPublishedDays();
-    fetchTimeSlotScheme();
-  }, []);
+    if (!DAY_TABS.includes(selectedDay)) setSelectedDay(researchDay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [researchDay]);
 
   useEffect(() => {
-    fetchAssignments();
-  }, [selectedDay]);
+    if (DAY_TABS.includes(selectedDay)) fetchAssignments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDay, round.id, timeSlotScheme]);
 
-  const fetchResearchDay = async () => {
+  const setPublished = async (publish: boolean) => {
+    setError('');
     try {
-      const response = await axios.get('/api/settings/research-day');
-      const day = response.data.research_day;
-      setResearchDay(day);
-      // If currently on a research day tab that changed, switch to the new one
-      if (selectedDay === 'tuesday' || selectedDay === 'friday') {
-        setSelectedDay(day);
-      }
-    } catch {
-      // Default to tuesday on error
-    }
-  };
-
-  const fetchPublishedDays = async () => {
-    try {
-      const response = await axios.get('/api/settings/published-days');
-      setPublishedDays(response.data.published_days || []);
-    } catch {
-      // ignore
-    }
-  };
-
-  const fetchTimeSlotScheme = async () => {
-    try {
-      const response = await axios.get('/api/settings/time-slot-scheme');
-      const scheme = response.data.time_slot_scheme;
-      if (scheme === 'exact_alignment' || scheme === 'max_slots') {
-        setTimeSlotScheme(scheme);
-      }
-    } catch {
-      // Default to exact_alignment on error
-    }
-  };
-
-  const handlePublish = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.put(
-        '/api/admin/settings/publish',
-        { day: selectedDay },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setPublishedDays(response.data.published_days || []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:publishError'));
-    }
-  };
-
-  const handleUnpublish = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.put(
-        '/api/admin/settings/unpublish',
-        { day: selectedDay },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setPublishedDays(response.data.published_days || []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:unpublishError'));
+      const res = publish
+        ? await api.admin.ministry.publish(round.id, selectedDay)
+        : await api.admin.ministry.unpublish(round.id, selectedDay);
+      onRoundUpdated({ ...round, settings: { ...round.settings, published_days: res.published_days } });
+    } catch (err) {
+      setError(errorText(t, err, publish ? 'admin:publishError' : 'admin:unpublishError'));
     }
   };
 
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`/api/admin/assignments/${selectedDay}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.admin.ministry.assignments(round.id, selectedDay);
       // Enforce 1 player per slot on load
       const cleaned: Assignments = {};
-      const rawAssignments = (response.data.assignments || {}) as Assignments;
-      for (const [slot, players] of Object.entries(rawAssignments)) {
-        cleaned[slot] = (players || []).slice(0, 1);
+      for (const [slot, players] of Object.entries(res.assignments || {})) {
+        cleaned[slot] = (players || []).slice(0, 1) as AssignedPlayer[];
       }
       setAssignments(cleaned);
-      // Unassigned players are now returned on load, not just after auto-assign
-      setUnassignedPlayers(response.data.unassigned || []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:fetchAssignmentsError'));
+      setUnassignedPlayers((res.unassigned || []) as UnassignedPlayer[]);
+      setError('');
+    } catch (err) {
+      setError(errorText(t, err, 'admin:fetchAssignmentsError'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleAutoAssign = async () => {
+    if (readOnly) return;
     setLoading(true);
     setError('');
-
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.post(
-        '/api/admin/assignments/auto-assign',
-        { day: selectedDay },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setAssignments(response.data.assignments);
-      setUnassignedPlayers(response.data.unassigned);
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:autoAssignError'));
+      const res = await api.admin.ministry.autoAssign(round.id, selectedDay);
+      setAssignments(res.assignments as Assignments);
+      setUnassignedPlayers(res.unassigned as UnassignedPlayer[]);
+    } catch (err) {
+      setError(errorText(t, err, 'admin:autoAssignError'));
     } finally {
       setLoading(false);
     }
@@ -514,38 +466,28 @@ export default function AssignmentManagement() {
   };
 
   const saveAssignments = async (assignmentsToSave: Assignments) => {
+    if (readOnly) return;
+    // The API takes the first player per slot: {slot: [{player_id, is_sticky}]}.
+    const body: Record<string, { player_id: number; is_sticky: boolean }[]> = {};
+    for (const [slot, players] of Object.entries(assignmentsToSave)) {
+      if (players && players.length > 0) {
+        body[slot] = [{ player_id: players[0].player_id, is_sticky: !!players[0].is_sticky }];
+      }
+    }
     try {
-      const token = localStorage.getItem('adminToken');
-      await axios.post(
-        '/api/admin/assignments/update',
-        {
-          day: selectedDay,
-          assignments: assignmentsToSave,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:saveError'));
+      await api.admin.ministry.saveAssignments(round.id, selectedDay, body);
+    } catch (err) {
+      setError(errorText(t, err, 'admin:saveError'));
+      fetchAssignments();
     }
   };
 
   const handleExport = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.get('/api/admin/export', {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob',
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'ministry_assignments.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err: any) {
-      setError(t('admin:exportError'));
+      const blob = await api.admin.exportRound(round.id);
+      downloadBlob(blob, `ministry_round_${round.id}_assignments.xlsx`);
+    } catch (err) {
+      setError(errorText(t, err, 'admin:exportError'));
     }
   };
 
@@ -556,6 +498,7 @@ export default function AssignmentManagement() {
         {DAY_TABS.map((day) => (
           <button
             key={day}
+            data-testid={`assign-day-${day}`}
             onClick={() => setSelectedDay(day)}
             className={`px-4 py-2 font-medium rounded-lg transition-colors ${
               selectedDay === day
@@ -570,16 +513,20 @@ export default function AssignmentManagement() {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap items-center gap-4 mb-6">
+        {!readOnly && (
         <button
           onClick={handleAutoAssign}
+          data-testid="auto-assign"
           disabled={loading}
           className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50"
         >
           <Sparkles className="w-5 h-5" />
           {t('admin:autoAssign')}
         </button>
+        )}
         <button
           onClick={handleExport}
+          data-testid="export-excel"
           className="flex items-center gap-2 px-6 py-3 bg-success text-dark-bg rounded-lg hover:bg-success-dark font-medium transition-colors"
         >
           <Download className="w-5 h-5" />
@@ -587,9 +534,10 @@ export default function AssignmentManagement() {
         </button>
 
         {/* Publish / Unpublish Button */}
-        {publishedDays.includes(selectedDay) ? (
+        {readOnly ? null : publishedDays.includes(selectedDay) ? (
           <button
-            onClick={handleUnpublish}
+            onClick={() => setPublished(false)}
+            data-testid="unpublish"
             className="flex items-center gap-2 px-6 py-3 bg-danger/80 text-white rounded-lg hover:bg-danger font-medium transition-colors"
           >
             <EyeOff className="w-5 h-5" />
@@ -597,7 +545,8 @@ export default function AssignmentManagement() {
           </button>
         ) : (
           <button
-            onClick={handlePublish}
+            onClick={() => setPublished(true)}
+            data-testid="publish"
             className="flex items-center gap-2 px-6 py-3 bg-accent/80 text-dark-bg rounded-lg hover:bg-accent font-medium transition-colors"
           >
             <Globe className="w-5 h-5" />
@@ -651,8 +600,9 @@ export default function AssignmentManagement() {
                             key={`player-${player.player_id}-${slot}`}
                             player={player}
                             sourceSlot={slot}
-                            onToggleLock={handleToggleLock}
+                            onToggleLock={readOnly ? undefined : handleToggleLock}
                             timezone={timezone}
+                            disabled={readOnly}
                           />
                         ))}
                       </div>
@@ -675,6 +625,7 @@ export default function AssignmentManagement() {
                         player={player}
                         sourceSlot="unassigned"
                         timezone={timezone}
+                        disabled={readOnly}
                       />
                       {player.preferred_times && player.preferred_times.length > 0 && (
                         <div className="text-xs text-theme-dim mt-1 pl-2">
@@ -686,7 +637,7 @@ export default function AssignmentManagement() {
                 </div>
                 {unassignedPlayers.length === 0 && !activePlayer && (
                   <p className="text-theme-dim text-sm text-center mt-8">
-                    {t('admin:allAssigned', 'All players assigned!')}
+                    {t('admin:allAssigned')}
                   </p>
                 )}
               </DroppableUnassigned>

@@ -14,6 +14,8 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import Page, expect
 
+import ui
+
 ARTIFACTS = Path(__file__).parent / 'artifacts'
 RUN_ID = time.strftime('%Y%m%d-%H%M%S')
 
@@ -60,6 +62,17 @@ def shot(page: Page, request):
 
 @pytest.fixture
 def accept_dialogs(page: Page):
-    """v1.4 uses window.confirm() when a day has no time slots selected."""
+    """The form uses window.confirm() when no time slots are selected at all."""
     page.on('dialog', lambda d: d.accept())
     return page
+
+
+@pytest.fixture(scope='session')
+def api(base_url, admin_password) -> ui.Api:
+    return ui.Api(base_url, admin_password)
+
+
+@pytest.fixture(scope='session', autouse=True)
+def ministry_round(base_url, admin_password):
+    """A fresh install has no rounds: make sure an open ministry round exists for the suite."""
+    return ui.Api(base_url, admin_password).ensure_open_round(f'E2E round {RUN_ID}')

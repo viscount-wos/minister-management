@@ -24,7 +24,8 @@
     "status": {
       "open": "Offen",
       "nextRelease": "Nächste Version",
-      "comingSoon": "Demnächst"
+      "comingSoon": "Demnächst",
+      "notOpen": "Noch nicht geöffnet"
     }
   },
   "placeholder": {
@@ -33,5 +34,15 @@
     "comingSoonTitle": "Demnächst",
     "comingSoonBody": "Dieses Event ist noch in Planung. Schau später wieder vorbei."
   },
-  "footer": "mit Empfehlung des Viscount, gern geschehen 😂"
+  "footer": "mit Empfehlung des Viscount, gern geschehen 😂",
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "applicationsClosed": "Bewerbungen für diese Runde sind geschlossen.",
+    "noCurrentRound": "Bewerbungen sind derzeit nicht geöffnet.",
+    "notFound": "Nicht gefunden.",
+    "conflict": "Jemand hat gleichzeitig gespeichert. Bitte versuche es erneut.",
+    "network": "Server nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
+    "invalidField": "Bitte prüfe dieses Feld: {{field}}",
+    "invalidInput": "Einige Angaben sind ungültig. Bitte prüfe sie und versuche es erneut."
+  }
 }

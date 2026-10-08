@@ -24,7 +24,8 @@
     "status": {
       "open": "진행 중",
       "nextRelease": "다음 업데이트",
-      "comingSoon": "곧 출시"
+      "comingSoon": "곧 출시",
+      "notOpen": "아직 열리지 않음"
     }
   },
   "placeholder": {
@@ -33,5 +34,15 @@
     "comingSoonTitle": "곧 출시",
     "comingSoonBody": "이 이벤트는 아직 준비 중입니다. 나중에 다시 확인하세요."
   },
-  "footer": "자작이 드립니다, 천만에요 😂"
+  "footer": "자작이 드립니다, 천만에요 😂",
+  "errors": {
+    "generic": "문제가 발생했습니다. 다시 시도해 주세요.",
+    "applicationsClosed": "이번 라운드 신청이 마감되었습니다.",
+    "noCurrentRound": "지금은 신청을 받지 않습니다.",
+    "notFound": "찾을 수 없습니다.",
+    "conflict": "다른 사람이 동시에 저장했습니다. 다시 시도해 주세요.",
+    "network": "서버에 연결할 수 없습니다. 연결을 확인한 뒤 다시 시도해 주세요.",
+    "invalidField": "이 항목을 확인해 주세요: {{field}}",
+    "invalidInput": "일부 정보가 올바르지 않습니다. 확인 후 다시 시도해 주세요."
+  }
 }

@@ -24,7 +24,8 @@
     "status": {
       "open": "开放中",
       "nextRelease": "下个版本",
-      "comingSoon": "即将推出"
+      "comingSoon": "即将推出",
+      "notOpen": "尚未开放"
     }
   },
   "placeholder": {
@@ -33,5 +34,15 @@
     "comingSoonTitle": "即将推出",
     "comingSoonBody": "该活动仍在筹划中，请稍后再来。"
   },
-  "footer": "子爵敬上，不用谢 😂"
+  "footer": "子爵敬上，不用谢 😂",
+  "errors": {
+    "generic": "出了点问题，请重试。",
+    "applicationsClosed": "本轮申请已截止。",
+    "noCurrentRound": "目前未开放申请。",
+    "notFound": "未找到。",
+    "conflict": "有人同时进行了保存，请重试。",
+    "network": "无法连接服务器，请检查网络后重试。",
+    "invalidField": "请检查此项：{{field}}",
+    "invalidInput": "部分信息无效，请检查后重试。"
+  }
 }

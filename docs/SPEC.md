@@ -121,6 +121,16 @@ Final shape is in docs/API.md. Where it differs from the sketch above:
   development; a role whose password env var is unset cannot log in (v1.4 silently fell back to admin123/minister123).
 - `PRAGMA foreign_keys=ON` on every connection (v1.4 never enabled it).
 
+### Frontend 1b decisions (p1b/frontend-wiring)
+- All HTTP goes through `frontend/src/shared/api.ts` (typed, error codes, one CONFLICT retry, 401 -> login).
+- The player flow is ONE page, `/ministry/apply`: FID first, then "New application for <round>" or
+  "Edit your application for <round>". It replaces v1.4's 5-step wizard + separate update page
+  (`/submit`, `/update`, `/apply`, `/ministry/submit|update` redirect there). Empty-slot `confirm()` kept.
+- "Past round read-only" = `status === 'closed'` (UI only; the API still accepts writes, see
+  docs/BACKEND_ISSUES.md #2).
+- A player's own assignments show every active day (as v1.4), not only published ones.
+- Server error text is never shown; `code`/`field` map to translated messages.
+
 ## MCP server (phase 1b, in front of the API)
 Separate process `mcp/` (Python, official `mcp` SDK, streamable HTTP), talks to the app ONLY via the HTTP API above.
 Tools (first cut): list_events, get_current_round, get_profile, update_profile, get_application, submit_application,

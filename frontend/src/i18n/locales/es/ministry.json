@@ -6,16 +6,15 @@
   "home": {
     "title": "Gestión de Ministerios de Whiteout Survival",
     "subtitle": "Sistema de Asignación de Ministerios SVS Estado vs Estado",
-    "submitNew": "Enviar Nueva Solicitud",
-    "updateExisting": "Ver Asignación / Actualizar Información",
-    "submitDesc": "Envía tus aceleradores y preferencias de horario para los puestos de ministerio",
-    "updateDesc": "Consulta tu asignación de ministerio actual o actualiza la información que enviaste",
     "adminDesc": "Gestiona jugadores y asignaciones",
     "utcNote": "Todos los horarios se almacenan en UTC — usa el selector de zona horaria en los formularios para convertirlos a tu hora local",
     "welcome": "Bienvenido, {{state}}",
     "applicationsClosed": "Las solicitudes ya están cerradas.",
     "applicationsCloseAt": "Las solicitudes cierran: {{time}}",
-    "applicationsClosedCard": "Las solicitudes están cerradas. Ya no se aceptan nuevos envíos."
+    "currentRound": "Ronda actual: {{round}}",
+    "applyTile": "Inscribirse o actualizar",
+    "applyTileDesc": "Introduce tu ID de jugador para crear una solicitud nueva o editar la tuya",
+    "applyTileClosedDesc": "Las solicitudes nuevas están cerradas. Aún puedes editar una solicitud existente."
   },
   "form": {
     "step1Title": "Información del Jugador",
@@ -60,18 +59,14 @@
     "heatmapLegend": "El color indica la demanda: Azul = Baja, Rojo = Alta",
     "noTimeSlotsConfirm": "No has seleccionado ningún horario para este día. ¿Seguro que quieres continuar?",
     "selectAllAvailable": "Selecciona TODOS los horarios en que estés disponible para asegurar la mejor oportunidad de obtener un puesto.",
-    "applicationsClosedDesc": "Ya no se aceptan nuevas solicitudes. Si ya enviaste la tuya, aún puedes actualizar tu información desde la página de inicio."
+    "applicationsClosedDesc": "Ya no se aceptan nuevas solicitudes. Si ya enviaste la tuya, aún puedes actualizar tu información desde la página de inicio.",
+    "applicantCount": "Solicitantes: {{n}}"
   },
   "update": {
-    "title": "Actualizar Tu Envío",
     "currentAssignments": "Tus Asignaciones Actuales",
     "noAssignments": "Aún no has sido asignado a ningún horario.",
     "noneAssigned": "Ninguna",
     "assignmentDisclaimer": "Los horarios asignados están sujetos a cambios y no se consideran definitivos hasta que se confirmen los nombramientos dentro del juego. Vuelve a consultar con frecuencia para ver actualizaciones.",
-    "enterFID": "Ingresa tu ID de Jugador (FID) para actualizar",
-    "fidLabel": "ID de Jugador (FID)",
-    "load": "Cargar Mis Datos",
-    "notFound": "No se encontró ningún envío para este ID de Jugador",
     "backHome": "Volver al Inicio"
   },
   "schedule": {
@@ -83,5 +78,22 @@
     "unfilled": "— Libre —",
     "timesNote": "Todos los horarios están en UTC a menos que se seleccione una zona horaria arriba.",
     "disclaimer": "Las solicitudes siguen abiertas. Los horarios asignados pueden cambiar hasta que las solicitudes cierren."
+  },
+  "apply": {
+    "title": "Solicitud de ministerio",
+    "enterFid": "Introduce tu ID de jugador (FID) para crear o editar tu solicitud.",
+    "newFor": "Nueva solicitud para {{round}}",
+    "editFor": "Edita tu solicitud para {{round}}",
+    "notOpenTitle": "Las solicitudes no están abiertas",
+    "notOpenBody": "Ahora mismo no hay ninguna ronda de ministerio abierta. Vuelve más tarde.",
+    "closedBody": "Ya no se aceptan solicitudes nuevas para {{round}}. Si ya te inscribiste, introduce ese ID de jugador para editarla.",
+    "closedButEditable": "Las solicitudes están cerradas para jugadores nuevos. Aún puedes actualizar la tuya.",
+    "otherFid": "Usar otro ID de jugador",
+    "answersTitle": "Aceleraciones para esta ronda",
+    "answersBlankNote": "Es una ronda nueva, así que estas respuestas empiezan vacías.",
+    "answersEditNote": "Estas son las respuestas que guardaste para esta ronda.",
+    "savedNew": "Tu solicitud para {{round}} se ha enviado.",
+    "savedEdit": "Tu solicitud para {{round}} se ha actualizado.",
+    "viewMine": "Ver mi solicitud"
   }
 }

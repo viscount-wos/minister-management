@@ -4,11 +4,23 @@
   "playerIDOptional": "플레이어 ID (FID) - 선택사항",
   "playerIDPlaceholder": "고유 플레이어 ID를 입력하세요",
   "fidRequired": "플레이어 ID (FID)는 필수입니다",
-  "playerAlreadyExists": "이 FID 또는 이름을 가진 플레이어가 이미 존재합니다. 제출 내용을 수정하려면 업데이트 페이지를 사용하세요.",
   "furnaceLevel": "화로 레벨",
   "alliance": "연맹 태그",
   "alliancePlaceholder": "최대 3자 (예: ABC)",
   "playerInfo": "플레이어 정보",
   "enterPlayerID": "플레이어 ID를 입력하세요",
-  "allianceRequired": "연맹 태그는 필수입니다"
+  "allianceRequired": "연맹 태그는 필수입니다",
+  "fidDigitsOnly": "플레이어 ID(FID)는 숫자만 입력할 수 있습니다",
+  "continue": "계속",
+  "timezone": "내 시간대",
+  "optional": "선택",
+  "prefilled": "다시 오신 것을 환영합니다! 저장된 프로필을 채워 두었습니다.",
+  "newProfile": "새 플레이어: 프로필을 입력해 주세요.",
+  "changeFid": "본인이 아닌가요? 다른 FID 사용",
+  "lastAnswers": {
+    "button": "지난 답변 사용",
+    "hint": "이전에 신청했나요? {{round}}의 답변을 복사하세요.",
+    "applied": "{{round}}의 답변을 복사했습니다. 확인한 뒤 저장하세요.",
+    "previousRound": "이전 라운드"
+  }
 }

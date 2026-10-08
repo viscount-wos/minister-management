@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Calendar, AlertTriangle } from 'lucide-react';
-import axios from 'axios';
+import api from '../../shared/api';
 import TimezoneSelector from '../../shared/TimezoneSelector';
 import { useTimezone } from '../../shared/TimezoneContext';
-import { getSlotDisplayTime, generateAssignmentSlots } from '../../shared/timezone';
+import { getSlotDisplayTime, generateAssignmentSlots, TimeSlotScheme } from '../../shared/timezone';
 import { MINISTRY_PATHS } from './paths';
 
 interface PublishedPlayer {
@@ -28,6 +28,7 @@ export default function PublishedSchedule() {
   const [loading, setLoading] = useState(true);
   const { timezone, setTimezone } = useTimezone();
   const [appsStillOpen, setAppsStillOpen] = useState(false);
+  const [scheme, setScheme] = useState<TimeSlotScheme>('exact_alignment');
 
   useEffect(() => {
     if (!day) {
@@ -35,22 +36,22 @@ export default function PublishedSchedule() {
       setLoading(false);
       return;
     }
-    axios.get(`/api/published-schedule/${day}`)
-      .then(res => setData(res.data))
+    api.ministry.scheduleDay(day)
+      .then(res => setData(res))
       .catch(() => setData({ published: false }))
       .finally(() => setLoading(false));
 
-    axios.get('/api/settings/application-closing-time')
-      .then(res => {
-        // Show disclaimer if closing time is set but apps haven't closed yet
-        if (res.data.closing_time && !res.data.is_closed) {
-          setAppsStillOpen(true);
-        }
+    // Disclaimer while the round is still taking new applications.
+    api.currentRound('ministry')
+      .then(r => {
+        setAppsStillOpen(!!r.closing_time && !r.is_closed_for_new);
+        // Draw the round's own slot grid (max_slots has :20/:50 slots).
+        setScheme(r.settings.time_slot_scheme);
       })
       .catch(() => {});
   }, [day]);
 
-  const allSlots = generateAssignmentSlots();
+  const allSlots = generateAssignmentSlots(scheme);
 
   if (loading) {
     return (
@@ -71,7 +72,7 @@ export default function PublishedSchedule() {
             onClick={() => navigate(MINISTRY_PATHS.home)}
             className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
             {t('ministry:update.backHome')}
           </button>
         </div>
@@ -94,7 +95,7 @@ export default function PublishedSchedule() {
           onClick={() => navigate(MINISTRY_PATHS.home)}
           className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
           {t('ministry:update.backHome')}
         </button>
 

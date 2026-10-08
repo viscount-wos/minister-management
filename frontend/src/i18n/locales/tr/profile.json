@@ -4,11 +4,23 @@
   "playerIDOptional": "Oyuncu ID (FID) - İsteğe Bağlı",
   "playerIDPlaceholder": "Benzersiz Oyuncu ID'nizi girin",
   "fidRequired": "Oyuncu ID (FID) gereklidir",
-  "playerAlreadyExists": "Bu FID veya isme sahip bir oyuncu zaten mevcut. Gönderiminizi değiştirmek için güncelleme sayfasını kullanın.",
   "furnaceLevel": "Ocak Seviyesi",
   "alliance": "İttifak Etiketi",
   "alliancePlaceholder": "Maks 3 karakter (ör. ABC)",
   "playerInfo": "Oyuncu Bilgileri",
   "enterPlayerID": "Lütfen bir Oyuncu ID girin",
-  "allianceRequired": "İttifak etiketi gereklidir"
+  "allianceRequired": "İttifak etiketi gereklidir",
+  "fidDigitsOnly": "Oyuncu kimliği (FID) yalnızca rakam olmalıdır",
+  "continue": "Devam",
+  "timezone": "Saat diliminiz",
+  "optional": "isteğe bağlı",
+  "prefilled": "Tekrar hoş geldiniz! Kayıtlı profilinizi doldurduk.",
+  "newProfile": "Yeni oyuncu: lütfen profilinizi doldurun.",
+  "changeFid": "Siz değil misiniz? Başka bir FID kullanın",
+  "lastAnswers": {
+    "button": "Son cevaplarımı kullan",
+    "hint": "Daha önce başvurdunuz mu? {{round}} cevaplarınızı kopyalayın.",
+    "applied": "{{round}} cevaplarınız kopyalandı. Kontrol edip kaydedin.",
+    "previousRound": "önceki turunuz"
+  }
 }
