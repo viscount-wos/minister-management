@@ -70,3 +70,48 @@ async def test_plan_tools(public, admin, api):
         for t in (token, new):
             err, data = await call(c, 'get_svs_plan_shared', {'token': t})
             assert err and data['code'] == 'PLAN_NOT_FOUND'
+
+
+async def test_plan_place_tool(public, admin, api):
+    api.start_round('MCP SVS place', event='svs')
+    lead, a, b, c = fid(), fid(), fid(), fid()
+    for f in (lead, a, b, c):
+        status, data = api.admin('POST', '/api/admin/rounds/current/applications?event=svs',
+                                 {'fid': f, 'profile': {'game_name': f'P{f}', 'alliance': 'MCP'}})
+        assert status == 201, data
+    plan = plan_doc(lead, a)
+    plan['leaders'][0]['extra_joiners'] = []
+    status, data = api.admin('PUT', '/api/admin/svs/rounds/current/plan', {'revision': 0, 'plan': plan})
+    assert status == 200, data
+
+    async with public() as cl:
+        assert 'svs_plan_place' not in {t.name for t in (await cl.list_tools()).tools}
+
+    async with admin() as cl:
+        tools = {t.name: t for t in (await cl.list_tools()).tools}
+        assert 'mode' in tools['svs_plan_place'].input_schema['properties']
+        err, data = await call(cl, 'svs_plan_place', {'fid': b, 'leader_id': 'L1', 'mode': 'named'})
+        assert not err, data
+        assert data['revision'] == 2 and data['result']['placed'][0]['as'] == 'named'
+        assert data['plan']['leaders'][0]['named_joiners'][1]['player'] == {'fid': b}
+        # already placed: DOUBLE_BOOKED, then an explicit move
+        err, data = await call(cl, 'svs_plan_place', {'fid': a, 'group_id': 'counter', 'mode': 'leader'})
+        assert err and data['code'] == 'DOUBLE_BOOKED' and data['details']['leader_id'] == 'L1'
+        err, data = await call(cl, 'svs_plan_place', {'fid': a, 'group_id': 'counter', 'mode': 'leader', 'move': True})
+        assert not err and data['result']['moved'][0]['from']['position'] == 'named_joiner'
+        # bulk: one skipped (already placed), one placed as extra
+        err, data = await call(cl, 'svs_plan_place', {'fids': [b, c], 'leader_id': 'L1', 'mode': 'extra',
+                                                     'expected_revision': data['revision']})
+        assert not err, data
+        assert [s['player']['fid'] for s in data['result']['skipped']] == [b]
+        assert data['result']['skipped'][0]['where']['position'] == 'named_joiner'
+        assert data['plan']['leaders'][0]['extra_joiners'] == [{'player': {'fid': c}}]
+        err, data = await call(cl, 'svs_plan_place', {'fid': c, 'leader_id': 'L1', 'expected_revision': 1})
+        assert err and data['code'] == 'PLAN_CONFLICT'
+        err, data = await call(cl, 'svs_plan_place', {'leader_id': 'L1'})
+        assert err and data['code'] == 'VALIDATION_ERROR'
+        err, data = await call(cl, 'list_applications', {'event': 'svs', 'svs_filters': {'in_plan': 'no'}})
+        assert not err and data['total'] == 0
+        err, data = await call(cl, 'list_applications', {'event': 'svs', 'svs_filters': {'in_plan': 'yes'}})
+        assert not err and data['total'] == 4
+        assert {x['fid']: x['plan_place']['position'] for x in data['applications']}[c] == 'extra_joiner'
