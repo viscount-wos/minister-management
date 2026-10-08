@@ -62,9 +62,11 @@ backend/
   tests/                 pytest; run with `cd backend && python -m pytest`
 ```
 
-## Migration from v1.4 DB (must be automatic, idempotent, tested)
-Detect old schema (players has construction_speedups_days). Before migrating, copy DB file to
-`<db>.pre-v2-<timestamp>.bak`. Then:
+## Migration from v1.4 DB (must be EXPLICIT, idempotent, tested)
+Changed in milestone 1c (review H1): the import is no longer automatic. A normal boot on a v1.4 file refuses to
+start; the operator runs `python -m core.migrate` (or boots once with `MIGRATE_V14=1`) as described in
+docs/DEPLOY-CUTOVER.md. Detect old schema (players TABLE has construction_speedups_days). Before migrating, copy DB
+file to `<db>.pre-v2-<timestamp>.bak` (written as `.bak.partial`, renamed after COMMIT). Then:
 - players -> profiles (keep fid, game_name, alliance, timezone, legacy avatar/stove columns).
 - create ONE ministry round "Imported from previous system" (status open, settings from old global settings incl.
   closing time, research_day, show_fire_crystals, time_slot_scheme, published days).
@@ -117,9 +119,78 @@ Final shape is in docs/API.md. Where it differs from the sketch above:
   returned every day type's, with duplicates); a sticky placement on a slot that doesn't exist in the current scheme
   is re-placed instead of the player vanishing; manual assignment saves reject unknown slots/players and duplicates.
 - Excel export keeps v1.4's per-day sheets (with their UNASSIGNED section) and adds an `Unassigned` summary sheet.
-- Auth: a SECRET_KEY that is missing or a known placeholder is replaced by a random per-process key outside
-  development; a role whose password env var is unset cannot log in (v1.4 silently fell back to admin123/minister123).
+- Auth: a SECRET_KEY that is missing or a known placeholder stops the app outside development (1c; it used to be
+  replaced by a random per-process key); a role whose password env var is unset cannot log in (v1.4 silently fell
+  back to admin123/minister123).
 - `PRAGMA foreign_keys=ON` on every connection (v1.4 never enabled it).
+- Benign differences found by the parity harness (milestone 1b), now intended:
+  - absent strings (alliance, avatar_image, stove_lv_content, timezone) are `null` in cards and exports, never `''`
+    (v1.4 mixed both);
+  - equal-points ties: the Excel UNASSIGNED section and `Unassigned` sheet order ties by player id ASC (as v1.4's
+    Excel); the admin unassigned list orders ties newest application first;
+  - hours inside `time_slots_by_day` are stored and returned sorted (v1.4 read them back sorted);
+  - the heat map counts only applicants of the round (v1.4 also counted preference rows of deleted players).
+
+### Milestone 1c decisions (review fixes, docs/REVIEW-phase1.md)
+- **Explicit v1.4 import** (H1): normal boot refuses a v1.4 file (`LegacyDatabaseError`); import via
+  `python -m core.migrate [--db PATH] [--check]` or `MIGRATE_V14=1`. Migration 2 creates guard VIEWs named
+  `players`, `time_preferences`, `assignments`, `admin_users` (no rows, v1.4 columns) and triggers rejecting the v1.4
+  round-setting keys in `settings`. A v1.4 instance on a v2 file cannot boot (its init hits the views) and every
+  write fails loudly. An empty ghost v1.4 table found later is dropped; a non-empty one stops the app with a message.
+- **Locking** (H2): `migrate()` takes `BEGIN IMMEDIATE` before reading `schema_version` or detecting a legacy file and
+  runs all pending migrations in that transaction. Production runs ONE instance (`--max-instances 1`).
+- **Secrets** (H2/M4): outside development a missing/placeholder/short (<16) `SECRET_KEY` or a well-known default
+  password stops the app (`ConfigError`). Placeholders and the `admin123`/`minister123` defaults are accepted only
+  with `FLASK_ENV=development` AND `ALLOW_INSECURE_DEV=1` (docker-compose sets both, binds 127.0.0.1). Development
+  without a key gets a random per-process key.
+- **Crystals** (M1): imported exactly as v1.4 stored them (`12.5` stays `12.5`; points match v1.4). New input must be
+  a whole number; an imported fractional value re-sent unchanged (player resubmit, admin edit) is accepted and kept.
+- **FIDs** (M2):
+  - FIDs are strings end to end; leading zeros are significant (`0040021` ≠ `40021`); FIDs above 2^53 are never
+    parsed as numbers.
+  - Lookup everywhere (public and admin): exact match first, then the whitespace-trimmed FID.
+  - Import: surrounding whitespace is trimmed when the trimmed FID is non-empty and unique among legacy FIDs;
+    otherwise the FID is kept byte-for-byte (and stays reachable by exact match). Trimmed, kept and non-digit FIDs are
+    logged.
+  - A NEW profile needs a canonical FID (digits only, 1-20). An EXISTING profile keeps its stored FID, may resubmit,
+    and is always updated by id, so legacy rows never fork.
+  - Legacy values over today's limits (e.g. the 4-char alliance `love`, a long name) are accepted when re-sent
+    unchanged (alliance compared case-insensitively) and kept exactly as stored; any new value must meet the limits.
+- **Admin login throttling** (M3): in-process limiter, per client IP (right-most `TRUSTED_PROXY_HOPS` entry of
+  X-Forwarded-For, default 1 = Cloud Run) plus a global budget; after 5 failures exponential backoff (1 s ... 15 min),
+  429 `TOO_MANY_ATTEMPTS` with `Retry-After`, without checking the password. Adequate because there is one instance;
+  state resets on restart. Passwords are compared as SHA-256 digests with `hmac.compare_digest`, both roles always.
+- **CORS** is off unless `CORS_ORIGINS` is set (the SPA is same-origin; Vite proxies `/api` in dev).
+- **Excel** (M5): user text starting with `= + - @`, TAB or CR is written as a quote-prefixed text cell: shown exactly,
+  never evaluated.
+- **Public data with only an FID** (M6, accepted by the owner): see docs/API.md "What an FID gives a stranger". Public
+  profile/application responses no longer include internal ids, the profile snapshot or created_at timestamps.
+- **Closed rounds are read-only**: application/assignment/publish/import/settings writes on a `closed` round return
+  409 `ROUND_CLOSED`. `PUT /api/admin/rounds/<id>` with `status: open|draft` reopens it (subject to the one-open-round
+  rule) and may change other fields in the same request. Deleting a whole profile stays allowed (profile-level).
+- **Published days** only ever contain active days: switching `research_day` drops the old day, and public endpoints
+  ignore stale entries. A player's own assignments (`/current/assignments/<fid>`) list **published days only**
+  (v1.4 also returned drafts to anyone with the FID; the MCP tool already filtered). Admins see drafts via admin routes.
+- **Public schedule day**: anything other than monday/tuesday/thursday/friday → 400 `VALIDATION_ERROR`; a possible
+  but inactive day (e.g. friday when research is tuesday) → `{"published": false}`.
+- **Admin routes**: `/api/admin/rounds/<id|current>` (+`/applications`, `/export`; `?event=`, default ministry).
+  Admin lists (`rounds`, `applications`, `profiles`) take optional `?limit=` (1-1000) `&offset=` and always report
+  `total`.
+- Scheme switch re-syncs the shared 23:50 boundary (L3): after remapping, the boundary is mirrored from the earlier
+  day if occupied, else from the later day. Export timestamps are UTC ISO `Z` (L5). Name/alliance filters use Python
+  `casefold()` (Unicode-aware, L7). Read-modify-write of round settings/publish runs under `BEGIN IMMEDIATE`; a
+  locked database answers 503 `RETRY` (L2). JSON import runs each entry in a savepoint; database errors are reported
+  per entry (L4). A failed migration leaves no backup; one `.bak` per successful import (L1).
+
+### Known / accepted (not fixed)
+- **L6**: a `closing_time` without offset is UTC (the admin UI must send `toISOString()`); an unparseable legacy closing
+  time leaves the round open with only a log warning and `settings.legacy_closing_time_raw`; `profiles.timezone` is
+  free text ≤64 chars, not validated against IANA.
+- **L8**: admin tokens cannot be revoked individually. Rotating `ADMIN_PASSWORD` does not invalidate issued tokens
+  (≤12 h); rotating `SECRET_KEY` invalidates all. A bare token (no `Bearer`) is accepted.
+- **M6**: anyone with an FID can read and change that player's profile and current application (no login by design);
+  there is no per-IP limit on public PUTs and no audit trail yet.
+- Assignments of an old research day stay stored (unreachable) after a `research_day` switch.
 
 ## MCP server (phase 1b, in front of the API)
 Separate process `mcp/` (Python, official `mcp` SDK, streamable HTTP), talks to the app ONLY via the HTTP API above.
