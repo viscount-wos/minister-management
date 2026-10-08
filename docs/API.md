@@ -446,6 +446,30 @@ Player calls are the generic ones with `{event}` = `svs`.
   `troop` + `min_camp` (FC code) + `min_tier` (10/11), exact `<type>_camp` / `<type>_tier` (chips; `none` = blank),
   `submitted_from`/`submitted_to`, `days`. Bad values → 400 naming the parameter.
 
+
+### SVS battle planner (v2.2.0)
+- `GET /api/admin/svs/rounds/{ref}/plan` (admin) → `{round_id, round_name, revision (0 = never saved), updated_at,
+  plan, share: {enabled, token, path, created_at}, battle: {start, end, hours}, pet_buff_times: {open, two_hours,
+  last_hour}, state_generation, people: {fid: {name, alliance, signed_up}}, view}` (`view` = the resolved read-only
+  plan, as the public view but real names always shown). Before the first save: an empty main + counter plan.
+- `PUT /api/admin/svs/rounds/{ref}/plan` body `{revision, plan}` → the GET shape with `revision + 1`.
+  `revision` must be the one loaded, else **409 `PLAN_CONFLICT`** (`details.revision` = current; nothing written).
+  400 `VALIDATION_ERROR` (`field` = plan path, e.g. `plan.leaders[0].rally.ratio`; a hero above the state generation →
+  `details.hero`), **422 `DOUBLE_BOOKED`** (`details.where = {group_id, group_name, leader_id, leader_label,
+  position: leader|named_joiner|extra_joiner|extra_group}`), 409 `ROUND_CLOSED`.
+  Plan document: `{strategy: single|main_counter, show_real_names, groups: [{id, kind: main|counter|extra, name,
+  alliance_tag?, notes?, min_requirements? {infantry|lancer|marksman: {min_camp, min_tier}}, players? (extra only)}],
+  leaders: [{id, group_id, order, player, disguise {pfp_hero, alias}, split, rally {heroes[3], ratio {inf,lan,mks}},
+  garrison?, pet_buff, named_joiners[≤4] {player, rally {lead_hero, ratio?}, garrison?}, other_joiner_heroes {rally[≤4],
+  garrison[≤4]}, extra_joiners[≤14] {player}}]}`; player = `{fid}` or `{name}`; ratios = integers summing to 100.
+- `POST /api/admin/svs/rounds/{ref}/plan/share` body `{action: create|rotate|disable}` → `{round_id, share}`. create is
+  idempotent; rotate = new 128-bit token (old link dies at once); disable = off. Does not change the revision.
+- `GET /api/svs/plan/{token}` (public, rate-limited like lookups; `X-Robots-Tag: noindex`, `Referrer-Policy:
+  no-referrer`, `Cache-Control: no-store`) → `{round_name, revision, updated_at, attribution, battle, pet_buff_times,
+  show_real_names, groups: [{…, leaders: [{label, alias, pfp_hero, player?, rally {heroes, ratio, other_joiner_heroes},
+  garrison?, pet_buff, pet_buff_time, named_joiners, extra_joiners}]}]}` (heroes resolved to `{slug, name, troop,
+  image}`; FIDs are never exposed). Unknown/rotated/disabled token → 404 `PLAN_NOT_FOUND`.
+
 ## v1.4 → v2 endpoint map (for the frontend rewire)
 
 | v1.4 | v2 |

@@ -570,5 +570,79 @@ Both events read and write the same per-FID `profile.troops` (`{type: {furnace_l
 `set_state_generation(generation)` (admin). See docs/MCP.md.
 
 ### Known gaps / accepted
-- No import of past SVS data; no per-hour capacity / planner yet (phase 2: the drag-and-drop battle planner).
+- No import of past SVS data; no per-hour capacity planning.
 - Hero data is a one-off scrape (re-run the build script when new heroes ship; bump `version`).
+
+## SVS battle planner (phase 2, p5/svs-planner, v2.2.0)
+Owner brief: `catalogue/SVS-battle-setup-brief.md` (incl. its Decisions). Desktop-first in Event Management → SVS →
+**Battle plan** (full-width tab), plus a phone-first read-only **shared plan view** `/svs/plan/<token>`.
+
+### Decisions (owner)
+- **SVS sign-up does not ask the role; the planner assigns leaders.** Pickers rank sign-ups by strength
+  (FC number + tier summed over the three troop types, max 63) and show hours + Discord VC; no "calls rallies" preference.
+- One plan per SVS round, a validated JSON document with a `revision` (table `svs_plans`, migration 5).
+- `strategy`: `single` (one main group) | `main_counter` (one main + one counter). Up to 5 light `extra` groups
+  (e.g. Turrets: name, players, notes) via "Add another group".
+- Main/counter groups: name, alliance tag, notes, `min_requirements` per troop type `{min_camp FC1..FC10|null,
+  min_tier 10|11|null}`. Shown on the plan view as the joining rules for "everyone else"; in the planner a named joiner
+  below them gets a WARNING badge (never blocked).
+- Leaders (unlimited, ordered per group): player, disguise `{pfp_hero, alias}` (what the ENEMY sees; collapsed when
+  empty, at the top of the card), `split` ("Separate rally and garrison"), `rally {heroes[3], ratio}`, `garrison`
+  (only when split), `pet_buff` `open|two_hours|last_hour|null`, ≤4 `named_joiners {player, rally {lead_hero,
+  ratio?}, garrison? {lead_hero, ratio?}}`, `other_joiner_heroes {rally[≤4], garrison[≤4]}` (repeats allowed),
+  ≤14 `extra_joiners {player}` (names only).
+- Ratios: integers inf/lan/mks summing to 100. Joiners inherit the leader's ratio per side; an optional override per
+  joiner per side. When split the SAME joiners have separate rally and garrison lead heroes + ratios.
+- Pet buffs: a per-leader choice of three moments, labelled with real times from the round's battle start/duration
+  ("At open (11:00 UTC)", "Two hours in (13:00 UTC)", "Last hour (15:00 UTC)"). No auto-assignment, no coverage warnings.
+- Player ref: `{fid}` (a profile/sign-up) or quick add `{name}`; quick add WITH an FID creates the SVS sign-up via the
+  admin add-player route; name-only stays in the plan, marked "not signed up".
+- **Double booking**: a player (fid, or the same quick-add name, case-insensitive) appears ONCE across the plan (leader,
+  named joiner, extra joiner or extra group). Server: 422 `DOUBLE_BOOKED` + `details.where` (group, leader label,
+  position). UI: search results badge "Already with Rally Caller 01"; picking them is refused with that message;
+  "Move here" is the explicit move.
+- Hero choices: generation ≤ `state_generation`; rare/epic (no generation) allowed, listed after. A hero ALREADY in the
+  stored plan stays valid when the generation is lowered (the planner flags it); new ones above the limit → 400.
+- Autosave: every change saves (debounced ~0.8 s) with the revision; "Saved · just now". A stale revision → 409
+  `PLAN_CONFLICT` and a conflict banner with Reload; nothing is overwritten silently. A failed save is not retried in a
+  loop: the next edit or Retry saves.
+- Share: 128-bit random token (stored + looked up by sha256); create (idempotent) / rotate ("New link": the old one dies
+  at once) / disable ("Turn off sharing"). Per-plan toggle "Show real names to the state" (default ON) only affects our
+  page: a disguised leader shows the alias + PFP hero, plus the real name when ON.
+
+### Planner UI
+- Toolbar: strategy switch, Add another group, hint, save status, Share popover (link, copy, new link, turn off,
+  real-names toggle).
+- Group columns side by side, distinct colour accents (theme tokens `team.main/counter/extra`) and labels; compact
+  minimums editor (camp + tier select per troop type) and notes.
+- Leader card: drag handle (dnd-kit, mouse/touch/keyboard; between groups and within a group; also a ⋮ "Move to
+  Counter/Main" menu, up/down, remove), number badge, player name (hover = troops, hours, VC), disguise block, hero
+  slots ×3 + ratio editor (three inputs, live total, stacked bar), split toggle, pet-buff segmented control (with
+  times), named joiners (4 rows: search + lead hero slot(s) + collapsed ratio override + below-minimum badge),
+  "Everyone else may use" slots, extra joiner chips + add-by-search.
+- Sticky side panel: **Heroes** (big HeroCards, troop tabs, search; drag onto any slot, or click a slot then a hero:
+  the next empty slot of that march arms itself; × clears; Esc disarms) and **Sign-ups** (unplaced, strongest first,
+  filter by text/VC; drag onto a joiner row, the extra-joiner box or a group's "new leader" drop zone).
+- Player search: ARIA combobox over the round's sign-ups (name, FID, alliance), strongest first, shows troop line,
+  hours, VC, the "already placed" badge; "Quick add" at the bottom (name + optional FID).
+
+### Shared plan view (`/svs/plan/<token>`)
+- Phone-first, 9 languages + RTL, noindex (meta + `X-Robots-Tag`), `Referrer-Policy: no-referrer`, no-store,
+  rate-limited like the lookups; invalid/rotated/disabled token → friendly "not found" page (one answer for all).
+- Per group (colour + name + tag + joining rules + notes) the leaders in order: alias/PFP (and real name per toggle),
+  heroes as pictures with names, ratio bar + numbers, pet-buff moment with UTC time, named joiners (lead hero per side,
+  own ratio only when overridden; a note says joiners otherwise use the leader's ratio), "everyone else" heroes,
+  extra joiners; extra groups with their players. Battle times in UTC plus "your time".
+- "Find me" (name or FID): highlights the player's place, scrolls to it and says it in a sentence
+  ("You join Rally Caller 01 as joiner 2 (Main rallies)").
+
+### Demo data
+`scripts/demo/seed_svs.py --base-url … --password … [--plan] [--new-round]`: ~60 dummy sign-ups across 8 alliances
+(fixed FIDs 990001…, seeded randomness: re-runs update the same rows), FC5-FC10, T10/T11, varied hours, VC; `--plan`
+saves a sample main + counter plan (4 leaders, disguises, split, pet buffs, joiners, a Turrets group) if still empty.
+Refuses the live site. Uses the admin token on every call (admin requests are not throttled).
+
+### Known gaps / accepted
+- Plan editing over MCP is not offered (read + share only).
+- No undo history (autosave + revision conflict only).
+

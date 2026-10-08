@@ -137,6 +137,7 @@ any API call.
 | `submit_application(event, fid, answers, profile?)` | `PUT /api/events/{event}/current/application/{fid}` | `APPLICATIONS_CLOSED` after closing time for new apps |
 | `get_published_schedule(day?)` | `GET /api/events/ministry/current/schedule[/{day}]` | no day = list of published days |
 | `get_my_assignments(fid)` | `GET /api/events/ministry/current/assignments/{fid}` | **filtered to published days** (the API returns all; the UI filters) |
+| `get_svs_plan_shared(token)` | `GET /api/svs/plan/{token}` | the shared, read-only SVS battle plan (what the state sees); `PLAN_NOT_FOUND` for a bad/rotated/disabled token |
 | `get_heroes(max_gen?, troop?)` | `GET /api/heroes` | hero library up to `max_gen` (default the state's hero generation); rare/epic (no generation) always included; carries the Century Games attribution |
 
 ### Admin (`/admin/mcp` only)
@@ -152,6 +153,8 @@ any API call.
 | `get_assignments(day, round_id="current")` | `GET /api/admin/ministry/rounds/{ref}/assignments/{day}` | includes unpublished days |
 | `get_svs_summary(round_id="current", alliance?, hours?, vc?, min_camp?, min_tier?, troop?, svs_filters?)` | `GET /api/admin/svs/rounds/{ref}/summary?<filters>` | SVS stats for the FILTERED set: total (+ round_total), avg_hours, all_t11, discord_vc, players per hour, alliances, camp levels and tiers per troop type |
 | `add_player(event, fid, profile?, answers?, round_id="current")` | `POST /api/admin/rounds/{ref}/applications` | admin "add player" for any event: FID (+ game_name for a new profile) required, the rest optional; `APPLICATION_EXISTS` (409) if the FID already signed up in that round |
+| `get_svs_plan(round_id="current")` | `GET /api/admin/svs/rounds/{ref}/plan` | the SVS battle plan as structured JSON (plan document, revision, share state, pet-buff times, resolved view with real names). Read-only: plan editing over MCP is not offered |
+| `svs_plan_share(action, round_id="current")` | `POST /api/admin/svs/rounds/{ref}/plan/share` | `create` (idempotent) / `rotate` (old link dies) / `disable` the secret read-only link → `{share: {enabled, token, path}}` |
 | `set_state_generation(generation)` | `PUT /api/admin/settings` | the state's hero generation (1..17), state-wide |
 | `get_tyrant_summary(round_id="current", alliance=None, min_camp?, min_tier?, troop?, filters?)` | `GET /api/admin/tyrant/rounds/{ref}/summary?<filters>` | Tyrant stats for the FILTERED set: total (+ round_total), opening rush, VC, windows, alliances, roles, troop tiers and camp levels per troop type; no furnace counts (Tyrant does not ask it), no gem total |
 
