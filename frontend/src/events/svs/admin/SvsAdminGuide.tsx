@@ -50,7 +50,7 @@ export default function SvsAdminGuide() {
 
         {/* Players tab. To document a new Players feature, add a key (table4, ...) to this list in all 9 languages. */}
         <GuideSection icon={Table} title={k('tableTitle')} id="players">
-          <GuideList t={k} keys={['table1', 'table2', 'table3']} />
+          <GuideList t={k} keys={['table1', 'table2', 'table3', 'table4', 'table5', 'table6']} />
         </GuideSection>
         <GuideSection icon={BarChart3} title={k('statsTitle')}>
           <p>{k('statsBody')}</p>

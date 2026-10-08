@@ -371,6 +371,9 @@
     "workflow3": "Kayıtları izleyin; kaydolamayanları ekleyin.",
     "workflow4": "Kapanıştan sonra savaş planını yapın.",
     "workflow5": "Plan bağlantısını eyalet sohbetinde paylaşın (yalnızca eyalet içinde).",
-    "workflow6": "SVS bitince bir sonraki için yeni tur başlatın."
+    "workflow6": "SVS bitince bir sonraki için yeni tur başlatın.",
+    "table4": "Plan sütunu: her oyuncunun bu turun savaş planında nerede olduğunu gösterir, ör. \"Katılımcı 2 · Rally Caller 01 (Ana ittifak)\". Tire, henüz planda olmadığı anlamına gelir. Tablonun üstündeki \"Planda\" ve \"Planda değil\" sayıları listeyi filtreler.",
+    "table5": "Ralliye ekle: bir satırdaki kişi-artı düğmesi ralli liderlerini ve boş yerlerini (isimli n/4, ek n/14) listeler. Bir lider seç, sonra \"İsimli katılımcı olarak\" (ana kahraman sonra Savaş planında seçilir) veya \"Ek katılımcı olarak\". Oyuncuyu ralli lideri yapabilir ya da Taretler gibi bir gruba da ekleyebilirsin. Zaten yerleştirilmişse menü nerede olduğunu gösterir ve \"Buraya taşı\" seçeneğini sunar.",
+    "table6": "Toplu ekleme: birkaç oyuncuyu işaretle ve alttaki çubukta \"Seçili N oyuncuyu ralliye ekle…\" seçeneğini kullan. Önce isimli yerler, sonra ek yerler dolar. Zaten planda olanlar veya sığmayanlar mesajda adlarıyla belirtilir. Başka bir lider planı aynı anda değiştirdiyse işlem bir kez yeniden denenir ve hiçbir şeyin üzerine yazılmaz."
   }
 }

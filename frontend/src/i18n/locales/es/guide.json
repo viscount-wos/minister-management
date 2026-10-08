@@ -371,6 +371,9 @@
     "workflow3": "Sigue las inscripciones; añade a quien no pudo inscribirse.",
     "workflow4": "Tras la hora de cierre, crea el plan de batalla.",
     "workflow5": "Comparte el enlace del plan en el chat del estado (solo dentro del estado).",
-    "workflow6": "Después del SVS, inicia una nueva ronda para el siguiente."
+    "workflow6": "Después del SVS, inicia una nueva ronda para el siguiente.",
+    "table4": "Columna Plan: muestra dónde está cada jugador en el plan de batalla de esta ronda, p. ej. «Acompañante 2 · Rally Caller 01 (Alianza principal)». Un guion significa que aún no está en el plan. Los contadores «En el plan» y «Fuera del plan» encima de la tabla filtran la lista.",
+    "table5": "Añadir a un rally: el botón de persona con «+» de cada fila muestra tus líderes de rally con sus plazas libres (con nombre n/4, extra n/14). Elige un líder y luego «Como unido con nombre» (el héroe principal se elige después en Plan de batalla) o «Como unido extra». También puedes hacerlo líder de rally o añadirlo a un grupo como Torretas. Si ya está colocado, el menú indica dónde y ofrece «Mover aquí».",
+    "table6": "Añadir varios: marca varios jugadores y usa «Añadir N seleccionados al rally…» en la barra inferior. Primero se llenan las plazas con nombre y luego las extra. Quien ya esté en el plan o no quepa aparece nombrado en el mensaje. Si otro líder cambió el plan a la vez, se reintenta una vez y no se sobrescribe nada."
   }
 }

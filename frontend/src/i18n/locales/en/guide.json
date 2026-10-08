@@ -371,6 +371,9 @@
     "workflow3": "Watch the sign-ups; add players who couldn't sign up.",
     "workflow4": "After the closing time, build the battle plan.",
     "workflow5": "Share the plan link in state chat (only inside the state).",
-    "workflow6": "After SVS, start a new round for the next one."
+    "workflow6": "After SVS, start a new round for the next one.",
+    "table4": "Plan column: shows where each player is in this round's battle plan, e.g. \"Joiner 2 · Rally Caller 01 (Main alliance)\". A dash means they are not in the plan yet. The \"In plan\" and \"Not in plan\" counts above the table filter the list.",
+    "table5": "Add to rally: the person-plus button on a row lists your rally leaders with their free places (named n/4, extra n/14). Pick a leader, then \"As named joiner\" (pick the lead hero later in Battle plan) or \"As extra joiner\". You can also make the player a rally leader or add them to a group such as Turrets. If they are already placed, the menu says where and offers \"Move here\".",
+    "table6": "Bulk add: tick several players, then use \"Add N selected to rally…\" in the bar at the bottom. Named places fill first, then extra. Anyone already in the plan, or who did not fit, is named in the message. If another leader changed the plan at the same time, it is retried once and nothing is overwritten."
   }
 }

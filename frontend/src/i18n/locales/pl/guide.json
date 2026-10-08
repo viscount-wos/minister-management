@@ -371,6 +371,9 @@
     "workflow3": "Obserwuj zapisy; dodaj graczy, którzy nie mogli się zapisać.",
     "workflow4": "Po terminie przygotuj plan bitwy.",
     "workflow5": "Udostępnij link do planu na czacie stanu (tylko w obrębie stanu).",
-    "workflow6": "Po SVS rozpocznij nową rundę na następne."
+    "workflow6": "Po SVS rozpocznij nową rundę na następne.",
+    "table4": "Kolumna Plan: pokazuje, gdzie gracz jest w planie bitwy tej rundy, np. „Dołączający 2 · Rally Caller 01 (Główny sojusz)”. Myślnik oznacza, że nie ma go jeszcze w planie. Liczniki „W planie” i „Poza planem” nad tabelą filtrują listę.",
+    "table5": "Dodaj do rajdu: przycisk osoby z plusem w wierszu pokazuje liderów rajdów i wolne miejsca (imienne n/4, dodatkowe n/14). Wybierz lidera, potem „Jako imienny dołączający” (głównego bohatera wybierzesz później w Planie bitwy) albo „Jako dodatkowy dołączający”. Możesz też zrobić z gracza lidera rajdu lub dodać go do grupy, np. Wieżyczki. Jeśli już jest w planie, menu pokaże gdzie i zaproponuje „Przenieś tutaj”.",
+    "table6": "Dodawanie wielu: zaznacz kilku graczy i użyj „Dodaj zaznaczonych (N) do rajdu…” na pasku na dole. Najpierw zapełniane są miejsca imienne, potem dodatkowe. Gracze już w planie lub ci, którzy się nie zmieścili, są wymienieni w komunikacie. Jeśli inny lider zmienił plan w tym samym czasie, operacja jest ponawiana raz i nic nie zostaje nadpisane."
   }
 }

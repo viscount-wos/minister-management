@@ -371,6 +371,9 @@
     "workflow3": "Suivez les inscriptions ; ajoutez ceux qui n'ont pas pu s'inscrire.",
     "workflow4": "Après l'heure de clôture, préparez le plan de bataille.",
     "workflow5": "Partagez le lien du plan dans le chat de l'État (seulement dans l'État).",
-    "workflow6": "Après le SVS, lancez un nouveau tour pour le suivant."
+    "workflow6": "Après le SVS, lancez un nouveau tour pour le suivant.",
+    "table4": "Colonne Plan : indique la place de chaque joueur dans le plan de bataille de ce tour, par ex. « Participant 2 · Rally Caller 01 (Alliance principale) ». Un tiret signifie qu’il n’est pas encore dans le plan. Les compteurs « Dans le plan » et « Hors du plan » au-dessus du tableau filtrent la liste.",
+    "table5": "Ajouter à un rally : le bouton personne « + » d’une ligne liste vos chefs de rally avec leurs places libres (nommés n/4, extra n/14). Choisissez un chef, puis « Comme renfort nommé » (le héros principal se choisit ensuite dans Plan de bataille) ou « Comme renfort extra ». Vous pouvez aussi en faire un chef de rally ou l’ajouter à un groupe comme Tourelles. S’il est déjà placé, le menu indique où et propose « Déplacer ici ».",
+    "table6": "Ajout groupé : cochez plusieurs joueurs puis utilisez « Ajouter les N sélectionnés au rallye… » dans la barre du bas. Les places nommées se remplissent d’abord, puis les extra. Les joueurs déjà dans le plan, ou qui n’ont pas trouvé de place, sont cités dans le message. Si un autre chef a modifié le plan en même temps, l’action est relancée une fois et rien n’est écrasé."
   }
 }

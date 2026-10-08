@@ -371,6 +371,9 @@
     "workflow3": "Beobachte die Anmeldungen; füge Spieler hinzu, die sich nicht anmelden konnten.",
     "workflow4": "Erstelle nach der Schlusszeit den Schlachtplan.",
     "workflow5": "Teile den Plan-Link im Staats-Chat (nur innerhalb des Staates).",
-    "workflow6": "Starte nach SVS eine neue Runde für das nächste."
+    "workflow6": "Starte nach SVS eine neue Runde für das nächste.",
+    "table4": "Spalte Plan: zeigt, wo jeder Spieler im Schlachtplan dieser Runde steht, z. B. „Mitläufer 2 · Rally Caller 01 (Hauptallianz)“. Ein Strich heißt: noch nicht im Plan. Die Zähler „Im Plan“ und „Nicht im Plan“ über der Tabelle filtern die Liste.",
+    "table5": "Zur Rallye hinzufügen: Die Person-Plus-Schaltfläche in einer Zeile zeigt deine Rallye-Leiter mit freien Plätzen (benannt n/4, extra n/14). Wähle einen Leiter, dann „Als benannter Mitläufer“ (den Haupthelden wählst du später im Schlachtplan) oder „Als Extra-Mitläufer“. Du kannst den Spieler auch zum Rallye-Leiter machen oder einer Gruppe wie Türme hinzufügen. Ist er schon eingeplant, zeigt das Menü wo und bietet „Hierher verschieben“.",
+    "table6": "Mehrere hinzufügen: Hake mehrere Spieler an und nutze „N Ausgewählte zur Rallye…“ in der Leiste unten. Zuerst werden benannte Plätze gefüllt, dann zusätzliche. Wer schon im Plan ist oder nicht mehr passt, wird in der Meldung genannt. Hat ein anderer Leiter den Plan gleichzeitig geändert, wird es einmal wiederholt und nichts überschrieben."
   }
 }
