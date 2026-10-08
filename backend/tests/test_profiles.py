@@ -58,7 +58,7 @@ def test_delete_profile_cascades_applications_and_assignments(client, admin):
 
 
 def test_global_settings(client, admin):
-    assert client.get('/api/settings/public').json == {'state_number': '2694'}
+    assert client.get('/api/settings/public').json == {'state_number': None}  # unset until an admin sets it
     r = client.put('/api/admin/settings', json={'state_number': '2807'}, headers=admin)
     assert r.json == {'state_number': '2807'}
     assert client.get('/api/settings/public').json == {'state_number': '2807'}

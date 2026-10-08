@@ -1,7 +1,8 @@
 {
   "event": {
     "name": "Ministerium",
-    "tagline": "Buche einen Ministerplatz für die SVS-Vorbereitungstage und sieh dir den Plan an"
+    "tagline": "Buche einen Ministerplatz für die SVS-Vorbereitungstage und sieh dir den Plan an",
+    "adminSubtitle": "Ministerium: Bewerbungen und Zuweisungen"
   },
   "home": {
     "title": "Whiteout Survival Ministeriumsverwaltung",

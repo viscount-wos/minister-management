@@ -1,7 +1,8 @@
 {
   "event": {
     "name": "Bakanlık",
-    "tagline": "SVS hazırlık günleri için bakanlık saati ayır ve programı gör"
+    "tagline": "SVS hazırlık günleri için bakanlık saati ayır ve programı gör",
+    "adminSubtitle": "Bakanlık: başvurular ve atamalar"
   },
   "home": {
     "title": "Whiteout Survival Bakanlık Yönetimi",

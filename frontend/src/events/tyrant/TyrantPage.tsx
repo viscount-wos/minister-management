@@ -5,19 +5,21 @@ import { FileText, Shield, Clock, Sparkles, CalendarOff, ArrowLeft } from 'lucid
 import api, { Round, isApiError } from '../../shared/api';
 import { TyrantSettings, tyrantApi } from './api';
 import { TYRANT_PATHS } from './paths';
+import { usePageTitle } from '../../shared/usePageTitle';
 
 // Frost Dragon Tyrant landing page (same layout as the ministry home).
 export default function TyrantPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [stateNumber, setStateNumber] = useState('2694');
+  const [stateNumber, setStateNumber] = useState('');
   const [round, setRound] = useState<Round<TyrantSettings> | null>(null);
   const [noRound, setNoRound] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
+  usePageTitle(t('tyrant:name'));
 
   useEffect(() => {
     api.publicSettings()
-      .then((s) => setStateNumber(s.state_number || '2694'))
+      .then((s) => setStateNumber(s.state_number || ''))
       .catch(() => {});
     tyrantApi
       .currentRound()
@@ -43,7 +45,11 @@ export default function TyrantPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-4">
-          <p className="text-2xl text-theme-text font-semibold">{t('tyrant:home.welcome', { state: stateNumber })}</p>
+          {stateNumber && (
+            <p className="text-2xl text-theme-text font-semibold" data-testid="welcome">
+              {t('tyrant:home.welcome', { state: stateNumber })}
+            </p>
+          )}
           {round && (
             <p className="mt-2 text-theme-text" data-testid="current-round">
               {t('tyrant:home.currentRound', { round: round.name })}
@@ -101,7 +107,7 @@ export default function TyrantPage() {
           </button>
 
           <button
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate(TYRANT_PATHS.admin)}
             data-testid="tyrant-admin-tile"
             className="bg-dark-card rounded-2xl p-8 border border-theme-border hover:bg-dark-card-hover transform hover:-translate-y-2 transition-all duration-300 group"
           >

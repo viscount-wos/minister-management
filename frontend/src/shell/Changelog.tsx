@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Sparkles } from 'lucide-react';
+import { usePageTitle } from '../shared/usePageTitle';
 
 // Newest first. Each entry maps to a block of translated keys in i18n.ts.
 const RELEASES = [
@@ -14,6 +15,7 @@ const RELEASES = [
 export default function Changelog() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  usePageTitle(t('changelog:title'));
 
   return (
     <div className="min-h-screen px-4 py-8">

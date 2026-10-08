@@ -1,7 +1,8 @@
 {
   "event": {
     "name": "Ministry",
-    "tagline": "Book a ministry slot for the SVS prep days and view the schedule"
+    "tagline": "Book a ministry slot for the SVS prep days and view the schedule",
+    "adminSubtitle": "Ministry: applications and assignments"
   },
   "home": {
     "title": "Whiteout Survival Ministry Management",

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Hourglass, LucideIcon } from 'lucide-react';
+import { usePageTitle } from './usePageTitle';
 
 interface EventPlaceholderProps {
   /** Namespace holding the event's `name` and `tagline` keys. */
@@ -14,6 +15,7 @@ interface EventPlaceholderProps {
 export default function EventPlaceholder({ ns, icon: Icon, status }: EventPlaceholderProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  usePageTitle(t(`${ns}:name`));
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-4">

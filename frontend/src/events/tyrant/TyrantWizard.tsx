@@ -25,6 +25,7 @@ import {
   tyrantApi,
 } from './api';
 import { TYRANT_PATHS } from './paths';
+import { usePageTitle } from '../../shared/usePageTitle';
 
 // The Frost Dragon Tyrant sign-up WIZARD, ported from the live tyrantpoll app
 // (templates/poll.html), same 6 steps in the same order:
@@ -195,6 +196,7 @@ const TimeRange = ({ start, end }: { start: string; end: string }) => (
 export default function TyrantWizard() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  usePageTitle(t('tyrant:apply.title'));
   const [params, setParams] = useSearchParams();
 
   const [phase, setPhase] = useState<Phase>('loading');

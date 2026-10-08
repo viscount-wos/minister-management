@@ -5,6 +5,7 @@ import { Crown, Flame, Castle, Swords, Shield, Sparkles, LucideIcon } from 'luci
 import api from '../shared/api';
 import { MINISTRY_PATHS } from '../events/ministry/paths';
 import { TYRANT_PATHS } from '../events/tyrant/paths';
+import { usePageTitle } from '../shared/usePageTitle';
 
 type TileStatus = 'open' | 'notOpen' | 'nextRelease' | 'comingSoon';
 
@@ -31,13 +32,15 @@ const taglineKey = (key: EventTile['key']) => (key === 'ministry' ? 'ministry:ev
 export default function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [stateNumber, setStateNumber] = useState('2694');
+  // No hardcoded state: the welcome line only shows once the admin has set one.
+  const [stateNumber, setStateNumber] = useState('');
   // Live events show "Open" only while they have an open round.
   const [openEvents, setOpenEvents] = useState<Set<string> | null>(null);
+  usePageTitle();
 
   useEffect(() => {
     api.publicSettings()
-      .then(s => setStateNumber(s.state_number || '2694'))
+      .then(s => setStateNumber(s.state_number || ''))
       .catch(() => {});
     api.events()
       .then(res => setOpenEvents(new Set(res.events.filter(e => e.current_round).map(e => e.key))))
@@ -47,11 +50,13 @@ export default function Home() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
-        <div className="text-center mb-4">
-          <p className="text-2xl text-theme-text font-semibold">
-            {t('common:home.welcome', { state: stateNumber })}
-          </p>
-        </div>
+        {stateNumber && (
+          <div className="text-center mb-4">
+            <p className="text-2xl text-theme-text font-semibold" data-testid="welcome">
+              {t('common:home.welcome', { state: stateNumber })}
+            </p>
+          </div>
+        )}
 
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-accent mb-4">{t('common:home.title')}</h1>
@@ -104,8 +109,10 @@ export default function Home() {
             <Sparkles className="w-4 h-4" aria-hidden="true" />
             {t('changelog:linkText')}
           </button>
+          {/* Plain /admin: lands on the last event administered on this device (or ministry). */}
           <button
             onClick={() => navigate('/admin')}
+            data-testid="home-admin-link"
             className="inline-flex items-center gap-2 text-theme-dim hover:text-accent transition-colors text-sm font-medium"
           >
             <Shield className="w-4 h-4" aria-hidden="true" />

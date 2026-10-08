@@ -2,10 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Shield, ArrowLeft, AlertCircle, Clock } from 'lucide-react';
-import api, { adminSession } from '../../../shared/api';
-import { errorText } from '../../../shared/apiErrors';
-import { MINISTRY_PATHS } from '../paths';
+import api, { adminSession } from '../shared/api';
+import { errorText } from '../shared/apiErrors';
+import { usePageTitle } from '../shared/usePageTitle';
+import { findAdminEvent, resolveAdminEvent } from './registry';
+import { ADMIN_PATHS } from './paths';
 
+// One login for every event ("Event Management"). /admin?event=tyrant comes
+// from the Tyrant page and lands on the Tyrant dashboard; plain /admin lands
+// on the last event administered here (or ministry).
 export default function AdminLogin() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -14,15 +19,19 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const expired = params.get('expired') === '1';
+  const fromEvent = findAdminEvent(params.get('event'));
+  const target = ADMIN_PATHS.dashboard(resolveAdminEvent(params.get('event')).key);
+
+  usePageTitle(t('admin:title'));
 
   // Already holding a valid token? Go straight to the dashboard.
   useEffect(() => {
     if (!adminSession.token() || expired) return;
     api.admin.me()
-      .then(() => navigate('/admin/dashboard', { replace: true }))
+      .then(() => navigate(target, { replace: true }))
       .catch(() => adminSession.clear());
     // The 401 handler is not registered here, so a stale token is simply dropped.
-  }, [navigate, expired]);
+  }, [navigate, expired, target]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +40,7 @@ export default function AdminLogin() {
     try {
       const res = await api.admin.login(password);
       adminSession.save(res.token, res.role);
-      navigate('/admin/dashboard');
+      navigate(target);
     } catch (err) {
       setError(errorText(t, err, 'admin:invalidPassword'));
     } finally {
@@ -43,18 +52,31 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-md w-full">
         <button
-          onClick={() => navigate(MINISTRY_PATHS.home)}
+          onClick={() => navigate(fromEvent ? fromEvent.publicPath : '/')}
+          data-testid="admin-login-back"
           className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
         >
           <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
-          {t('ministry:update.backHome')}
+          {fromEvent ? t('admin:shell.backTo', { event: t(fromEvent.label) }) : t('common:nav.home')}
         </button>
 
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="w-10 h-10 text-accent" aria-hidden="true" />
           </div>
-          <h2 className="text-3xl font-bold text-accent mb-2">{t('admin:title')}</h2>
+          <h2 className="text-3xl font-bold text-accent mb-2" data-testid="admin-title">
+            {t('admin:title')}
+          </h2>
+          {fromEvent && (
+            <p
+              className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full bg-accent/10 border border-accent/40 text-accent text-sm font-semibold"
+              data-testid="admin-login-event"
+              data-event={fromEvent.key}
+            >
+              <fromEvent.icon className="w-4 h-4" aria-hidden="true" />
+              {t(fromEvent.label)}
+            </p>
+          )}
           <p className="text-theme-dim">{t('admin:enterPassword')}</p>
         </div>
 

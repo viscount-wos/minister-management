@@ -90,8 +90,7 @@
     "gems": "Gem spend must be a whole number, e.g. 10000"
   },
   "admin": {
-    "eventSwitch": "Event",
-    "subtitle": "Sign-ups for this round: stats, players and exports",
+    "adminSubtitle": "Frost Dragon Tyrant: sign-ups, stats and exports",
     "defaultRoundName": "Tyrant {{date}}",
     "stats": {
       "total": "Total Players",

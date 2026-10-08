@@ -1,11 +1,10 @@
 {
-  "title": "Ministeriumsverwaltung",
+  "title": "Eventverwaltung",
   "login": "Anmelden",
   "password": "Passwort",
   "enterPassword": "Geben Sie Ihr Passwort ein, um auf das Admin-Panel zuzugreifen",
   "invalidPassword": "Ungültiges Passwort",
   "logout": "Abmelden",
-  "managePlayers": "Spieler und Ministeriumszuweisungen verwalten",
   "players": "Spieler",
   "assignments": "Zuweisungen",
   "playerManagement": "Spielerverwaltung",
@@ -118,5 +117,9 @@
     "publishedDays": "Veröffentlichte Plantage",
     "publishedDaysDesc": "Spieler sehen den Plan der veröffentlichten Tage auf der Ministeriumsseite.",
     "remapped": "Slot-Schema geändert. {{n}} Zuweisungen wurden auf die neuen Slots verschoben."
+  },
+  "shell": {
+    "eventSwitch": "Event",
+    "backTo": "Zurück zu {{event}}"
   }
 }

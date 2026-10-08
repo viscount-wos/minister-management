@@ -1,11 +1,10 @@
 {
-  "title": "Administración de Ministerios",
+  "title": "Gestión de eventos",
   "login": "Iniciar Sesión",
   "password": "Contraseña",
   "enterPassword": "Ingresa tu contraseña para acceder al panel de administración",
   "invalidPassword": "Contraseña inválida",
   "logout": "Cerrar Sesión",
-  "managePlayers": "Gestiona jugadores y asignaciones de ministerio",
   "players": "Jugadores",
   "assignments": "Asignaciones",
   "playerManagement": "Gestión de Jugadores",
@@ -118,5 +117,9 @@
     "publishedDays": "Días con horario publicado",
     "publishedDaysDesc": "Los jugadores ven el horario de los días publicados en la página del ministerio.",
     "remapped": "Esquema de franjas cambiado. {{n}} asignaciones movidas a las nuevas franjas."
+  },
+  "shell": {
+    "eventSwitch": "Evento",
+    "backTo": "Volver a {{event}}"
   }
 }

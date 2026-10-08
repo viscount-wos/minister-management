@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import api, { EventKey, Round } from '../../../shared/api';
-import { errorText } from '../../../shared/apiErrors';
-import { localInputToIso } from '../../../shared/datetime';
+import api, { EventKey, Round } from '../shared/api';
+import { errorText } from '../shared/apiErrors';
+import { localInputToIso } from '../shared/datetime';
 
 // "Start new round" replaces v1.4's "Remove all players": it closes the
 // current round (nothing is deleted) and opens a new one. Settings carry over;

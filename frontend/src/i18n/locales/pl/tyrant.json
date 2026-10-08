@@ -90,8 +90,7 @@
     "gems": "Wydatek klejnotów musi być liczbą całkowitą, np. 10000"
   },
   "admin": {
-    "eventSwitch": "Wydarzenie",
-    "subtitle": "Zgłoszenia tej rundy: statystyki, gracze i eksport",
+    "adminSubtitle": "Tyran Mroźnego Smoka: zgłoszenia, statystyki i eksport",
     "defaultRoundName": "Tyran {{date}}",
     "stats": {
       "total": "Gracze",

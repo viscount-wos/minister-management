@@ -7,6 +7,7 @@ import TimezoneSelector from '../../shared/TimezoneSelector';
 import { useTimezone } from '../../shared/TimezoneContext';
 import { getSlotDisplayTime, generateAssignmentSlots, TimeSlotScheme } from '../../shared/timezone';
 import { MINISTRY_PATHS } from './paths';
+import { usePageTitle } from '../../shared/usePageTitle';
 
 interface PublishedPlayer {
   game_name: string;
@@ -24,6 +25,7 @@ export default function PublishedSchedule() {
   const navigate = useNavigate();
   const { day } = useParams<{ day: string }>();
   const { t } = useTranslation();
+  usePageTitle(t('ministry:schedule.title'));
   const [data, setData] = useState<PublishedData | null>(null);
   const [loading, setLoading] = useState(true);
   const { timezone, setTimezone } = useTimezone();

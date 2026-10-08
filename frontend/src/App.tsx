@@ -8,9 +8,9 @@ import MinistryHome from './events/ministry/MinistryHome';
 import ApplicationWizard from './events/ministry/ApplicationWizard';
 import PublishedSchedule from './events/ministry/PublishedSchedule';
 import PlayerGuide from './events/ministry/PlayerGuide';
-import AdminLogin from './events/ministry/admin/AdminLogin';
-import AdminDashboard from './events/ministry/admin/AdminDashboard';
-import AdminGuide from './events/ministry/admin/AdminGuide';
+import AdminLogin from './admin/AdminLogin';
+import AdminShell from './admin/AdminShell';
+import AdminGuidePage from './admin/AdminGuidePage';
 import TyrantPage from './events/tyrant/TyrantPage';
 import TyrantWizard from './events/tyrant/TyrantWizard';
 import SvsPage from './events/svs/SvsPage';
@@ -40,10 +40,10 @@ function App() {
             <Route path="/svs" element={<SvsPage />} />
             <Route path="/tal" element={<TalPage />} />
 
-            {/* Admin (unchanged URLs) */}
+            {/* Event Management: one admin for every event; ?event=<key> picks the event (admin/paths.ts) */}
             <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/guide" element={<AdminGuide />} />
+            <Route path="/admin/dashboard" element={<AdminShell />} />
+            <Route path="/admin/guide" element={<AdminGuidePage />} />
 
             {/* v1.x URLs, kept working for bookmarks and shared links */}
             <Route path="/submit" element={<LegacyRedirect to="/ministry/apply" />} />

@@ -1,11 +1,10 @@
 {
-  "title": "Minister Administration",
+  "title": "Event Management",
   "login": "Login",
   "password": "Password",
   "enterPassword": "Enter your password to access the admin panel",
   "invalidPassword": "Invalid password",
   "logout": "Logout",
-  "managePlayers": "Manage players and ministry assignments",
   "players": "Players",
   "assignments": "Assignments",
   "playerManagement": "Player Management",
@@ -118,5 +117,9 @@
     "publishedDays": "Published schedule days",
     "publishedDaysDesc": "Players see the schedule of published days on the ministry page.",
     "remapped": "Slot scheme changed. {{n}} assignments moved to the new slots."
+  },
+  "shell": {
+    "eventSwitch": "Event",
+    "backTo": "Back to {{event}}"
   }
 }

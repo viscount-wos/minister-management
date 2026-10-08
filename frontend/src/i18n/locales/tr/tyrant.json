@@ -90,8 +90,7 @@
     "gems": "Elmas harcaması tam sayı olmalı, ör. 10000"
   },
   "admin": {
-    "eventSwitch": "Etkinlik",
-    "subtitle": "Bu turun kayıtları: istatistikler, oyuncular ve dışa aktarma",
+    "adminSubtitle": "Ayaz Ejderhası Tiranı: kayıtlar, istatistikler ve dışa aktarma",
     "defaultRoundName": "Tiran {{date}}",
     "stats": {
       "total": "Toplam Oyuncu",

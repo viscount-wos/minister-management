@@ -1,11 +1,10 @@
 {
-  "title": "Bakanlık Yönetimi",
+  "title": "Etkinlik Yönetimi",
   "login": "Giriş",
   "password": "Şifre",
   "enterPassword": "Yönetim paneline erişmek için şifrenizi girin",
   "invalidPassword": "Geçersiz şifre",
   "logout": "Çıkış",
-  "managePlayers": "Oyuncuları ve bakanlık atamalarını yönetin",
   "players": "Oyuncular",
   "assignments": "Atamalar",
   "playerManagement": "Oyuncu Yönetimi",
@@ -118,5 +117,9 @@
     "publishedDays": "Yayınlanan program günleri",
     "publishedDaysDesc": "Oyuncular yayınlanan günlerin programını bakanlık sayfasında görür.",
     "remapped": "Zaman dilimi düzeni değişti. {{n}} atama yeni dilimlere taşındı."
+  },
+  "shell": {
+    "eventSwitch": "Etkinlik",
+    "backTo": "{{event}} sayfasına dön"
   }
 }

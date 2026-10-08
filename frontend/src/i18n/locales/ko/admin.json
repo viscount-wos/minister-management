@@ -1,11 +1,10 @@
 {
-  "title": "장관 관리",
+  "title": "이벤트 관리",
   "login": "로그인",
   "password": "비밀번호",
   "enterPassword": "관리 패널에 접근하려면 비밀번호를 입력하세요",
   "invalidPassword": "잘못된 비밀번호",
   "logout": "로그아웃",
-  "managePlayers": "플레이어 및 장관 배정 관리",
   "players": "플레이어",
   "assignments": "배정",
   "playerManagement": "플레이어 관리",
@@ -118,5 +117,9 @@
     "publishedDays": "공개된 일정 요일",
     "publishedDaysDesc": "플레이어는 장관직 페이지에서 공개된 요일의 일정을 볼 수 있습니다.",
     "remapped": "슬롯 방식이 변경되었습니다. 배정 {{n}}건을 새 슬롯으로 옮겼습니다."
+  },
+  "shell": {
+    "eventSwitch": "이벤트",
+    "backTo": "{{event}}(으)로 돌아가기"
   }
 }

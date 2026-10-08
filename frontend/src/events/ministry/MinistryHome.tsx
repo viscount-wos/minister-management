@@ -5,18 +5,20 @@ import { FileText, Shield, Calendar, HelpCircle, Clock, Sparkles, CalendarOff } 
 import api, { MinistrySettings, Round, isApiError } from '../../shared/api';
 import { activeDaysInOrder, sortDaysByWeek } from '../../shared/days';
 import { MINISTRY_PATHS } from './paths';
+import { usePageTitle } from '../../shared/usePageTitle';
 
 export default function MinistryHome() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [stateNumber, setStateNumber] = useState('2694');
+  const [stateNumber, setStateNumber] = useState('');
   const [round, setRound] = useState<Round<MinistrySettings> | null>(null);
   const [noRound, setNoRound] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
+  usePageTitle(t('ministry:event.name'));
 
   useEffect(() => {
     api.publicSettings()
-      .then((s) => setStateNumber(s.state_number || '2694'))
+      .then((s) => setStateNumber(s.state_number || ''))
       .catch(() => {});
     api.currentRound<MinistrySettings>('ministry')
       .then((r) => {
@@ -47,7 +49,11 @@ export default function MinistryHome() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-4">
-          <p className="text-2xl text-theme-text font-semibold">{t('ministry:home.welcome', { state: stateNumber })}</p>
+          {stateNumber && (
+            <p className="text-2xl text-theme-text font-semibold" data-testid="welcome">
+              {t('ministry:home.welcome', { state: stateNumber })}
+            </p>
+          )}
           {round && (
             <p className="mt-2 text-theme-text" data-testid="current-round">
               {t('ministry:home.currentRound', { round: round.name })}
@@ -131,7 +137,7 @@ export default function MinistryHome() {
           </button>
 
           <button
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate(MINISTRY_PATHS.admin)}
             data-testid="ministry-admin-tile"
             className="bg-dark-card rounded-2xl p-8 border border-theme-border hover:bg-dark-card-hover transform hover:-translate-y-2 transition-all duration-300 group"
           >

@@ -90,8 +90,7 @@
     "gems": "宝石消耗必须是整数，例如 10000"
   },
   "admin": {
-    "eventSwitch": "活动",
-    "subtitle": "本轮报名：统计、玩家和导出",
+    "adminSubtitle": "霜龙暴君：报名、统计和导出",
     "defaultRoundName": "暴君 {{date}}",
     "stats": {
       "total": "玩家总数",

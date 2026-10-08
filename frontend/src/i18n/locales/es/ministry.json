@@ -1,7 +1,8 @@
 {
   "event": {
     "name": "Ministerio",
-    "tagline": "Reserva un puesto de ministerio para los días de preparación de SVS y consulta el horario"
+    "tagline": "Reserva un puesto de ministerio para los días de preparación de SVS y consulta el horario",
+    "adminSubtitle": "Ministerio: solicitudes y asignaciones"
   },
   "home": {
     "title": "Gestión de Ministerios de Whiteout Survival",

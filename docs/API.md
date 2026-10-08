@@ -94,7 +94,7 @@ applies across all addresses. A success clears that address. The client address 
 ```
 
 ### GET /api/settings/public
-`200 {"state_number": "2807"}` (default `"2694"` as v1.4)
+`200 {"state_number": "2807"}` (`null` until an admin sets it; v1.4 defaulted to `"2694"`, the UI now hides its welcome line instead)
 
 ### GET /api/profile/{fid}
 ```json

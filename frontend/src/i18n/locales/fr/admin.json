@@ -1,11 +1,10 @@
 {
-  "title": "Administration Ministérielle",
+  "title": "Gestion des événements",
   "login": "Connexion",
   "password": "Mot de passe",
   "enterPassword": "Saisissez votre mot de passe pour accéder au panneau d'administration",
   "invalidPassword": "Mot de passe invalide",
   "logout": "Déconnexion",
-  "managePlayers": "Gérer les joueurs et les attributions ministérielles",
   "players": "Joueurs",
   "assignments": "Attributions",
   "playerManagement": "Gestion des joueurs",
@@ -118,5 +117,9 @@
     "publishedDays": "Jours du planning publiés",
     "publishedDaysDesc": "Les joueurs voient le planning des jours publiés sur la page du ministère.",
     "remapped": "Schéma de créneaux modifié. {{n}} affectations déplacées vers les nouveaux créneaux."
+  },
+  "shell": {
+    "eventSwitch": "Événement",
+    "backTo": "Retour à {{event}}"
   }
 }

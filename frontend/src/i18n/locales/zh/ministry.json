@@ -1,7 +1,8 @@
 {
   "event": {
     "name": "部长",
-    "tagline": "为 SVS 备战日预约部长时段并查看日程"
+    "tagline": "为 SVS 备战日预约部长时段并查看日程",
+    "adminSubtitle": "大臣职位：申请与分配"
   },
   "home": {
     "title": "白色废土 部长管理",

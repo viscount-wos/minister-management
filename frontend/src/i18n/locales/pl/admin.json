@@ -1,11 +1,10 @@
 {
-  "title": "Administracja ministerstwami",
+  "title": "Zarządzanie wydarzeniami",
   "login": "Zaloguj się",
   "password": "Hasło",
   "enterPassword": "Wprowadź hasło, aby uzyskać dostęp do panelu administracyjnego",
   "invalidPassword": "Nieprawidłowe hasło",
   "logout": "Wyloguj się",
-  "managePlayers": "Zarządzaj graczami i przydziałami stanowisk ministerialnych",
   "players": "Gracze",
   "assignments": "Przydziały",
   "playerManagement": "Zarządzanie graczami",
@@ -118,5 +117,9 @@
     "publishedDays": "Opublikowane dni harmonogramu",
     "publishedDaysDesc": "Gracze widzą harmonogram opublikowanych dni na stronie ministerstwa.",
     "remapped": "Zmieniono schemat slotów. Przeniesiono przydziały: {{n}}."
+  },
+  "shell": {
+    "eventSwitch": "Wydarzenie",
+    "backTo": "Wróć do: {{event}}"
   }
 }

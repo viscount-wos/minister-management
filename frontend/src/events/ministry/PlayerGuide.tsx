@@ -2,10 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText, Edit, Clock, Palette, Globe, Lightbulb } from 'lucide-react';
 import { MINISTRY_PATHS } from './paths';
+import { usePageTitle } from '../../shared/usePageTitle';
 
 export default function PlayerGuide() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  usePageTitle(t('guide:player.title'), t('ministry:event.name'));
 
   return (
     <div className="min-h-screen bg-dark-bg py-8 px-4">

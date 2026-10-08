@@ -90,8 +90,7 @@
     "gems": "보석 사용량은 정수로 입력하세요. 예: 10000"
   },
   "admin": {
-    "eventSwitch": "이벤트",
-    "subtitle": "이번 라운드 신청: 통계, 플레이어, 내보내기",
+    "adminSubtitle": "서리 용 폭군: 신청, 통계, 내보내기",
     "defaultRoundName": "폭군 {{date}}",
     "stats": {
       "total": "전체 플레이어",

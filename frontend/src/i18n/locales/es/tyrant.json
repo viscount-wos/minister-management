@@ -90,8 +90,7 @@
     "gems": "El gasto de gemas debe ser un número entero, p. ej. 10000"
   },
   "admin": {
-    "eventSwitch": "Evento",
-    "subtitle": "Inscripciones de esta ronda: estadísticas, jugadores y exportación",
+    "adminSubtitle": "Tirano Dragón de Escarcha: inscripciones, estadísticas y exportación",
     "defaultRoundName": "Tirano {{date}}",
     "stats": {
       "total": "Jugadores",

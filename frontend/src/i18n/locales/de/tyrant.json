@@ -90,8 +90,7 @@
     "gems": "Edelsteinausgabe muss eine ganze Zahl sein, z. B. 10000"
   },
   "admin": {
-    "eventSwitch": "Event",
-    "subtitle": "Anmeldungen dieser Runde: Statistik, Spieler und Export",
+    "adminSubtitle": "Frostdrachen-Tyrann: Anmeldungen, Statistik und Export",
     "defaultRoundName": "Tyrann {{date}}",
     "stats": {
       "total": "Spieler",

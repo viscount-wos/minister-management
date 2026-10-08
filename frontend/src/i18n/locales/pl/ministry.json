@@ -1,7 +1,8 @@
 {
   "event": {
     "name": "Ministerstwo",
-    "tagline": "Zarezerwuj miejsce w ministerstwie na dni przygotowań do SVS i sprawdź harmonogram"
+    "tagline": "Zarezerwuj miejsce w ministerstwie na dni przygotowań do SVS i sprawdź harmonogram",
+    "adminSubtitle": "Ministerstwo: zgłoszenia i przydziały"
   },
   "home": {
     "title": "Zarządzanie Ministerstwami Whiteout Survival",

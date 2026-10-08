@@ -8,7 +8,8 @@ from core.validation import validate_str
 
 bp = Blueprint('settings', __name__)
 
-DEFAULTS = {'state_number': '2694'}
+# No default state: the UI hides its welcome line until an admin sets one (v1.4 showed a hardcoded 2694).
+DEFAULTS = {'state_number': None}
 PUBLIC_KEYS = ('state_number',)
 
 

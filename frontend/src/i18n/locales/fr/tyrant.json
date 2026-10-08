@@ -90,8 +90,7 @@
     "gems": "La dépense en gemmes doit être un nombre entier, ex. 10000"
   },
   "admin": {
-    "eventSwitch": "Événement",
-    "subtitle": "Inscriptions de cette manche : stats, joueurs et exports",
+    "adminSubtitle": "Tyran Dragon de Givre : inscriptions, stats et exports",
     "defaultRoundName": "Tyran {{date}}",
     "stats": {
       "total": "Joueurs",

@@ -1,7 +1,8 @@
 {
   "event": {
     "name": "Ministère",
-    "tagline": "Réservez un créneau de ministère pour les jours de préparation SVS et consultez le planning"
+    "tagline": "Réservez un créneau de ministère pour les jours de préparation SVS et consultez le planning",
+    "adminSubtitle": "Ministère : candidatures et affectations"
   },
   "home": {
     "title": "Gestion des Ministères Whiteout Survival",

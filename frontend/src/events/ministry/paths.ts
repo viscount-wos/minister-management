@@ -1,7 +1,7 @@
 // Ministry routes. Everything ministry lives under /ministry; the pre-v2
 // top-level URLs (/submit, /update, /schedule/:day, /guide, /apply) and the
 // v2-shell /ministry/submit and /ministry/update redirect from App.tsx so
-// bookmarks keep working. Admin stays at /admin.
+// bookmarks keep working. Admin stays at /admin (?event=ministry).
 
 export const MINISTRY_PATHS = {
   home: '/ministry',
@@ -9,4 +9,6 @@ export const MINISTRY_PATHS = {
   apply: '/ministry/apply',
   guide: '/ministry/guide',
   schedule: (day: string) => `/ministry/schedule/${day}`,
+  /** Event Management login; lands on the ministry dashboard. */
+  admin: '/admin?event=ministry',
 } as const;

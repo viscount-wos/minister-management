@@ -26,6 +26,7 @@ import { SlotGrid, ToleranceNote, useDayTypeLabel } from './TimeSlotPicker';
 import MyAssignments from './MyAssignments';
 import WizardSteps from './WizardSteps';
 import { MINISTRY_PATHS } from './paths';
+import { usePageTitle } from '../../shared/usePageTitle';
 
 // The ministry application WIZARD, restored from v1.4's PlayerForm:
 //   1 Player information (+ speedups)   2 Construction day times
@@ -80,6 +81,7 @@ function ReviewItem({ label, children, testId }: { label: string; children: Reac
 export default function ApplicationWizard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  usePageTitle(t('ministry:apply.title'));
   const [params, setParams] = useSearchParams();
   const { timezone, setTimezone } = useTimezone();
   const dayTypeLabel = useDayTypeLabel();
