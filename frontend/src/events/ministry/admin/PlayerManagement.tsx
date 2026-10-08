@@ -1,218 +1,197 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Edit2, Trash2, X, Save, AlertCircle, Download, Upload } from 'lucide-react';
-import axios from 'axios';
-import TimezoneSelector from '../../../shared/TimezoneSelector';
+import api, { AdminApplication, Round, downloadBlob } from '../../../shared/api';
+import { errorText } from '../../../shared/apiErrors';
+import { Field } from '../../../shared/fields';
 import { useTimezone } from '../../../shared/TimezoneContext';
-import { generatePlayerTimeSlots, getTimezoneAbbr } from '../../../shared/timezone';
+import { AnswersForm, CRYSTAL_FIELDS, answersToForm, formToAnswers, totalSlots } from '../answers';
+import TimeSlotPicker from '../TimeSlotPicker';
 
+// Applications of ONE round (the dashboard's selected round). Admin edits go
+// to the application (answers) and the player's profile (name, alliance).
 
-interface Player {
+interface Row {
+  app: AdminApplication;
   id: number;
   fid: string;
   game_name: string;
-  construction_speedups_days: number;
-  research_speedups_days: number;
-  troop_training_speedups_days: number;
-  general_speedups_days: number;
-  fire_crystals: number;
-  refined_fire_crystals: number;
-  fire_crystal_shards: number;
-  time_slots: string[];
-  time_slots_by_day?: { construction: string[]; research: string[]; troop: string[] };
+  alliance: string;
+  avatar_image: string | null;
   monday_points: number;
   research_points: number;
   thursday_points: number;
-  research_day?: string;
-  avatar_image?: string;
-  stove_lv?: number;
-  stove_lv_content?: string;
-  alliance?: string;
+  slots: number;
 }
 
 type SortField = 'game_name' | 'fid' | 'monday_points' | 'research_points' | 'thursday_points';
 type SortDirection = 'asc' | 'desc';
 
-export default function PlayerManagement() {
+interface EditState {
+  app: AdminApplication;
+  game_name: string;
+  alliance: string;
+  answers: AnswersForm;
+}
+
+const ADMIN_NUMBER_FIELDS = [
+  { key: 'construction_speedups_days', label: 'admin:constructionDays' },
+  { key: 'research_speedups_days', label: 'admin:researchDays' },
+  { key: 'troop_training_speedups_days', label: 'admin:troopDays' },
+  { key: 'general_speedups_days', label: 'admin:generalDays' },
+] as const;
+
+function toRow(app: AdminApplication): Row {
+  const p = app.profile ?? app.profile_snapshot;
+  return {
+    app,
+    id: app.id,
+    fid: app.fid,
+    game_name: p?.game_name ?? '',
+    alliance: p?.alliance ?? '',
+    avatar_image: p?.avatar_image ?? null,
+    monday_points: app.monday_points ?? 0,
+    research_points: app.research_points ?? 0,
+    thursday_points: app.thursday_points ?? 0,
+    slots: totalSlots(answersToForm(app.answers).time_slots_by_day),
+  };
+}
+
+export default function PlayerManagement({
+  round,
+  readOnly,
+  onChanged,
+}: {
+  round: Round;
+  readOnly: boolean;
+  onChanged?: () => void;
+}) {
   const { t } = useTranslation();
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortField>('game_name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
-  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
-  const [showFireCrystals, setShowFireCrystals] = useState(false);
+  const [editing, setEditing] = useState<EditState | null>(null);
+  const [deleting, setDeleting] = useState<Row | null>(null);
   const [importMessage, setImportMessage] = useState('');
-  const [activeTimeTab, setActiveTimeTab] = useState<'construction' | 'research' | 'troop'>('construction');
-  const [researchDay, setResearchDay] = useState('tuesday');
   const { timezone, setTimezone } = useTimezone();
+  const researchDay = round.settings.research_day;
 
-  useEffect(() => {
-    fetchPlayers();
-    axios.get('/api/settings/show-fire-crystals')
-      .then(res => setShowFireCrystals(res.data.show_fire_crystals))
-      .catch(() => {});
-    axios.get('/api/settings/research-day')
-      .then(res => setResearchDay(res.data.research_day))
-      .catch(() => {});
-  }, []);
-
-  const researchDayName = t(`ministry:form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
-  const dayTypeLabel = (dayType: string) =>
-    t(`ministry:form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
-
-  const fetchPlayers = async () => {
+  const fetchRows = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.get('/api/admin/players', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPlayers(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:fetchError'));
+      const res = await api.admin.applications(round.id);
+      setRows(res.applications.map(toRow));
+      setError('');
+    } catch (err) {
+      setError(errorText(t, err, 'admin:fetchError'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [round.id, t]);
+
+  useEffect(() => {
+    fetchRows();
+  }, [fetchRows]);
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
+    if (sortField === field) setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    else {
       setSortField(field);
       setSortDirection('asc');
     }
   };
 
-  const filteredAndSortedPlayers = useMemo(() => {
-    let filtered = players.filter(
-      (player) =>
-        player.game_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        player.fid.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (player.alliance || '').toLowerCase().includes(searchQuery.toLowerCase())
+  const visibleRows = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    const filtered = rows.filter(
+      (r) => r.game_name.toLowerCase().includes(q) || r.fid.toLowerCase().includes(q) || r.alliance.toLowerCase().includes(q),
     );
-
     filtered.sort((a, b) => {
-      let aVal = a[sortField];
-      let bVal = b[sortField];
-
-      if (typeof aVal === 'string') {
-        aVal = aVal.toLowerCase();
-        bVal = (bVal as string).toLowerCase();
+      let av: string | number = a[sortField];
+      let bv: string | number = b[sortField];
+      if (typeof av === 'string') {
+        av = av.toLowerCase();
+        bv = String(bv).toLowerCase();
       }
-
-      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+      if (av < bv) return sortDirection === 'asc' ? -1 : 1;
+      if (av > bv) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-
     return filtered;
-  }, [players, searchQuery, sortField, sortDirection]);
+  }, [rows, searchQuery, sortField, sortDirection]);
 
-  const handleDelete = async (playerId: number) => {
+  const handleDelete = async (row: Row) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      await axios.delete(`/api/admin/player/${playerId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPlayers(players.filter((p) => p.id !== playerId));
-      setShowDeleteConfirm(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:deleteError'));
+      await api.admin.deleteApplication(row.id);
+      setRows((rs) => rs.filter((r) => r.id !== row.id));
+      setDeleting(null);
+      onChanged?.();
+    } catch (err) {
+      setError(errorText(t, err, 'admin:deleteError'));
+      setDeleting(null);
     }
   };
+
+  const startEdit = (row: Row) =>
+    setEditing({ app: row.app, game_name: row.game_name, alliance: row.alliance, answers: answersToForm(row.app.answers) });
 
   const handleSaveEdit = async () => {
-    if (!editingPlayer) return;
-
+    if (!editing) return;
     try {
-      const token = localStorage.getItem('adminToken');
-      await axios.put(`/api/admin/player/${editingPlayer.id}`, editingPlayer, {
-        headers: { Authorization: `Bearer ${token}` },
+      const updated = await api.admin.updateApplication(editing.app.id, {
+        profile: { game_name: editing.game_name.trim(), alliance: editing.alliance.trim().toUpperCase() },
+        answers: formToAnswers(editing.answers),
       });
-      await fetchPlayers();
-      setEditingPlayer(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:playerUpdateError'));
-    }
-  };
-
-  const handleDeleteAll = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      await axios.delete('/api/admin/players/delete-all', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPlayers([]);
-      setShowDeleteAllConfirm(false);
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:deleteAllError'));
+      setRows((rs) => rs.map((r) => (r.id === updated.id ? toRow(updated) : r)));
+      setEditing(null);
+      setError('');
+    } catch (err) {
+      setError(errorText(t, err, 'admin:playerUpdateError'));
     }
   };
 
   const handleExportJSON = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.get('/api/admin/players/export-json', {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob',
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `players_backup_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err: any) {
-      setError(err.response?.data?.error || t('admin:exportError'));
+      const blob = await api.admin.ministry.exportJson(round.id);
+      downloadBlob(blob, `ministry_round_${round.id}_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    } catch (err) {
+      setError(errorText(t, err, 'admin:exportError'));
     }
   };
 
   const handleImportJSON = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (!data.players || !Array.isArray(data.players)) {
-        setError(t('admin:importInvalidFile'));
-        return;
-      }
-
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.post('/api/admin/players/import', data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const { imported, updated, errors } = response.data;
-      setImportMessage(t('admin:importSuccess', { imported, updated }) + (errors > 0 ? ` (${errors} errors)` : ''));
-      await fetchPlayers();
-    } catch (err: any) {
-      if (err instanceof SyntaxError) {
-        setError(t('admin:importInvalidFile'));
-      } else {
-        setError(err.response?.data?.error || t('admin:importError'));
-      }
-    }
-    // Reset the file input
     event.target.value = '';
+    if (!file) return;
+    let data: unknown;
+    try {
+      data = JSON.parse(await file.text());
+    } catch {
+      return setError(t('admin:importInvalidFile'));
+    }
+    if (!data || typeof data !== 'object' || !Array.isArray((data as { players?: unknown }).players)) {
+      return setError(t('admin:importInvalidFile'));
+    }
+    try {
+      const res = await api.admin.ministry.importJson(round.id, data);
+      setImportMessage(
+        t('admin:importSuccess', { imported: res.imported, updated: res.updated }) +
+          (res.errors > 0 ? ` ${t('admin:importErrors', { n: res.errors })}` : ''),
+      );
+      await fetchRows();
+      onChanged?.();
+    } catch (err) {
+      setError(errorText(t, err, 'admin:importError'));
+    }
   };
 
   const SortButton = ({ field, label }: { field: SortField; label: string }) => (
-    <button
-      onClick={() => handleSort(field)}
-      className="flex items-center gap-1 hover:text-accent transition-colors"
-    >
+    <button onClick={() => handleSort(field)} className="flex items-center gap-1 hover:text-accent transition-colors">
       {label}
-      {sortField === field && (
-        <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-      )}
+      {sortField === field && <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
     </button>
   );
 
@@ -224,314 +203,218 @@ export default function PlayerManagement() {
     );
   }
 
+  const dayName = (key: string) => t(`admin:${key}`).split(' - ')[0];
+
   return (
-    <div className="bg-dark-card rounded-xl border border-theme-border p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-dark-card rounded-xl border border-theme-border p-6" data-testid="players-panel">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-accent">{t('admin:playerManagement')}</h2>
-          <p className="text-theme-dim mt-1">
-            {t('admin:totalPlayers')}: {players.length}
+          <p className="text-theme-dim mt-1" data-testid="players-total">
+            {t('admin:totalPlayers')}: {rows.length}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportJSON}
+            data-testid="export-json"
             className="flex items-center gap-2 px-4 py-2 bg-success text-dark-bg rounded-lg hover:bg-success/80 font-medium transition-colors"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4" aria-hidden="true" />
             {t('admin:exportJSON')}
           </button>
-          <label className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors cursor-pointer">
-            <Upload className="w-4 h-4" />
-            {t('admin:importJSON')}
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImportJSON}
-              className="hidden"
-            />
-          </label>
-          {players.length > 0 && (
-            <button
-              onClick={() => setShowDeleteAllConfirm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-              {t('admin:removeAll')}
-            </button>
+          {!readOnly && (
+            <label className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors cursor-pointer">
+              <Upload className="w-4 h-4" aria-hidden="true" />
+              {t('admin:importJSON')}
+              <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" data-testid="import-json" />
+            </label>
           )}
         </div>
       </div>
 
-      {/* Search */}
       <div className="mb-6">
+        <label htmlFor="player-search" className="sr-only">
+          {t('admin:search')}
+        </label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-dim w-5 h-5" />
+          <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-theme-dim w-5 h-5" aria-hidden="true" />
           <input
+            id="player-search"
+            data-testid="player-search"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('admin:search')}
-            className="w-full pl-10 pr-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
+            className="w-full ps-10 pe-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
           />
         </div>
       </div>
 
-      {/* Import Success Message */}
       {importMessage && (
         <div className="mb-6 p-4 bg-success/10 border border-success/30 rounded-lg flex items-center justify-between">
           <p className="text-success">{importMessage}</p>
-          <button onClick={() => setImportMessage('')} className="text-success hover:text-success/70">
-            <X className="w-4 h-4" />
+          <button onClick={() => setImportMessage('')} className="text-success hover:text-success/70" aria-label={t('common:close')}>
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-danger/10 border border-danger/30 rounded-lg flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-danger" />
+        <div className="mb-6 p-4 bg-danger/10 border border-danger/30 rounded-lg flex items-center gap-3" role="alert">
+          <AlertCircle className="w-5 h-5 text-danger" aria-hidden="true" />
           <p className="text-danger">{error}</p>
         </div>
       )}
 
-      {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full" data-testid="players-table">
           <thead>
             <tr className="border-b-2 border-theme-border">
-              <th className="text-left p-3 font-semibold text-theme-dim">
+              <th className="text-start p-3 font-semibold text-theme-dim">
                 <SortButton field="game_name" label={t('admin:gameName')} />
               </th>
-              <th className="text-left p-3 font-semibold text-theme-dim">
-                <SortButton field="fid" label="FID" />
+              <th className="text-start p-3 font-semibold text-theme-dim">
+                <SortButton field="fid" label={t('admin:fid')} />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">
-                <SortButton field="monday_points" label={t('admin:monday').split(' - ')[0]} />
+                <SortButton field="monday_points" label={dayName('monday')} />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">
-                <SortButton field="research_points" label={t(`admin:${players[0]?.research_day || 'tuesday'}`).split(' - ')[0]} />
+                <SortButton field="research_points" label={dayName(researchDay)} />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">
-                <SortButton field="thursday_points" label={t('admin:thursday').split(' - ')[0]} />
+                <SortButton field="thursday_points" label={dayName('thursday')} />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">{t('admin:timeSlots')}</th>
-              <th className="text-center p-3 font-semibold text-theme-dim">{t('admin:actions')}</th>
+              {!readOnly && <th className="text-center p-3 font-semibold text-theme-dim">{t('admin:actions')}</th>}
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedPlayers.map((player) => (
-              <tr key={player.id} className="border-b border-theme-border/50 hover:bg-dark-card-hover">
+            {visibleRows.map((row) => (
+              <tr key={row.id} className="border-b border-theme-border/50 hover:bg-dark-card-hover" data-testid={`player-row-${row.fid}`}>
                 <td className="p-3 text-theme-text">
                   <div className="flex items-center gap-2">
-                    {player.avatar_image ? (
-                      <img src={player.avatar_image} alt="" className="w-6 h-6 rounded-full flex-shrink-0" />
-                    ) : null}
-                    {player.alliance && <span className="text-accent font-medium">[{player.alliance}]</span>} {player.game_name}
+                    {row.avatar_image ? <img src={row.avatar_image} alt="" className="w-6 h-6 rounded-full flex-shrink-0" /> : null}
+                    {row.alliance && <span className="text-accent font-medium">[{row.alliance}]</span>} {row.game_name}
                   </div>
                 </td>
-                <td className="p-3 text-sm text-theme-dim">{player.fid}</td>
-                <td className="p-3 text-center font-medium text-accent">
-                  {player.monday_points.toLocaleString()}
-                </td>
-                <td className="p-3 text-center font-medium text-success">
-                  {player.research_points.toLocaleString()}
-                </td>
-                <td className="p-3 text-center font-medium text-accent-light">
-                  {player.thursday_points.toLocaleString()}
-                </td>
+                <td className="p-3 text-sm text-theme-dim">{row.fid}</td>
+                <td className="p-3 text-center font-medium text-accent">{row.monday_points.toLocaleString()}</td>
+                <td className="p-3 text-center font-medium text-success">{row.research_points.toLocaleString()}</td>
+                <td className="p-3 text-center font-medium text-accent-light">{row.thursday_points.toLocaleString()}</td>
                 <td className="p-3 text-center text-sm text-theme-dim">
-                  {player.time_slots ? player.time_slots.length : 0} {t('admin:selected')}
+                  {row.slots} {t('admin:selected')}
                 </td>
-                <td className="p-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => { setActiveTimeTab('construction'); setEditingPlayer(player); }}
-                      className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
-                      title={t('admin:edit')}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(player.id)}
-                      className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors"
-                      title={t('admin:delete')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
+                {!readOnly && (
+                  <td className="p-3">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => startEdit(row)}
+                        data-testid={`edit-${row.fid}`}
+                        className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
+                        title={t('admin:edit')}
+                        aria-label={t('admin:edit')}
+                      >
+                        <Edit2 className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                      <button
+                        onClick={() => setDeleting(row)}
+                        data-testid={`delete-${row.fid}`}
+                        className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors"
+                        title={t('admin:delete')}
+                        aria-label={t('admin:delete')}
+                      >
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
 
-        {filteredAndSortedPlayers.length === 0 && (
-          <div className="text-center py-12 text-theme-dim">
-            {t('admin:noPlayersFound')}
-          </div>
-        )}
+        {visibleRows.length === 0 && <div className="text-center py-12 text-theme-dim">{t('admin:noPlayersFound')}</div>}
       </div>
 
-      {/* Edit Modal */}
-      {editingPlayer && (
+      {editing && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-dark-card rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-theme-border">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-player-title"
+            data-testid="edit-dialog"
+            className="bg-dark-card rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-theme-border"
+          >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-accent">{t('admin:editPlayer')}</h3>
-              <button
-                onClick={() => setEditingPlayer(null)}
-                className="text-theme-dim hover:text-theme-text"
-              >
-                <X className="w-6 h-6" />
+              <h3 id="edit-player-title" className="text-2xl font-bold text-accent">
+                {t('admin:editPlayer')}
+              </h3>
+              <button onClick={() => setEditing(null)} className="text-theme-dim hover:text-theme-text" aria-label={t('common:close')}>
+                <X className="w-6 h-6" aria-hidden="true" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-theme-text mb-2">{t('admin:gameName')}</label>
-                  <input
-                    type="text"
-                    value={editingPlayer.game_name}
-                    onChange={(e) =>
-                      setEditingPlayer({ ...editingPlayer, game_name: e.target.value })
-                    }
-                    className="w-full px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-theme-text mb-2">{t('admin:allianceLabel')}</label>
-                  <input
-                    type="text"
-                    value={editingPlayer.alliance || ''}
-                    onChange={(e) =>
-                      setEditingPlayer({ ...editingPlayer, alliance: e.target.value.toUpperCase().slice(0, 3) })
-                    }
-                    maxLength={3}
-                    className="w-full px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent uppercase"
-                    placeholder="TAG"
-                  />
-                </div>
+                <Field
+                  id="edit-game-name"
+                  className="col-span-2"
+                  label={t('admin:gameName')}
+                  value={editing.game_name}
+                  onChange={(e) => setEditing({ ...editing, game_name: e.target.value })}
+                />
+                <Field
+                  id="edit-alliance"
+                  label={t('admin:allianceLabel')}
+                  maxLength={3}
+                  inputClassName="uppercase"
+                  placeholder={t('profile:alliancePlaceholder')}
+                  value={editing.alliance}
+                  onChange={(e) => setEditing({ ...editing, alliance: e.target.value.toUpperCase().slice(0, 3) })}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {[
-                  { key: 'construction_speedups_days', label: t('admin:constructionDays') },
-                  { key: 'research_speedups_days', label: t('admin:researchDays') },
-                  { key: 'troop_training_speedups_days', label: t('admin:troopDays') },
-                  { key: 'general_speedups_days', label: t('admin:generalDays') },
-                  ...(showFireCrystals ? [
-                    { key: 'fire_crystals', label: t('ministry:form.fireCrystals') },
-                    { key: 'refined_fire_crystals', label: t('ministry:form.refinedFireCrystals') },
-                    { key: 'fire_crystal_shards', label: t('ministry:form.fireCrystalShards') },
-                  ] : []),
-                ].map(({ key, label }) => (
-                  <div key={key}>
-                    <label className="block text-sm font-medium text-theme-text mb-2">{label}</label>
-                    <input
-                      type="number"
-                      value={(editingPlayer as any)[key]}
-                      onChange={(e) =>
-                        setEditingPlayer({
-                          ...editingPlayer,
-                          [key]: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      min="0"
-                      step={key.includes('speedups') ? '0.1' : '1'}
-                      className="w-full px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent"
-                    />
-                  </div>
+                {[...ADMIN_NUMBER_FIELDS, ...(round.settings.show_fire_crystals ? CRYSTAL_FIELDS : [])].map(({ key, label }) => (
+                  <Field
+                    key={key}
+                    id={`edit-${key}`}
+                    type="number"
+                    min={0}
+                    step={key.includes('speedups') ? 0.1 : 1}
+                    placeholder="0"
+                    label={t(label)}
+                    value={editing.answers[key]}
+                    onChange={(e) => setEditing({ ...editing, answers: { ...editing.answers, [key]: e.target.value } })}
+                  />
                 ))}
               </div>
 
-              {/* Time Preferences */}
               <div className="mt-6">
-                <label className="block text-sm font-medium text-theme-text mb-2">
-                  {t('ministry:form.timePreferences')}
-                </label>
-
-                {/* Day type tabs */}
-                <div className="flex gap-2 mb-3 border-b border-theme-border">
-                  {(['construction', 'research', 'troop'] as const).map((dayType) => {
-                    const slots = editingPlayer.time_slots_by_day?.[dayType] || [];
-                    return (
-                      <button
-                        key={dayType}
-                        type="button"
-                        onClick={() => setActiveTimeTab(dayType)}
-                        className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-                          activeTimeTab === dayType
-                            ? 'border-accent text-accent'
-                            : 'border-transparent text-theme-dim hover:text-theme-text'
-                        }`}
-                      >
-                        {dayTypeLabel(dayType)}
-                        {slots.length > 0 && (
-                          <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-accent/20 text-accent">
-                            {slots.length}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="flex items-center justify-between mb-2">
-                  <TimezoneSelector value={timezone} onChange={setTimezone} />
-                </div>
-                <div className="grid grid-cols-6 gap-2">
-                  {generatePlayerTimeSlots(timezone).map(({ display, utcValue }) => {
-                    const byDay = editingPlayer.time_slots_by_day || { construction: [], research: [], troop: [] };
-                    const current = byDay[activeTimeTab] || [];
-                    return (
-                      <button
-                        key={utcValue}
-                        type="button"
-                        onClick={() => {
-                          setEditingPlayer({
-                            ...editingPlayer,
-                            time_slots_by_day: {
-                              ...byDay,
-                              [activeTimeTab]: current.includes(utcValue)
-                                ? current.filter((t: string) => t !== utcValue)
-                                : [...current, utcValue],
-                            },
-                          });
-                        }}
-                        className={`p-2 rounded border text-sm font-medium transition-all ${
-                          current.includes(utcValue)
-                            ? 'bg-accent border-accent text-dark-bg'
-                            : 'bg-dark-input border-theme-border text-theme-text hover:border-accent'
-                        }`}
-                      >
-                        {display}
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="text-xs text-theme-dim mt-2">
-                  {t('ministry:form.selectedSlots', { count: (editingPlayer.time_slots_by_day?.[activeTimeTab] || []).length })}
-                  {timezone !== 'UTC' && (
-                    <span className="ml-2 text-accent">
-                      ({t('ministry:form.timesShownIn')} {getTimezoneAbbr(timezone)})
-                    </span>
-                  )}
-                </p>
+                <p className="block text-sm font-medium text-theme-text mb-2">{t('ministry:form.timePreferences')}</p>
+                <TimeSlotPicker
+                  compact
+                  value={editing.answers.time_slots_by_day}
+                  onChange={(next) => setEditing({ ...editing, answers: { ...editing.answers, time_slots_by_day: next } })}
+                  researchDay={researchDay}
+                  timezone={timezone}
+                  onTimezoneChange={setTimezone}
+                />
               </div>
 
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={handleSaveEdit}
+                  data-testid="save-edit"
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium"
                 >
-                  <Save className="w-5 h-5" />
+                  <Save className="w-5 h-5" aria-hidden="true" />
                   {t('common:save')}
                 </button>
                 <button
-                  onClick={() => setEditingPlayer(null)}
+                  onClick={() => setEditing(null)}
                   className="flex-1 px-4 py-3 bg-dark-bg text-theme-text rounded-lg hover:bg-dark-card-hover font-medium border border-theme-border"
                 >
                   {t('common:cancel')}
@@ -542,52 +425,34 @@ export default function PlayerManagement() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
+      {deleting && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-dark-card rounded-xl p-6 max-w-md w-full border border-theme-border">
-            <h3 className="text-xl font-bold text-theme-text mb-4">{t('admin:confirmDelete')}</h3>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-title"
+            className="bg-dark-card rounded-xl p-6 max-w-md w-full border border-theme-border"
+          >
+            <h3 id="delete-title" className="text-xl font-bold text-theme-text mb-2">
+              {t('admin:confirmDelete')}
+            </h3>
+            <p className="text-theme-dim text-sm mb-4">
+              {deleting.alliance && `[${deleting.alliance}] `}
+              {deleting.game_name} ({deleting.fid}) — {t('admin:deleteApplicationNote')}
+            </p>
             <div className="flex gap-3">
               <button
-                onClick={() => handleDelete(showDeleteConfirm)}
+                onClick={() => handleDelete(deleting)}
+                data-testid="confirm-delete"
                 className="flex-1 px-4 py-3 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium"
               >
                 {t('common:yes')}
               </button>
               <button
-                onClick={() => setShowDeleteConfirm(null)}
+                onClick={() => setDeleting(null)}
                 className="flex-1 px-4 py-3 bg-dark-bg text-theme-text rounded-lg hover:bg-dark-card-hover font-medium border border-theme-border"
               >
                 {t('common:no')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete All Confirmation Modal */}
-      {showDeleteAllConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-dark-card rounded-xl p-6 max-w-md w-full border border-theme-border">
-            <div className="flex items-center gap-3 mb-4">
-              <AlertCircle className="w-8 h-8 text-danger" />
-              <h3 className="text-xl font-bold text-theme-text">{t('admin:removeAllConfirm')}</h3>
-            </div>
-            <p className="text-theme-dim mb-6">
-              {t('admin:removeAllWarning', { count: players.length })}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleDeleteAll}
-                className="flex-1 px-4 py-3 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium"
-              >
-                {t('admin:yesDeleteAll')}
-              </button>
-              <button
-                onClick={() => setShowDeleteAllConfirm(false)}
-                className="flex-1 px-4 py-3 bg-dark-bg text-theme-text rounded-lg hover:bg-dark-card-hover font-medium border border-theme-border"
-              >
-                {t('common:cancel')}
               </button>
             </div>
           </div>
