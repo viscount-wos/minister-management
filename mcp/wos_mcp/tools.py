@@ -461,8 +461,10 @@ application by its numeric application id (not the FID), with profile and comput
 
     @server.tool(annotations=_rw('Update application'), description=f"""{ADMIN} Edit an application
 by id. `profile` is a partial profile update; `answers` is PARTIAL here (merged into the stored
-answers, then validated by the API). No closing-time check (admins may edit closed rounds).
-Returns the updated application. {MINISTRY_ANSWERS_HELP} {UNTRUSTED} {ERRORS}""")
+answers, then validated by the API in ADMIN mode: SVS/Tyrant answers may be left blank). No closing-time
+check, but a CLOSED round is read-only (409 ROUND_CLOSED). Name, alliance and troops (plus Tyrant power/Discord ID)
+live in the player's SHARED profile, so a change shows in every event; troops merge per type+field (a blank never
+clears). Returns the updated application. {MINISTRY_ANSWERS_HELP} {UNTRUSTED} {ERRORS}""")
     async def update_application(application_id: Annotated[int, Field(ge=1)], ctx: Context,
                                  profile: ProfileFields | None = None,
                                  answers: dict[str, Any] | None = None) -> CallToolResult:
