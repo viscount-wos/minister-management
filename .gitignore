@@ -70,3 +70,6 @@ docker-compose.override.yml
 # DB migration backups (<db>.pre-v2-<ts>.bak)
 *.bak
 .pytest_cache/
+
+# local venv symlink
+backend/venv
