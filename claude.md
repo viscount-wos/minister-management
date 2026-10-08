@@ -403,6 +403,22 @@ all 9 languages, and `RELEASES` in `frontend/src/shell/Changelog.tsx` must be up
 items to the latest release until it ships; start a new release block once a version is deployed.
 Record the developer-level detail here as well.
 
+**Documentation rule:** every section has a player guide and an admin guide in all 9 languages. Every user-visible
+change (a button, label, step, rule, default, limit) must update the guide that describes that screen, in all 9
+languages, in the same change; or the commit message says why no guide change is needed. Map and checklist:
+`docs/GUIDES.md`. Which guide covers which screen:
+- Minister player guide `/minister/guide` (`guide:player`): Minister page, application wizard, own assignments,
+  published schedule.
+- Frost Dragon Tyrant player guide `/tyrant/guide` (`guide:tyrantPlayer`): Tyrant page and wizard.
+- SVS player guide `/svs/guide` (`guide:svsPlayer`): SVS page, wizard, and the shared plan view
+  `/svs/plan/<token>` (`#plan`).
+- Event Management basics `/admin/guide?event=<key>&topic=basics` (`guide:basics`): login/logout, event switch,
+  rounds, Start new round, Rename, closing times, Add player, filters/exports, state number, hero generation,
+  links, rate limits.
+- Admin guides `/admin/guide?event=ministry|tyrant|svs` (`guide:admin`, `guide:tyrantAdmin`, `guide:svsAdmin`):
+  each event's admin tabs (SVS incl. the Battle plan and Share).
+`e2e/test_guides.py` renders every guide in all 9 languages (no raw keys, no "Ministry") and checks the links.
+
 - **v2.2.1** (October 2026): Add to rally from the SVS players list (branch p6/svs-add-to-rally). Details in
   `docs/SPEC.md` "SVS battle planner" -> "Add to rally (players table)".
   - Backend: `POST /api/admin/svs/rounds/<ref>/plan/place` (`events/svs/routes.py` `admin_place_in_plan`,
@@ -419,6 +435,15 @@ Record the developer-level detail here as well.
   - MCP `svs_plan_place` (argument `mode` = the API's `as`), `svs_filters.in_plan`.
   - i18n `scripts/i18n/v221_add_to_rally.py` (svs:players.*, changelog v221). e2e `test_svs_add_to_rally.py`;
     backend `tests/test_svs_place.py`.
+- **v2.2.1** (docs part, branch p7/docs): help guides for every section, in 9 languages. New player guides
+  `/tyrant/guide` (`TyrantGuide.tsx`) and `/svs/guide` (`SvsGuide.tsx`, incl. reading the shared plan and keeping
+  aliases secret); Minister player guide, the three admin guides and the new "Event Management basics"
+  (`admin/EventBasicsGuide.tsx`, `?topic=basics`) audited against the screens. Shared `shared/guide/`
+  (`GuideBits`, `GuideLink`, `useGuidesReady`). The `guide` namespace is a lazy chunk per language (`guide-<lang>`,
+  `i18n/index.ts` `loadGuides`, vite `manualChunks`): sign-up pages no longer download guide text (en locale
+  chunk ~15.6 -> ~13.5 KB gzip). Link texts moved to `common:guideLinks.*`. Links: Tyrant/SVS pages, step 1 of
+  each wizard, the shared plan view (-> `/svs/guide#plan`); Admin Guide opens the current event with the basics
+  tab on top. Changelog key `v221docs`. e2e `test_guides.py`; guides in `ui.PUBLIC_PAGES` and the phone pass.
 - **v2.2.0** (October 2026): SVS sign-up, add player, hero library (branch p4/svs-signup). Details in `docs/SPEC.md`
   "SVS sign-up".
   - `events/svs/` (validation, filters, logic, routes): hours derived from round settings `battle_start` (UTC,
