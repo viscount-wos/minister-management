@@ -267,7 +267,8 @@ def test_admin_assign_publish_export_and_player_sees_schedule(page: Page, base_u
     placed = {s: c[0] for s, c in day['assignments'].items() if c and c[0]['fid'] == fid}
     assert len(placed) == 1, day
     slot_id, placed_card = next(iter(placed.items()))
-    assert placed_card['is_sticky'] is True and slot_id[:2] in ('12', '13')
+    mins = int(slot_id[:2]) * 60 + int(slot_id[3:5])                        # ±20 min of a chosen hour
+    assert placed_card['is_sticky'] is True and any(abs(mins - h * 60) <= 20 for h in (12, 13)), slot_id
     page.get_by_test_id('publish').click()
     expect(page.get_by_test_id('unpublish')).to_be_visible()
     assert api.current_round()['settings']['published_days'] == ['monday']
