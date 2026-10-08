@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Settings, RefreshCw, Clock, CalendarClock, BarChart3, Filter, FileSpreadsheet, Trash2, UserPlus } from 'lucide-react';
+import { Settings, RefreshCw, Clock, CalendarClock, BarChart3, Filter, FileSpreadsheet, Pencil, UserPlus } from 'lucide-react';
 import { GuideList, GuideSection } from '../../../shared/guide/GuideBits';
 
 // Frost Dragon Tyrant admin guide (guide:tyrantAdmin.*; body only, admin/AdminGuidePage adds the title, the basics
@@ -47,7 +47,7 @@ export default function TyrantAdminGuide() {
           <p>{k('addBody')}</p>
         </GuideSection>
 
-        <GuideSection icon={Trash2} title={k('deleteTitle')}>
+        <GuideSection icon={Pencil} title={k('deleteTitle')}>
           <p>{k('deleteBody')}</p>
         </GuideSection>
 

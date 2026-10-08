@@ -444,6 +444,11 @@ languages, in the same change; or the commit message says why no guide change is
   chunk ~15.6 -> ~13.5 KB gzip). Link texts moved to `common:guideLinks.*`. Links: Tyrant/SVS pages, step 1 of
   each wizard, the shared plan view (-> `/svs/guide#plan`); Admin Guide opens the current event with the basics
   tab on top. Changelog key `v221docs`. e2e `test_guides.py`; guides in `ui.PUBLIC_PAGES` and the phone pass.
+- **v2.2.1** (edit part, branch p8/admin-edit; SPEC "Admin Edit / Remove in the SVS and Frost Dragon Tyrant lists"):
+  per-row Edit (AddPlayerDialog edit mode, PUT /api/admin/applications/{id}, field-level errors, in-place row update)
+  and Remove (confirm dialog). Deleting an SVS sign-up removes the player from that round's battle plan in the same
+  transaction (+1 revision, `plan_removed`). Closed rounds: aria-disabled buttons. i18n `scripts/i18n/v221_admin_edit.py`;
+  guide text `scripts/i18n/v221_guide_edit.py`, `v221_guide_add_to_rally.py`. e2e `test_admin_edit.py`.
 - **v2.2.0** (October 2026): SVS sign-up, add player, hero library (branch p4/svs-signup). Details in `docs/SPEC.md`
   "SVS sign-up".
   - `events/svs/` (validation, filters, logic, routes): hours derived from round settings `battle_start` (UTC,
