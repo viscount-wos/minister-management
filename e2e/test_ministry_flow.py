@@ -1,8 +1,9 @@
-"""Ministry happy path through the UI against the v2 API (profiles / rounds / applications).
+"""Ministry happy path through the v1.4-style application WIZARD against the v2 API.
 
-home tiles -> ministry -> apply; new application (en + ar); edit via FID; admin sees it;
-admin "Start new round" -> the same FID gets "New application" and "Use my last answers"
-copies the previous round's answers.
+home tiles -> ministry -> apply (wizard step 1 starts with the FID); new application through all
+five steps (en + ar); the per-day "no slots selected" warning; the review step; edit via FID in
+the wizard; admin sees it; admin "Start new round" -> the same FID gets a NEW application and
+"Use my last answers" copies the previous round's answers.
 
 Tests run in file order and share STATE; later tests skip if an earlier step failed.
 Each run uses fresh FIDs (time-based), so it is safe to re-run against the same container.
@@ -26,6 +27,7 @@ STATE: dict = {
     'fid_ar': f'7{_STAMP}2',
     'name_ar': f'اختبار E2E {_STAMP}',
 }
+PICKED = {'construction': ['12:00', '13:00'], 'research': [], 'troop': ['20:00']}
 
 
 def test_home_tile_to_ministry_to_apply(page: Page, base_url, shot, api):
@@ -40,94 +42,190 @@ def test_home_tile_to_ministry_to_apply(page: Page, base_url, shot, api):
     shot('ministry-home')
     page.get_by_test_id('ministry-apply-tile').click()
     page.wait_for_url('**/ministry/apply')
+    # the wizard, on step 1 of 5, asking for the FID first
+    ui.expect_step(page, 1)
+    for n in range(1, 6):
+        expect(page.get_by_test_id(f'wizard-step-indicator-{n}')).to_have_attribute(
+            'data-state', 'current' if n == 1 else 'todo')
+    expect(page.get_by_test_id('wizard-step-indicator-1')).to_have_attribute('aria-current', 'step')
+    expect(page.get_by_test_id('wizard-step-title')).to_have_text(en('ministry:form.step1Title'))
     expect(page.get_by_test_id('round-name')).to_have_text(rnd['name'])
     expect(page.get_by_label(en('profile:playerID'))).to_be_visible()      # label linked to input
-    shot('apply-lookup')
+    expect(page.get_by_test_id('profile-fields')).to_have_count(0)        # nothing else before the FID
+    shot('apply-step1-fid')
 
 
 def test_fid_must_be_digits(page: Page, base_url):
     ui.enter_fid(page, base_url, 'abc123')
-    expect(page.get_by_test_id('fid-error')).to_have_text(en('profile:fidDigitsOnly'))
+    expect(page.get_by_test_id('form-error')).to_have_text(en('profile:fidDigitsOnly'))
     expect(page.get_by_test_id('profile-fields')).to_have_count(0)
+    ui.expect_step(page, 1)
+    page.get_by_test_id('fid-input').fill('')
+    page.get_by_test_id('fid-input').press('Enter')                       # Enter = Next
+    expect(page.get_by_test_id('form-error')).to_have_text(en('profile:fidRequired'))
 
 
-def test_new_application_en(page: Page, base_url, shot, api, accept_dialogs):
+def test_new_application_through_all_steps(page: Page, base_url, shot, api):
+    """NEW mode: step 1 validation, the per-day 'no slots' confirm, the review step, submit."""
     rnd = api.current_round()
     assert ui.open_application(page, base_url, STATE['fid']) == 'new'
-    expect(page.get_by_test_id('application-heading')).to_have_text(
-        en('ministry:apply.newFor', round=rnd['name']))
+    expect(page.get_by_test_id('application-heading')).to_have_text(en('ministry:apply.newFor', round=rnd['name']))
     expect(page.get_by_test_id('profile-status')).to_have_text(en('profile:newProfile'))
     expect(page.get_by_test_id('use-last-answers')).to_have_count(0)      # never applied before
     expect(page.get_by_test_id('profile-fid')).to_have_value(STATE['fid'])
+    ui.expect_step(page, 1)
+    shot('step1-new')
 
-    # labels are linked: find the name field by its label text
-    page.get_by_label(en('profile:gameName')).fill(STATE['name'])
+    # step 1 validation (v1.4 wording): name, then alliance
+    page.get_by_test_id('wizard-next').click()
+    expect(page.get_by_test_id('form-error')).to_have_text(en('ministry:form.required'))
+    page.get_by_label(en('profile:gameName')).fill(STATE['name'])        # labels are linked
+    page.get_by_test_id('wizard-next').click()
+    expect(page.get_by_test_id('form-error')).to_have_text(en('profile:allianceRequired'))
+    ui.expect_step(page, 1)
     page.get_by_test_id('profile-alliance').fill('e2e')
     expect(page.get_by_test_id('profile-alliance')).to_have_value('E2E')  # upper-cased, max 3
     ui.fill_answers(page, construction='12.5', research='3', troop='100')
-    ui.pick_slots(page, {'construction': ['12:00', '13:00'], 'troop': ['20:00']})
-    shot('filled')
-    ui.save_application(page)
+    ui.next_step(page)
+
+    # step 2: construction day
+    expect(page.get_by_test_id('wizard-step-title')).to_have_text(en('ministry:form.constructionTimes'))
+    expect(page.get_by_test_id('wizard-step-indicator-1')).to_have_attribute('data-state', 'done')
+    expect(page.get_by_test_id('wizard-step-indicator-2')).to_have_attribute('data-state', 'current')
+    ui.toggle_slots(page, 'construction', PICKED['construction'])
+    expect(page.get_by_test_id('selected-count')).to_contain_text(en('ministry:form.selectedSlots', count=2))
+    shot('step2-construction')
+    ui.next_step(page)
+
+    # step 3: research day, nothing selected -> the v1.4 confirm. Dismiss = stay; accept = go on.
+    research = en('ministry:form.researchTimes', day=en('ministry:form.tuesdayName'))
+    expect(page.get_by_test_id('wizard-step-title')).to_have_text(research)
+    shot('step3-research-empty')
+    seen = []
+    page.once('dialog', lambda d: (seen.append(d.message), d.dismiss()))
+    page.get_by_test_id('wizard-next').click()
+    expect(page.get_by_test_id('wizard-steps')).to_have_attribute('data-step', '3')
+    assert seen == [en('ministry:form.noTimeSlotsConfirm')], seen
+    page.once('dialog', lambda d: (seen.append(d.message), d.accept()))
+    ui.next_step(page)
+    assert len(seen) == 2
+
+    # step 4: troop day; Back keeps what was picked, then forward again
+    expect(page.get_by_test_id('wizard-step-title')).to_have_text(en('ministry:form.troopTimes'))
+    ui.toggle_slots(page, 'troop', PICKED['troop'])
+    ui.back_step(page)
+    ui.back_step(page)
+    expect(ui.slot(page, 'construction', '12:00')).to_have_attribute('aria-pressed', 'true')
+    ui.next_step(page)
+    page.once('dialog', lambda d: d.accept())
+    ui.next_step(page)
+    expect(ui.slot(page, 'troop', '20:00')).to_have_attribute('aria-pressed', 'true')
+    shot('step4-troop')
+    ui.next_step(page)
+
+    # step 5: review
+    expect(page.get_by_test_id('wizard-step-title')).to_have_text(en('ministry:form.step3Title'))
+    expect(page.get_by_test_id('review-game-name')).to_contain_text('[E2E]')
+    expect(page.get_by_test_id('review-game-name')).to_contain_text(STATE['name'])
+    expect(page.get_by_test_id('review-fid')).to_contain_text(STATE['fid'])
+    expect(page.get_by_test_id('review-construction_speedups_days')).to_contain_text('12.5 ' + en('ministry:form.days'))
+    ui.expect_review_slots(page, PICKED)
+    expect(page.get_by_test_id('review-slots-research')).to_contain_text(en('ministry:form.noTimeSelected'))
+    expect(page.get_by_test_id('wizard-submit')).to_have_text(en('ministry:form.submit'))
+    expect(page.get_by_test_id('wizard-next')).to_have_count(0)
+    shot('step5-review')
+
+    ui.submit(page)
     expect(page.get_by_test_id('save-success')).to_contain_text(en('ministry:form.success'))
     expect(page.get_by_test_id('save-success')).to_contain_text(en('ministry:apply.savedNew', round=rnd['name']))
     shot('success')
 
     app = api.application(STATE['fid'])
     assert app['answers']['construction_speedups_days'] == 12.5
-    assert app['answers']['time_slots_by_day'] == {
-        'construction': ['12:00', '13:00'], 'research': [], 'troop': ['20:00']}
-    assert app['profile_snapshot']['alliance'] == 'E2E'
+    assert app['answers']['time_slots_by_day'] == PICKED
+    assert api.call('GET', f'/api/profile/{STATE["fid"]}')[1]['alliance'] == 'E2E'
     STATE['submitted'] = True
 
 
-def test_edit_via_fid(page: Page, base_url, shot, api, accept_dialogs):
+def test_edit_via_fid_in_the_wizard(page: Page, base_url, shot, api, accept_dialogs):
+    """EDIT mode: every step pre-filled from this round's application; 'Update' saves it."""
     if not STATE.get('submitted'):
         pytest.skip('submission failed')
     rnd = api.current_round()
     assert ui.open_application(page, base_url, STATE['fid']) == 'edit'
-    expect(page.get_by_test_id('application-heading')).to_have_text(
-        en('ministry:apply.editFor', round=rnd['name']))
+    expect(page.get_by_test_id('application-heading')).to_have_text(en('ministry:apply.editFor', round=rnd['name']))
     expect(page.get_by_test_id('profile-status')).to_have_text(en('profile:prefilled'))
     expect(page.get_by_test_id('profile-game-name')).to_have_value(STATE['name'])
     expect(page.get_by_test_id('profile-alliance')).to_have_value('E2E')
     expect(page.get_by_test_id(ui.ANSWER['construction'])).to_have_value('12.5')
-    ui.expect_slots(page, {'construction': ['12:00', '13:00'], 'troop': ['20:00']})
-    expect(page.get_by_test_id('my-assignments')).to_be_visible()
-    shot('loaded')
+    expect(page.get_by_test_id('my-assignments')).to_be_visible()          # v1.4 update page: assignments on top
+    expect(page.get_by_test_id('use-last-answers')).to_have_count(0)
+    shot('step1-edit')
 
     page.get_by_test_id(ui.ANSWER['construction']).fill('42.5')
-    ui.pick_slots(page, {'research': ['01:00']})
-    shot('edited')
-    page.get_by_test_id('save-application').click()
+    ui.next_step(page)
+    for h in PICKED['construction']:                                       # step 2 pre-filled
+        expect(ui.slot(page, 'construction', h)).to_have_attribute('aria-pressed', 'true')
+    ui.next_step(page)
+    ui.toggle_slots(page, 'research', ['01:00'])                           # step 3: add one
+    shot('step3-edit')
+    ui.next_step(page)
+    expect(ui.slot(page, 'troop', '20:00')).to_have_attribute('aria-pressed', 'true')
+    ui.next_step(page)
+    edited = {**PICKED, 'research': ['01:00']}
+    ui.expect_review_slots(page, edited)
+    expect(page.get_by_test_id('wizard-submit')).to_have_text(en('ministry:form.update'))
+    shot('step5-edit-review')
+    ui.submit(page)
     expect(page.get_by_test_id('save-success')).to_contain_text(en('ministry:apply.savedEdit', round=rnd['name']))
 
-    # reload from scratch and prove the edit persisted
-    assert ui.open_application(page, base_url, STATE['fid']) == 'edit'
+    # reopen from the success card and prove the edit persisted
+    page.get_by_test_id('reopen-application').click()
+    expect(page.get_by_test_id('application-heading')).to_have_attribute('data-mode', 'edit')
     expect(page.get_by_test_id(ui.ANSWER['construction'])).to_have_value('42.5')
     expect(page.get_by_test_id(ui.ANSWER['research'])).to_have_value('3')
-    ui.expect_slots(page, {'research': ['01:00']})
+    ui.go_to_step(page, ui.REVIEW_STEP)
+    ui.expect_review_slots(page, edited)
+    assert api.application(STATE['fid'])['answers']['time_slots_by_day'] == edited
     STATE['edited'] = True
-    shot('reloaded')
 
 
 def test_new_application_ar_rtl(page: Page, base_url, shot, api, accept_dialogs):
     """Full new application with the UI in Arabic (strings checked in Arabic, not English)."""
     rnd = api.current_round()
+    ar = lambda key, **kw: ui.tr('ar', key, **kw)  # noqa: E731
     ui.go(page, base_url, 'apply')
     ui.switch_language(page, 'ar')
     assert page.evaluate('document.documentElement.dir') == 'rtl'
-    expect(page.get_by_test_id('fid-input')).to_have_attribute(
-        'placeholder', ui.tr('ar', 'profile:playerIDPlaceholder'))
+    expect(page.get_by_test_id('wizard-step-title')).to_have_text(ar('ministry:form.step1Title'))
+    expect(page.get_by_test_id('fid-input')).to_have_attribute('placeholder', ar('profile:playerIDPlaceholder'))
+    # v1.4 mirrored the step indicator in Arabic: step 1 sits to the right of step 5
+    x1 = page.get_by_test_id('wizard-step-indicator-1').bounding_box()['x']
+    x5 = page.get_by_test_id('wizard-step-indicator-5').bounding_box()['x']
+    assert x1 > x5, (x1, x5)
+    # and Back is on the right, Next on the left
+    assert page.get_by_test_id('wizard-next').bounding_box()['x'] < page.get_by_test_id('wizard-back').bounding_box()['x']
+    shot('ar-step1-fid')
     page.get_by_test_id('fid-input').fill(STATE['fid_ar'])
-    page.get_by_test_id('fid-continue').click()
-    expect(page.get_by_test_id('application-heading')).to_have_text(
-        ui.tr('ar', 'ministry:apply.newFor', round=rnd['name']))
+    page.get_by_test_id('wizard-next').click()
+    expect(page.get_by_test_id('application-heading')).to_have_text(ar('ministry:apply.newFor', round=rnd['name']))
     ui.fill_profile(page, STATE['name_ar'], 'LOV')
     ui.fill_answers(page, construction='1')
-    ui.pick_slots(page, {'construction': ['00:00']})
-    shot('ar-form')
-    page.get_by_test_id('save-application').click()
-    expect(page.get_by_test_id('save-success')).to_contain_text(ui.tr('ar', 'ministry:form.success'))
+    assert page.evaluate("getComputedStyle(document.querySelector('[data-testid=wizard]')).direction") == 'rtl'
+    shot('ar-step1')
+    ui.next_step(page)
+    expect(page.get_by_test_id('wizard-step-title')).to_have_text(ar('ministry:form.constructionTimes'))
+    ui.toggle_slots(page, 'construction', ['00:00'])
+    shot('ar-step2')
+    ui.next_step(page)
+    ui.next_step(page)                       # empty research day: confirm accepted
+    ui.next_step(page)                       # empty troop day
+    expect(page.get_by_test_id('wizard-step-title')).to_have_text(ar('ministry:form.step3Title'))
+    ui.expect_review_slots(page, {'construction': ['00:00'], 'research': [], 'troop': []})
+    expect(page.get_by_test_id('wizard-submit')).to_have_text(ar('ministry:form.submit'))
+    shot('ar-step5-review')
+    page.get_by_test_id('wizard-submit').click()
+    expect(page.get_by_test_id('save-success')).to_contain_text(ar('ministry:form.success'))
     assert page.evaluate('document.documentElement.dir') == 'rtl'
     shot('ar-success')
     STATE['submitted_ar'] = True
@@ -211,15 +309,17 @@ def test_start_new_round_then_use_last_answers(page: Page, base_url, admin_passw
     expect(page.get_by_test_id('closing-time')).to_be_disabled()
     shot('old-round-read-only')
 
-    # --- player: same FID now gets a NEW application with blank answers
+    # --- player: same FID now gets the wizard in NEW mode, profile pre-filled, answers blank
     assert ui.open_application(page, base_url, STATE['fid']) == 'new'
     expect(page.get_by_test_id('application-heading')).to_have_text(en('ministry:apply.newFor', round=new_name))
     expect(page.get_by_test_id('profile-game-name')).to_have_value(STATE['name'])     # profile pre-fills
     expect(page.get_by_test_id('profile-alliance')).to_have_value('E2E')
     expect(page.get_by_test_id(ui.ANSWER['construction'])).to_have_value('')          # answers blank
-    expect(ui.day_tab(page, 'construction')).to_be_visible()
-    expect(ui.slot(page, 'construction', '12:00')).to_have_attribute('aria-pressed', 'false')
+    expect(page.get_by_test_id('last-answers')).to_contain_text(en('profile:lastAnswers.hint', round=old['name']))
     expect(page.get_by_test_id('last-answers-applied')).to_have_count(0)
+    ui.next_step(page)
+    expect(ui.slot(page, 'construction', '12:00')).to_have_attribute('aria-pressed', 'false')   # times blank too
+    ui.back_step(page)
     shot('new-round-blank')
 
     page.get_by_test_id('use-last-answers').click()
@@ -228,22 +328,25 @@ def test_start_new_round_then_use_last_answers(page: Page, base_url, admin_passw
     expect(page.get_by_test_id(ui.ANSWER['construction'])).to_have_value('42.5')
     expect(page.get_by_test_id(ui.ANSWER['research'])).to_have_value('3')
     expect(page.get_by_test_id(ui.ANSWER['troop'])).to_have_value('100')
-    ui.expect_slots(page, {'construction': ['12:00', '13:00'], 'research': ['01:00'], 'troop': ['20:00']})
     shot('last-answers-applied')
 
     bad = ui.check_all_languages(page, 'last-answers', shot)
-    assert not bad, f'raw i18n keys on the use-last-answers form: {bad}'
+    assert not bad, f'raw i18n keys on the use-last-answers step: {bad}'
     ui.switch_language(page, 'ar')
     expect(page.get_by_test_id('last-answers-applied')).to_have_text(
         ui.tr('ar', 'profile:lastAnswers.applied', round=old['name']))
     shot('last-answers-ar')
     ui.switch_language(page, 'en')
 
-    ui.save_application(page)
+    copied = {'construction': ['12:00', '13:00'], 'research': ['01:00'], 'troop': ['20:00']}
+    ui.walk_days(page)                                    # the copied hours are already selected
+    ui.expect_review_slots(page, copied)
+    shot('last-answers-review')
+    ui.submit(page)
     app = api.application(STATE['fid'])
     assert app['round_id'] == new['id']
     assert app['answers']['construction_speedups_days'] == 42.5
-    assert app['answers']['time_slots_by_day']['research'] == ['01:00']
+    assert app['answers']['time_slots_by_day'] == copied
 
 
 def test_admin_assign_publish_export_and_player_sees_schedule(page: Page, base_url, admin_password, shot,
@@ -269,6 +372,14 @@ def test_admin_assign_publish_export_and_player_sees_schedule(page: Page, base_u
     slot_id, placed_card = next(iter(placed.items()))
     mins = int(slot_id[:2]) * 60 + int(slot_id[3:5])                        # ±20 min of a chosen hour
     assert placed_card['is_sticky'] is True and any(abs(mins - h * 60) <= 20 for h in (12, 13)), slot_id
+
+    # before publishing, the player's own box lists no days (the API returns published days only)
+    assert ui.open_application(page, base_url, fid) == 'edit'
+    expect(page.get_by_test_id('my-assignments-none')).to_have_text(en('ministry:update.noAssignments'))
+    ui.admin_login(page, base_url, admin_password)
+    page.get_by_test_id('tab-assignments').click()
+    page.get_by_test_id('assign-day-monday').click()
+
     page.get_by_test_id('publish').click()
     expect(page.get_by_test_id('unpublish')).to_be_visible()
     assert api.current_round()['settings']['published_days'] == ['monday']
@@ -283,7 +394,7 @@ def test_admin_assign_publish_export_and_player_sees_schedule(page: Page, base_u
     assert data['round']['id'] == rnd['id'] and any(p['fid'] == fid for p in data['players'])
     shot('assigned-published')
 
-    # player side: published schedule link + page, and their own assignment
+    # player side: published schedule link + page, and their own assignment on wizard step 1
     ui.go(page, base_url, 'ministry')
     page.get_by_test_id('schedule-link-monday').click()
     page.wait_for_url('**/ministry/schedule/monday')
@@ -291,6 +402,7 @@ def test_admin_assign_publish_export_and_player_sees_schedule(page: Page, base_u
     shot('public-schedule')
     assert ui.open_application(page, base_url, fid) == 'edit'
     expect(page.get_by_test_id('my-assignments-monday')).to_contain_text(slot_id)
+    expect(page.get_by_test_id('my-assignments-thursday')).to_have_count(0)   # unpublished day not listed
     shot('my-assignment')
     ui.switch_language(page, 'ar')
     shot('my-assignment-ar')
@@ -301,3 +413,13 @@ def test_legacy_urls_redirect(page: Page, base_url):
         page.goto(base_url + old)
         page.wait_for_url(f'**{new}')
         assert page.url.endswith(new), (old, page.url)
+
+
+def test_legacy_update_link_with_fid_opens_edit(page: Page, base_url):
+    """A shared /update?fid=... link lands in the wizard, already in EDIT mode."""
+    if not STATE.get('edited'):
+        pytest.skip('edit step failed')
+    page.goto(f'{base_url}/update?fid={STATE["fid"]}')
+    page.wait_for_url(f'**/ministry/apply?fid={STATE["fid"]}')
+    expect(page.get_by_test_id('application-heading')).to_have_attribute('data-mode', 'edit')
+    ui.expect_step(page, 1)

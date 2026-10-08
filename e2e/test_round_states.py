@@ -53,21 +53,24 @@ def test_closing_time_blocks_new_but_allows_edit(page: Page, base_url, shot, api
     expect(page.get_by_test_id('closing-note')).to_have_text(en('ministry:apply.closedButEditable'))
     page.get_by_test_id(ui.ANSWER['construction']).fill('6')
     page.on('dialog', lambda d: d.accept())
-    ui.save_application(page)
+    ui.go_to_step(page, ui.REVIEW_STEP)
+    expect(page.get_by_test_id('closing-note')).to_have_text(en('ministry:apply.closedButEditable'))
+    ui.submit(page)
     assert api.application(round_closed_for_new['existing_fid'])['answers']['construction_speedups_days'] == 6
     shot('existing-edit-after-close')
 
 
 def test_closing_time_passes_while_filling(page: Page, base_url, api):
-    """Form opened before the deadline, saved after it: 403 APPLICATIONS_CLOSED -> closed state."""
+    """Wizard opened before the deadline, submitted after it: 403 APPLICATIONS_CLOSED -> closed state."""
     rnd = api.current_round()
     assert ui.open_application(page, base_url, f'98{_STAMP}03') == 'new'
     api.update_round(rnd['id'], closing_time=PAST)
     try:
+        page.on('dialog', lambda d: d.accept())
         ui.fill_profile(page, 'E2E too late', 'LTE')
         ui.fill_answers(page, construction='1')
-        ui.pick_slots(page, {'construction': ['05:00']})
-        page.get_by_test_id('save-application').click()
+        ui.walk_days(page, {'construction': ['05:00']})
+        page.get_by_test_id('wizard-submit').click()
         expect(page.get_by_test_id('applications-closed')).to_be_visible()
         assert api.application(f'98{_STAMP}03') is None
     finally:

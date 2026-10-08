@@ -71,24 +71,35 @@ def test_arabic_sets_rtl_and_back(page: Page, base_url, shot):
     assert page.evaluate('document.documentElement.dir') == 'ltr'
 
 
-def test_application_form_all_languages(page: Page, base_url, shot, api):
-    """New-application form (unsaved, fresh FID) and an edit form, in all 9 languages."""
+def test_wizard_every_step_all_languages(page: Page, base_url, shot, api):
+    """Every wizard step, NEW (unsaved, fresh FID) and EDIT, in all 9 languages: no raw keys."""
+    page.on('dialog', lambda d: d.accept())                     # empty days -> confirm
     bad = {}
+
+    def check(where):
+        found = ui.check_all_languages(page, where, shot)
+        if found:
+            bad[where] = found
+
+    ui.go(page, base_url, 'apply')
+    check('wizard-step1-fid')
     assert ui.open_application(page, base_url, f'99{_STAMP}01') == 'new'
-    found = ui.check_all_languages(page, 'apply-new', shot)
-    if found:
-        bad['new'] = found
+    check('wizard-new-step1')
+    ui.fill_profile(page, 'E2E i18n new', 'I18')
+    for n in (2, 3, 4, 5):
+        ui.next_step(page)
+        check(f'wizard-new-step{n}')
 
     fid = f'99{_STAMP}02'
     api.put_application(fid, 'E2E i18n edit', 'I18', {
         'construction_speedups_days': 1, 'time_slots_by_day': {'construction': ['10:00']}})
     assert ui.open_application(page, base_url, fid) == 'edit'
-    for day_type in ('research', 'troop'):                      # every day-type tab rendered once
-        ui.day_tab(page, day_type).click()
-    found = ui.check_all_languages(page, 'apply-edit', shot)
-    if found:
-        bad['edit'] = found
-    assert not bad, f'raw i18n keys on the application form: {bad}'
+    check('wizard-edit-step1')
+    ui.next_step(page)
+    check('wizard-edit-step2')
+    ui.go_to_step(page, ui.REVIEW_STEP)
+    check('wizard-edit-step5')
+    assert not bad, f'raw i18n keys in the wizard: {bad}'
 
 
 def test_arabic_rtl_new_pages(page: Page, base_url, shot, api, admin_password):
@@ -111,7 +122,7 @@ def test_arabic_rtl_new_pages(page: Page, base_url, shot, api, admin_password):
     fid = f'99{_STAMP}03'
     api.put_application(fid, 'E2E ar edit', 'ARB', {'troop_training_speedups_days': 2})
     page.get_by_test_id('fid-input').fill(fid)
-    page.get_by_test_id('fid-continue').click()
+    page.get_by_test_id('wizard-next').click()
     expect(page.get_by_test_id('application-heading')).to_have_text(ar('ministry:apply.editFor', round=rnd['name']))
     expect(page.get_by_test_id('profile-status')).to_have_text(ar('profile:prefilled'))
     # RTL really reaches the new components (computed direction, not just the <html> attribute)
