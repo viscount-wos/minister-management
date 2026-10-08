@@ -54,7 +54,8 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
     }
   };
 
-  const input = 'px-3 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent';
+  // 16px text (iOS zooms into smaller inputs on focus) and 44px tall
+  const input = 'min-h-[44px] px-3 py-2 text-base bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent';
 
   return (
     <div className="space-y-6">
@@ -94,14 +95,14 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
                   className={input}
                 />
               </div>
-              <label className="flex items-center gap-2 py-2 text-theme-text text-sm">
+              <label className="flex items-center gap-3 min-h-[44px] px-2 rounded-lg text-theme-text text-base cursor-pointer hover:bg-dark-card-hover">
                 <input
                   type="checkbox"
                   data-testid={`window-rush-${i}`}
                   checked={w.rush}
                   disabled={readOnly}
                   onChange={(e) => update(i, { rush: e.target.checked })}
-                  className="w-4 h-4 accent-accent"
+                  className="w-6 h-6 accent-accent"
                 />
                 {t('tyrant:step2.openingRush')}
               </label>
@@ -175,7 +176,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
                 onClick={() => save({ closing_time: localInputToIso(closing) })}
                 disabled={busy || !closing}
                 data-testid="save-closing-time"
-                className="px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium disabled:opacity-50"
+                className="min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium disabled:opacity-50"
               >
                 {t('common:save')}
               </button>
@@ -184,7 +185,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
                 onClick={() => save({ closing_time: null })}
                 disabled={busy}
                 data-testid="clear-closing-time"
-                className="px-4 py-2 border border-theme-border rounded-lg text-theme-text hover:bg-dark-card-hover"
+                className="min-h-[44px] px-4 py-2 border border-theme-border rounded-lg text-theme-text hover:bg-dark-card-hover"
               >
                 {t('admin:clear')}
               </button>

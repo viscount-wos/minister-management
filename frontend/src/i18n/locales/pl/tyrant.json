@@ -62,12 +62,17 @@
   },
   "step4": {
     "title": "Poziomy wojsk",
-    "desc": "Wybierz piec i poziom T dla każdego typu wojsk",
+    "desc": "Wybierz poziom OBOZU każdego typu wojsk i poziom T",
     "infantry": "🛡 Piechota",
     "lancer": "🐴 Lansjerzy",
     "marksman": "🏹 Strzelcy",
-    "fcLevel": "Poziom pieca",
-    "tLevel": "Poziom T"
+    "tLevel": "Poziom T",
+    "camp": {
+      "infantry": "Obóz piechoty (poziom FC)",
+      "lancer": "Obóz lansjerów (poziom FC)",
+      "marksman": "Obóz strzelców (poziom FC)"
+    },
+    "campHint": "Obozy mogą mieć niższy poziom niż piec: wybierz poziom obozu"
   },
   "step5": {
     "title": "Wybrane role",
@@ -87,7 +92,9 @@
   },
   "errors": {
     "power": "Siła musi być liczbą (w milionach), np. 410",
-    "gems": "Wydatek klejnotów musi być liczbą całkowitą, np. 10000"
+    "gems": "Wydatek klejnotów musi być liczbą całkowitą, np. 10000",
+    "furnaceRequired": "Wybierz poziom pieca (FC1-FC10)",
+    "campRequired": "Wybierz poziom obozu i poziom T dla każdego typu wojsk"
   },
   "admin": {
     "adminSubtitle": "Tyran Mroźnego Smoka: zgłoszenia, statystyki i eksport",
@@ -96,13 +103,12 @@
       "total": "Gracze",
       "openingRush": "Otwierający szturm",
       "discordVc": "Głos Discord",
-      "alliances": "Sojusze",
-      "gems": "Szac. klejnoty"
+      "alliances": "Sojusze"
     },
     "byWindow": "Gracze w przedziałach (UTC)",
     "byRole": "Wybrane role",
     "byAlliance": "Sojusze",
-    "byTroop": "Poziomy wojsk",
+    "byTroop": "Wojska: poziomy obozów i T",
     "none": "brak",
     "search": "Szukaj nicku, FID lub Discorda...",
     "allianceFilter": "Sojusz",
@@ -118,7 +124,8 @@
       "gems": "Klejnoty",
       "windows": "Przedziały (UTC)",
       "vc": "Głos",
-      "submitted": "Wysłano"
+      "submitted": "Wysłano",
+      "strength": "Siła"
     },
     "troopShort": {
       "infantry": "Pie",
@@ -141,6 +148,68 @@
       "save": "Zapisz przedziały",
       "saved": "Ustawienia zapisane",
       "error": "Nie udało się zapisać. Sprawdź godziny (koniec po początku)."
+    },
+    "chipHint": "Dotknij liczby, aby filtrować; dotknij ponownie, aby usunąć filtr.",
+    "campRow": "Poziom obozu",
+    "tierRow": "Poziom T",
+    "troopName": {
+      "all": "Wszystkie trzy",
+      "infantry": "Piechota",
+      "lancer": "Lansjerzy",
+      "marksman": "Strzelcy"
+    },
+    "ofRound": "z {{total}} w tej rundzie",
+    "showingOf": "{{n}} z {{total}} graczy",
+    "noMatches": "Żadne zgłoszenie nie pasuje do tych filtrów",
+    "exportFiltered": "Eksport obejmuje tylko przefiltrowanych graczy.",
+    "filter": {
+      "search": "Szukaj",
+      "windows": "Okna (UTC)",
+      "anyWindow": "Dowolne okno",
+      "troop": "Typ wojsk",
+      "campAtLeast": "Obóz co najmniej",
+      "anyCamp": "Dowolny obóz",
+      "tier": "Poziom T",
+      "anyTier": "Dowolny poziom T",
+      "tier10": "T10 lub wyżej",
+      "tier11": "Tylko T11",
+      "any": "Dowolnie",
+      "yes": "Tak",
+      "no": "Nie",
+      "minPower": "Siła od (mln)",
+      "maxPower": "Siła do (mln)",
+      "minGems": "Klejnoty od",
+      "maxGems": "Klejnoty do",
+      "anyRole": "Dowolna rola",
+      "rolesMode": "Dopasowanie ról",
+      "rolesAny": "Dowolna z nich",
+      "rolesAll": "Wszystkie",
+      "anyTime": "Kiedykolwiek",
+      "last24h": "Ostatnie 24 godziny",
+      "from": "Wysłane od",
+      "to": "Wysłane do",
+      "selected": "Wybrano: {{n}}"
+    },
+    "pill": {
+      "search": "Szukaj: {{v}}",
+      "alliance": "Sojusz: {{v}}",
+      "minCamp": "{{troop}}: obóz ≥ {{v}}",
+      "minTier": "{{troop}}: poziom T ≥ {{v}}",
+      "camp": "Obóz ({{troop}}): {{v}}",
+      "tier": "Poziom T ({{troop}}): {{v}}",
+      "window": "Okno {{v}}",
+      "furnace": "Piec ≥ {{v}}",
+      "minPower": "Siła ≥ {{v}} mln",
+      "maxPower": "Siła ≤ {{v}} mln",
+      "minGems": "Klejnoty ≥ {{v}}",
+      "maxGems": "Klejnoty ≤ {{v}}",
+      "vcYes": "Discord VC: tak",
+      "vcNo": "Discord VC: nie",
+      "roleAny": "Rola: {{v}}",
+      "roleAll": "Rola (wszystkie): {{v}}",
+      "from": "Od {{v}}",
+      "to": "Do {{v}}",
+      "days": "Ostatnie {{n}} dni"
     }
   }
 }

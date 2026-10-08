@@ -84,7 +84,9 @@ export function SlotGrid({ dayType, selected, onToggle, timezone, heatmap = {}, 
         {t('ministry:form.selectedSlots', { count: selected.length })}
         {timezone !== 'UTC' && (
           <span className="ms-2 text-accent">
-            ({t('ministry:form.timesShownIn')} {getTimezoneAbbr(timezone)})
+            <span data-testid="times-shown-in">
+              {t('ministry:form.timesShownIn')} <bdi dir="ltr">{getTimezoneAbbr(timezone)}</bdi>
+            </span>
           </span>
         )}
       </p>

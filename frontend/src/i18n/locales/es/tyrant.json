@@ -62,12 +62,17 @@
   },
   "step4": {
     "title": "Niveles de tropas",
-    "desc": "Elige el horno y el nivel T de cada tipo de tropa",
+    "desc": "Elige el nivel del CAMPAMENTO de cada tropa y su nivel T",
     "infantry": "🛡 Infantería",
     "lancer": "🐴 Lanceros",
     "marksman": "🏹 Tiradores",
-    "fcLevel": "Nivel de horno",
-    "tLevel": "Nivel T"
+    "tLevel": "Nivel T",
+    "camp": {
+      "infantry": "Campamento de infantería (nivel FC)",
+      "lancer": "Campamento de lanceros (nivel FC)",
+      "marksman": "Campamento de tiradores (nivel FC)"
+    },
+    "campHint": "Los campamentos pueden estar por debajo de tu horno: elige el nivel del campamento"
   },
   "step5": {
     "title": "Roles deseados",
@@ -87,7 +92,9 @@
   },
   "errors": {
     "power": "El poder debe ser un número (en millones), p. ej. 410",
-    "gems": "El gasto de gemas debe ser un número entero, p. ej. 10000"
+    "gems": "El gasto de gemas debe ser un número entero, p. ej. 10000",
+    "furnaceRequired": "Elige el nivel de tu horno (FC1-FC10)",
+    "campRequired": "Elige el nivel de campamento y el nivel T de cada tipo de tropa"
   },
   "admin": {
     "adminSubtitle": "Tirano Dragón de Escarcha: inscripciones, estadísticas y exportación",
@@ -96,13 +103,12 @@
       "total": "Jugadores",
       "openingRush": "Ataque inicial",
       "discordVc": "Voz Discord",
-      "alliances": "Alianzas",
-      "gems": "Gemas estimadas"
+      "alliances": "Alianzas"
     },
     "byWindow": "Jugadores por franja (UTC)",
     "byRole": "Roles deseados",
     "byAlliance": "Alianzas",
-    "byTroop": "Niveles de tropa",
+    "byTroop": "Tropas: niveles de campamento y T",
     "none": "ninguno",
     "search": "Buscar nombre, FID o Discord...",
     "allianceFilter": "Alianza",
@@ -118,7 +124,8 @@
       "gems": "Gemas",
       "windows": "Franjas (UTC)",
       "vc": "Voz",
-      "submitted": "Enviado"
+      "submitted": "Enviado",
+      "strength": "Fuerza"
     },
     "troopShort": {
       "infantry": "Inf",
@@ -141,6 +148,68 @@
       "save": "Guardar franjas",
       "saved": "Ajustes guardados",
       "error": "No se pudieron guardar. Revisa las horas (el fin después del inicio)."
+    },
+    "chipHint": "Toca un recuento para filtrar por él; tócalo otra vez para quitar el filtro.",
+    "campRow": "Nivel de campamento",
+    "tierRow": "Nivel T",
+    "troopName": {
+      "all": "Las tres",
+      "infantry": "Infantería",
+      "lancer": "Lanceros",
+      "marksman": "Tiradores"
+    },
+    "ofRound": "de {{total}} en esta ronda",
+    "showingOf": "{{n}} de {{total}} jugadores",
+    "noMatches": "Ninguna inscripción coincide con estos filtros",
+    "exportFiltered": "Las exportaciones incluyen solo los jugadores filtrados.",
+    "filter": {
+      "search": "Buscar",
+      "windows": "Franjas (UTC)",
+      "anyWindow": "Cualquier franja",
+      "troop": "Tipo de tropa",
+      "campAtLeast": "Campamento mínimo",
+      "anyCamp": "Cualquier campamento",
+      "tier": "Nivel T",
+      "anyTier": "Cualquier nivel T",
+      "tier10": "T10 o superior",
+      "tier11": "Solo T11",
+      "any": "Cualquiera",
+      "yes": "Sí",
+      "no": "No",
+      "minPower": "Poder desde (M)",
+      "maxPower": "Poder hasta (M)",
+      "minGems": "Gemas desde",
+      "maxGems": "Gemas hasta",
+      "anyRole": "Cualquier rol",
+      "rolesMode": "Coincidencia de roles",
+      "rolesAny": "Cualquiera de ellos",
+      "rolesAll": "Todos ellos",
+      "anyTime": "Cualquier fecha",
+      "last24h": "Últimas 24 horas",
+      "from": "Enviado desde",
+      "to": "Enviado hasta",
+      "selected": "{{n}} seleccionados"
+    },
+    "pill": {
+      "search": "Búsqueda: {{v}}",
+      "alliance": "Alianza: {{v}}",
+      "minCamp": "{{troop}}: campamento ≥ {{v}}",
+      "minTier": "{{troop}}: nivel T ≥ {{v}}",
+      "camp": "Campamento de {{troop}}: {{v}}",
+      "tier": "Nivel T de {{troop}}: {{v}}",
+      "window": "Franja {{v}}",
+      "furnace": "Horno ≥ {{v}}",
+      "minPower": "Poder ≥ {{v}}M",
+      "maxPower": "Poder ≤ {{v}}M",
+      "minGems": "Gemas ≥ {{v}}",
+      "maxGems": "Gemas ≤ {{v}}",
+      "vcYes": "Discord VC: sí",
+      "vcNo": "Discord VC: no",
+      "roleAny": "Rol: {{v}}",
+      "roleAll": "Rol (todos): {{v}}",
+      "from": "Desde {{v}}",
+      "to": "Hasta {{v}}",
+      "days": "Últimos {{n}} días"
     }
   }
 }

@@ -54,5 +54,11 @@
     "fireCrystal": "Ateş Kristali",
     "preFc": "FC öncesi",
     "level": "Sv. {{n}}"
+  },
+  "filters": {
+    "clear": "Filtreleri temizle",
+    "remove": "Filtreyi kaldır: {{label}}",
+    "more": "Daha fazla filtre",
+    "fewer": "Daha az filtre"
   }
 }

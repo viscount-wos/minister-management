@@ -76,6 +76,8 @@ export interface TyrantAdminApplication extends TyrantApplication {
   updated_at: string;
   profile: TyrantProfile;
   answers: TyrantAnswers;
+  /** Sum over the 3 troop types of camp FC number (FC1=1..FC10=10, pre-FC/blank 0) + tier; null = no troop data. */
+  joiner_strength?: number | null;
 }
 
 export interface TyrantSummary {
@@ -83,23 +85,54 @@ export interface TyrantSummary {
   total: number;
   opening_rush: number;
   discord_vc: number;
-  gem_spend_total: number;
+  /** Unfiltered number of sign-ups in the round (the other counts are for the filtered set). */
+  round_total: number;
+  /** Every alliance tag of the round (unfiltered), for the alliance picker. */
+  alliance_options: string[];
   windows: (TyrantWindow & { count: number })[];
   alliances: { alliance: string | null; count: number }[];
   roles: Record<Role, number>;
   troop_tiers: Record<TroopType, Record<string, number>>;
+  /** Camp level counts per troop type: FC10..FC1, legacy pre-FC codes as stored, then 'none'. */
+  camp_levels: Record<TroopType, Record<string, number>>;
   furnace_levels: Record<string, number>;
 }
 
-export type SortKey = 'submitted' | 'updated' | 'name' | 'alliance' | 'fid' | 'furnace' | 'power' | 'gems';
+export type SortKey = 'submitted' | 'updated' | 'name' | 'alliance' | 'fid' | 'furnace' | 'power' | 'gems' | 'strength';
 
-export interface ListQuery {
-  q?: string;
-  alliance?: string;
+/** Admin filters: the API's query params (docs/API.md "Frost Dragon Tyrant"); the admin URL uses the same keys. */
+export const FILTER_KEYS = [
+  'q',
+  'alliance',
+  'min_furnace',
+  'min_power',
+  'max_power',
+  'min_gems',
+  'max_gems',
+  'windows',
+  'rush',
+  'vc',
+  'troop',
+  'min_camp',
+  'min_tier',
+  'infantry_camp',
+  'infantry_tier',
+  'lancer_camp',
+  'lancer_tier',
+  'marksman_camp',
+  'marksman_tier',
+  'roles',
+  'roles_mode',
+  'submitted_from',
+  'submitted_to',
+  'days',
+] as const;
+export type FilterKey = (typeof FILTER_KEYS)[number];
+export type FilterQuery = Partial<Record<FilterKey, string>>;
+
+export interface ListQuery extends FilterQuery {
   sort?: SortKey;
   dir?: 'asc' | 'desc';
-  /** Only players at this furnace level or higher (code). */
-  min_furnace?: string;
   limit?: number;
   offset?: number;
 }
@@ -117,6 +150,12 @@ export function parseTroops(raw: unknown): Troops {
 }
 
 const enc = encodeURIComponent;
+
+function pickFilters(q: FilterQuery): Record<string, string | undefined> {
+  const out: Record<string, string | undefined> = {};
+  for (const k of FILTER_KEYS) if (q[k]) out[k] = q[k];
+  return out;
+}
 
 export const tyrantApi = {
   currentRound: () => api.currentRound<TyrantSettings>(EVENT),
@@ -142,22 +181,22 @@ export const tyrantApi = {
         {
           admin: true,
           query: {
-            q: q.q,
-            alliance: q.alliance,
+            ...pickFilters(q),
             sort: q.sort,
             dir: q.dir,
-            min_furnace: q.min_furnace,
             limit: q.limit != null ? String(q.limit) : undefined,
             offset: q.offset ? String(q.offset) : undefined,
           },
         },
       ),
-    summary: (roundId: number, alliance?: string) =>
-      apiRequest<TyrantSummary>('GET', `/api/admin/tyrant/rounds/${roundId}/summary`, { admin: true, query: { alliance } }),
-    exportXlsx: (roundId: number) =>
-      apiRequest<Blob>('GET', `/api/admin/tyrant/rounds/${roundId}/export`, { admin: true, blob: true }),
-    exportCsv: (roundId: number) =>
-      apiRequest<Blob>('GET', `/api/admin/tyrant/rounds/${roundId}/export.csv`, { admin: true, blob: true }),
+    /** Counts for the FILTERED set (same filters as the list). */
+    summary: (roundId: number, filters: FilterQuery = {}) =>
+      apiRequest<TyrantSummary>('GET', `/api/admin/tyrant/rounds/${roundId}/summary`, { admin: true, query: pickFilters(filters) }),
+    /** Exports follow the current filters. */
+    exportXlsx: (roundId: number, filters: FilterQuery = {}) =>
+      apiRequest<Blob>('GET', `/api/admin/tyrant/rounds/${roundId}/export`, { admin: true, blob: true, query: pickFilters(filters) }),
+    exportCsv: (roundId: number, filters: FilterQuery = {}) =>
+      apiRequest<Blob>('GET', `/api/admin/tyrant/rounds/${roundId}/export.csv`, { admin: true, blob: true, query: pickFilters(filters) }),
     deleteApplication: (id: number) => api.admin.deleteApplication(id),
   },
 };

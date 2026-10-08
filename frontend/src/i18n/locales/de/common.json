@@ -54,5 +54,11 @@
     "fireCrystal": "Feuerkristall",
     "preFc": "Vor FC",
     "level": "Stufe {{n}}"
+  },
+  "filters": {
+    "clear": "Filter löschen",
+    "remove": "Filter entfernen: {{label}}",
+    "more": "Weitere Filter",
+    "fewer": "Weniger Filter"
   }
 }

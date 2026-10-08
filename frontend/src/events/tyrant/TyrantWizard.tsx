@@ -11,7 +11,7 @@ import UseLastAnswers from '../../shared/UseLastAnswers';
 import { Field, INPUT_CLASS } from '../../shared/fields';
 import WizardSteps from '../ministry/WizardSteps';
 import FurnaceLevelSelect from '../../shared/FurnaceLevelSelect';
-import { toFurnaceCode } from '../../shared/furnace';
+import { toFcCode } from '../../shared/furnace';
 import {
   ROLES,
   Role,
@@ -56,6 +56,13 @@ interface FormState {
 }
 
 const blankTroops = (): Troops => parseTroops(null);
+
+/** Drops camp levels the Tyrant form doesn't offer (legacy pre-FC codes) so the player picks an FC level. */
+function fcOnlyTroops(tr: Troops): Troops {
+  const out = { ...tr };
+  for (const k of TROOP_TYPES) out[k] = { ...tr[k], furnace_level: toFcCode(tr[k].furnace_level) || null };
+  return out;
+}
 
 const EMPTY: FormState = {
   game_name: '',
@@ -110,13 +117,14 @@ const FIELD_LABELS: [RegExp, string][] = [
   [/^answers\.roles/, 'tyrant:step5.title'],
 ];
 
-function Select({ id, label, value, onChange, children, invalid }: {
+function Select({ id, label, value, onChange, children, invalid, required }: {
   id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
   children: ReactNode;
   invalid?: boolean;
+  required?: boolean;
 }) {
   return (
     <div>
@@ -127,6 +135,7 @@ function Select({ id, label, value, onChange, children, invalid }: {
         id={id}
         data-testid={id}
         value={value}
+        required={required}
         aria-invalid={invalid || undefined}
         onChange={(e) => onChange(e.target.value)}
         className={`${INPUT_CLASS} ${invalid ? 'border-danger' : 'border-theme-border'}`}
@@ -235,9 +244,11 @@ export default function TyrantWizard() {
           game_name: prof?.game_name ?? '',
           alliance: (prof?.alliance ?? '').toUpperCase().slice(0, 3),
           discord_id: prof?.discord_id ?? '',
-          furnace_level: toFurnaceCode(prof?.furnace_level),
+          // Tyrant offers FC1-FC10 only (owner rule p2d): a saved pre-FC furnace / camp shows as unselected
+          // and must be re-picked (the wizard requires them).
+          furnace_level: toFcCode(prof?.furnace_level),
           power_m: powerToMillions(prof?.power),
-          troops: parseTroops(prof?.troops),
+          troops: fcOnlyTroops(parseTroops(prof?.troops)),
         };
         setStep(1);
         setFid(theFid);
@@ -319,10 +330,18 @@ export default function TyrantWizard() {
       if (!form.alliance.trim()) return fail('profile.alliance', 'profile:allianceRequired');
     }
     if (s === 3) {
+      if (!form.furnace_level) return fail('profile.furnace_level', 'tyrant:errors.furnaceRequired');
       const p = form.power_m.trim();
       if (p && !(Number.isFinite(Number(p)) && Number(p) >= 0)) return fail('profile.power', 'tyrant:errors.power');
       const g = form.gem_spend.trim();
       if (g && !/^\d{1,10}$/.test(g)) return fail('answers.gem_spend', 'tyrant:errors.gems');
+    }
+    if (s === 4) {
+      // camp level AND tier are required for all three troop types (owner rule p2d); any combination is fine
+      for (const k of TROOP_TYPES) {
+        if (!form.troops[k].furnace_level) return fail(`profile.troops.${k}.furnace_level`, 'tyrant:errors.campRequired');
+        if (form.troops[k].tier == null) return fail(`profile.troops.${k}.tier`, 'tyrant:errors.campRequired');
+      }
     }
     setError('');
     setInvalidField(null);
@@ -347,7 +366,7 @@ export default function TyrantWizard() {
 
   const submit = async () => {
     if (!round) return;
-    for (const s of [1, 3]) {
+    for (const s of [1, 3, 4]) {
       if (!validateStep(s)) return setStep(s);
     }
     setBusy(true);
@@ -712,6 +731,8 @@ export default function TyrantWizard() {
             <FurnaceLevelSelect
               id="furnace-level"
               label={t('tyrant:step3.furnaceLevel')}
+              fcOnly
+              required
               value={form.furnace_level}
               invalid={invalidField === 'profile.furnace_level'}
               onChange={(code) => set({ furnace_level: code })}
@@ -751,6 +772,9 @@ export default function TyrantWizard() {
         {step === 4 && (
           <div data-testid="wizard-step-4">
             {stepHeader(4)}
+            <p className="mb-4 p-3 rounded-lg bg-accent/10 border border-accent/30 text-sm text-theme-text" data-testid="camp-hint">
+              {t('tyrant:step4.campHint')}
+            </p>
             <div className="space-y-4">
               {TROOP_TYPES.map((kind) => {
                 const { furnace_level, tier } = form.troops[kind];
@@ -761,7 +785,9 @@ export default function TyrantWizard() {
                     <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3 sm:gap-4">
                       <FurnaceLevelSelect
                         id={`troop-${kind}-furnace`}
-                        label={t('tyrant:step4.fcLevel')}
+                        label={t(`tyrant:step4.camp.${kind}`)}
+                        fcOnly
+                        required
                         emptyLabel="—"
                         value={furnace_level ?? ''}
                         invalid={invalidField === `profile.troops.${kind}.furnace_level`}
@@ -770,6 +796,7 @@ export default function TyrantWizard() {
                       <Select
                         id={`troop-${kind}-tier`}
                         label={t('tyrant:step4.tLevel')}
+                        required
                         value={tier != null ? String(tier) : ''}
                         invalid={invalidField === `profile.troops.${kind}.tier` || invalidField === `profile.troops.${kind}`}
                         onChange={(v) => setTroop(kind, 'tier', v)}

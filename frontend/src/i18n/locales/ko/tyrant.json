@@ -62,12 +62,17 @@
   },
   "step4": {
     "title": "병종 레벨",
-    "desc": "각 병종의 용광로와 T레벨을 선택하세요",
+    "desc": "병종별 막사 레벨과 T레벨을 선택하세요",
     "infantry": "🛡 보병",
     "lancer": "🐴 창병",
     "marksman": "🏹 궁수",
-    "fcLevel": "용광로 레벨",
-    "tLevel": "T-레벨"
+    "tLevel": "T-레벨",
+    "camp": {
+      "infantry": "보병 막사 (FC 레벨)",
+      "lancer": "창병 막사 (FC 레벨)",
+      "marksman": "궁수 막사 (FC 레벨)"
+    },
+    "campHint": "막사는 용광로보다 낮을 수 있습니다: 막사 레벨을 선택하세요"
   },
   "step5": {
     "title": "희망 역할",
@@ -87,7 +92,9 @@
   },
   "errors": {
     "power": "전투력은 숫자(백만 단위)로 입력하세요. 예: 410",
-    "gems": "보석 사용량은 정수로 입력하세요. 예: 10000"
+    "gems": "보석 사용량은 정수로 입력하세요. 예: 10000",
+    "furnaceRequired": "용광로 레벨을 선택하세요 (FC1-FC10)",
+    "campRequired": "모든 병종의 막사 레벨과 T레벨을 선택하세요"
   },
   "admin": {
     "adminSubtitle": "서리 용 폭군: 신청, 통계, 내보내기",
@@ -96,13 +103,12 @@
       "total": "전체 플레이어",
       "openingRush": "오프닝 러시",
       "discordVc": "디스코드 음성",
-      "alliances": "연맹",
-      "gems": "예상 보석"
+      "alliances": "연맹"
     },
     "byWindow": "시간대별 플레이어 (UTC)",
     "byRole": "희망 역할",
     "byAlliance": "연맹",
-    "byTroop": "병종 티어",
+    "byTroop": "병종: 막사 레벨과 T레벨",
     "none": "없음",
     "search": "이름, FID, 디스코드 검색...",
     "allianceFilter": "연맹",
@@ -118,7 +124,8 @@
       "gems": "보석",
       "windows": "시간대 (UTC)",
       "vc": "음성",
-      "submitted": "제출"
+      "submitted": "제출",
+      "strength": "전력"
     },
     "troopShort": {
       "infantry": "보병",
@@ -141,6 +148,68 @@
       "save": "시간대 저장",
       "saved": "설정이 저장되었습니다",
       "error": "저장하지 못했습니다. 시간을 확인하세요 (종료가 시작보다 뒤)."
+    },
+    "chipHint": "숫자를 누르면 필터가 적용되고, 다시 누르면 해제됩니다.",
+    "campRow": "막사 레벨",
+    "tierRow": "T레벨",
+    "troopName": {
+      "all": "세 병종 모두",
+      "infantry": "보병",
+      "lancer": "창병",
+      "marksman": "궁수"
+    },
+    "ofRound": "이번 라운드 {{total}}명 중",
+    "showingOf": "{{total}}명 중 {{n}}명",
+    "noMatches": "필터와 일치하는 신청이 없습니다",
+    "exportFiltered": "내보내기에는 필터된 플레이어만 포함됩니다.",
+    "filter": {
+      "search": "검색",
+      "windows": "시간대 (UTC)",
+      "anyWindow": "모든 시간대",
+      "troop": "병종",
+      "campAtLeast": "최소 막사 레벨",
+      "anyCamp": "모든 막사",
+      "tier": "T레벨",
+      "anyTier": "모든 T레벨",
+      "tier10": "T10 이상",
+      "tier11": "T11만",
+      "any": "전체",
+      "yes": "예",
+      "no": "아니요",
+      "minPower": "전투력 최소 (M)",
+      "maxPower": "전투력 최대 (M)",
+      "minGems": "보석 최소",
+      "maxGems": "보석 최대",
+      "anyRole": "모든 역할",
+      "rolesMode": "역할 일치 방식",
+      "rolesAny": "하나라도",
+      "rolesAll": "모두",
+      "anyTime": "전체 기간",
+      "last24h": "최근 24시간",
+      "from": "제출 시작일",
+      "to": "제출 종료일",
+      "selected": "{{n}}개 선택"
+    },
+    "pill": {
+      "search": "검색: {{v}}",
+      "alliance": "연맹: {{v}}",
+      "minCamp": "{{troop}}: 막사 ≥ {{v}}",
+      "minTier": "{{troop}}: T레벨 ≥ {{v}}",
+      "camp": "{{troop}} 막사: {{v}}",
+      "tier": "{{troop}} T레벨: {{v}}",
+      "window": "시간대 {{v}}",
+      "furnace": "용광로 ≥ {{v}}",
+      "minPower": "전투력 ≥ {{v}}M",
+      "maxPower": "전투력 ≤ {{v}}M",
+      "minGems": "보석 ≥ {{v}}",
+      "maxGems": "보석 ≤ {{v}}",
+      "vcYes": "Discord VC: 예",
+      "vcNo": "Discord VC: 아니요",
+      "roleAny": "역할: {{v}}",
+      "roleAll": "역할 (모두): {{v}}",
+      "from": "{{v}}부터",
+      "to": "{{v}}까지",
+      "days": "최근 {{n}}일"
     }
   }
 }

@@ -57,7 +57,7 @@ export default function TyrantAdminGuide() {
         </Section>
 
         <Section icon={Filter} title={t('guide:tyrantAdmin.filtersTitle')}>
-          {list('filters1', 'filters2', 'filters3', 'filters4')}
+          {list('filters1', 'filters2', 'filters5', 'filters3', 'filters6', 'filters4')}
         </Section>
 
         <Section icon={FileSpreadsheet} title={t('guide:tyrantAdmin.exportTitle')}>

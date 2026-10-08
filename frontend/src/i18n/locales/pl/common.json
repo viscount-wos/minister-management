@@ -54,5 +54,11 @@
     "fireCrystal": "Kryształ Ognia",
     "preFc": "Przed FC",
     "level": "Poz. {{n}}"
+  },
+  "filters": {
+    "clear": "Wyczyść filtry",
+    "remove": "Usuń filtr: {{label}}",
+    "more": "Więcej filtrów",
+    "fewer": "Mniej filtrów"
   }
 }

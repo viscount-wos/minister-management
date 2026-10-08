@@ -12,7 +12,8 @@ import { Field } from '../../shared/fields';
 import TimezoneSelector from '../../shared/TimezoneSelector';
 import { useTimezone } from '../../shared/TimezoneContext';
 import { toFurnaceCode } from '../../shared/furnace';
-import { formatTimeInTimezone } from '../../shared/timezone';
+import { getTimezoneAbbr } from '../../shared/timezone';
+import TimeWithUtc from '../../shared/TimeWithUtc';
 import {
   AnswersForm,
   CRYSTAL_FIELDS,
@@ -567,7 +568,9 @@ export default function ApplicationWizard() {
               </div>
               <div className="bg-dark-bg p-4 sm:p-6 rounded-lg border border-theme-border" data-testid="review-times">
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                  <h3 className="font-semibold text-lg text-accent">{t('ministry:form.timePreferences')}</h3>
+                  <h3 className="font-semibold text-lg text-accent" data-testid="review-times-heading">
+                    {t('ministry:form.step2Title')} <bdi dir="ltr">({getTimezoneAbbr(timezone)})</bdi>
+                  </h3>
                   <TimezoneSelector value={timezone} onChange={handleTimezone} label={t('common:header.timezone')} />
                 </div>
                 {DAY_TYPES.map((d) => {
@@ -578,8 +581,7 @@ export default function ApplicationWizard() {
                       <div className="flex flex-wrap gap-2">
                         {slots.map((time) => (
                           <span key={time} className="px-3 py-1 bg-accent/20 text-accent rounded-full text-sm font-medium" data-slot={time}>
-                            {formatTimeInTimezone(time, timezone)}
-                            {timezone !== 'UTC' && <span className="opacity-60 ms-1 text-xs">({time} UTC)</span>}
+                            <TimeWithUtc utc={time} timezone={timezone} />
                           </span>
                         ))}
                         {slots.length === 0 && <span className="text-theme-dim text-sm">{t('ministry:form.noTimeSelected')}</span>}

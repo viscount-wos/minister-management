@@ -54,5 +54,11 @@
     "fireCrystal": "불의 수정",
     "preFc": "FC 이전",
     "level": "Lv. {{n}}"
+  },
+  "filters": {
+    "clear": "필터 지우기",
+    "remove": "필터 제거: {{label}}",
+    "more": "필터 더 보기",
+    "fewer": "필터 접기"
   }
 }

@@ -54,5 +54,11 @@
     "fireCrystal": "Cristal de Fuego",
     "preFc": "Pre-FC",
     "level": "Nv. {{n}}"
+  },
+  "filters": {
+    "clear": "Quitar filtros",
+    "remove": "Quitar filtro: {{label}}",
+    "more": "Más filtros",
+    "fewer": "Menos filtros"
   }
 }

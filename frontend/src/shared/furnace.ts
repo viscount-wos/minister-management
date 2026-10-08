@@ -20,3 +20,12 @@ export function furnaceOrdinal(code: string | null | undefined): number {
 export function toFurnaceCode(v: unknown): string {
   return isFurnaceCode(v) ? v : '';
 }
+
+export function isFcCode(v: unknown): v is string {
+  return typeof v === 'string' && FC_LEVELS.includes(v);
+}
+
+/** Stored value -> form value for FC-only forms (Frost Dragon Tyrant): pre-FC / blank / invalid -> ''. */
+export function toFcCode(v: unknown): string {
+  return isFcCode(v) ? v : '';
+}

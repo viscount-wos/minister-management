@@ -62,12 +62,17 @@
   },
   "step4": {
     "title": "Niveaux des troupes",
-    "desc": "Choisissez la fournaise et le niveau T de chaque type de troupe",
+    "desc": "Choisissez le niveau du CAMP de chaque troupe et son niveau T",
     "infantry": "🛡 Infanterie",
     "lancer": "🐴 Lanciers",
     "marksman": "🏹 Tireurs",
-    "fcLevel": "Niveau de fournaise",
-    "tLevel": "Niveau T"
+    "tLevel": "Niveau T",
+    "camp": {
+      "infantry": "Camp d'infanterie (niveau FC)",
+      "lancer": "Camp des lanciers (niveau FC)",
+      "marksman": "Camp des tireurs (niveau FC)"
+    },
+    "campHint": "Les camps peuvent être plus bas que votre fournaise : choisissez le niveau du camp"
   },
   "step5": {
     "title": "Rôles souhaités",
@@ -87,7 +92,9 @@
   },
   "errors": {
     "power": "La puissance doit être un nombre (en millions), ex. 410",
-    "gems": "La dépense en gemmes doit être un nombre entier, ex. 10000"
+    "gems": "La dépense en gemmes doit être un nombre entier, ex. 10000",
+    "furnaceRequired": "Choisissez le niveau de votre fournaise (FC1-FC10)",
+    "campRequired": "Choisissez le niveau de camp et le niveau T de chaque type de troupe"
   },
   "admin": {
     "adminSubtitle": "Tyran Dragon de Givre : inscriptions, stats et exports",
@@ -96,13 +103,12 @@
       "total": "Joueurs",
       "openingRush": "Assaut d'ouverture",
       "discordVc": "Vocal Discord",
-      "alliances": "Alliances",
-      "gems": "Gemmes estimées"
+      "alliances": "Alliances"
     },
     "byWindow": "Joueurs par créneau (UTC)",
     "byRole": "Rôles souhaités",
     "byAlliance": "Alliances",
-    "byTroop": "Niveaux de troupes",
+    "byTroop": "Troupes : niveaux de camp et niveaux T",
     "none": "aucun",
     "search": "Chercher nom, FID ou Discord...",
     "allianceFilter": "Alliance",
@@ -118,7 +124,8 @@
       "gems": "Gemmes",
       "windows": "Créneaux (UTC)",
       "vc": "Vocal",
-      "submitted": "Envoyé"
+      "submitted": "Envoyé",
+      "strength": "Force"
     },
     "troopShort": {
       "infantry": "Inf",
@@ -141,6 +148,68 @@
       "save": "Enregistrer les créneaux",
       "saved": "Réglages enregistrés",
       "error": "Impossible d'enregistrer. Vérifiez les heures (fin après début)."
+    },
+    "chipHint": "Touchez un nombre pour filtrer ; touchez-le à nouveau pour retirer le filtre.",
+    "campRow": "Niveau du camp",
+    "tierRow": "Niveau T",
+    "troopName": {
+      "all": "Les trois",
+      "infantry": "Infanterie",
+      "lancer": "Lanciers",
+      "marksman": "Tireurs"
+    },
+    "ofRound": "sur {{total}} dans cette manche",
+    "showingOf": "{{n}} joueurs sur {{total}}",
+    "noMatches": "Aucune inscription ne correspond à ces filtres",
+    "exportFiltered": "Les exports ne contiennent que les joueurs filtrés.",
+    "filter": {
+      "search": "Rechercher",
+      "windows": "Créneaux (UTC)",
+      "anyWindow": "N'importe quel créneau",
+      "troop": "Type de troupe",
+      "campAtLeast": "Camp au moins",
+      "anyCamp": "N'importe quel camp",
+      "tier": "Niveau T",
+      "anyTier": "N'importe quel niveau T",
+      "tier10": "T10 ou mieux",
+      "tier11": "T11 uniquement",
+      "any": "Tous",
+      "yes": "Oui",
+      "no": "Non",
+      "minPower": "Puissance dès (M)",
+      "maxPower": "Puissance jusqu'à (M)",
+      "minGems": "Gemmes dès",
+      "maxGems": "Gemmes jusqu'à",
+      "anyRole": "N'importe quel rôle",
+      "rolesMode": "Correspondance des rôles",
+      "rolesAny": "L'un d'eux",
+      "rolesAll": "Tous",
+      "anyTime": "N'importe quand",
+      "last24h": "Dernières 24 heures",
+      "from": "Envoyé à partir du",
+      "to": "Envoyé jusqu'au",
+      "selected": "{{n}} sélectionnés"
+    },
+    "pill": {
+      "search": "Recherche : {{v}}",
+      "alliance": "Alliance : {{v}}",
+      "minCamp": "{{troop}} : camp ≥ {{v}}",
+      "minTier": "{{troop}} : niveau T ≥ {{v}}",
+      "camp": "Camp {{troop}} : {{v}}",
+      "tier": "Niveau T {{troop}} : {{v}}",
+      "window": "Créneau {{v}}",
+      "furnace": "Fournaise ≥ {{v}}",
+      "minPower": "Puissance ≥ {{v}}M",
+      "maxPower": "Puissance ≤ {{v}}M",
+      "minGems": "Gemmes ≥ {{v}}",
+      "maxGems": "Gemmes ≤ {{v}}",
+      "vcYes": "Discord VC : oui",
+      "vcNo": "Discord VC : non",
+      "roleAny": "Rôle : {{v}}",
+      "roleAll": "Rôle (tous) : {{v}}",
+      "from": "Depuis le {{v}}",
+      "to": "Jusqu'au {{v}}",
+      "days": "{{n}} derniers jours"
     }
   }
 }

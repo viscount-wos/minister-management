@@ -54,5 +54,11 @@
     "fireCrystal": "Fire Crystal",
     "preFc": "Pre-FC",
     "level": "Lv. {{n}}"
+  },
+  "filters": {
+    "clear": "Clear filters",
+    "remove": "Remove filter: {{label}}",
+    "more": "More filters",
+    "fewer": "Fewer filters"
   }
 }

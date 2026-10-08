@@ -133,18 +133,18 @@
     "closingBody": "Fija una hora de cierre en la pestaña Configuración (o al iniciar una ronda). Después, los jugadores nuevos no pueden inscribirse, pero quienes ya lo hicieron pueden seguir editando su inscripción. Pulsa Borrar para quitar el plazo.",
     "statsTitle": "Estadísticas",
     "statsBody": "La parte superior de la pestaña Jugadores resume la ronda:",
-    "stats1": "Tarjetas: total de jugadores, jugadores disponibles para el ataque inicial, Discord VC, número de alianzas y gasto estimado de gemas.",
-    "stats2": "Desgloses: jugadores por franja horaria, roles deseados, alianzas y niveles de tropa.",
-    "stats3": "Elegir una alianza en el filtro limita las estadísticas a esa alianza.",
+    "stats1": "Tarjetas: total de jugadores (y \"de N\" al filtrar), jugadores disponibles para la apertura, Discord VC y número de alianzas.",
+    "stats2": "Tropas: para cada tipo de tropa, los recuentos por nivel de campamento (FC10 ... FC1, valores antiguos pre-FC tal cual, ninguno) y por nivel T (T11 ... T8, ninguno). Debajo: jugadores por franja, roles deseados y alianzas.",
+    "stats3": "Cada recuento es un botón: tócalo para filtrar (tócalo otra vez para quitarlo). Todas las estadísticas se recalculan para los jugadores filtrados.",
     "filtersTitle": "Búsqueda, filtros y orden",
     "filters1": "Busca por nombre en el juego, FID o ID de Discord.",
-    "filters2": "Filtra por alianza o por nivel mínimo de horno (FC5 muestra FC5 y superiores).",
+    "filters2": "La barra de filtros: alianza (varias), franjas o \"Apertura\", tipo de tropa (o las tres) con \"campamento mínimo\" y nivel T (T10 o superior / solo T11). \"Más filtros\" añade horno, poder, gemas, Discord VC, roles (alguno o todos) y fecha de envío.",
     "filters3": "Haz clic en el encabezado de una columna para ordenar; vuelve a hacer clic para invertir el orden.",
     "filters4": "Las rondas grandes se dividen en páginas: usa Anterior y Siguiente.",
     "exportTitle": "Exportación",
     "exportBody": "Descarga las inscripciones de la ronda seleccionada:",
     "export1": "Exportar CSV: una fila por jugador, para hojas de cálculo o bots.",
-    "export2": "Exportar Excel: una hoja con formato y una hoja Resumen con las estadísticas. Las exportaciones usan el perfil actual de cada jugador (nombre, alianza, horno, tropas).",
+    "export2": "Exportar Excel: una hoja con formato y una hoja Resumen con las estadísticas. Las exportaciones usan el perfil actual de cada jugador (nombre, alianza, horno, niveles de campamento y T) e incluyen solo los jugadores que cumplen los filtros actuales.",
     "deleteTitle": "Eliminar una inscripción",
     "deleteBody": "Usa el botón de eliminar de una fila para quitar una inscripción duplicada o de prueba (se pide confirmación). Solo la quita de esta ronda; el perfil del jugador se conserva. Las inscripciones de rondas pasadas no se pueden eliminar.",
     "workflowTitle": "Flujo recomendado",
@@ -153,6 +153,8 @@
     "workflow3": "Comparte el enlace de inscripción en el chat del estado.",
     "workflow4": "Sigue las estadísticas a medida que llegan inscripciones; elimina duplicados y pruebas.",
     "workflow5": "Tras la hora de cierre, filtra y ordena para planificar los rallies y exporta a CSV o Excel.",
-    "workflow6": "Antes del siguiente evento del Tirano, inicia una nueva ronda: esta queda visible como historial."
+    "workflow6": "Antes del siguiente evento del Tirano, inicia una nueva ronda: esta queda visible como historial.",
+    "filters5": "Los filtros se combinan (deben cumplirse todos). Cada filtro activo aparece como una etiqueta: tócala para quitarla, o \"Quitar filtros\" para quitarlos todos. Los filtros van en la dirección de la página, así que puedes guardar o compartir una vista filtrada.",
+    "filters6": "Fuerza (ordenable) clasifica a los que se unen: para cada tipo de tropa, el número FC del campamento más el nivel T, sumados (campamentos FC10 con tropas T11 en todo = 63)."
   }
 }

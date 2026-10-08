@@ -133,18 +133,18 @@
     "closingBody": "Set a closing time on the Settings tab (or when you start a round). After it, new players cannot sign up, but players who already did can still edit their sign-up. Press Clear to remove the deadline.",
     "statsTitle": "Stats",
     "statsBody": "The top of the Players tab sums up the round:",
-    "stats1": "Cards: total players, players available for the opening rush, Discord VC, number of alliances and the estimated gem spend.",
-    "stats2": "Breakdowns: players per time window, roles wanted, alliances and troop tiers.",
-    "stats3": "Choosing an alliance in the filter narrows the stats to that alliance.",
+    "stats1": "Cards: total players (and \"of N\" when filtered), players available for the opening rush, Discord VC and number of alliances.",
+    "stats2": "Troops: for each troop type the camp level counts (FC10 ... FC1, old pre-FC values as stored, none) and the tier counts (T11 ... T8, none). Below: players per time window, roles wanted and alliances.",
+    "stats3": "Every count is a button: tap it to filter by it (tap again to remove). All stats are recalculated for the filtered players.",
     "filtersTitle": "Search, filters and sorting",
     "filters1": "Search by in-game name, FID or Discord ID.",
-    "filters2": "Filter by alliance, or by minimum furnace level (FC5 shows FC5 and above).",
+    "filters2": "The filter bar: alliance (several allowed), time windows or \"Opening rush\", troop type (or all three) with \"camp at least\" and tier (T10 or better / T11 only). \"More filters\" adds furnace, power, gems, Discord VC, roles (any or all) and submitted date.",
     "filters3": "Click a column header to sort; click it again to reverse the order.",
     "filters4": "Big rounds are split into pages: use Previous and Next.",
     "exportTitle": "Exports",
     "exportBody": "Download the sign-ups of the selected round:",
     "export1": "Export CSV: one row per player, for spreadsheets or bots.",
-    "export2": "Export Excel: a formatted sheet plus a Summary sheet with the stats. Exports use each player's current profile (name, alliance, furnace, troops).",
+    "export2": "Export Excel: a formatted sheet plus a Summary sheet with the stats. Exports use each player's current profile (name, alliance, furnace, camp levels and tiers) and include only the players that match the current filters.",
     "deleteTitle": "Deleting a sign-up",
     "deleteBody": "Use the delete button on a row to remove a duplicate or test sign-up (you are asked to confirm). It removes the sign-up from this round only; the player profile is kept. Sign-ups in past rounds cannot be deleted.",
     "workflowTitle": "Recommended workflow",
@@ -153,6 +153,8 @@
     "workflow3": "Share the sign-up link in state chat.",
     "workflow4": "Watch the stats as sign-ups arrive; remove duplicates and test entries.",
     "workflow5": "After the closing time, filter and sort to plan rallies, then export to CSV or Excel.",
-    "workflow6": "Before the next Tyrant event, start a new round: this one stays viewable as history."
+    "workflow6": "Before the next Tyrant event, start a new round: this one stays viewable as history.",
+    "filters5": "Filters combine (all must match). Each active filter shows as a pill: tap a pill to remove it, or \"Clear filters\" to remove all. The filters are in the page address, so you can bookmark or share a filtered view.",
+    "filters6": "Strength (sortable) ranks joiners: for each troop type the camp FC number plus the tier, added up (FC10 camps with T11 troops everywhere = 63)."
   }
 }

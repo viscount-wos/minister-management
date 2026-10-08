@@ -62,12 +62,17 @@
   },
   "step4": {
     "title": "兵种等级",
-    "desc": "为每个兵种选择熔炉和T等级",
+    "desc": "为每个兵种选择兵营等级和T等级",
     "infantry": "🛡 步兵",
     "lancer": "🐴 骑兵",
     "marksman": "🏹 射手",
-    "fcLevel": "熔炉等级",
-    "tLevel": "T等级"
+    "tLevel": "T等级",
+    "camp": {
+      "infantry": "步兵营（FC等级）",
+      "lancer": "骑兵营（FC等级）",
+      "marksman": "射手营（FC等级）"
+    },
+    "campHint": "兵营等级可能低于熔炉：请选择兵营的等级"
   },
   "step5": {
     "title": "希望担任的角色",
@@ -87,7 +92,9 @@
   },
   "errors": {
     "power": "战力必须是数字（百万），例如 410",
-    "gems": "宝石消耗必须是整数，例如 10000"
+    "gems": "宝石消耗必须是整数，例如 10000",
+    "furnaceRequired": "请选择熔炉等级（FC1-FC10）",
+    "campRequired": "请为每个兵种选择兵营等级和T等级"
   },
   "admin": {
     "adminSubtitle": "霜龙暴君：报名、统计和导出",
@@ -96,13 +103,12 @@
       "total": "玩家总数",
       "openingRush": "开场冲锋",
       "discordVc": "Discord语音",
-      "alliances": "联盟",
-      "gems": "预计宝石"
+      "alliances": "联盟"
     },
     "byWindow": "各时间段玩家（UTC）",
     "byRole": "希望担任的角色",
     "byAlliance": "联盟",
-    "byTroop": "兵种等级",
+    "byTroop": "兵种：兵营等级和T等级",
     "none": "无",
     "search": "搜索昵称、FID或Discord...",
     "allianceFilter": "联盟",
@@ -118,7 +124,8 @@
       "gems": "宝石",
       "windows": "时间段（UTC）",
       "vc": "语音",
-      "submitted": "提交时间"
+      "submitted": "提交时间",
+      "strength": "实力"
     },
     "troopShort": {
       "infantry": "步",
@@ -141,6 +148,68 @@
       "save": "保存时间段",
       "saved": "设置已保存",
       "error": "无法保存。请检查时间（结束晚于开始）。"
+    },
+    "chipHint": "点击数字即可按其筛选；再次点击取消筛选。",
+    "campRow": "兵营等级",
+    "tierRow": "T等级",
+    "troopName": {
+      "all": "三个兵种",
+      "infantry": "步兵",
+      "lancer": "骑兵",
+      "marksman": "射手"
+    },
+    "ofRound": "本轮共 {{total}} 人",
+    "showingOf": "{{n}} / {{total}} 名玩家",
+    "noMatches": "没有符合这些筛选条件的报名",
+    "exportFiltered": "导出仅包含筛选后的玩家。",
+    "filter": {
+      "search": "搜索",
+      "windows": "时段（UTC）",
+      "anyWindow": "任意时段",
+      "troop": "兵种",
+      "campAtLeast": "兵营至少",
+      "anyCamp": "任意兵营",
+      "tier": "T等级",
+      "anyTier": "任意T等级",
+      "tier10": "T10及以上",
+      "tier11": "仅T11",
+      "any": "全部",
+      "yes": "是",
+      "no": "否",
+      "minPower": "战力不低于（百万）",
+      "maxPower": "战力不高于（百万）",
+      "minGems": "宝石不低于",
+      "maxGems": "宝石不高于",
+      "anyRole": "任意角色",
+      "rolesMode": "角色匹配",
+      "rolesAny": "任一",
+      "rolesAll": "全部",
+      "anyTime": "任意时间",
+      "last24h": "最近24小时",
+      "from": "提交起始日",
+      "to": "提交截止日",
+      "selected": "已选 {{n}} 项"
+    },
+    "pill": {
+      "search": "搜索：{{v}}",
+      "alliance": "联盟：{{v}}",
+      "minCamp": "{{troop}}：兵营 ≥ {{v}}",
+      "minTier": "{{troop}}：T等级 ≥ {{v}}",
+      "camp": "{{troop}}兵营：{{v}}",
+      "tier": "{{troop}} T等级：{{v}}",
+      "window": "时段 {{v}}",
+      "furnace": "熔炉 ≥ {{v}}",
+      "minPower": "战力 ≥ {{v}}M",
+      "maxPower": "战力 ≤ {{v}}M",
+      "minGems": "宝石 ≥ {{v}}",
+      "maxGems": "宝石 ≤ {{v}}",
+      "vcYes": "Discord 语音：是",
+      "vcNo": "Discord 语音：否",
+      "roleAny": "角色：{{v}}",
+      "roleAll": "角色（全部）：{{v}}",
+      "from": "自 {{v}} 起",
+      "to": "至 {{v}}",
+      "days": "最近 {{n}} 天"
     }
   }
 }

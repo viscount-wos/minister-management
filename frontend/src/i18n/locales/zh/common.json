@@ -54,5 +54,11 @@
     "fireCrystal": "火晶",
     "preFc": "火晶之前",
     "level": "{{n}} 级"
+  },
+  "filters": {
+    "clear": "清除筛选",
+    "remove": "移除筛选：{{label}}",
+    "more": "更多筛选",
+    "fewer": "收起筛选"
   }
 }

@@ -62,12 +62,17 @@
   },
   "step4": {
     "title": "Birlik Seviyeleri",
-    "desc": "Her birlik türü için fırın ve T-seviyesini seçin",
+    "desc": "Her birlik türünün KAMP seviyesini ve T-seviyesini seçin",
     "infantry": "🛡 Piyade",
     "lancer": "🐴 Mızrakçı",
     "marksman": "🏹 Nişancı",
-    "fcLevel": "Fırın Seviyesi",
-    "tLevel": "T-Seviye"
+    "tLevel": "T-Seviye",
+    "camp": {
+      "infantry": "Piyade Kampı (FC seviyesi)",
+      "lancer": "Mızrakçı Kampı (FC seviyesi)",
+      "marksman": "Nişancı Kampı (FC seviyesi)"
+    },
+    "campHint": "Kamplar fırınınızdan düşük olabilir: kampın seviyesini seçin"
   },
   "step5": {
     "title": "İstenen Roller",
@@ -87,7 +92,9 @@
   },
   "errors": {
     "power": "Güç bir sayı olmalı (milyon), ör. 410",
-    "gems": "Elmas harcaması tam sayı olmalı, ör. 10000"
+    "gems": "Elmas harcaması tam sayı olmalı, ör. 10000",
+    "furnaceRequired": "Fırın seviyenizi seçin (FC1-FC10)",
+    "campRequired": "Her birlik türü için kamp seviyesini ve T-seviyesini seçin"
   },
   "admin": {
     "adminSubtitle": "Ayaz Ejderhası Tiranı: kayıtlar, istatistikler ve dışa aktarma",
@@ -96,13 +103,12 @@
       "total": "Toplam Oyuncu",
       "openingRush": "Açılış Hücumu",
       "discordVc": "Discord Ses",
-      "alliances": "İttifaklar",
-      "gems": "Tahmini elmas"
+      "alliances": "İttifaklar"
     },
     "byWindow": "Zaman dilimine göre oyuncular (UTC)",
     "byRole": "İstenen roller",
     "byAlliance": "İttifaklar",
-    "byTroop": "Birlik seviyeleri",
+    "byTroop": "Birlikler: kamp ve T-seviyeleri",
     "none": "yok",
     "search": "İsim, FID veya Discord ara...",
     "allianceFilter": "İttifak",
@@ -118,7 +124,8 @@
       "gems": "Elmas",
       "windows": "Dilimler (UTC)",
       "vc": "Ses",
-      "submitted": "Gönderim"
+      "submitted": "Gönderim",
+      "strength": "Güç"
     },
     "troopShort": {
       "infantry": "Piy",
@@ -141,6 +148,68 @@
       "save": "Dilimleri kaydet",
       "saved": "Ayarlar kaydedildi",
       "error": "Kaydedilemedi. Saatleri kontrol et (bitiş başlangıçtan sonra)."
+    },
+    "chipHint": "Filtrelemek için bir sayıya dokunun; kaldırmak için tekrar dokunun.",
+    "campRow": "Kamp seviyesi",
+    "tierRow": "T-seviyesi",
+    "troopName": {
+      "all": "Üçü de",
+      "infantry": "Piyade",
+      "lancer": "Mızrakçı",
+      "marksman": "Nişancı"
+    },
+    "ofRound": "bu turdaki {{total}} kişiden",
+    "showingOf": "{{total}} oyuncudan {{n}}",
+    "noMatches": "Bu filtrelere uyan kayıt yok",
+    "exportFiltered": "Dışa aktarımlar yalnızca filtrelenen oyuncuları içerir.",
+    "filter": {
+      "search": "Ara",
+      "windows": "Zaman aralıkları (UTC)",
+      "anyWindow": "Herhangi bir aralık",
+      "troop": "Birlik türü",
+      "campAtLeast": "En az kamp",
+      "anyCamp": "Herhangi bir kamp",
+      "tier": "T-seviyesi",
+      "anyTier": "Herhangi bir T-seviyesi",
+      "tier10": "T10 veya üstü",
+      "tier11": "Yalnızca T11",
+      "any": "Hepsi",
+      "yes": "Evet",
+      "no": "Hayır",
+      "minPower": "Güç en az (M)",
+      "maxPower": "Güç en çok (M)",
+      "minGems": "Mücevher en az",
+      "maxGems": "Mücevher en çok",
+      "anyRole": "Herhangi bir rol",
+      "rolesMode": "Rol eşleşmesi",
+      "rolesAny": "Herhangi biri",
+      "rolesAll": "Hepsi",
+      "anyTime": "Her zaman",
+      "last24h": "Son 24 saat",
+      "from": "Gönderim başlangıcı",
+      "to": "Gönderim bitişi",
+      "selected": "{{n}} seçili"
+    },
+    "pill": {
+      "search": "Arama: {{v}}",
+      "alliance": "İttifak: {{v}}",
+      "minCamp": "{{troop}}: kamp ≥ {{v}}",
+      "minTier": "{{troop}}: T-seviyesi ≥ {{v}}",
+      "camp": "{{troop}} kampı: {{v}}",
+      "tier": "{{troop}} T-seviyesi: {{v}}",
+      "window": "Aralık {{v}}",
+      "furnace": "Fırın ≥ {{v}}",
+      "minPower": "Güç ≥ {{v}}M",
+      "maxPower": "Güç ≤ {{v}}M",
+      "minGems": "Mücevher ≥ {{v}}",
+      "maxGems": "Mücevher ≤ {{v}}",
+      "vcYes": "Discord VC: evet",
+      "vcNo": "Discord VC: hayır",
+      "roleAny": "Rol: {{v}}",
+      "roleAll": "Rol (hepsi): {{v}}",
+      "from": "{{v}} tarihinden",
+      "to": "{{v}} tarihine kadar",
+      "days": "Son {{n}} gün"
     }
   }
 }

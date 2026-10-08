@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { PlayerAssignments } from '../../shared/api';
 import { activeDaysInOrder } from '../../shared/days';
-import { formatTimeInTimezone } from '../../shared/timezone';
+import TimeWithUtc from '../../shared/TimeWithUtc';
 
 // The player's own ministry assignments in the current round (v1.4's "Your
 // Current Assignments" box). The API lists PUBLISHED days only (v1.4 also showed
@@ -36,9 +36,11 @@ export default function MyAssignments({
                 <div className="flex flex-wrap gap-2">
                   {slots.map((s, i) => (
                     <span key={i} className="px-3 py-1 bg-success/20 text-success rounded-full text-sm font-medium">
-                      {formatTimeInTimezone(s.time_slot, timezone)}
-                      {s.time_slot === '23:50+' && <span className="text-xs opacity-60 ms-1">(+1d)</span>}
-                      {timezone !== 'UTC' && <span className="opacity-60 ms-1 text-xs">({s.time_slot} UTC)</span>}
+                      <TimeWithUtc
+                        utc={s.time_slot}
+                        timezone={timezone}
+                        extra={s.time_slot === '23:50+' && <span className="text-xs opacity-60 ms-1"><bdi dir="ltr">(+1d)</bdi></span>}
+                      />
                     </span>
                   ))}
                 </div>

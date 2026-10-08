@@ -62,12 +62,17 @@
   },
   "step4": {
     "title": "Truppenstufen",
-    "desc": "Wähle Ofen- und T-Stufe für jeden Truppentyp",
+    "desc": "Wähle für jeden Truppentyp die Stufe des LAGERS und die T-Stufe",
     "infantry": "🛡 Infanterie",
     "lancer": "🐴 Lanzenträger",
     "marksman": "🏹 Schützen",
-    "fcLevel": "Ofenstufe",
-    "tLevel": "T-Stufe"
+    "tLevel": "T-Stufe",
+    "camp": {
+      "infantry": "Infanterielager (FC-Stufe)",
+      "lancer": "Lanzenträgerlager (FC-Stufe)",
+      "marksman": "Schützenlager (FC-Stufe)"
+    },
+    "campHint": "Lager können niedriger sein als dein Ofen: wähle die Stufe des Lagers"
   },
   "step5": {
     "title": "Gewünschte Rollen",
@@ -87,7 +92,9 @@
   },
   "errors": {
     "power": "Macht muss eine Zahl sein (in Millionen), z. B. 410",
-    "gems": "Edelsteinausgabe muss eine ganze Zahl sein, z. B. 10000"
+    "gems": "Edelsteinausgabe muss eine ganze Zahl sein, z. B. 10000",
+    "furnaceRequired": "Wähle deine Ofenstufe (FC1-FC10)",
+    "campRequired": "Wähle Lagerstufe und T-Stufe für jeden Truppentyp"
   },
   "admin": {
     "adminSubtitle": "Frostdrachen-Tyrann: Anmeldungen, Statistik und Export",
@@ -96,13 +103,12 @@
       "total": "Spieler",
       "openingRush": "Eröffnungsansturm",
       "discordVc": "Discord-Sprache",
-      "alliances": "Allianzen",
-      "gems": "Geschätzte Edelsteine"
+      "alliances": "Allianzen"
     },
     "byWindow": "Spieler pro Zeitfenster (UTC)",
     "byRole": "Gewünschte Rollen",
     "byAlliance": "Allianzen",
-    "byTroop": "Truppenstufen",
+    "byTroop": "Truppen: Lagerstufen und T-Stufen",
     "none": "keine",
     "search": "Name, FID oder Discord suchen...",
     "allianceFilter": "Allianz",
@@ -118,7 +124,8 @@
       "gems": "Edelsteine",
       "windows": "Zeitfenster (UTC)",
       "vc": "Sprache",
-      "submitted": "Gesendet"
+      "submitted": "Gesendet",
+      "strength": "Stärke"
     },
     "troopShort": {
       "infantry": "Inf",
@@ -141,6 +148,68 @@
       "save": "Zeitfenster speichern",
       "saved": "Einstellungen gespeichert",
       "error": "Speichern fehlgeschlagen. Prüfe die Zeiten (Ende nach Beginn)."
+    },
+    "chipHint": "Tippe auf eine Zahl, um danach zu filtern; erneut tippen entfernt den Filter.",
+    "campRow": "Lagerstufe",
+    "tierRow": "T-Stufe",
+    "troopName": {
+      "all": "Alle drei",
+      "infantry": "Infanterie",
+      "lancer": "Lanzenträger",
+      "marksman": "Schützen"
+    },
+    "ofRound": "von {{total}} in dieser Runde",
+    "showingOf": "{{n}} von {{total}} Spielern",
+    "noMatches": "Keine Anmeldung passt zu diesen Filtern",
+    "exportFiltered": "Exporte enthalten nur die gefilterten Spieler.",
+    "filter": {
+      "search": "Suche",
+      "windows": "Zeitfenster (UTC)",
+      "anyWindow": "Beliebiges Zeitfenster",
+      "troop": "Truppentyp",
+      "campAtLeast": "Lager mindestens",
+      "anyCamp": "Beliebiges Lager",
+      "tier": "T-Stufe",
+      "anyTier": "Beliebige T-Stufe",
+      "tier10": "T10 oder besser",
+      "tier11": "Nur T11",
+      "any": "Alle",
+      "yes": "Ja",
+      "no": "Nein",
+      "minPower": "Macht ab (Mio.)",
+      "maxPower": "Macht bis (Mio.)",
+      "minGems": "Edelsteine ab",
+      "maxGems": "Edelsteine bis",
+      "anyRole": "Beliebige Rolle",
+      "rolesMode": "Rollen abgleichen",
+      "rolesAny": "Eine davon",
+      "rolesAll": "Alle davon",
+      "anyTime": "Jederzeit",
+      "last24h": "Letzte 24 Stunden",
+      "from": "Gesendet ab",
+      "to": "Gesendet bis",
+      "selected": "{{n}} ausgewählt"
+    },
+    "pill": {
+      "search": "Suche: {{v}}",
+      "alliance": "Allianz: {{v}}",
+      "minCamp": "{{troop}}: Lager ≥ {{v}}",
+      "minTier": "{{troop}}: T-Stufe ≥ {{v}}",
+      "camp": "{{troop}}-Lager: {{v}}",
+      "tier": "{{troop}}-T-Stufe: {{v}}",
+      "window": "Zeitfenster {{v}}",
+      "furnace": "Ofen ≥ {{v}}",
+      "minPower": "Macht ≥ {{v}} Mio.",
+      "maxPower": "Macht ≤ {{v}} Mio.",
+      "minGems": "Edelsteine ≥ {{v}}",
+      "maxGems": "Edelsteine ≤ {{v}}",
+      "vcYes": "Discord-VC: ja",
+      "vcNo": "Discord-VC: nein",
+      "roleAny": "Rolle: {{v}}",
+      "roleAll": "Rolle (alle): {{v}}",
+      "from": "Ab {{v}}",
+      "to": "Bis {{v}}",
+      "days": "Letzte {{n}} Tage"
     }
   }
 }

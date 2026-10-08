@@ -62,12 +62,17 @@
   },
   "step4": {
     "title": "Troop Levels",
-    "desc": "Select furnace and T-level for each troop type",
+    "desc": "Pick each troop CAMP's level and your troop tier",
     "infantry": "🛡 Infantry",
     "lancer": "🐴 Lancer",
     "marksman": "🏹 Marksman",
-    "fcLevel": "Furnace Level",
-    "tLevel": "T-Level"
+    "tLevel": "T-Level",
+    "camp": {
+      "infantry": "Infantry Camp (FC level)",
+      "lancer": "Lancer Camp (FC level)",
+      "marksman": "Marksman Camp (FC level)"
+    },
+    "campHint": "Camps can be lower than your furnace: pick your camp's level"
   },
   "step5": {
     "title": "Roles Wanted",
@@ -87,7 +92,9 @@
   },
   "errors": {
     "power": "Power must be a number (in millions), e.g. 410",
-    "gems": "Gem spend must be a whole number, e.g. 10000"
+    "gems": "Gem spend must be a whole number, e.g. 10000",
+    "furnaceRequired": "Pick your furnace level (FC1-FC10)",
+    "campRequired": "Pick the camp level and the tier for every troop type"
   },
   "admin": {
     "adminSubtitle": "Frost Dragon Tyrant: sign-ups, stats and exports",
@@ -96,13 +103,12 @@
       "total": "Total Players",
       "openingRush": "Opening Rush",
       "discordVc": "Discord VC",
-      "alliances": "Alliances",
-      "gems": "Est. gem spend"
+      "alliances": "Alliances"
     },
     "byWindow": "Players per time window (UTC)",
     "byRole": "Roles wanted",
     "byAlliance": "Alliances",
-    "byTroop": "Troop tiers",
+    "byTroop": "Troops: camp levels and tiers",
     "none": "none",
     "search": "Search name, FID or Discord...",
     "allianceFilter": "Alliance",
@@ -118,12 +124,13 @@
       "gems": "Gems",
       "windows": "Windows (UTC)",
       "vc": "VC",
-      "submitted": "Submitted"
+      "submitted": "Submitted",
+      "strength": "Strength"
     },
     "troopShort": {
       "infantry": "Inf",
       "lancer": "Lan",
-      "marksman": "Mar"
+      "marksman": "Mks"
     },
     "confirmDelete": "Remove {{name}}'s sign-up from this round? The player profile is kept.",
     "noPlayers": "No sign-ups yet",
@@ -141,6 +148,68 @@
       "save": "Save windows",
       "saved": "Settings saved",
       "error": "Could not save the settings. Check the times (end after start)."
+    },
+    "chipHint": "Tap a count to filter by it; tap it again to remove the filter.",
+    "campRow": "Camp level",
+    "tierRow": "Tier",
+    "troopName": {
+      "all": "All three",
+      "infantry": "Infantry",
+      "lancer": "Lancer",
+      "marksman": "Marksman"
+    },
+    "ofRound": "of {{total}} in this round",
+    "showingOf": "{{n}} of {{total}} players",
+    "noMatches": "No sign-ups match these filters",
+    "exportFiltered": "Exports include only the filtered players.",
+    "filter": {
+      "search": "Search",
+      "windows": "Windows (UTC)",
+      "anyWindow": "Any window",
+      "troop": "Troop type",
+      "campAtLeast": "Camp at least",
+      "anyCamp": "Any camp",
+      "tier": "Tier",
+      "anyTier": "Any tier",
+      "tier10": "T10 or better",
+      "tier11": "T11 only",
+      "any": "Any",
+      "yes": "Yes",
+      "no": "No",
+      "minPower": "Power from (M)",
+      "maxPower": "Power up to (M)",
+      "minGems": "Gems from",
+      "maxGems": "Gems up to",
+      "anyRole": "Any role",
+      "rolesMode": "Match roles",
+      "rolesAny": "Any of them",
+      "rolesAll": "All of them",
+      "anyTime": "Any time",
+      "last24h": "Last 24 hours",
+      "from": "Submitted from",
+      "to": "Submitted until",
+      "selected": "{{n}} selected"
+    },
+    "pill": {
+      "search": "Search: {{v}}",
+      "alliance": "Alliance: {{v}}",
+      "minCamp": "{{troop}}: camp ≥ {{v}}",
+      "minTier": "{{troop}}: tier ≥ {{v}}",
+      "camp": "{{troop}} camp: {{v}}",
+      "tier": "{{troop}} tier: {{v}}",
+      "window": "Window {{v}}",
+      "furnace": "Furnace ≥ {{v}}",
+      "minPower": "Power ≥ {{v}}M",
+      "maxPower": "Power ≤ {{v}}M",
+      "minGems": "Gems ≥ {{v}}",
+      "maxGems": "Gems ≤ {{v}}",
+      "vcYes": "Discord VC: yes",
+      "vcNo": "Discord VC: no",
+      "roleAny": "Role: {{v}}",
+      "roleAll": "Role (all): {{v}}",
+      "from": "From {{v}}",
+      "to": "Until {{v}}",
+      "days": "Last {{n}} days"
     }
   }
 }

@@ -706,8 +706,15 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
                         picked={picked?.player.player_id === player.player_id}
                       />
                       {player.preferred_times && player.preferred_times.length > 0 && (
-                        <div className="text-xs text-theme-dim mt-1 ps-2">
-                          {t('admin:wants')}: {player.preferred_times.join(', ')}
+                        <div className="text-xs text-theme-dim mt-1 ps-2" data-testid={`wants-${player.fid}`}>
+                          {/* shown in the admin's display timezone, like the slots (were raw UTC hours) */}
+                          {t('admin:wants')}:{' '}
+                          {player.preferred_times.map((time, i) => (
+                            <span key={time} data-utc={time}>
+                              {i > 0 && ', '}
+                              <bdi dir="ltr">{getSlotDisplayTime(time, timezone)}</bdi>
+                            </span>
+                          ))}
                         </div>
                       )}
                     </div>

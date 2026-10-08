@@ -133,18 +133,18 @@
     "closingBody": "Ayarlar sekmesinde (veya tur başlatırken) bir kapanış saati belirleyin. Sonrasında yeni oyuncular kayıt olamaz, ama kayıtlı oyuncular kayıtlarını düzenlemeye devam edebilir. Son tarihi kaldırmak için Temizle'ye basın.",
     "statsTitle": "İstatistikler",
     "statsBody": "Oyuncular sekmesinin üst kısmı turu özetler:",
-    "stats1": "Kartlar: toplam oyuncu, açılış hücumuna katılabilen oyuncular, Discord VC, ittifak sayısı ve tahmini mücevher harcaması.",
-    "stats2": "Dağılımlar: zaman dilimi başına oyuncu, istenen roller, ittifaklar ve birlik seviyeleri.",
-    "stats3": "Filtrede bir ittifak seçmek istatistikleri o ittifakla sınırlar.",
+    "stats1": "Kartlar: toplam oyuncu (filtreliyken \"N kişiden\"), açılış hücumuna katılabilen oyuncular, Discord VC ve ittifak sayısı.",
+    "stats2": "Birlikler: her birlik türü için kamp seviyesi sayıları (FC10 ... FC1, eski FC öncesi değerler kayıtlı haliyle, yok) ve T-seviyesi sayıları (T11 ... T8, yok). Altında: zaman aralığı başına oyuncular, istenen roller ve ittifaklar.",
+    "stats3": "Her sayı bir düğmedir: filtrelemek için dokunun (kaldırmak için tekrar). Tüm istatistikler filtrelenen oyunculara göre yeniden hesaplanır.",
     "filtersTitle": "Arama, filtreler ve sıralama",
     "filters1": "Oyun içi ad, FID veya Discord ID ile arayın.",
-    "filters2": "İttifaka veya en düşük fırın seviyesine göre filtreleyin (FC5, FC5 ve üstünü gösterir).",
+    "filters2": "Filtre çubuğu: ittifak (birden fazla), zaman aralıkları veya \"Açılış Hücumu\", birlik türü (veya üçü de) ile \"en az kamp\" ve T-seviyesi (T10 veya üstü / yalnızca T11). \"Daha fazla filtre\" fırın, güç, mücevher, Discord VC, roller (herhangi biri veya hepsi) ve gönderim tarihini ekler.",
     "filters3": "Sıralamak için bir sütun başlığına tıklayın; sırayı ters çevirmek için yeniden tıklayın.",
     "filters4": "Büyük turlar sayfalara bölünür: Önceki ve Sonraki'yi kullanın.",
     "exportTitle": "Dışa aktarma",
     "exportBody": "Seçili turun kayıtlarını indirin:",
     "export1": "CSV dışa aktar: oyuncu başına bir satır, tablolar veya botlar için.",
-    "export2": "Excel dışa aktar: biçimlendirilmiş bir sayfa ve istatistiklerin olduğu bir Özet sayfası. Dışa aktarmalar her oyuncunun güncel profilini (ad, ittifak, fırın, birlikler) kullanır.",
+    "export2": "Excel'e aktar: biçimlendirilmiş bir sayfa ve istatistiklerin olduğu bir Özet sayfası. Dışa aktarımlar her oyuncunun güncel profilini (ad, ittifak, fırın, kamp ve T-seviyeleri) kullanır ve yalnızca mevcut filtrelere uyan oyuncuları içerir.",
     "deleteTitle": "Kaydı silme",
     "deleteBody": "Yinelenen veya deneme kaydını kaldırmak için satırdaki silme düğmesini kullanın (onay istenir). Kayıt yalnızca bu turdan kaldırılır; oyuncu profili korunur. Geçmiş turlardaki kayıtlar silinemez.",
     "workflowTitle": "Önerilen iş akışı",
@@ -153,6 +153,8 @@
     "workflow3": "Kayıt bağlantısını eyalet sohbetinde paylaşın.",
     "workflow4": "Kayıtlar geldikçe istatistikleri izleyin; yinelenen ve deneme kayıtlarını kaldırın.",
     "workflow5": "Kapanıştan sonra filtreleyip sıralayarak toplanmaları planlayın, sonra CSV veya Excel'e aktarın.",
-    "workflow6": "Sonraki Tiran etkinliğinden önce yeni bir tur başlatın: bu tur geçmiş olarak görüntülenebilir kalır."
+    "workflow6": "Sonraki Tiran etkinliğinden önce yeni bir tur başlatın: bu tur geçmiş olarak görüntülenebilir kalır.",
+    "filters5": "Filtreler birleşir (hepsi eşleşmelidir). Her etkin filtre bir etiket olarak görünür: kaldırmak için dokunun veya hepsini kaldırmak için \"Filtreleri temizle\". Filtreler sayfa adresindedir, böylece filtreli görünümü kaydedebilir veya paylaşabilirsiniz.",
+    "filters6": "Güç (sıralanabilir) katılımcıları sıralar: her birlik türü için kampın FC sayısı artı T-seviyesi, toplanır (her yerde FC10 kamp ve T11 = 63)."
   }
 }
