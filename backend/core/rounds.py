@@ -5,7 +5,7 @@ import sqlite3
 from flask import Blueprint, jsonify
 
 from core.auth import require_admin
-from core.db import get_db
+from core.db import begin_immediate, get_db
 from core.errors import conflict, get_json_body, not_found, validation_error
 from core.validation import is_past, now_iso, validate_closing_time, validate_str
 from events import all_events, get_event
@@ -151,6 +151,7 @@ def admin_get_round(round_id):
 @require_admin
 def admin_update_round(round_id):
     db = get_db()
+    begin_immediate(db)  # read-modify-write of name/status/settings under the write lock (L2)
     row = require_round(round_id)
     spec = get_event(row['event'])
     data = get_json_body()
