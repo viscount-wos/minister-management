@@ -115,7 +115,9 @@ export default function AddToRally({ round, anchor, players, onClose, onDone, on
     // the default (or first) choice of each step gets the focus
     const p = panel.current;
     if (!p) return;
-    const el = p.querySelector<HTMLElement>('[data-autofocus="true"]:not(:disabled)') ?? p.querySelector<HTMLElement>('button:not(:disabled), a[href]');
+    const el = p.querySelector<HTMLElement>('[data-autofocus="true"]:not(:disabled)') ??
+      p.querySelector<HTMLElement>('[data-choice]:not(:disabled)') ??
+      p.querySelector<HTMLElement>('button:not(:disabled)');
     el?.focus();
   }, [doc, leaderId]);
 
@@ -282,7 +284,7 @@ export default function AddToRally({ round, anchor, players, onClose, onDone, on
             <div className="text-sm text-theme-dim space-y-2 py-1" data-testid="add-no-leaders">
               <p>{t('svs:players.add.noLeaders')}</p>
               {onOpenPlan && (
-                <button type="button" onClick={onOpenPlan} data-testid="add-open-plan" className="inline-flex items-center gap-2 min-h-[44px] px-3 rounded-lg bg-accent/20 text-accent font-medium hover:bg-accent/30">
+                <button type="button" onClick={onOpenPlan} data-testid="add-open-plan" data-choice className="inline-flex items-center gap-2 min-h-[44px] px-3 rounded-lg bg-accent/20 text-accent font-medium hover:bg-accent/30">
                   <Swords className="w-4 h-4" aria-hidden="true" />
                   {t('svs:players.add.openPlan')}
                 </button>
@@ -306,7 +308,7 @@ export default function AddToRally({ round, anchor, players, onClose, onDone, on
                           type="button"
                           disabled={full || busy}
                           onClick={() => setLeaderId(l.id)}
-                          data-testid={`rally-leader-${l.id}`}
+                          data-testid={`rally-leader-${l.id}`} data-choice
                           className={BTN}
                         >
                           <Users className="w-4 h-4 shrink-0 text-theme-dim" aria-hidden="true" />
@@ -337,7 +339,7 @@ export default function AddToRally({ round, anchor, players, onClose, onDone, on
                     key={g.id}
                     type="button"
                     disabled={busy}
-                    data-testid={`make-leader-${g.id}`}
+                    data-testid={`make-leader-${g.id}`} data-choice
                     onClick={() => run({ body: { fid: single.fid, as: 'leader', group_id: g.id, move }, applies: groupExists(g.id) })}
                     className={BTN}
                   >
@@ -352,7 +354,7 @@ export default function AddToRally({ round, anchor, players, onClose, onDone, on
                     key={g.id}
                     type="button"
                     disabled={busy || isHere}
-                    data-testid={`to-group-${g.id}`}
+                    data-testid={`to-group-${g.id}`} data-choice
                     onClick={() => run({ body: { ...fidsBody, as: 'group', group_id: g.id, ...(bulk ? {} : { move }) }, applies: groupExists(g.id) })}
                     className={BTN}
                   >
