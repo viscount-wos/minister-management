@@ -19,6 +19,7 @@ import {
   answersToForm,
   blankAnswers,
   formToAnswers,
+  toNumber,
 } from './answers';
 import { SlotGrid, ToleranceNote, useDayTypeLabel } from './TimeSlotPicker';
 import MyAssignments from './MyAssignments';
@@ -431,10 +432,6 @@ export default function ApplicationWizard() {
       onChange={(e) => setAnswers((a) => ({ ...a, [key]: e.target.value }))}
     />
   );
-  const shownNumber = (v: string, integer = false) => {
-    const n = integer ? parseInt(v, 10) : parseFloat(v);
-    return Number.isFinite(n) && n >= 0 ? n : 0;
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -576,13 +573,13 @@ export default function ApplicationWizard() {
                   </ReviewItem>
                   {SPEEDUP_FIELDS.map(({ key, label }) => (
                     <ReviewItem key={key} label={t(label)} testId={`review-${key}`}>
-                      {shownNumber(answers[key])} {t('ministry:form.days')}
+                      {toNumber(answers[key])} {t('ministry:form.days')}
                     </ReviewItem>
                   ))}
                   {showCrystals &&
                     CRYSTAL_FIELDS.map(({ key, label }) => (
                       <ReviewItem key={key} label={t(label)} testId={`review-${key}`}>
-                        {shownNumber(answers[key], true)}
+                        {toNumber(answers[key])}
                       </ReviewItem>
                     ))}
                   {profile.furnace_level.trim() !== '' && (

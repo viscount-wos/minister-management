@@ -41,8 +41,9 @@ export type ErrorCode =
   | 'NETWORK_ERROR'
   | string;
 
+/** Public profiles have no id/created_at/updated_at; admin profile endpoints add them. */
 export interface Profile {
-  id: number;
+  id?: number;
   fid: string;
   game_name: string;
   alliance: string | null;
@@ -53,8 +54,8 @@ export interface Profile {
   avatar_image: string | null;
   stove_lv: number | null;
   stove_lv_content: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /** Writable profile fields (partial on update). */
@@ -121,21 +122,23 @@ export interface MinistryAnswers {
   time_slots_by_day: TimeSlotsByDay;
 }
 
+/** Public application: {fid, event, round_id, round_name, answers, updated_at} (no internal ids). */
 export interface Application<A = MinistryAnswers> {
-  id: number;
-  round_id: number;
-  player_id: number;
   fid: string;
+  round_id: number;
   answers: A;
-  profile_snapshot: Partial<Profile>;
-  created_at: string;
-  updated_at: string;
+  updated_at?: string | null;
   event?: EventKey;
   round_name?: string | null;
 }
 
-/** Admin application list entry (ministry adds points). */
+/** Admin application list entry: the full shape (ids, snapshot, timestamps) + ministry points. */
 export interface AdminApplication extends Application {
+  id: number;
+  player_id: number;
+  profile_snapshot: Partial<Profile>;
+  created_at: string;
+  updated_at: string;
   profile: Profile;
   monday_points: number;
   research_points: number;

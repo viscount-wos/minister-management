@@ -58,8 +58,8 @@ export function answersToForm(a: Partial<MinistryAnswers> | null | undefined): A
   };
 }
 
-const toNumber = (v: string, integer = false) => {
-  const n = integer ? parseInt(v, 10) : parseFloat(v);
+export const toNumber = (v: string) => {
+  const n = parseFloat(v);
   return Number.isFinite(n) && n >= 0 ? n : 0;
 };
 
@@ -70,9 +70,11 @@ export function formToAnswers(f: AnswersForm): MinistryAnswers {
     research_speedups_days: toNumber(f.research_speedups_days),
     troop_training_speedups_days: toNumber(f.troop_training_speedups_days),
     general_speedups_days: toNumber(f.general_speedups_days),
-    fire_crystals: toNumber(f.fire_crystals, true),
-    refined_fire_crystals: toNumber(f.refined_fire_crystals, true),
-    fire_crystal_shards: toNumber(f.fire_crystal_shards, true),
+    // Not truncated: a fractional crystal count imported from v1.4 (e.g. 12.5) must be re-sent unchanged
+    // (the API keeps it); a NEW fraction is rejected by the API as a VALIDATION_ERROR on that field.
+    fire_crystals: toNumber(f.fire_crystals),
+    refined_fire_crystals: toNumber(f.refined_fire_crystals),
+    fire_crystal_shards: toNumber(f.fire_crystal_shards),
     time_slots_by_day: {
       construction: [...f.time_slots_by_day.construction].sort(),
       research: [...f.time_slots_by_day.research].sort(),
