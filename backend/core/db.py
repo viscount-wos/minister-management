@@ -597,12 +597,36 @@ def _migration_4(conn, ctx):
     return {'description': 'profiles.furnace_level as TEXT codes', 'converted': converted, 'nulled': nulled}
 
 
+# --------------------------------------------------------------------------
+# migration 5: SVS battle plans (one per svs round), v2.2.0
+# --------------------------------------------------------------------------
+
+def _migration_5(conn, ctx):
+    # plan = the validated JSON document (events/svs/plan.py); revision = optimistic-concurrency counter (a PUT must
+    # name the revision it edited, 409 PLAN_CONFLICT otherwise). share_token = the secret read-only link (128-bit,
+    # NULL = sharing off); share_token_hash (sha256 hex) is what the public route looks the plan up by.
+    conn.execute('''CREATE TABLE IF NOT EXISTS svs_plans (
+        round_id INTEGER PRIMARY KEY REFERENCES rounds(id) ON DELETE CASCADE,
+        plan TEXT NOT NULL DEFAULT '{}',
+        revision INTEGER NOT NULL DEFAULT 0,
+        share_token TEXT,
+        share_token_hash TEXT,
+        share_created_at TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    )''')
+    conn.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_svs_plans_share ON svs_plans(share_token_hash) '
+                 'WHERE share_token_hash IS NOT NULL')
+    return {'description': 'svs_plans (SVS battle planner)'}
+
+
 # (version, function). Append new migrations; never edit applied ones.
 MIGRATIONS = [
     (1, _migration_1),
     (2, _migration_2),
     (3, _migration_3),
     (4, _migration_4),
+    (5, _migration_5),
 ]
 LATEST_VERSION = MIGRATIONS[-1][0]
 

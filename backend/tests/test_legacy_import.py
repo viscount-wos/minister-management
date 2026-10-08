@@ -65,7 +65,7 @@ def test_migrate_cli_check_then_import_and_verify(tmp_path, capsys):
     assert open(p, 'rb').read() == before  # --check never writes
     assert migrate_cli.main(['--db', p]) == 0
     out = capsys.readouterr().out
-    assert 'counts match' in out and 'schema_version=4' in out
+    assert 'counts match' in out and 'schema_version=5' in out
     assert len(glob.glob(p + '.pre-v2-*.bak')) == 1
     assert migrate_cli.main(['--db', p]) == 0  # second run: no-op, still one backup
     assert len(glob.glob(p + '.pre-v2-*.bak')) == 1
@@ -113,7 +113,7 @@ def test_two_processes_migrating_at_once(tmp_path):
     assert c.execute('SELECT COUNT(*) FROM rounds').fetchone()[0] == 1
     assert c.execute('SELECT COUNT(*) FROM profiles').fetchone()[0] == \
         c.execute('SELECT COUNT(*) FROM legacy_players').fetchone()[0] > 1000
-    assert [r[0] for r in c.execute('SELECT version FROM schema_version ORDER BY version')] == [1, 2, 3, 4]
+    assert [r[0] for r in c.execute('SELECT version FROM schema_version ORDER BY version')] == [1, 2, 3, 4, 5]
     c.close()
     assert len(glob.glob(p + '.pre-v2-*.bak')) == 1 and not glob.glob(p + '*.partial')
 

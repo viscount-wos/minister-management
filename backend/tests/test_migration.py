@@ -173,7 +173,7 @@ def test_migration_preserves_everything(legacy_path):
         assert f'legacy_{t}' in tables
     assert 'players' not in tables and 'time_preferences' not in tables and 'assignments' not in tables
     assert conn.execute('SELECT COUNT(*) FROM legacy_players').fetchone()[0] == len(PLAYERS)
-    assert [tuple(r) for r in conn.execute('SELECT version FROM schema_version ORDER BY version')] == [(1,), (2,), (3,), (4,)]
+    assert [tuple(r) for r in conn.execute('SELECT version FROM schema_version ORDER BY version')] == [(1,), (2,), (3,), (4,), (5,)]
 
     # one open imported ministry round with the old global settings
     rounds = conn.execute('SELECT * FROM rounds').fetchall()

@@ -28,6 +28,9 @@ NO_STORE = 'no-store'
 
 _INLINE_SCRIPT_RE = re.compile(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>', re.S | re.I)
 
+# The SVS shared plan (page + API): token in the URL, so no-referrer + noindex (+ no-store for the API).
+SHARED_PLAN_PREFIXES = ('/svs/plan/', '/api/svs/plan/')
+
 PERMISSIONS_POLICY = 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()'
 
 
@@ -134,6 +137,12 @@ def init_app(app):
     @app.after_request
     def _harden(response):
         h = response.headers
+        path = request.path
+        shared_plan = path.startswith(SHARED_PLAN_PREFIXES)
+        if shared_plan:
+            # SVS shared battle plan (secret link): never indexed, never leaks the token in a Referer header.
+            h['Referrer-Policy'] = 'no-referrer'
+            h['X-Robots-Tag'] = 'noindex, nofollow, noarchive'
         h.setdefault('Content-Security-Policy', current_csp())
         h.setdefault('X-Content-Type-Options', 'nosniff')
         h.setdefault('X-Frame-Options', 'DENY')
@@ -143,11 +152,10 @@ def init_app(app):
         if production or request.is_secure or request.headers.get('X-Forwarded-Proto', '').lower() == 'https':
             h.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
 
-        path = request.path
         if path.startswith(ASSET_PREFIX) and response.status_code in (200, 304):
             h['Cache-Control'] = IMMUTABLE
         elif path.startswith('/api/') or path == '/health':
-            h['Cache-Control'] = NO_STORE if path.startswith('/api/admin') else NO_CACHE
+            h['Cache-Control'] = NO_STORE if path.startswith('/api/admin') or shared_plan else NO_CACHE
         elif 'Cache-Control' not in h or response.mimetype == 'text/html':
             h['Cache-Control'] = NO_CACHE
         return response
