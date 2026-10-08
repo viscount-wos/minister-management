@@ -495,3 +495,79 @@ Old routes (`/apply`, `/update`, etc.) redirect to the new ones.
 - **Round renaming** moved to the shared Event Management header ("Rename", every event, any round incl. closed ones)
   via `PATCH /api/admin/rounds/{ref}`; the ministry Settings tab's own round-name card was removed (one place only).
 
+## SVS sign-up (phase 4, p4/svs-signup, v2.2.0)
+Owner brief: `catalogue/SVS-battle-setup-brief.md`. Phase 1 = sign-up + foundations; the drag-and-drop battle
+planner it describes comes later.
+
+### Player wizard (`/svs/apply`, phone-first, `WizardChrome` like Tyrant)
+1. **Player**: FID (with "Where do I find my player ID?"), in-game name, alliance. Pre-filled from the shared
+   profile. The alliance is required ONLY when the profile has none (a new player); a known one may be changed.
+2. **Hours**: one big chip per battle hour, label = game time "HH:00 UTC" (LTR-isolated) with the player's local
+   time in small text underneath (from the browser zone). At least one. "I can do every hour" / clear.
+3. **Troops**: per infantry / lancer / marksman the CAMP level (`FurnaceLevelSelect fcOnly`, FC10..FC1) and the tier
+   as two big radio buttons **T11, T10** (never T8/T9 in SVS). All six required. Pre-filled from the shared profile;
+   a stored T8/T9 (e.g. from Frost Dragon Tyrant) shows unselected and must be chosen.
+4. **Role** (radio cards, required): "Call rallies" (`call`) or "Join rallies" (`join`); **Discord voice chat**
+   yes/no (required).
+5. **Review** + submit (Update when editing). NO gems, NO main furnace, NO power, NO Discord ID, no other roles.
+- Edit/resubmit by FID; closed round = Tyrant behaviour (new FIDs blocked after the closing time, existing sign-ups
+  stay editable; no round = "not open"). Rate limits apply (generic routes).
+
+### Round settings (decided: settings, because the owner is "not 100% sure" of the window)
+`battle_start` "HH:MM" UTC, default **11:00**, and `battle_hours` 1-24, default **5** → hours 11:00..15:00 (the
+battle ends at 16:00). Derived `hours` wrap past midnight. Copied by start-new-round. Changing them later keeps the
+hours players already chose (re-sent unchanged), but a new pick must be a current hour.
+
+### Shared troops with Frost Dragon Tyrant (the merge rule, `backend/core/troops.py`)
+Both events read and write the same per-FID `profile.troops` (`{type: {furnace_level = CAMP level, tier}}`).
+- **Per troop type and per field, a value SENT replaces the stored one; a blank/missing value never clears it;
+  types, fields and extra keys not sent stay as stored.** Used by SVS, Tyrant (since v2.2.0) and admin add/edit.
+- Why "replace" and not "keep the higher": the latest statement is the truth (camps and tiers only go up in-game, and
+  a downgrade typed by mistake is fixed by the player re-submitting). The "never downgrade Tyrant's richer data"
+  requirement is met because SVS can only ever send FC1-FC10 + T10/T11 (it can't write T8/T9, pre-FC camp codes,
+  power, gems or roles), and a blank never wipes a stored value: an SVS sign-up only touches what the player
+  actually picked, and an admin add with half the troops filled in never erases the rest.
+- An SVS player submit needs the MERGED troops complete (FC camp + T10/T11 ×3): a returning player with valid stored
+  troops need not re-send them; a stored T8/T9 or pre-FC camp must be replaced (400 names the field).
+- SVS ignores (never stores) `furnace_level`, `power`, `discord_id`, `timezone` from its form.
+
+### Admin (Event Management → SVS: Players / Settings / Heroes; desktop-first)
+- Headline stats: total, rally callers, joiners, Discord VC (for the filtered set; "of N" when filtered).
+- "Players per hour (UTC)" bars, then role and alliance bars (shared `shared/filters/Breakdowns.tsx`, extracted from
+  Tyrant), then per-troop camp-level chips and tier chips (T11, T10, none); every bar/chip toggles a URL filter.
+- Filter bar (`shared/filters` `useUrlFilters` + `FilterControls`): search, alliances, hours (attends ALL chosen),
+  role, troop + min camp + min tier; More: Discord VC, submitted from/to, last N days. Pills + Clear.
+- Table: name / FID / alliance, hours, role, VC, troop line "Inf FC10 T11 · Lan FC9 T10 · Mar …", Strength (the
+  Tyrant joiner-strength definition), submitted; sortable (incl. Strength); edit / delete; CSV + Excel exports
+  respect the filters (`*_filtered` file names).
+- Settings: battle start (UTC) + duration with a live preview of the hours, closing time. Admin guide in 9 languages.
+
+### Admin "Add player" (every event: Minister, Tyrant, SVS)
+- Button in each players view → `admin/AddPlayerDialog.tsx`: FID + Look up (a known profile pre-fills name /
+  alliance / troops), in-game name (required for a new FID), alliance, then the event's own fields, all optional:
+  Minister speedups/resources + day slots left empty; Tyrant windows, VC, troops (T8-T11), roles; SVS hours, role, VC,
+  troops (T10/T11).
+- Backend: `POST /api/admin/rounds/{ref}/applications` reuses the event's validation in ADMIN mode
+  (`EventSpec.validate_profile/answers(..., admin=True)`, `admin_required_profile_fields = ('game_name',)` for a new
+  profile): answers a player must give may be blank, anything given must be valid. 409 `APPLICATION_EXISTS` if the
+  FID already signed up in that round (the dialog says "edit that one instead"). Admin edits use the same lenient mode.
+
+### Hero library foundation (for the planner, later)
+- Data: `backend/gamedata/heroes.json` (version 1; 65 heroes: slug, name, troop, generation 1-17 or null for
+  rare/epic, rarity, image) + `frontend/public/heroes/<slug>.webp` (256 px), built reproducibly by
+  `scripts/heroes/build_heroes.py` from the hero-test scrape.
+- `GET /api/heroes?max_gen=N&troop=` (public); default max_gen = the global setting **State hero generation**
+  (`state_generation`, 1..17, default 17, core settings like `state_number`; edited in Event Management: Minister
+  Settings and the SVS Heroes tab). Rare/epic heroes (no generation) are always included, `has_generation: false`.
+- `shared/heroes/HeroCard.tsx`: big picture, name, troop icon, small "Gen N" (or the rarity), forwardRef + rest props
+  so the future dnd-kit picker can wrap it; `HeroCredit` (© Century Games) shown once on every page with heroes;
+  README "Credits". Admin "Heroes" tab = the filtered library by troop.
+
+### MCP
+`list_applications(event="svs", hours, role, vc, alliance, troop, min_camp, min_tier, svs_filters)`,
+`get_svs_summary`, `add_player(event, fid, profile?, answers?)`, `get_heroes(max_gen?, troop?)` (public),
+`set_state_generation(generation)` (admin). See docs/MCP.md.
+
+### Known gaps / accepted
+- No import of past SVS data; no per-hour capacity / planner yet (phase 2: the drag-and-drop battle planner).
+- Hero data is a one-off scrape (re-run the build script when new heroes ship; bump `version`).

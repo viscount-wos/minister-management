@@ -143,10 +143,9 @@ def test_heroes_library_and_generation_setting(client, admin):
 def test_hero_images_exist():
     import json
     import os
-    here = os.path.dirname(os.path.abspath(__file__))
-    repo = os.path.dirname(os.path.dirname(here))
-    doc = json.load(open(os.path.join(repo, 'backend', 'gamedata', 'heroes.json'), encoding='utf-8'))
-    public = os.path.join(repo, 'frontend', 'public')
+    backend = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    doc = json.load(open(os.path.join(backend, 'gamedata', 'heroes.json'), encoding='utf-8'))
+    public = os.path.join(os.path.dirname(backend), 'frontend', 'public')
     if not os.path.isdir(public):  # backend-only checkout (e.g. the 3.11 container copies backend/ alone)
         pytest.skip('frontend/public not present')
     for h in doc['heroes']:

@@ -118,7 +118,25 @@ applies across all addresses. A success clears that address. The client address 
 ```
 
 ### GET /api/settings/public
-`200 {"state_number": "2807"}` (`null` until an admin sets it; v1.4 defaulted to `"2694"`, the UI now hides its welcome line instead)
+`200 {"state_number": "2807", "state_generation": 17}` (`state_number` is `null` until an admin sets it; v1.4 defaulted
+to `"2694"`, the UI now hides its welcome line instead). `state_generation` (v2.2.0) = the state's hero generation,
+1..the newest generation in the hero library (17), default 17.
+
+### GET /api/heroes (v2.2.0)
+The hero library (foundation of the SVS planner). `?max_gen=1..17` (default: `state_generation`), `?troop=infantry|
+lancer|marksman` (optional). Bad values → 400 `VALIDATION_ERROR` (`field` = `max_gen` / `troop`).
+```json
+{"version": 1, "state_generation": 17, "max_gen": 8, "max_generation": 17,
+ "attribution": "Hero names and artwork (c) Century Games. ...", "total": 37,
+ "heroes": [{"slug": "smith", "name": "Smith", "troop": "infantry", "generation": null, "has_generation": false,
+             "rarity": "rare", "image": "/heroes/smith.webp"},
+            {"slug": "jeronimo", "name": "Jeronimo", "troop": "infantry", "generation": 1, "has_generation": true,
+             "rarity": "mythic", "image": "/heroes/jeronimo.webp"}, ...]}
+```
+Rare/epic heroes have no generation and are ALWAYS included (`has_generation: false`). Order: no-generation heroes
+first, then by generation. Data: `backend/gamedata/heroes.json` (versioned; built by `scripts/heroes/build_heroes.py`
+from the hero-test scrape); images are static SPA files `frontend/public/heroes/<slug>.webp` (256 px WebP).
+Hero names and art © Century Games: any page that shows heroes carries a credit line.
 
 ### GET /api/profile/{fid}
 ```json
@@ -220,8 +238,10 @@ No per-IP limit on public writes and no audit trail yet (possible later: rate li
 ## Admin endpoints
 
 ### Global settings
-- `GET /api/admin/settings` → `{"state_number": "2807"}`
-- `PUT /api/admin/settings` `{"state_number": "2807"}` → same shape
+- `GET /api/admin/settings` → `{"state_number": "2807", "state_generation": 17}`
+- `PUT /api/admin/settings` any of `{"state_number": "2807", "state_generation": 8}` → same shape. `state_generation`
+  is a whole number 1..17 (int or digit string); everything is validated before anything is written. MCP:
+  `set_state_generation`.
 
 ### Round references and closed rounds
 `{ref}` in `/api/admin/rounds/{ref}`, `/api/admin/rounds/{ref}/applications` and `/api/admin/rounds/{ref}/export` is a
@@ -253,8 +273,16 @@ Ministry round settings: `research_day` (`tuesday`|`friday`), `show_fire_crystal
 - `GET /api/admin/rounds/{ref}/applications?alliance=ABC` →
   `{"round_id": 3, "total": N, "applications": [application + "profile": {...current profile...} + ministry "monday_points", "research_points", "thursday_points", "research_day"]}`
   newest first. `alliance` is compared Unicode-case-insensitively.
+- `POST /api/admin/rounds/{ref}/applications` (v2.2.0, every event) **"Add player"**: body `{"fid", "profile"?: {...},
+  "answers"?: {...}}` → 201 the new application (admin shape: ids, profile, event decorations such as ministry points
+  or `joiner_strength`) + `"profile_created": bool`. `fid` required (a NEW profile needs a canonical digits-only FID
+  and `profile.game_name`; an existing profile needs nothing else). Uses the event's own validation in ADMIN mode:
+  answers a player must give (SVS hours/role/VC, SVS troop levels) may be blank; anything sent must be valid (SVS
+  tiers 10/11, tyrant window ids, ...). Profile troops merge (see SVS). No closing-time check; closed rounds → 409
+  `ROUND_CLOSED`. FID already signed up in that round → **409 `APPLICATION_EXISTS`** ("FID … already has a sign-up in
+  this round; edit that one instead"). `{ref}` = id or `current` + `?event=`. MCP: `add_player`.
 - `GET /api/admin/applications/{id}` → one, same shape.
-- `PUT /api/admin/applications/{id}` `{"profile"?: {...partial...}, "answers"?: {...partial, merged then validated...}}` → updated application. No closing-time check.
+- `PUT /api/admin/applications/{id}` `{"profile"?: {...partial...}, "answers"?: {...partial, merged then validated...}}` → updated application. No closing-time check. Validated in admin mode (SVS: blanks allowed).
 - `DELETE /api/admin/applications/{id}` → `{"deleted": true, "id": 12}`; also removes that player's assignments in the round. Profile kept.
 - `GET /api/admin/rounds/{id}/export` → xlsx (event-specific; ministry below).
 
@@ -375,6 +403,46 @@ Admin (`{ref}` = tyrant round id or `current`; a non-tyrant round id → 404):
   Power (M), Est. Max Gem Spend, `<Troop> Camp Level` / `<Troop> Tier` ×3 (Infantry, Lancer,
   Marksman), Joiner Strength, five role Yes/No columns, Language, Submitted/Updated At (UTC). Formula-safe.
 - Delete: `DELETE /api/admin/applications/{id}` (profile kept). Edit: `PUT /api/admin/applications/{id}`.
+
+## SVS (`svs`, v2.2.0)
+
+Player calls are the generic ones with `{event}` = `svs`.
+
+```json
+// GET /api/events/svs/current -> settings
+{"battle_start": "11:00", "battle_hours": 5, "hours": ["11:00", "12:00", "13:00", "14:00", "15:00"]}
+// PUT /api/events/svs/current/application/{fid}
+{"profile": {"game_name": "Sva", "alliance": "woo",
+             "troops": {"infantry": {"furnace_level": "FC10", "tier": 11}, "lancer": {"furnace_level": "FC9", "tier": 10},
+                        "marksman": {"furnace_level": "FC10", "tier": 11}}},
+ "answers": {"hours": ["12:00", "13:00"], "role": "join", "discord_vc": true, "language": "en"}}
+```
+- **Round settings**: `battle_start` "HH:MM" UTC (default "11:00"), `battle_hours` 1-24 (default 5); public settings
+  add the derived `hours` (start, start+1h, ... wrapping past midnight). Carried over by start-new-round. Other keys → 400.
+- **Answers** (player submit, all required): `hours` ⊆ the round's hours, at least one (returned in battle order);
+  `role` `call` (calls rallies) | `join` (joins rallies); `discord_vc` bool; `language` or null. Unknown key → 400.
+  An hour the admin has since removed (start/duration changed) is kept when re-sent unchanged; a new unknown hour → 400.
+  Admin create/edit: every answer may be blank (`hours: []`, `role: null`, `discord_vc: null`).
+- **Profile**: `game_name`; `alliance` required only when the shared profile has none (new player); `troops`: what is
+  SENT must be FC1-FC10 camps and tiers **10 or 11 only** (`T11`/`11`; T8/T9 → 400 naming e.g.
+  `profile.troops.infantry.tier`); it is MERGED into the shared profile, and a player submit then needs the merged
+  troops complete (FC camp + T10/T11 for all three types), so a returning player with valid stored troops may omit
+  them, while a stored T8/T9 or pre-FC camp (e.g. from Frost Dragon Tyrant) must be replaced. Ignored (dropped, never
+  stored through SVS): `furnace_level`, `power`, `discord_id`, `timezone`.
+- **Troop merge rule** (shared profile, `core/troops.py`; SVS and, since v2.2.0, Frost Dragon Tyrant): per troop type
+  and per field (camp level, tier) a value sent replaces the stored one; a blank/missing value never clears it; types,
+  fields and extra keys not sent stay as stored.
+- **Admin**: `GET /api/admin/svs/rounds/{ref}/applications?<filters>&sort=submitted|updated|name|alliance|fid|strength|hours
+  &dir=&limit=&offset=` → `{round_id, total, applications}` (current profile, `joiner_strength` as Tyrant, no furnace).
+  `GET .../summary?<filters>` → `{round_id, round_total, filters, total, rally_callers, joiners, discord_vc,
+  hours: [{hour, count}], roles: {call, join, none}, alliances, troop_tiers, camp_levels, alliance_options}`.
+  `GET .../export?<filters>` (xlsx: "SVS Sign-ups" + "Summary") and `.../export.csv?<filters>`: FID, In-Game Name,
+  Alliance, Role, one Yes/No column per hour (`11:00 UTC`), Discord VC, camp level + tier ×3, Joiner Strength,
+  Language, Submitted/Updated At. Also `GET /api/admin/rounds/{id}/export` (unfiltered xlsx).
+- **Filters** (one parser `events/svs/filters.py`, list + summary + exports + MCP; same keys in the admin URL; AND):
+  `q` (FID/name), `alliance` (comma list), `hours` (comma list: attends ALL), `role` call|join|none, `vc` yes|no|none,
+  `troop` + `min_camp` (FC code) + `min_tier` (10/11), exact `<type>_camp` / `<type>_tier` (chips; `none` = blank),
+  `submitted_from`/`submitted_to`, `days`. Bad values → 400 naming the parameter.
 
 ## v1.4 → v2 endpoint map (for the frontend rewire)
 

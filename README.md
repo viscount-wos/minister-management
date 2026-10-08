@@ -141,6 +141,18 @@ minister_management/
 - [User Guide](USER_GUIDE.md) - For players and ministers
 - [Project Summary](PROJECT_SUMMARY.md) - Technical overview
 
+## Events
+
+Minister (ministry appointments), Frost Dragon Tyrant, **SVS** (v2.2.0: battle hours, troop camp levels with T10/T11,
+call/join role, Discord voice chat; admin stats, filters and exports) and TAL (coming soon). Every event's admin can
+**add a player** who did not sign up. See `docs/SPEC.md`, `docs/API.md` and `docs/MCP.md`.
+
+## Credits
+
+- Whiteout Survival, its hero names and hero artwork are © Century Games. The hero portraits in
+  `frontend/public/heroes/` (served by `GET /api/heroes`) are used for identification in this fan-made, non-commercial
+  tool; every page that shows heroes carries a credit line. This project is not affiliated with Century Games.
+
 ## License
 
 Private - For Whiteout Survival State Management Only

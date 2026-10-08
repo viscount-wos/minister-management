@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { X, UserPlus, Search, AlertCircle } from 'lucide-react';
 import api, { ApiError, EventKey, Profile } from '../shared/api';
@@ -113,15 +114,18 @@ export default function AddPlayerDialog({ event, roundId, onClose, onAdded, chil
 
   const status = known == null || checkedFid !== fid.trim() ? null : known ? t('admin:addPlayer.known') : t('admin:addPlayer.newPlayer');
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+  // Portal to <body>: a transformed/animated ancestor would otherwise make `fixed` relative to it (the overlay then
+  // stops covering the page). items-start + my-auto centres short dialogs while a tall one (Tyrant) scrolls from its
+  // top instead of being clipped above the viewport.
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center p-2 sm:p-4 z-50 overflow-y-auto">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-player-title"
         data-testid="add-player-dialog"
         data-event={event}
-        className="bg-dark-card rounded-xl p-4 sm:p-6 max-w-2xl w-full my-4 border border-theme-border"
+        className="bg-dark-card rounded-xl p-4 sm:p-6 max-w-2xl w-full my-auto border border-theme-border"
       >
         <div className="flex items-center justify-between gap-3 mb-2">
           <h3 id="add-player-title" className="text-2xl font-bold text-accent">
@@ -229,6 +233,7 @@ export default function AddPlayerDialog({ event, roundId, onClose, onAdded, chil
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
