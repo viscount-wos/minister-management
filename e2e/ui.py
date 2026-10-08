@@ -109,8 +109,10 @@ def admin_guide_url(event: str) -> str:
 def admin_login(page: Page, base_url: str, password: str, event: str = 'ministry') -> None:
     """Log in through the UI (password found by its <label>) and land on `event`'s dashboard."""
     page.goto(base_url + ROUTES['home'])
-    # A still-valid token makes /admin skip straight to the dashboard: start logged out.
-    page.evaluate("localStorage.removeItem('adminToken'); localStorage.removeItem('adminRole')")
+    # A still-valid token makes /admin skip straight to the dashboard: start logged out. The password is
+    # found by its English label, and a language picked earlier in the test is remembered: forget it.
+    page.evaluate("localStorage.removeItem('adminToken'); localStorage.removeItem('adminRole');"
+                  " localStorage.removeItem('preferred_language')")
     page.goto(f"{base_url}{ROUTES['admin_login']}?event={event}")
     page.wait_for_load_state('networkidle')
     page.get_by_label(en('admin:password')).fill(password)
