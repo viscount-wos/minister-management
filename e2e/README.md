@@ -83,6 +83,17 @@ none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gi
 - no open round: home tile "Not open yet", ministry banner + disabled tile, apply page "not open"
   (9 languages + Arabic)
 
+`test_tyrant.py` (Frost Dragon Tyrant, in order, opens its own tyrant round)
+- home tile live ("Open") -> landing -> wizard; FID digits check; 6-step indicator
+- NEW in English through all 6 steps (step-1 checks, Select All, furnace dropdown order FC10..FC1, 30..1,
+  per-troop furnace + tier, roles, review with Edit per section); verified through the API (profile vs answers)
+- EDIT via FID (everything pre-filled, Update), "Not you? Use a different FID"
+- Arabic RTL wizard (step 1 on the right, Arabic strings, saved with language 'ar')
+- raw-key check in 9 languages on the landing page and every wizard step (titles change per language)
+- closing time: new FID -> closed card, existing FID -> edit with the note
+- admin: event switch, stats cards/breakdowns, search, alliance + furnace filters, sorting, CSV + Excel download,
+  windows editor + closing time, delete, 9 languages; Start new round -> NEW + Use my last answers -> saved
+
 ## Not covered
 
 Drag-and-drop between slots (the assignment save path is exercised through the lock toggle), JSON

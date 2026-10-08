@@ -226,6 +226,66 @@ Final shape is in docs/API.md. Where it differs from the sketch above:
   done|current|todo, aria-current), `wizard-step-N`, `wizard-step-title`, `wizard-back`, `wizard-next`,
   `wizard-submit` (data-mode), `slot-<day>-<HH:MM>`, `slot-grid-<day>`, `review-*`, `review-slots-<day>`.
 
+## Frost Dragon Tyrant (phase 2, p2/tyrant)
+Port of the live tyrantpoll app (`project_from_viscount/tyrant/tyrantpoll`, poll.html + admin.html) onto rounds +
+shared profiles. Event key `tyrant`; backend `events/tyrant/` (validation.py, logic.py, routes.py); frontend
+`events/tyrant/` (TyrantPage landing, TyrantWizard, admin/).
+
+### Profile vs round split (decided)
+- **PROFILE** (per FID, reused by ministry/SVS): `game_name`, `alliance` (required for tyrant, as tyrantpoll),
+  `discord_id` (NEW nullable column, migration 3, free text ≤64), `furnace_level` (code, see "Furnace levels"),
+  `power` (absolute integer; the wizard asks "Power in Millions" like tyrantpoll and multiplies by 10^6),
+  `troops` = `{infantry|lancer|marksman: {furnace_level: code|null, tier: 1-11|null}}`. The tyrant spec validates
+  `troops` strictly on tyrant submits (`EventSpec.validate_profile` hook, new); other events keep free-form JSON.
+  Rationale: these describe the account and change slowly; SVS needs the same data.
+- **ROUND answers** (per application): `availability` (window ids of the round), `discord_vc` (bool), `gem_spend`
+  (whole number of gems or null; tyrantpoll had a free-text box), `roles` ⊆ {rally_leader, joiner, gathering,
+  battle_mgmt, event_prep}, `language` (UI language at submit, as tyrantpoll stored it). Unknown keys → 400.
+  Rationale: availability, VC, gem budget and roles depend on the event date and the player's plans.
+- A window id the admin later removed from the round is kept when the stored answers are re-sent (admin edits keep
+  working); a new unknown id is a VALIDATION_ERROR. "Use my last answers" copies only ids that exist now.
+
+### Round settings
+- `windows`: 1-12 `{id: [a-z0-9_]{1,24}, start: "HH:MM", end: "HH:MM" (> start), rush: bool}` (UTC), stored sorted
+  by start. Default = tyrantpoll's: w1 11:01-11:15 rush, w2 11:15-13:00, w3 13:00-15:00, w4 15:00-16:30,
+  w5 16:30-18:00. Carried over by start-new-round. Any other setting key → 400. `closing_time` is the round column.
+- "Opening rush" = windows with `rush: true` (shown as "Opening Rush" + time tag); the summary counts players
+  available in any rush window.
+
+### Wizard (owner: keep the wizard)
+tyrantpoll's 6 steps in its order: 1 Player Identity (FID first, then name, read-only FID, Discord ID, alliance),
+2 Availability (UTC note, Select All, windows, divider, Discord VC), 3 Player Stats (furnace dropdown, power in
+millions, est. max gem spend), 4 Troop Levels (furnace dropdown + T8-T11 per troop), 5 Roles Wanted, 6 Review with
+Edit per section, Submit/Update. Round flow exactly as the ministry wizard: FID lookup → NEW "New sign-up for
+<round>" (profile pre-filled, answers blank, "Use my last answers" on step 1 when an earlier tyrant application
+exists) or EDIT "Edit your sign-up for <round>" (all pre-filled); "Not you? Use a different FID"; closing time →
+closed card for new FIDs, edit still allowed; no round → "not open". Reuses ministry's `WizardSteps` (direction
+follows the page: Arabic step 1 on the right, as both tyrantpoll and ministry do) and arrows mirrored in RTL.
+
+### Admin
+`/admin/dashboard?event=tyrant` via a Ministry | Frost Dragon Tyrant switch (`shell/AdminEventSwitch`) on both
+dashboards. Round selector, Start new round (shared dialog, `event` prop), Players tab (stats cards: total, opening
+rush, Discord VC, alliances, est. gems; breakdowns per window/role/alliance/troop tier; search name/FID/Discord,
+alliance filter, minimum-furnace filter, sortable server-paged table, delete; CSV + Excel export), Settings tab
+(windows editor, closing time). Endpoints in docs/API.md "Frost Dragon Tyrant".
+- Exports use the CURRENT profile (as ministry), not the snapshot. CSV: UTF-8 BOM, formula-injection-safe (leading
+  `= + - @ TAB CR` prefixed with `'`); xlsx: tyrantpoll's styled sheet + a Summary sheet, quote-prefixed text cells
+  (`core/exports.py`, shared helpers).
+
+### Import of existing tyrantpoll submissions (NOT done; how it could be done)
+tyrantpoll's `players` table has one row per submission (duplicates per FID possible). An explicit, one-off
+`python -m events.tyrant.import_tyrantpoll --db tyrantpoll.db --round "<name>"` could: open the file read-only,
+create one CLOSED tyrant round (or an open one if wanted), take the LATEST row per trimmed FID, upsert the profile
+only where our field is empty (game_name, alliance upper-cased and cut to 3, discord_id, furnace 'FCn' kept,
+power = float(total_power) × 10^6, troops from `*_furnace`/`*_tlevel` 'FCn'/'Tn'), and save answers: availability
+from `slot_opening_rush`→w1, `slot_11_13`→w2, `slot_13_15`→w3, `slot_15_16`→w4, `slot_16_18`→w5; `discord_vc`;
+`gem_spend` = digits of the free text or null (log the raw value); roles from `role_*`; `language`; created_at =
+`submitted_at`. Report skipped/odd rows like the v1.4 import, run it twice to prove idempotence.
+
+### Known gaps / accepted
+- `discord_id` is part of the public profile (anyone with an FID can read it, M6), like the name and alliance.
+- Profile-level troop/furnace values written by tyrant are visible in ministry (shared profile, by design).
+
 ## Furnace levels (owner rule, phase 2; applies to EVERY event)
 - Two kinds: pre-FC furnaces 1-30, Fire Crystal furnaces FC1-FC10 (nothing above FC10). Most players are FC.
 - Stored everywhere as a canonical STRING code: `'FC1'..'FC10'` or `'1'..'30'` (profile `furnace_level`, and each

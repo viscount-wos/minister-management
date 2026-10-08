@@ -21,8 +21,8 @@ The source of truth is `backend/core/*.py` and `backend/events/ministry/routes.p
 - **Admin lists** (`/api/admin/events/{event}/rounds`, `/api/admin/rounds/{ref}/applications`,
   `/api/admin/profiles`) always include `"total"`; optional `?limit=` (1-1000) and `&offset=` return one page and echo
   `"limit"`/`"offset"`.
-- **Events**: fixed keys `ministry`, `tyrant`, `svs`, `tal`. `tal` has no rounds yet. `tyrant`/`svs` accept free-form
-  JSON `answers` until their phases land.
+- **Events**: fixed keys `ministry`, `tyrant`, `svs`, `tal`. `tal` has no rounds yet. `svs` accepts free-form
+  JSON `answers` until its phase lands; `tyrant` is strict (see "Frost Dragon Tyrant").
 
 ### Error codes
 
@@ -270,6 +270,48 @@ Ministry round settings: `research_day` (`tuesday`|`friday`), `show_fire_crystal
 - Excel exports write user text that starts with `= + - @`, TAB or CR as quote-prefixed text (never a formula). Ties
   in the UNASSIGNED section are ordered by player id.
 
+## Frost Dragon Tyrant (`tyrant`)
+
+Player calls are the generic ones with `{event}` = `tyrant`. Tyrant requires `profile.game_name` and
+`profile.alliance`.
+
+```json
+// PUT /api/events/tyrant/current/application/{fid}
+{"profile": {"game_name": "Tyra", "alliance": "woo", "discord_id": "tyra#0001", "furnace_level": "FC8",
+             "power": 410500000,
+             "troops": {"infantry": {"furnace_level": "FC5", "tier": 10}, "lancer": {"furnace_level": "30", "tier": 9},
+                        "marksman": {"furnace_level": null, "tier": 11}}},
+ "answers": {"availability": ["w1", "w3"], "discord_vc": true, "gem_spend": 10000,
+             "roles": ["rally_leader", "joiner"], "language": "en"}}
+```
+- `answers.availability`: window ids of the current round (`GET /api/events/tyrant/current` → `settings.windows`),
+  returned in window order. `discord_vc` bool (default false). `gem_spend` whole number 0-10^9 or null. `roles` ⊆
+  `rally_leader, joiner, gathering, battle_mgmt, event_prep` (returned in that order). `language` one of the 9 UI
+  languages or null. Any other key → 400 `VALIDATION_ERROR` (`field` = `answers.<key>`).
+- `profile.troops` (tyrant submits only): keys ⊆ infantry/lancer/marksman, each null or `{furnace_level, tier}`;
+  `furnace_level` a furnace code, `tier` 1-11 (the UI offers T8-T11). Stored with all three keys. Errors name the
+  exact field, e.g. `profile.troops.infantry.tier`.
+
+Round settings (`PUT /api/admin/rounds/{id}` `{"settings": {"windows": [...]}}`):
+`windows` = 1-12 `{"id": "w1", "start": "11:01", "end": "11:15", "rush": true}` (UTC; id `[a-z0-9_]{1,24}`, unique;
+end after start; sorted by start on save). Defaults: w1 11:01-11:15 rush, w2 11:15-13:00, w3 13:00-15:00,
+w4 15:00-16:30, w5 16:30-18:00. Carried over by start-new-round.
+
+Admin (`{ref}` = tyrant round id or `current`; a non-tyrant round id → 404):
+- `GET /api/admin/tyrant/rounds/{ref}/applications?q=&alliance=&min_furnace=&sort=&dir=&limit=&offset=` →
+  `{round_id, total, applications: [admin application + profile]}`. `q` matches FID, name or Discord ID
+  (case-insensitive); `min_furnace` a code (FC5 = FC5 and above); `sort` ∈ submitted (default) | updated | name |
+  alliance | fid | furnace (by ordinal) | power | gems, `dir` asc|desc (blanks always last).
+- `GET /api/admin/tyrant/rounds/{ref}/summary?alliance=` →
+  `{round_id, total, opening_rush, discord_vc, gem_spend_total, windows: [{id,start,end,rush,count}],
+  alliances: [{alliance, count}], roles: {role: n}, troop_tiers: {infantry: {"T10": n, "none": n}, ...},
+  furnace_levels: {"FC10": n, ..., "none": n}}` (furnace highest first).
+- `GET /api/admin/tyrant/rounds/{ref}/export` (also `/api/admin/rounds/{id}/export`) → xlsx (sheet
+  "Tyrant Poll Results" + "Summary"); `GET .../export.csv` → CSV (UTF-8 BOM). Columns: FID, In-Game Name, Alliance,
+  Discord ID, one Yes/No column per window, Discord VC, Furnace Level (code), Power (M), Est. Max Gem Spend,
+  <Troop> Furnace Level / T-Level ×3, five role Yes/No columns, Language, Submitted/Updated At (UTC). Formula-safe.
+- Delete: `DELETE /api/admin/applications/{id}` (profile kept). Edit: `PUT /api/admin/applications/{id}`.
+
 ## v1.4 → v2 endpoint map (for the frontend rewire)
 
 | v1.4 | v2 |
@@ -314,6 +356,9 @@ time preferences by day_type), assignments → `ministry_assignments` with stick
 `time_slot_scheme`, it is inferred from stored slots (`:20`/`:50` ⇒ `max_slots`, else `exact_alignment`). Orphan
 assignments whose player no longer exists are left in `legacy_assignments` only. Crystal values are kept exactly
 (fractions included), preferred hours sorted, FID whitespace trimmed when unambiguous. Re-running is a no-op.
+
+Migration 3: `profiles.discord_id TEXT` (nullable). Migration 4: `profiles` rebuilt with `furnace_level TEXT`
+codes (ints 1-30 → '1'..'30', invalid → NULL; troop `furnace_level` likewise).
 
 Migration 2 (every database): guard VIEWs `players`, `time_preferences`, `assignments`, `admin_users` (v1.4 columns,
 no rows) and triggers that reject the v1.4 round-setting keys in `settings`, so a stray v1.4 instance fails loudly.
