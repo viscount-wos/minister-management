@@ -272,6 +272,46 @@ alliance filter, minimum-furnace filter, sortable server-paged table, delete; CS
   `= + - @ TAB CR` prefixed with `'`); xlsx: tyrantpoll's styled sheet + a Summary sheet, quote-prefixed text cells
   (`core/exports.py`, shared helpers).
 
+### Troop camps and admin filters (owner rules, p2d/tyrant-camps)
+Game facts (owner): each troop type has its own CAMP with its own FC level, which can lag the furnace (FC9 furnace,
+FC7 infantry camp). Asking only the furnace makes players look stronger than they are, so camp levels are the key
+strength signal. The best joiner has FC10 camps with T11 troops.
+- **FC1-FC10 only** in Tyrant, for the furnace and each camp (`FurnaceLevelSelect fcOnly`: FC10..FC1, no pre-FC
+  group). Any combination is allowed: NO rule tying T11 to a camp level and NO "camp ≤ furnace" rule (the owner
+  rejected cross-field rules as overcomplicated). Tiers stay T8-T11 in the UI (API 1-11). Minister (and SVS) keep
+  the full list incl. 1-30. Backend: `TyrantEvent.validate_profile` → `core.furnace.validate_fc_level`, so a pre-FC
+  code on a tyrant submit (player or admin edit) is `VALIDATION_ERROR` naming the field; the generic profile route
+  and Minister still accept 1-30.
+- **No data migration** (the owner's LAN copy holds pre-FC tyrant sign-ups): stored values stay as they are, are
+  shown as they are in the admin (summary line, chips, exports), and the rule applies on submit. In the wizard a
+  saved pre-FC furnace / camp shows as unselected and must be re-picked.
+- **Wizard step 4**: per type "Infantry Camp (FC level)" etc. + one hint "Camps can be lower than your furnace: pick
+  your camp's level" (9 languages). Camp level AND tier are required for all three types; the furnace (step 3) is
+  required too (coordinator choice: "requires an FC choice" for legacy profiles, applied to everyone for one rule;
+  the API keeps them optional so MCP/API clients are unchanged).
+- **Joiner strength** (admin sort `strength`, column "Strength", export column, MCP rows): Σ over infantry, lancer,
+  marksman of camp FC number (FC1=1..FC10=10; pre-FC or blank 0) + tier (blank 0). 0..63; 63 = FC10 camps + T11
+  everywhere; null (sorted last) without any troop data. A SUM (not a min): one weak camp ranks a player below an
+  otherwise equal one, but still above a player weak everywhere; it is simple to explain and to check by hand.
+- **Admin filters** (owner, replaces the earlier "minimum furnace" filter): one parser `events/tyrant/filters.py`
+  used by the list, the summary and both exports (exports follow the current filters), and by the MCP tools. Keys,
+  identical in the API query and the admin URL: q, alliance (multi), min_furnace, min/max_power, min/max_gems,
+  windows (ALL of), rush, vc, troop + min_camp + min_tier, exact `<type>_camp` / `<type>_tier` (the chips), roles +
+  roles_mode, submitted_from/to, days. All AND. Details: docs/API.md.
+- **Admin UI** (`TyrantPlayers.tsx`): a filter card on top: search, alliance (multi), windows incl. "Opening rush",
+  troop type (All three / one type), camp at least (FC10..FC1), tier (any / T10 or better / T11 only), and a "More
+  filters" expander (furnace at least, VC, power and gems ranges, roles any/all, submitted last N days / from-to).
+  Active filters are removable pills + one "Clear filters". The summary is recomputed for the filtered set
+  ("N of M"); the troop card shows per type the CAMP level counts and the TIER counts as 44px chips; tapping a chip
+  toggles the exact filter (highlighted, aria-pressed), several combine with AND; window/role/alliance bars are
+  clickable too. Table: the name cell carries a compact line "Inf FC10 T11 · Lan FC9 T10 · Mks FC10 T11" (readable
+  without scrolling sideways), a sortable Strength column, 44px sort headers. State lives in the URL
+  (`useUrlFilters`, replace-history), so a filtered view is shareable and survives reload.
+- **No aggregate gem total** anywhere (stats card, API summary, MCP, Excel Summary); per-player gems stay.
+- **Reusable pieces** for Minister / SVS: `shared/filters/useUrlFilters.ts` (URL filter state, list helpers),
+  `shared/filters/FilterControls.tsx` (`FilterPills`, `ChipButton`, `CheckboxMenu`); generic strings in
+  `common:filters.*`.
+
 ### Import of existing tyrantpoll submissions (NOT done; how it could be done)
 tyrantpoll's `players` table has one row per submission (duplicates per FID possible). An explicit, one-off
 `python -m events.tyrant.import_tyrantpoll --db tyrantpoll.db --round "<name>"` could: open the file read-only,
@@ -364,6 +404,11 @@ Most players use the site on a phone. Every milestone gets a 360-390px check (no
   local time + UTC fit without clipping. Inputs are 16px (no iOS zoom on focus) and >= 44px; keyboards: FID
   `numeric`, speedup days `decimal`, crystals `numeric`, Tyrant power `decimal`, gems `numeric`.
 - **Tiles** (`shared/Tile.tsx`): a compact row (icon beside text) on phones, the original tall card from `sm` up.
+- **p2d phone-audit fixes**: the Minister review heading names the zone the times are shown in ("Time Preferences
+  (KST)", was a fixed "(UTC)"); time chips render through `shared/TimeWithUtc.tsx` with each time an LTR isolate
+  (`<bdi dir="ltr">`), so Arabic reads "20:00 (11:00 UTC)" instead of "(UTC 11:00) 20:00", and the "Times shown in"
+  zone is isolated too; the assignment board's "Wants:" line shows the admin's display zone (was raw UTC); Tyrant
+  admin settings: time inputs 16px / 44px, "Opening Rush" checkboxes in 44px rows, sort headers and pager 44px.
 - **Admin on phones: usable, not perfect.** Event switch, tab bar and day tabs scroll sideways inside their own
   container; tables scroll inside `overflow-x-auto`; round selector full width; buttons 44px. Assignment board:
   `MouseSensor` (5px), `TouchSensor` (long press 250 ms, tolerance 8px, so a swipe still scrolls) and
@@ -381,7 +426,8 @@ Most players use the site on a phone. Every milestone gets a 360-390px check (no
   'FC1'=31 ... 'FC10'=40, blank/invalid 0.
 - UI: ALWAYS a dropdown, never free text: the one shared `shared/FurnaceLevelSelect.tsx` (empty "Select...", then an
   optgroup "Fire Crystal" FC10..FC1, then "Pre-FC" Lv. 30..1; group names and "Lv." translated). Used by the ministry
-  wizard (ProfileFields), the Tyrant stats step, the Tyrant per-troop levels and the Tyrant admin filter.
+  wizard (ProfileFields), the Tyrant stats step, the Tyrant per-troop camp levels and the Tyrant admin filters.
+  Exception (owner, p2d): Frost Dragon Tyrant uses `fcOnly` (FC10..FC1 only); see "Troop camps and admin filters".
 - Codes are shown as-is in exports, tables and review steps.
 - Migration 4 rebuilds `profiles` with `furnace_level TEXT` (SQLite cannot change a column type and INTEGER affinity
   would turn '30' back into 30): integers 1-30 become '1'..'30', valid codes are kept, anything else becomes NULL;

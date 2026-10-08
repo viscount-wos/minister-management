@@ -143,12 +143,12 @@ any API call.
 | Tool | API | Notes |
 |---|---|---|
 | `list_rounds(event, limit=20)` | `GET /api/admin/events/{event}/rounds` | adds `total`, `limit` (max 100) |
-| `list_applications(round_id="current", event="ministry", alliance?, offset=0, limit=50)` | `GET /api/events/{event}/current` (for "current") + `GET /api/admin/rounds/{id}/applications` | paged by the MCP server (max 200): `{round_id, total, offset, limit, returned, applications}` |
+| `list_applications(round_id="current", event="ministry", alliance?, offset=0, limit=50, min_camp?, min_tier?, troop?, sort?, direction?, filters?)` | `GET /api/events/{event}/current` (for "current") + `GET /api/admin/rounds/{id}/applications`; for `event="tyrant"` or any tyrant filter `GET /api/admin/tyrant/rounds/{id}/applications?<filters>` | paged by the MCP server (max 200): `{round_id, total, offset, limit, returned, applications}`. Tyrant: `min_camp` ("FC10"), `min_tier` (11 / "T11"), `troop` (infantry/lancer/marksman/all, default all) make "who has T11" (`min_tier=11`) and "FC10 camps with T11" (`min_camp="FC10", min_tier=11`) ONE call; `filters` = every other admin filter (q, alliances, min_furnace, power/gems ranges, windows, rush, vc, exact camp/tier per type, roles + roles_mode, submitted_from/to, days); rows carry `joiner_strength`; `sort="strength"` ranks joiners |
 | `get_application_by_id(application_id)` | `GET /api/admin/applications/{id}` | |
 | `update_application(application_id, profile?, answers?)` | `PUT /api/admin/applications/{id}` | answers partial/merged; no closing-time check |
 | `start_new_round(event, name, closing_time?, settings?, confirm=false)` | `POST /api/admin/events/{event}/start-new-round` | without `confirm=true` returns a preview of the round it would close and changes nothing |
 | `get_assignments(day, round_id="current")` | `GET /api/admin/ministry/rounds/{ref}/assignments/{day}` | includes unpublished days |
-| `get_tyrant_summary(round_id="current", alliance=None)` | `GET /api/admin/tyrant/rounds/{ref}/summary` | Tyrant stats: totals, opening rush, VC, windows, alliances, roles, troop tiers, furnace levels |
+| `get_tyrant_summary(round_id="current", alliance=None, min_camp?, min_tier?, troop?, filters?)` | `GET /api/admin/tyrant/rounds/{ref}/summary?<filters>` | Tyrant stats for the FILTERED set: total (+ round_total), opening rush, VC, windows, alliances, roles, troop tiers and camp levels per troop type, furnace levels; no gem total |
 
 Tool annotations mark read-only tools `readOnlyHint` and `start_new_round` `destructiveHint`.
 

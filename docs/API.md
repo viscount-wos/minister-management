@@ -279,7 +279,7 @@ Player calls are the generic ones with `{event}` = `tyrant`. Tyrant requires `pr
 // PUT /api/events/tyrant/current/application/{fid}
 {"profile": {"game_name": "Tyra", "alliance": "woo", "discord_id": "tyra#0001", "furnace_level": "FC8",
              "power": 410500000,
-             "troops": {"infantry": {"furnace_level": "FC5", "tier": 10}, "lancer": {"furnace_level": "30", "tier": 9},
+             "troops": {"infantry": {"furnace_level": "FC5", "tier": 10}, "lancer": {"furnace_level": "FC9", "tier": 9},
                         "marksman": {"furnace_level": null, "tier": 11}}},
  "answers": {"availability": ["w1", "w3"], "discord_vc": true, "gem_spend": 10000,
              "roles": ["rally_leader", "joiner"], "language": "en"}}
@@ -289,8 +289,14 @@ Player calls are the generic ones with `{event}` = `tyrant`. Tyrant requires `pr
   `rally_leader, joiner, gathering, battle_mgmt, event_prep` (returned in that order). `language` one of the 9 UI
   languages or null. Any other key → 400 `VALIDATION_ERROR` (`field` = `answers.<key>`).
 - `profile.troops` (tyrant submits only): keys ⊆ infantry/lancer/marksman, each null or `{furnace_level, tier}`;
-  `furnace_level` a furnace code, `tier` 1-11 (the UI offers T8-T11). Stored with all three keys. Errors name the
-  exact field, e.g. `profile.troops.infantry.tier`.
+  `furnace_level` is that troop type's CAMP level, `tier` 1-11 (the UI offers T8-T11). Stored with all three keys.
+  Errors name the exact field, e.g. `profile.troops.infantry.tier`.
+- **Fire Crystal only (owner rule p2d)**: on tyrant submits (player and admin edit) `profile.furnace_level` and every
+  `profile.troops.<type>.furnace_level` must be `FC1`..`FC10` (or null); a pre-FC code `1`..`30` →
+  `VALIDATION_ERROR` with that field. Any combination is allowed (no tier-vs-camp or camp-vs-furnace rule). The
+  generic profile / Minister routes still accept `1`..`30`. Values stored earlier (pre-FC) are not migrated: they
+  are returned and exported as stored, and only rejected when re-sent on a tyrant submit. The API keeps every
+  troop field optional; the Tyrant wizard requires the furnace and each camp level + tier.
 
 Round settings (`PUT /api/admin/rounds/{id}` `{"settings": {"windows": [...]}}`):
 `windows` = 1-12 `{"id": "w1", "start": "11:01", "end": "11:15", "rush": true}` (UTC; id `[a-z0-9_]{1,24}`, unique;
@@ -298,18 +304,47 @@ end after start; sorted by start on save). Defaults: w1 11:01-11:15 rush, w2 11:
 w4 15:00-16:30, w5 16:30-18:00. Carried over by start-new-round.
 
 Admin (`{ref}` = tyrant round id or `current`; a non-tyrant round id → 404):
-- `GET /api/admin/tyrant/rounds/{ref}/applications?q=&alliance=&min_furnace=&sort=&dir=&limit=&offset=` →
-  `{round_id, total, applications: [admin application + profile]}`. `q` matches FID, name or Discord ID
-  (case-insensitive); `min_furnace` a code (FC5 = FC5 and above); `sort` ∈ submitted (default) | updated | name |
-  alliance | fid | furnace (by ordinal) | power | gems, `dir` asc|desc (blanks always last).
-- `GET /api/admin/tyrant/rounds/{ref}/summary?alliance=` →
-  `{round_id, total, opening_rush, discord_vc, gem_spend_total, windows: [{id,start,end,rush,count}],
-  alliances: [{alliance, count}], roles: {role: n}, troop_tiers: {infantry: {"T10": n, "none": n}, ...},
-  furnace_levels: {"FC10": n, ..., "none": n}}` (furnace highest first).
-- `GET /api/admin/tyrant/rounds/{ref}/export` (also `/api/admin/rounds/{id}/export`) → xlsx (sheet
-  "Tyrant Poll Results" + "Summary"); `GET .../export.csv` → CSV (UTF-8 BOM). Columns: FID, In-Game Name, Alliance,
-  Discord ID, one Yes/No column per window, Discord VC, Furnace Level (code), Power (M), Est. Max Gem Spend,
-  <Troop> Furnace Level / T-Level ×3, five role Yes/No columns, Language, Submitted/Updated At (UTC). Formula-safe.
+- **Filters** (query params, all optional, combined with AND; the SAME set on list, summary and both exports, so a
+  filtered view, its counts and its download agree; the admin UI keeps the same keys in its own URL). Parser:
+  `backend/events/tyrant/filters.py`. A bad value → 400 `VALIDATION_ERROR` with `field` = the parameter.
+
+  | param | meaning |
+  |---|---|
+  | `q` | FID, in-game name or Discord ID contains (case-insensitive) |
+  | `alliance` | one tag or a comma list (any of them), case-insensitive |
+  | `min_furnace` | main furnace at least this code (FC5 = FC5 and up; pre-FC codes allowed) |
+  | `min_power`, `max_power` | absolute power (whole numbers; the UI converts from millions) |
+  | `min_gems`, `max_gems` | per-player est. max gem spend (a blank never matches a bound) |
+  | `windows` | comma list of window ids: available in ALL of them |
+  | `rush` | `1`: available in at least one opening-rush window |
+  | `vc` | `yes` / `no` (`any` = no filter) |
+  | `troop` | `infantry` / `lancer` / `marksman` / `all` (default): which troop types `min_camp`/`min_tier` apply to |
+  | `min_camp` | `FC1`..`FC10`: camp level at least this; pre-FC and blank camps never match |
+  | `min_tier` | `1`..`11` or `T11`: tier at least this |
+  | `infantry_camp`, `lancer_camp`, `marksman_camp` | EXACT camp level of that type: a code (also legacy `25`) or `none` |
+  | `infantry_tier`, `lancer_tier`, `marksman_tier` | EXACT tier of that type: `1`..`11`/`T11` or `none` |
+  | `roles` + `roles_mode` | comma list of role ids; `any` (default: has any of them) or `all` |
+  | `submitted_from`, `submitted_to` | `YYYY-MM-DD` (UTC, inclusive) |
+  | `days` | submitted in the last N days (1-3650) |
+
+  "FC10 camps with T11" = `?min_camp=FC10&min_tier=11` (troop defaults to all three); "who has T11" = `?min_tier=11`.
+- `GET /api/admin/tyrant/rounds/{ref}/applications?<filters>&sort=&dir=&limit=&offset=` →
+  `{round_id, total, applications: [admin application + profile + joiner_strength]}` (`total` after filters).
+  `sort` ∈ submitted (default) | updated | name | alliance | fid | furnace (by ordinal) | power | gems | strength,
+  `dir` asc|desc (blanks always last). **Joiner strength** = Σ over infantry, lancer, marksman of (camp FC number,
+  FC1=1 .. FC10=10, pre-FC or blank = 0) + (tier number, blank = 0): 0..63, 63 = FC10 camps with T11 everywhere;
+  `null` when no camp level or tier is filled in at all.
+- `GET /api/admin/tyrant/rounds/{ref}/summary?<filters>` → counts for the FILTERED set:
+  `{round_id, round_total (unfiltered), filters (the active, canonical filters), alliance_options (every tag of the
+  round, unfiltered), total, opening_rush, discord_vc, windows: [{id,start,end,rush,count}],
+  alliances: [{alliance, count}], roles: {role: n}, troop_tiers: {infantry: {"T11": n, ..., "none": n}, ...},
+  camp_levels: {infantry: {"FC10": n, ..., "FC1": n, "25": n, "none": n}, ...}, furnace_levels: {"FC10": n, ...,
+  "none": n}}` (highest first; legacy pre-FC codes after FC1; blanks last). No aggregate gem total (owner rule).
+- `GET /api/admin/tyrant/rounds/{ref}/export?<filters>` (also `/api/admin/rounds/{id}/export`, unfiltered) → xlsx
+  (sheet "Tyrant Poll Results" + "Summary" with camp-level and tier counts per troop type); `GET .../export.csv?<filters>`
+  → CSV (UTF-8 BOM). Columns: FID, In-Game Name, Alliance, Discord ID, one Yes/No column per window, Discord VC,
+  Furnace Level (code), Power (M), Est. Max Gem Spend, `<Troop> Camp Level` / `<Troop> Tier` ×3 (Infantry, Lancer,
+  Marksman), Joiner Strength, five role Yes/No columns, Language, Submitted/Updated At (UTC). Formula-safe.
 - Delete: `DELETE /api/admin/applications/{id}` (profile kept). Edit: `PUT /api/admin/applications/{id}`.
 
 ## v1.4 → v2 endpoint map (for the frontend rewire)
