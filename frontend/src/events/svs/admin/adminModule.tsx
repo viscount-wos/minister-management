@@ -28,8 +28,16 @@ const svsAdmin: AdminEventModule = {
       label: 'admin:players',
       icon: Users,
       needsRound: true,
-      render: ({ round, readOnly, reloadRounds }) =>
-        round && <SvsPlayers key={round.id} round={round as unknown as SRound} readOnly={readOnly} onChanged={() => reloadRounds()} />,
+      render: ({ round, readOnly, reloadRounds, selectTab }) =>
+        round && (
+          <SvsPlayers
+            key={round.id}
+            round={round as unknown as SRound}
+            readOnly={readOnly}
+            onChanged={() => reloadRounds()}
+            onOpenPlan={selectTab ? () => selectTab('plan') : undefined}
+          />
+        ),
     },
     {
       key: 'plan',

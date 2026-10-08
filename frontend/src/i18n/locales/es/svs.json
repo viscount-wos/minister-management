@@ -264,5 +264,73 @@
     "timesNote": "Las horas de batalla son hora del juego (UTC).",
     "joinersRatioNote": "Los participantes usan la proporción del líder salvo que se indique una propia.",
     "localTimes": "{{range}} tu hora"
+  },
+  "players": {
+    "col": {
+      "plan": "Plan"
+    },
+    "place": {
+      "leader": "Líder · {{leader}} ({{group}})",
+      "joiner": "Unido {{n}} · {{leader}} ({{group}})",
+      "extra": "Extra · {{leader}} ({{group}})",
+      "group": "{{group}}"
+    },
+    "filter": {
+      "plan": "Plan de batalla",
+      "inPlan": "En el plan",
+      "notInPlan": "Fuera del plan"
+    },
+    "add": {
+      "button": "Añadir a {{name}} a un rally",
+      "title": "Añadir a un rally",
+      "bulkTitle": "Añadir {{n}} seleccionados a un rally",
+      "now": "Ahora: {{where}}",
+      "loading": "Cargando el plan…",
+      "noLeaders": "El plan de batalla aún no tiene líderes de rally.",
+      "openPlan": "Abrir el plan de batalla",
+      "chooseLeader": "Elige un líder de rally",
+      "capacity": "Con nombre {{named}}/{{maxNamed}} · Extra {{extra}}/{{maxExtra}}",
+      "full": "Lleno",
+      "hereNow": "aquí ahora",
+      "asNamed": "Como unido con nombre ({{n}}/{{max}})",
+      "asExtra": "Como unido extra ({{n}}/{{max}})",
+      "moveNamed": "Mover aquí como unido con nombre ({{n}}/{{max}})",
+      "moveExtra": "Mover aquí como unido extra ({{n}}/{{max}})",
+      "namedHint": "El héroe principal queda vacío: elígelo en el plan de batalla.",
+      "bulkAuto": "Añadirlos: primero los puestos con nombre, luego extra (quedan {{free}})",
+      "bulkExtra": "Todos como unidos extra ({{n}}/{{max}})",
+      "makeLeader": "Hacer líder de rally en {{group}}",
+      "moveMakeLeader": "Mover: hacer líder de rally en {{group}}",
+      "toGroup": "Añadir a {{group}}",
+      "moveToGroup": "Mover a {{group}}",
+      "other": "Otros puestos",
+      "back": "Atrás",
+      "close": "Cerrar",
+      "saving": "Guardando…"
+    },
+    "done": {
+      "one": "{{name}} añadido: {{where}}.",
+      "moved": "{{name}} movido: {{where}}.",
+      "unchanged": "{{name}} ya está ahí: {{where}}.",
+      "bulk": "Añadidos {{n}} a {{to}} ({{named}} con nombre, {{extra}} extra).",
+      "bulkGroup": "Añadidos {{n}} a {{to}}.",
+      "none": "No se añadió a nadie.",
+      "skipped": "Omitidos, ya están en el plan: {{list}}.",
+      "overflow": "No queda sitio para: {{list}}."
+    },
+    "err": {
+      "conflict": "El plan cambió mientras elegías. Revisa los nuevos números e inténtalo de nuevo.",
+      "full": "No queda sitio ahí.",
+      "gone": "Ese líder o grupo ya no está en el plan."
+    },
+    "select": {
+      "row": "Seleccionar a {{name}}",
+      "all": "Seleccionar a todos en esta página"
+    },
+    "bulk": {
+      "selected": "{{n}} seleccionados",
+      "add": "Añadir {{n}} seleccionados al rally…",
+      "clear": "Quitar selección"
+    }
   }
 }

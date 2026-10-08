@@ -126,6 +126,8 @@ class SvsFilters(BaseModel):
     submitted_from: str | None = Field(None, description='Submitted on/after YYYY-MM-DD (UTC).')
     submitted_to: str | None = Field(None, description='Submitted on/before YYYY-MM-DD (UTC).')
     days: int | None = Field(None, ge=1, le=3650, description='Submitted in the last N days.')
+    in_plan: Literal['yes', 'no'] | None = Field(None, description=(
+        'yes = already placed in the round\'s battle plan (leader, joiner, extra joiner or extra group); no = not.'))
 
 
 SVS_FILTERS_HELP = (
@@ -133,7 +135,7 @@ SVS_FILTERS_HELP = (
     '`vc` true/false (Discord voice chat), '
     '`alliance`, `min_camp` FC code, `min_tier` 10/11, `troop` "infantry"|"lancer"|"marksman"|"all" (default all '
     '= EVERY troop type must meet min_camp/min_tier). `svs_filters` takes the rest: q, alliances, camp/tier (EXACT per '
-    'troop type), submitted_from/to, days. There is no role filter (SVS does not ask it). Example: players for the '
+    'troop type), submitted_from/to, days, in_plan (yes/no: placed in the battle plan). There is no role filter (SVS does not ask it). Example: players for the '
     '12:00 hour on VC with FC10 T11 everywhere -> hours=["12:00"], vc=true, min_camp="FC10", min_tier=11.'
 )
 
@@ -627,6 +629,48 @@ or "current". {ERRORS}""")
             return bad
         return R.from_api(await api.admin('POST', f'/api/admin/svs/rounds/{seg(round_id)}/plan/share',
                                           json={'action': action}))
+
+    @server.tool(annotations=_rw('Place player in SVS plan', idempotent=False), description=f"""{ADMIN} SVS only:
+put one player (`fid`) or several (`fids`, max 100) into the round's battle plan, applied atomically on the server to
+the CURRENT stored plan (other leaders' edits are kept). Read get_svs_plan first for leader ids and group ids.
+`mode` (the API's `as`): "auto" (default: a named joiner if the leader has a free named slot of 4, else an extra joiner of 14), "named",
+"extra" (both need `leader_id`), "leader" (`group_id` of a main/counter group -> a NEW rally leader card; or
+`leader_id` of an EMPTY leader card), "group" (`group_id` of an extra group, e.g. Turrets). `slot` 0-3 picks a named
+slot. A player may be in the plan only once: if they already are, one `fid` gives DOUBLE_BOOKED (details = where they
+are) unless `move`=true (then they are moved, like the planner's "Move here"); with `fids` they are reported in
+result.skipped instead, and players that don't fit in result.overflow (never silently dropped). Other errors:
+RALLY_FULL / GROUP_FULL / SLOT_TAKEN (422), LEADER_NOT_FOUND / GROUP_NOT_FOUND / PLAYER_NOT_FOUND (404), PLAN_CONFLICT
+(409, only when `expected_revision` is given and the plan has changed since), ROUND_CLOSED. Returns the get_svs_plan
+shape with the new revision + changed + result {{placed, moved, unchanged, skipped, overflow, not_found}}. Confirm the
+leader and the players with the user before calling. `round_id` is an svs round id or "current".
+{UNTRUSTED} {ERRORS}""")
+    async def svs_plan_place(ctx: Context,
+                             fid: Annotated[Fid | None, Field(description='One player (strict errors).')] = None,
+                             fids: Annotated[list[Fid] | None, Field(
+                                 min_length=1, max_length=100, description='Several players (reported, not raised).')] = None,
+                             mode: Annotated[Literal['auto', 'named', 'extra', 'leader', 'group'], Field(
+                                 description='Where to put them (the API\'s `as`).')] = 'auto',
+                             leader_id: Annotated[str | None, Field(max_length=40)] = None,
+                             group_id: Annotated[str | None, Field(max_length=40)] = None,
+                             slot: Annotated[int | None, Field(ge=0, le=3)] = None,
+                             move: bool = False,
+                             expected_revision: Annotated[int | None, Field(ge=0)] = None,
+                             round_id: Annotated[int | Literal['current'], Field(
+                                 description='Round id or "current".')] = 'current') -> CallToolResult:
+        if bad := refused(ctx):
+            return bad
+        if (fid is None) == (fids is None):
+            return R.error(400, 'VALIDATION_ERROR', 'Pass exactly one of fid or fids', field='fid')
+        body: dict[str, Any] = {'as': mode, 'move': move}
+        if fid is not None:
+            body['fid'] = fid
+        else:
+            body['fids'] = fids
+        for k, v in (('leader_id', leader_id), ('group_id', group_id), ('slot', slot),
+                     ('expected_revision', expected_revision)):
+            if v is not None:
+                body[k] = v
+        return R.from_api(await api.admin('POST', f'/api/admin/svs/rounds/{seg(round_id)}/plan/place', json=body))
 
     @server.tool(annotations=_ro('Get minister assignments'), description=f"""{ADMIN} Minister event (key 'ministry') only:
 the saved assignments for one day of a round, including unpublished days: occupied slots ->

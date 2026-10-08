@@ -254,7 +254,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
             {t('admin:round.noRoundsYet')}
           </div>
         ) : (
-          tab.render({ round, readOnly, reloadRounds: (select) => void loadRounds(select), onRoundUpdated })
+          tab.render({ round, readOnly, reloadRounds: (select) => void loadRounds(select), onRoundUpdated, selectTab: setActiveTab })
         )}
       </div>
 

@@ -264,5 +264,73 @@
     "timesNote": "Godziny bitwy to czas gry (UTC).",
     "joinersRatioNote": "Dołączający używają proporcji lidera, chyba że podano własne.",
     "localTimes": "{{range}} Twój czas"
+  },
+  "players": {
+    "col": {
+      "plan": "Plan"
+    },
+    "place": {
+      "leader": "Lider · {{leader}} ({{group}})",
+      "joiner": "Dołączający {{n}} · {{leader}} ({{group}})",
+      "extra": "Dodatkowy · {{leader}} ({{group}})",
+      "group": "{{group}}"
+    },
+    "filter": {
+      "plan": "Plan bitwy",
+      "inPlan": "W planie",
+      "notInPlan": "Poza planem"
+    },
+    "add": {
+      "button": "Dodaj {{name}} do rajdu",
+      "title": "Dodaj do rajdu",
+      "bulkTitle": "Dodaj {{n}} zaznaczonych do rajdu",
+      "now": "Teraz: {{where}}",
+      "loading": "Wczytywanie planu…",
+      "noLeaders": "Plan bitwy nie ma jeszcze liderów rajdów.",
+      "openPlan": "Otwórz plan bitwy",
+      "chooseLeader": "Wybierz lidera rajdu",
+      "capacity": "Imienni {{named}}/{{maxNamed}} · Dodatkowi {{extra}}/{{maxExtra}}",
+      "full": "Pełny",
+      "hereNow": "tu teraz",
+      "asNamed": "Jako imienny dołączający ({{n}}/{{max}})",
+      "asExtra": "Jako dodatkowy dołączający ({{n}}/{{max}})",
+      "moveNamed": "Przenieś tutaj jako imiennego ({{n}}/{{max}})",
+      "moveExtra": "Przenieś tutaj jako dodatkowego ({{n}}/{{max}})",
+      "namedHint": "Główny bohater zostaje pusty: wybierz go w planie bitwy.",
+      "bulkAuto": "Dodaj: najpierw miejsca imienne, potem dodatkowe (wolnych: {{free}})",
+      "bulkExtra": "Wszyscy jako dodatkowi ({{n}}/{{max}})",
+      "makeLeader": "Zrób liderem rajdu w {{group}}",
+      "moveMakeLeader": "Przenieś: lider rajdu w {{group}}",
+      "toGroup": "Dodaj do {{group}}",
+      "moveToGroup": "Przenieś do {{group}}",
+      "other": "Inne miejsca",
+      "back": "Wstecz",
+      "close": "Zamknij",
+      "saving": "Zapisywanie…"
+    },
+    "done": {
+      "one": "Dodano {{name}}: {{where}}.",
+      "moved": "Przeniesiono {{name}}: {{where}}.",
+      "unchanged": "{{name}} już tam jest: {{where}}.",
+      "bulk": "Dodano {{n}} do {{to}} ({{named}} imiennych, {{extra}} dodatkowych).",
+      "bulkGroup": "Dodano {{n}} do {{to}}.",
+      "none": "Nikogo nie dodano.",
+      "skipped": "Pominięci, już w planie: {{list}}.",
+      "overflow": "Brak miejsca dla: {{list}}."
+    },
+    "err": {
+      "conflict": "Plan zmienił się w trakcie wyboru. Sprawdź nowe liczby i spróbuj ponownie.",
+      "full": "Brak tam miejsca.",
+      "gone": "Tego lidera lub grupy nie ma już w planie."
+    },
+    "select": {
+      "row": "Zaznacz {{name}}",
+      "all": "Zaznacz wszystkich na tej stronie"
+    },
+    "bulk": {
+      "selected": "Zaznaczono: {{n}}",
+      "add": "Dodaj zaznaczonych ({{n}}) do rajdu…",
+      "clear": "Wyczyść zaznaczenie"
+    }
   }
 }

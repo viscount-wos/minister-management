@@ -264,5 +264,73 @@
     "timesNote": "Kampfzeiten sind Spielzeit (UTC).",
     "joinersRatioNote": "Beitretende nutzen das Truppenverhältnis des Leiters, außer ein eigenes ist angegeben.",
     "localTimes": "{{range}} deine Zeit"
+  },
+  "players": {
+    "col": {
+      "plan": "Plan"
+    },
+    "place": {
+      "leader": "Anführer · {{leader}} ({{group}})",
+      "joiner": "Mitläufer {{n}} · {{leader}} ({{group}})",
+      "extra": "Extra · {{leader}} ({{group}})",
+      "group": "{{group}}"
+    },
+    "filter": {
+      "plan": "Schlachtplan",
+      "inPlan": "Im Plan",
+      "notInPlan": "Nicht im Plan"
+    },
+    "add": {
+      "button": "{{name}} zu einer Rallye hinzufügen",
+      "title": "Zur Rallye hinzufügen",
+      "bulkTitle": "{{n}} Ausgewählte zu einer Rallye hinzufügen",
+      "now": "Jetzt: {{where}}",
+      "loading": "Plan wird geladen…",
+      "noLeaders": "Der Schlachtplan hat noch keine Rallye-Anführer.",
+      "openPlan": "Schlachtplan öffnen",
+      "chooseLeader": "Rallye-Anführer wählen",
+      "capacity": "Benannt {{named}}/{{maxNamed}} · Extra {{extra}}/{{maxExtra}}",
+      "full": "Voll",
+      "hereNow": "jetzt hier",
+      "asNamed": "Als benannter Mitläufer ({{n}}/{{max}})",
+      "asExtra": "Als Extra-Mitläufer ({{n}}/{{max}})",
+      "moveNamed": "Hierher verschieben als benannter Mitläufer ({{n}}/{{max}})",
+      "moveExtra": "Hierher verschieben als Extra-Mitläufer ({{n}}/{{max}})",
+      "namedHint": "Der Hauptheld bleibt leer: im Schlachtplan auswählen.",
+      "bulkAuto": "Hinzufügen: erst benannte Plätze, dann Extra ({{free}} Plätze frei)",
+      "bulkExtra": "Alle als Extra-Mitläufer ({{n}}/{{max}})",
+      "makeLeader": "Zum Rallye-Anführer in {{group}} machen",
+      "moveMakeLeader": "Verschieben: Rallye-Anführer in {{group}}",
+      "toGroup": "Zu {{group}} hinzufügen",
+      "moveToGroup": "Nach {{group}} verschieben",
+      "other": "Andere Plätze",
+      "back": "Zurück",
+      "close": "Schließen",
+      "saving": "Speichern…"
+    },
+    "done": {
+      "one": "{{name}} hinzugefügt: {{where}}.",
+      "moved": "{{name}} verschoben: {{where}}.",
+      "unchanged": "{{name}} ist schon dort: {{where}}.",
+      "bulk": "{{n}} zu {{to}} hinzugefügt ({{named}} benannt, {{extra}} Extra).",
+      "bulkGroup": "{{n}} zu {{to}} hinzugefügt.",
+      "none": "Niemand wurde hinzugefügt.",
+      "skipped": "Übersprungen, schon im Plan: {{list}}.",
+      "overflow": "Kein Platz mehr für: {{list}}."
+    },
+    "err": {
+      "conflict": "Der Plan hat sich während deiner Auswahl geändert. Prüfe die neuen Zahlen und versuche es erneut.",
+      "full": "Dort ist kein Platz mehr.",
+      "gone": "Dieser Anführer oder diese Gruppe ist nicht mehr im Plan."
+    },
+    "select": {
+      "row": "{{name}} auswählen",
+      "all": "Alle auf dieser Seite auswählen"
+    },
+    "bulk": {
+      "selected": "{{n}} ausgewählt",
+      "add": "{{n}} Ausgewählte zur Rallye…",
+      "clear": "Auswahl aufheben"
+    }
   }
 }

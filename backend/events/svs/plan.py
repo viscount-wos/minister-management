@@ -562,3 +562,215 @@ def people(db, fids, round_id):
                         f'FROM profiles p WHERE p.fid IN ({marks})', [round_id, *fids]).fetchall():
         out[r['fid']] = {'game_name': r['game_name'], 'alliance': r['alliance'], 'signed_up': bool(r['su'])}
     return out
+
+
+# ---------------------------------------------------------------- place (players table "Add to rally")
+
+PLACE_MODES = ('auto', 'named', 'extra', 'leader', 'group')
+MAX_PLACE_BULK = 100
+
+
+def find_placement(plan, ref):
+    """``where`` dict (see iter_placements) of the player ``ref`` in the plan, or None."""
+    key = player_key(ref)
+    for r, _path, where in iter_placements(plan):
+        if player_key(r) == key:
+            return where
+    return None
+
+
+def _remove_at(plan, where):
+    """Take a player out of their place (planner \"Move here\" semantics): a leader card stays with no player, a named
+    joiner slot keeps its heroes/ratio but loses the player, an extra joiner / extra-group entry is removed."""
+    if where['position'] == 'extra_group':
+        g = next(g for g in plan['groups'] if g['id'] == where['group_id'])
+        del g['players'][where['slot']]
+        return
+    ld = next(x for x in plan['leaders'] if x['id'] == where['leader_id'])
+    if where['position'] == 'leader':
+        ld['player'] = None
+    elif where['position'] == 'named_joiner':
+        ld['named_joiners'][where['slot']]['player'] = None
+    else:
+        del ld['extra_joiners'][where['slot']]
+
+
+def _blank_named_slot(nj):
+    return not nj['player'] and not nj['rally']['lead_hero'] and not nj['garrison']['lead_hero'] \
+        and not nj['rally']['ratio_override'] and not nj['garrison']['ratio_override']
+
+
+def capacity(ld):
+    """{named_used, named_max, extra_used, extra_max} of one leader."""
+    return {'named_used': sum(1 for j in ld['named_joiners'] if j['player']), 'named_max': NAMED_JOINERS,
+            'extra_used': len(ld['extra_joiners']), 'extra_max': EXTRA_JOINERS}
+
+
+def _same_target(where, mode, leader_id, group_id):
+    """Is the player already exactly where this request would put them (nothing to do)?"""
+    if mode in ('named', 'extra', 'auto'):
+        pos = {'named': ('named_joiner',), 'extra': ('extra_joiner',),
+               'auto': ('named_joiner', 'extra_joiner')}[mode]
+        return where['leader_id'] == leader_id and where['position'] in pos
+    if mode == 'group':
+        return where['position'] == 'extra_group' and where['group_id'] == group_id
+    if mode == 'leader':
+        if leader_id:
+            return where['position'] == 'leader' and where['leader_id'] == leader_id
+        return False  # a NEW leader card: never "already there"
+    return False
+
+
+class PlaceRefused(Exception):
+    """One player could not be placed: ``kind`` = double_booked | full | slot_taken."""
+
+    def __init__(self, kind, details):
+        super().__init__(kind)
+        self.kind = kind
+        self.details = details
+
+
+def _place_one(plan, ref, mode, leader_id, group_id, slot, move, new_id):
+    """Put ``ref`` at the target (mutates ``plan``). Returns the placement record or raises PlaceRefused. ``where``
+    before the call is checked by the caller (double booking / unchanged)."""
+    where = find_placement(plan, ref)
+    if where and not move:
+        raise PlaceRefused('double_booked', where)
+    if where:
+        _remove_at(plan, where)
+    if mode == 'group':
+        g = next(g for g in plan['groups'] if g['id'] == group_id)
+        if len(g['players']) >= MAX_EXTRA_GROUP_PLAYERS:
+            raise PlaceRefused('full', {'group_id': group_id, 'players': len(g['players']),
+                                        'max': MAX_EXTRA_GROUP_PLAYERS})
+        g['players'].append(ref)
+        return {'as': 'group', 'group_id': group_id, 'leader_id': None, 'slot': len(g['players']) - 1}
+    if mode == 'leader':
+        if leader_id:
+            ld = next(x for x in plan['leaders'] if x['id'] == leader_id)
+            if ld['player']:
+                raise PlaceRefused('slot_taken', {'leader_id': leader_id, 'position': 'leader'})
+            ld['player'] = ref
+            return {'as': 'leader', 'group_id': ld['group_id'], 'leader_id': ld['id'], 'slot': None}
+        order = 1 + max([x['order'] for x in plan['leaders'] if x['group_id'] == group_id] or [-1])
+        ld = {'id': new_id(), 'group_id': group_id, 'order': order, 'player': ref,
+              'disguise': {'pfp_hero': None, 'alias': None}, 'split': False,
+              'rally': {'heroes': [None] * HERO_SLOTS, 'ratio': None}, 'garrison': None, 'pet_buff': None,
+              'named_joiners': [{'player': None, 'rally': {'lead_hero': None, 'ratio_override': None},
+                                 'garrison': {'lead_hero': None, 'ratio_override': None}}
+                                for _ in range(NAMED_JOINERS)],
+              'other_joiner_heroes': {'rally': [], 'garrison': []}, 'extra_joiners': []}
+        plan['leaders'].append(ld)
+        return {'as': 'leader', 'group_id': group_id, 'leader_id': ld['id'], 'slot': None}
+    ld = next(x for x in plan['leaders'] if x['id'] == leader_id)
+    cap = capacity(ld)
+    want = mode
+    if mode == 'auto':
+        want = 'named' if cap['named_used'] < NAMED_JOINERS else 'extra'
+    if want == 'named':
+        if slot is not None:
+            if ld['named_joiners'][slot]['player']:
+                raise PlaceRefused('slot_taken', {'leader_id': leader_id, 'position': 'named_joiner', 'slot': slot})
+            idx = slot
+        else:
+            free = [i for i, j in enumerate(ld['named_joiners']) if not j['player']]
+            if not free:
+                raise PlaceRefused('full', dict(cap, leader_id=leader_id, position='named_joiner'))
+            # a completely blank slot first (the lead hero stays empty, to be set in the planner)
+            idx = next((i for i in free if _blank_named_slot(ld['named_joiners'][i])), free[0])
+        ld['named_joiners'][idx]['player'] = ref
+        return {'as': 'named', 'group_id': ld['group_id'], 'leader_id': leader_id, 'slot': idx}
+    if cap['extra_used'] >= EXTRA_JOINERS:
+        raise PlaceRefused('full', dict(cap, leader_id=leader_id, position='extra_joiner'))
+    ld['extra_joiners'].append({'player': ref})
+    return {'as': 'extra', 'group_id': ld['group_id'], 'leader_id': leader_id, 'slot': len(ld['extra_joiners']) - 1}
+
+
+def check_place_target(plan, mode, leader_id, group_id, slot):
+    """Validate the request's target against the CURRENT plan (404 LEADER_NOT_FOUND / GROUP_NOT_FOUND, 400 bad
+    combination)."""
+    if mode not in PLACE_MODES:
+        raise validation_error('as must be one of ' + ', '.join(PLACE_MODES), 'as')
+    groups = {g['id']: g for g in plan['groups']}
+    leaders = {ld['id']: ld for ld in plan['leaders']}
+    if slot is not None:
+        if mode != 'named' or isinstance(slot, bool) or not isinstance(slot, int) or not 0 <= slot < NAMED_JOINERS:
+            raise validation_error(f'slot is a named joiner slot 0-{NAMED_JOINERS - 1} (as=named only)', 'slot')
+    if mode in ('auto', 'named', 'extra') or (mode == 'leader' and leader_id):
+        if not isinstance(leader_id, str) or not leader_id:
+            raise validation_error('leader_id is required', 'leader_id')
+        if leader_id not in leaders:
+            raise ApiError(404, 'LEADER_NOT_FOUND', 'That rally leader is no longer in the plan', field='leader_id',
+                           details={'leader_id': leader_id})
+        return
+    if not isinstance(group_id, str) or not group_id:
+        raise validation_error('group_id is required', 'group_id')
+    g = groups.get(group_id)
+    if not g:
+        raise ApiError(404, 'GROUP_NOT_FOUND', 'That group is no longer in the plan', field='group_id',
+                       details={'group_id': group_id})
+    if mode == 'leader' and g['kind'] == 'extra':
+        raise validation_error('a rally leader goes in a main or counter group', 'group_id')
+    if mode == 'group' and g['kind'] != 'extra':
+        raise validation_error('as=group adds to an extra group (main/counter take leaders)', 'group_id')
+
+
+def where_details(plan, where, names, ref=None):
+    """The DOUBLE_BOOKED details shape (where a player already is, with the planner's labels)."""
+    g = next(g for g in plan['groups'] if g['id'] == where['group_id'])
+    labels = leader_labels(plan, names)
+    out = dict(where, group_name=g['name'], group_kind=g['kind'],
+               leader_label=labels.get(where['leader_id']) if where['leader_id'] else None)
+    if ref is not None:
+        out.update(player=ref, player_name=display_name(ref, names))
+    return out
+
+
+def place_players(plan, refs, mode, leader_id=None, group_id=None, slot=None, move=False, strict=True,
+                  names=None, new_id=None):
+    """Apply \"Add to rally\" to a copy of ``plan``. ``strict`` (one player): any refusal raises (422 DOUBLE_BOOKED /
+    RALLY_FULL / GROUP_FULL / SLOT_TAKEN). Bulk: refusals are REPORTED (skipped = already placed elsewhere, overflow =
+    no room left), never silently dropped. Players are placed in the given order, so ``auto`` fills the named joiner
+    slots first, then extra joiners. Returns (new_plan, result)."""
+    import copy
+    names = names or {}
+    new_id = new_id or (lambda: 'L' + secrets.token_hex(5))
+    work = copy.deepcopy(plan)
+    check_place_target(work, mode, leader_id, group_id, slot)
+    result = {'placed': [], 'moved': [], 'unchanged': [], 'skipped': [], 'overflow': []}
+    for ref in refs:
+        where = find_placement(work, ref)
+        if where and _same_target(where, mode, leader_id, group_id):
+            result['unchanged'].append({'player': ref, 'where': where_details(work, where, names)})
+            continue
+        trial = copy.deepcopy(work)
+        try:
+            rec = _place_one(trial, ref, mode, leader_id, group_id, slot, move, new_id)
+        except PlaceRefused as e:
+            if e.kind == 'double_booked':
+                details = where_details(work, e.details, names, ref)
+                if strict:
+                    who = details['player_name']
+                    place = details['leader_label'] or details['group_name'] or details['group_kind']
+                    raise ApiError(422, 'DOUBLE_BOOKED', f'{who} is already in this plan ({place}); '
+                                   'use move to move them', field='fid', details=details)
+                result['skipped'].append({'player': ref, 'reason': 'already_placed', 'where': details})
+            elif e.kind == 'full':
+                if strict:
+                    code = 'GROUP_FULL' if mode == 'group' else 'RALLY_FULL'
+                    raise ApiError(422, code, 'No room left there (named joiners up to '
+                                   f'{NAMED_JOINERS}, extra joiners up to {EXTRA_JOINERS})', field='as',
+                                   details=e.details)
+                result['overflow'].append({'player': ref, 'details': e.details})
+            else:
+                if strict:
+                    raise ApiError(422, 'SLOT_TAKEN', 'That place is already taken', field='slot', details=e.details)
+                result['overflow'].append({'player': ref, 'details': e.details})
+            continue
+        rec = dict(rec, player=ref)
+        if where:
+            rec['from'] = where_details(work, where, names)
+            result['moved'].append(rec)
+        work = trial
+        result['placed'].append(rec)
+    return work, result

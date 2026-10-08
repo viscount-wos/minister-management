@@ -264,5 +264,73 @@
     "timesNote": "Les horaires de bataille sont en heure du jeu (UTC).",
     "joinersRatioNote": "Les participants utilisent le ratio du chef, sauf si un ratio propre est indiqué.",
     "localTimes": "{{range}} chez vous"
+  },
+  "players": {
+    "col": {
+      "plan": "Plan"
+    },
+    "place": {
+      "leader": "Chef · {{leader}} ({{group}})",
+      "joiner": "Renfort {{n}} · {{leader}} ({{group}})",
+      "extra": "Extra · {{leader}} ({{group}})",
+      "group": "{{group}}"
+    },
+    "filter": {
+      "plan": "Plan de bataille",
+      "inPlan": "Dans le plan",
+      "notInPlan": "Hors du plan"
+    },
+    "add": {
+      "button": "Ajouter {{name}} à un rallye",
+      "title": "Ajouter à un rallye",
+      "bulkTitle": "Ajouter les {{n}} sélectionnés à un rallye",
+      "now": "Actuellement : {{where}}",
+      "loading": "Chargement du plan…",
+      "noLeaders": "Le plan de bataille n'a pas encore de chef de rallye.",
+      "openPlan": "Ouvrir le plan de bataille",
+      "chooseLeader": "Choisissez un chef de rallye",
+      "capacity": "Nommés {{named}}/{{maxNamed}} · Extra {{extra}}/{{maxExtra}}",
+      "full": "Complet",
+      "hereNow": "ici",
+      "asNamed": "Comme renfort nommé ({{n}}/{{max}})",
+      "asExtra": "Comme renfort extra ({{n}}/{{max}})",
+      "moveNamed": "Déplacer ici comme renfort nommé ({{n}}/{{max}})",
+      "moveExtra": "Déplacer ici comme renfort extra ({{n}}/{{max}})",
+      "namedHint": "Le héros principal reste vide : choisissez-le dans le plan de bataille.",
+      "bulkAuto": "Les ajouter : places nommées d'abord, puis extra ({{free}} places libres)",
+      "bulkExtra": "Tous comme renforts extra ({{n}}/{{max}})",
+      "makeLeader": "Nommer chef de rallye dans {{group}}",
+      "moveMakeLeader": "Déplacer : nommer chef de rallye dans {{group}}",
+      "toGroup": "Ajouter à {{group}}",
+      "moveToGroup": "Déplacer vers {{group}}",
+      "other": "Autres places",
+      "back": "Retour",
+      "close": "Fermer",
+      "saving": "Enregistrement…"
+    },
+    "done": {
+      "one": "{{name}} ajouté : {{where}}.",
+      "moved": "{{name}} déplacé : {{where}}.",
+      "unchanged": "{{name}} y est déjà : {{where}}.",
+      "bulk": "{{n}} ajoutés à {{to}} ({{named}} nommés, {{extra}} extra).",
+      "bulkGroup": "{{n}} ajoutés à {{to}}.",
+      "none": "Personne n'a été ajouté.",
+      "skipped": "Ignorés, déjà dans le plan : {{list}}.",
+      "overflow": "Plus de place pour : {{list}}."
+    },
+    "err": {
+      "conflict": "Le plan a changé pendant votre choix. Vérifiez les nouveaux chiffres et réessayez.",
+      "full": "Plus de place ici.",
+      "gone": "Ce chef ou ce groupe n'est plus dans le plan."
+    },
+    "select": {
+      "row": "Sélectionner {{name}}",
+      "all": "Tout sélectionner sur cette page"
+    },
+    "bulk": {
+      "selected": "{{n}} sélectionnés",
+      "add": "Ajouter les {{n}} sélectionnés au rallye…",
+      "clear": "Effacer la sélection"
+    }
   }
 }

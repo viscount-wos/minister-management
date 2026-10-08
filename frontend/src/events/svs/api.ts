@@ -85,6 +85,16 @@ export interface SvsAdminApplication extends SvsApplication {
   profile: SvsProfile;
   answers: SvsAnswers;
   joiner_strength?: number | null;
+  /** Where the player is in the round's battle plan (null = not in it). */
+  plan_place?: PlanPlace | null;
+}
+
+export interface PlanPlace {
+  position: 'leader' | 'named_joiner' | 'extra_joiner' | 'extra_group';
+  group_id: string;
+  group_kind: 'main' | 'counter' | 'extra' | null;
+  leader_id: string | null;
+  slot: number | null;
 }
 
 export interface SvsSummary {
@@ -95,6 +105,8 @@ export interface SvsSummary {
   /** Players with T11 in all three troop types. */
   all_t11: number;
   discord_vc: number;
+  /** In / not in the battle plan (filtered set). */
+  plan?: { in: number; out: number };
   round_total: number;
   alliance_options: string[];
   hours: { hour: string; count: number }[];
@@ -123,6 +135,7 @@ export const FILTER_KEYS = [
   'submitted_from',
   'submitted_to',
   'days',
+  'in_plan',
 ] as const;
 export type FilterKey = (typeof FILTER_KEYS)[number];
 export type FilterQuery = Partial<Record<FilterKey, string>>;

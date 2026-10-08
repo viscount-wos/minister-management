@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Trash2, FileSpreadsheet, FileText, ChevronUp, ChevronDown, AlertCircle, SlidersHorizontal, CheckCircle } from 'lucide-react';
+import { Search, Trash2, FileSpreadsheet, FileText, ChevronUp, ChevronDown, AlertCircle, SlidersHorizontal, CheckCircle, UserPlus, X } from 'lucide-react';
 import { Round, downloadBlob } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
 import { useFormatDateTime } from '../../../shared/DateTime';
@@ -27,6 +27,11 @@ import {
   svsTroops,
 } from '../api';
 import { TroopIcon } from '../../../shared/heroes/HeroCard';
+import { planApi } from '../plan/api';
+import { makePlayerName, placementShort } from '../plan/labels';
+import { normalizeDoc, placements } from '../plan/model';
+import type { Person, PlanDoc } from '../plan/model';
+import AddToRally, { type RallyPlayer } from './AddToRally';
 
 // SVS admin Players tab (modelled on Frost Dragon Tyrant's, owner's dashboard order): headline stats -> breakdown
 // bars (players per hour, alliances; clickable filters) -> troop camp/tier chips -> filter bar -> table.
@@ -37,6 +42,7 @@ const SORT_KEYS: SortKey[] = ['submitted', 'updated', 'name', 'alliance', 'fid',
 const URL_KEYS = [...FILTER_KEYS, 'sort', 'dir'] as const;
 type UrlKey = (typeof URL_KEYS)[number];
 const MORE_KEYS: FilterKey[] = ['vc', 'submitted_from', 'submitted_to', 'days'];
+const PLAN_VALUES = ['yes', 'no'] as const;
 const SELECT_CLASS = 'w-full min-h-[44px] px-3 py-2 text-base bg-dark-input border rounded-lg text-theme-text';
 const INPUT_SM =
   'w-full min-h-[44px] px-3 py-2 text-base bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim';
@@ -45,6 +51,8 @@ interface Props {
   round: Round<SvsSettings>;
   readOnly: boolean;
   onChanged: () => void;
+  /** Switch the admin shell to the Battle plan tab. */
+  onOpenPlan?: () => void;
 }
 
 const tierValue = (label: string) => (label === 'none' ? 'none' : label.replace(/^T/, ''));
@@ -57,7 +65,7 @@ interface AddState {
 }
 const blankAdd = (): AddState => ({ hours: [], vc: '', troops: blankTroopValues() });
 
-export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
+export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: Props) {
   const { t } = useTranslation();
   const fmt = useFormatDateTime();
   const F = useUrlFilters<UrlKey>(URL_KEYS);
@@ -75,6 +83,11 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
   const [moreOpen, setMoreOpen] = useState(moreActive > 0);
   const [adding, setAdding] = useState(false);
   const [add, setAdd] = useState<AddState>(blankAdd);
+  const [planDoc, setPlanDoc] = useState<PlanDoc | null>(null);
+  const [planPeople, setPlanPeople] = useState<Record<string, Person>>({});
+  const [selected, setSelected] = useState<Map<string, string>>(new Map()); // fid -> name
+  const [rally, setRally] = useState<{ anchor: HTMLElement; players: RallyPlayer[] } | null>(null);
+  const [rallyNote, setRallyNote] = useState<{ text: string; warn: boolean } | null>(null);
   const sort: SortKey = SORT_KEYS.includes(v.sort as SortKey) ? (v.sort as SortKey) : 'submitted';
   const dir: 'asc' | 'desc' = v.dir === 'asc' ? 'asc' : 'desc';
 
@@ -100,11 +113,16 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
 
   const load = useCallback(async () => {
     try {
-      const [s, list] = await Promise.all([
+      const [s, list, plan] = await Promise.all([
         svsApi.admin.summary(round.id, filters),
         svsApi.admin.applications(round.id, { ...filters, sort, dir, limit: PAGE_SIZE, offset: page * PAGE_SIZE }),
+        planApi.get(round.id).catch(() => null),
       ]);
       setSummary(s);
+      if (plan) {
+        setPlanDoc(normalizeDoc(plan.plan));
+        setPlanPeople(plan.people);
+      }
       setApps(list.applications);
       setTotal(list.total);
       setError('');
@@ -170,6 +188,38 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
   if (v.submitted_from) pill('submitted_from', t('tyrant:admin.pill.from', { v: v.submitted_from }), () => F.set({ submitted_from: null }));
   if (v.submitted_to) pill('submitted_to', t('tyrant:admin.pill.to', { v: v.submitted_to }), () => F.set({ submitted_to: null }));
   if (v.days) pill('days', daysLabel(Number(v.days)), () => F.set({ days: null }));
+  if (v.in_plan === 'yes' || v.in_plan === 'no')
+    pill('in_plan', t(v.in_plan === 'yes' ? 'svs:players.filter.inPlan' : 'svs:players.filter.notInPlan'), () => F.set({ in_plan: null }));
+
+  // ------------------------------------------------------------ battle plan (Plan column, Add to rally, bulk)
+  const planName = useMemo(() => makePlayerName(planPeople), [planPeople]);
+  const placedMap = useMemo(() => (planDoc ? placements(planDoc) : null), [planDoc]);
+  const planText = (fid: string) => {
+    const p = placedMap?.get(`fid:${fid}`);
+    return p && planDoc ? placementShort(t, planDoc, p, planName) : null;
+  };
+  const toggleSelect = (a: SvsAdminApplication) =>
+    setSelected((m) => {
+      const n = new Map(m);
+      if (n.has(a.fid)) n.delete(a.fid);
+      else n.set(a.fid, a.profile.game_name);
+      return n;
+    });
+  const pageAllSelected = apps.length > 0 && apps.every((a) => selected.has(a.fid));
+  const toggleAllOnPage = () =>
+    setSelected((m) => {
+      const n = new Map(m);
+      if (pageAllSelected) apps.forEach((a) => n.delete(a.fid));
+      else apps.forEach((a) => n.set(a.fid, a.profile.game_name));
+      return n;
+    });
+  const rallyDone = (text: string, warn: boolean) => {
+    const bulkRun = (rally?.players.length ?? 0) > 1;
+    setRally(null);
+    if (bulkRun) setSelected(new Map());
+    setRallyNote({ text, warn });
+    load();
+  };
 
   const clearAll = () => {
     setSearch('');
@@ -219,6 +269,20 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
         <div className="p-3 bg-success/10 border border-success/30 rounded-lg flex items-center gap-2 text-success" role="status" data-testid="add-player-done">
           <CheckCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
           {notice}
+        </div>
+      )}
+
+      {rallyNote && (
+        <div
+          className={`p-3 rounded-lg flex items-start gap-2 border ${rallyNote.warn ? 'bg-warning/10 border-warning/30 text-warning' : 'bg-success/10 border-success/30 text-success'}`}
+          role="status"
+          data-testid="rally-result"
+        >
+          {rallyNote.warn ? <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" /> : <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />}
+          <span className="flex-1">{rallyNote.text}</span>
+          <button type="button" onClick={() => setRallyNote(null)} aria-label={t('svs:players.add.close')} className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] -m-3 rounded-lg">
+            <X className="w-4 h-4" aria-hidden="true" />
+          </button>
         </div>
       )}
 
@@ -428,6 +492,17 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
           </div>
         )}
 
+        {summary?.plan && (
+          <div className="flex flex-wrap items-center gap-2" data-testid="plan-chips">
+            <span className="text-sm font-medium text-theme-text">{t('svs:players.filter.plan')}</span>
+            {PLAN_VALUES.map((val) => (
+              <ChipButton key={val} testId={`chip-in-plan-${val}`} active={v.in_plan === val} onClick={() => toggleExact('in_plan', val)}>
+                {t(val === 'yes' ? 'svs:players.filter.inPlan' : 'svs:players.filter.notInPlan')}: <b data-testid="chip-count">{val === 'yes' ? summary.plan!.in : summary.plan!.out}</b>
+              </ChipButton>
+            ))}
+          </div>
+        )}
+
         <FilterPills pills={pills} onClear={clearAll} />
       </div>
 
@@ -467,10 +542,23 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
           <table className="w-full text-sm" data-testid="svs-table">
             <thead className="border-b border-theme-border">
               <tr>
+                {!readOnly && (
+                  <th className="px-1 py-1 w-10">
+                    <input
+                      type="checkbox"
+                      checked={pageAllSelected}
+                      onChange={toggleAllOnPage}
+                      aria-label={t('svs:players.select.all')}
+                      data-testid="select-all"
+                      className="w-5 h-5 accent-accent cursor-pointer align-middle"
+                    />
+                  </th>
+                )}
                 {th('name', t('tyrant:fields.ingameName'))}
                 {th('fid', t('admin:fid'))}
                 {th('alliance', t('tyrant:fields.alliance'))}
                 {th('hours', t('svs:admin.col.hours'))}
+                {th(null, t('svs:players.col.plan'))}
                 {th(null, t('tyrant:admin.col.vc'))}
                 {th('strength', t('tyrant:admin.col.strength'))}
                 {th('submitted', t('tyrant:admin.col.submitted'))}
@@ -483,6 +571,18 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
                 const mine = new Set(a.answers.hours ?? []);
                 return (
                   <tr key={a.id} className="border-b border-theme-border/50 hover:bg-dark-card-hover align-top" data-testid={`player-row-${a.fid}`}>
+                    {!readOnly && (
+                      <td className="px-1 py-2">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(a.fid)}
+                          onChange={() => toggleSelect(a)}
+                          aria-label={t('svs:players.select.row', { name: a.profile.game_name })}
+                          data-testid={`select-${a.fid}`}
+                          className="w-5 h-5 mt-3 accent-accent cursor-pointer"
+                        />
+                      </td>
+                    )}
                     <td className="px-2 py-2 font-medium text-theme-text min-w-[12rem]">
                       <bdi>{a.profile.game_name}</bdi>
                       <div className="text-xs font-normal text-theme-dim mt-0.5 leading-5" data-testid={`troop-summary-${a.fid}`}>
@@ -512,13 +612,41 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
                         ))}
                       </div>
                     </td>
+                    <td className="px-2 py-2 text-xs min-w-[9rem] max-w-[14rem]" data-testid={`plan-${a.fid}`}>
+                      {planText(a.fid) ? (
+                        <span className="inline-block px-1.5 py-0.5 rounded bg-accent/15 text-accent font-semibold">
+                          <bdi>{planText(a.fid)}</bdi>
+                        </span>
+                      ) : (
+                        <span className="text-theme-dim">
+                          <span aria-hidden="true">—</span>
+                          <span className="sr-only">{t('svs:players.filter.notInPlan')}</span>
+                        </span>
+                      )}
+                    </td>
                     <td className="px-2 py-2">{vcCell(a.answers.discord_vc ?? null)}</td>
                     <td className="px-2 py-2 text-theme-text font-semibold" data-testid="strength">
                       {a.joiner_strength ?? '—'}
                     </td>
                     <td className="px-2 py-2 text-xs text-theme-dim whitespace-nowrap">{fmt(a.created_at, { withZone: false, weekday: false, isolate: false })}</td>
                     {!readOnly && (
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-2 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            const el = e.currentTarget;
+                            setRallyNote(null);
+                            setRally((r) => (r?.anchor === el ? null : { anchor: el, players: [{ fid: a.fid, name: a.profile.game_name }] }));
+                          }}
+                          data-testid={`add-to-rally-${a.fid}`}
+                          aria-label={t('svs:players.add.button', { name: a.profile.game_name })}
+                          title={t('svs:players.add.title')}
+                          aria-haspopup="dialog"
+                          aria-expanded={rally?.players.length === 1 && rally.players[0].fid === a.fid}
+                          className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-accent hover:bg-accent/10 rounded-lg"
+                        >
+                          <UserPlus className="w-4 h-4" aria-hidden="true" />
+                        </button>
                         <button
                           type="button"
                           onClick={() => remove(a)}
@@ -535,7 +663,7 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
               })}
               {apps.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-3 py-10 text-center text-theme-dim" data-testid="no-players">
+                  <td colSpan={11} className="px-3 py-10 text-center text-theme-dim" data-testid="no-players">
                     {filtered ? t('tyrant:admin.noMatches') : t('tyrant:admin.noPlayers')}
                   </td>
                 </tr>
@@ -556,6 +684,54 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
           </div>
         )}
       </div>
+
+      {!readOnly && selected.size > 0 && (
+        <div className="sticky bottom-2 z-30 flex flex-wrap items-center gap-3 p-3 rounded-xl border border-accent/50 bg-dark-card shadow-2xl" data-testid="bulk-bar" role="region" aria-label={t('svs:players.bulk.selected', { n: selected.size })}>
+          <span className="text-sm font-semibold text-theme-text flex-1" data-testid="bulk-count">
+            {t('svs:players.bulk.selected', { n: selected.size })}
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelected(new Map())}
+            data-testid="bulk-clear"
+            className="min-h-[44px] px-3 rounded-lg border border-theme-border text-theme-text text-sm hover:bg-dark-card-hover"
+          >
+            {t('svs:players.bulk.clear')}
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              const el = e.currentTarget;
+              setRallyNote(null);
+              setRally((r) => (r?.anchor === el ? null : { anchor: el, players: [...selected].map(([fid, name]) => ({ fid, name })) }));
+            }}
+            aria-haspopup="dialog"
+            data-testid="bulk-add"
+            className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-lg bg-accent text-dark-bg font-semibold hover:opacity-90"
+          >
+            <UserPlus className="w-4 h-4" aria-hidden="true" />
+            {t('svs:players.bulk.add', { n: selected.size })}
+          </button>
+        </div>
+      )}
+
+      {rally && (
+        <AddToRally
+          round={round}
+          anchor={rally.anchor}
+          players={rally.players}
+          onClose={() => setRally(null)}
+          onDone={rallyDone}
+          onOpenPlan={
+            onOpenPlan
+              ? () => {
+                  setRally(null);
+                  onOpenPlan();
+                }
+              : undefined
+          }
+        />
+      )}
 
       {adding && (
         <AddPlayerDialog
