@@ -266,7 +266,7 @@ def test_admin_forged_token_goes_back_to_login(page: Page, base_url, shot):
     ui.go(page, base_url, 'admin_login')
     page.evaluate("localStorage.setItem('adminToken', 'admin-token')")
     page.goto(base_url + ui.ROUTES['admin_dashboard'])
-    page.wait_for_url('**/admin?expired=1')
+    page.wait_for_url('**/admin?event=ministry&expired=1')   # back to login, then back to the same event
     expect(page.get_by_test_id('session-expired')).to_have_text(en('admin:sessionExpired'))
     assert page.evaluate("localStorage.getItem('adminToken')") is None
     shot('expired')

@@ -85,17 +85,35 @@ def switch_language(page: Page, code: str) -> None:
         arg='rtl' if code in RTL_LANGUAGES else 'ltr')
 
 
-def admin_login(page: Page, base_url: str, password: str) -> None:
-    """Log in through the UI (password found by its <label>) and land on the dashboard."""
-    go(page, base_url, 'admin_login')
+def admin_dashboard_url(event: str) -> str:
+    return f"{ROUTES['admin_dashboard']}?event={event}"
+
+
+def admin_guide_url(event: str) -> str:
+    return f"{ROUTES['admin_guide']}?event={event}"
+
+
+def admin_login(page: Page, base_url: str, password: str, event: str = 'ministry') -> None:
+    """Log in through the UI (password found by its <label>) and land on `event`'s dashboard."""
+    page.goto(base_url + ROUTES['home'])
     # A still-valid token makes /admin skip straight to the dashboard: start logged out.
     page.evaluate("localStorage.removeItem('adminToken'); localStorage.removeItem('adminRole')")
-    go(page, base_url, 'admin_login')
+    page.goto(f"{base_url}{ROUTES['admin_login']}?event={event}")
+    page.wait_for_load_state('networkidle')
     page.get_by_label(en('admin:password')).fill(password)
     page.get_by_test_id('admin-login').click()
-    page.wait_for_url('**' + ROUTES['admin_dashboard'])
+    page.wait_for_url('**' + admin_dashboard_url(event))
     expect(page.get_by_test_id('round-select')).to_be_visible()
     page.wait_for_load_state('networkidle')
+
+
+def use_admin_token(page: Page, base_url: str, token: str, path: str | None = None) -> None:
+    """Reuse an API token instead of logging in through the UI (the login is rate-limited)."""
+    page.goto(base_url + ROUTES['home'])
+    page.evaluate("t => { localStorage.setItem('adminToken', t); localStorage.setItem('adminRole', 'admin'); }", token)
+    if path:
+        page.goto(base_url + path)
+        page.wait_for_load_state('networkidle')
 
 
 # --- the application wizard (v1.4 steps) -------------------------------------
