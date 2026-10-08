@@ -379,6 +379,77 @@ def test_tyrant_wizard_new_on_phone(phone, api, device, lang, locale):
     assert app['answers']['language'] == lang
 
 
+# ------------------------------------------------------------------ SVS wizard NEW (v2.2.0)
+
+def ensure_svs_round(api: ui.Api):
+    status, res = api.call('GET', '/api/events/svs/current', ok=None)
+    if status == 200 and res['settings']['hours'] == ['11:00', '12:00', '13:00', '14:00', '15:00']:
+        return res
+    _, res = api.call('POST', '/api/admin/events/svs/start-new-round',
+                      {'name': f'SVS mobile {RUN}', 'settings': {'battle_start': '11:00', 'battle_hours': 5}}, admin=True)
+    return res['round']
+
+
+@pytest.mark.parametrize('device', ['iPhone 13', 'narrow-360'])
+@pytest.mark.parametrize('lang,locale', [('en', 'en-US'), ('ar', 'ar-SA')])
+def test_svs_wizard_new_on_phone(phone, api, device, lang, locale):
+    ensure_svs_round(api)
+    page = phone(device, locale=locale, timezone_id='Asia/Seoul')     # local time = UTC+9
+    p = Phone(page, device, lang)
+    fid = fresh_fid()
+    p.goto('/svs')
+    p.check('svs-home', tappable=['svs-apply-tile', 'nav-home'])
+    p.goto('/svs/apply')
+    ui.expect_step(page, 1)
+    p.expect_steps_fit()
+    assert page.get_by_test_id('fid-input').get_attribute('inputmode') == 'numeric'
+    expect(page.get_by_test_id('fid-help')).to_be_visible()
+    p.check('svs-1-fid', tappable=['wizard-back', 'wizard-next'])
+    page.get_by_test_id('fid-input').fill(fid)
+    page.get_by_test_id('wizard-next').click()
+    expect(page.get_by_test_id('application-heading')).to_have_attribute('data-mode', 'new')
+    page.get_by_test_id('profile-game-name').fill(f'SVS {lang} {RUN}')
+    page.get_by_test_id('profile-alliance').fill('svm')
+    p.expect_nav_in_view()
+    p.check('svs-1-player', tappable=['wizard-back', 'wizard-next', 'change-fid'])
+    ui.next_step(page)
+    # 2 hours: game time (UTC) big, local time (Seoul) small, 5 chips 11:00-15:00
+    expect(page.get_by_test_id('utc-note')).to_have_text(ui.tr(lang, 'svs:step2.utcNote'))
+    chip = page.get_by_test_id('hour-11:00')
+    expect(chip.get_by_test_id('hour-utc')).to_have_text('11:00 UTC')
+    expect(chip.get_by_test_id('hour-local')).to_have_text('20:00')
+    assert chip.get_by_test_id('hour-utc').get_attribute('dir') == 'ltr'
+    for h in ('11:00', '12:00', '13:00', '14:00', '15:00'):
+        b = page.get_by_test_id(f'hour-{h}').bounding_box()
+        assert b['height'] >= TAP and b['width'] >= TAP and b['x'] + b['width'] <= p.width
+    page.get_by_test_id('hour-12:00').click()
+    page.get_by_test_id('hour-13:00').click()
+    expect(page.get_by_test_id('hour-13:00')).to_have_attribute('aria-pressed', 'true')
+    p.expect_nav_in_view()
+    p.check('svs-2-hours', tappable=['wizard-back', 'wizard-next', 'select-all-hours'])
+    ui.next_step(page)
+    # 3 troops: FC camps, T11 / T10 buttons only
+    for kind in ('infantry', 'lancer', 'marksman'):
+        assert page.get_by_test_id(f'troop-{kind}-tier').locator('[role=radio]').all_inner_texts() == ['T11', 'T10']
+        page.get_by_test_id(f'troop-{kind}-furnace').select_option('FC9')
+        page.get_by_test_id(f'tier-{kind}-11').click()
+    p.check('svs-3-troops', tappable=['wizard-back', 'wizard-next'] + [f'troop-{k}-furnace' for k in ('infantry', 'lancer', 'marksman')]
+            + [f'tier-{k}-{n}' for k in ('infantry', 'lancer', 'marksman') for n in (10, 11)])
+    ui.next_step(page)
+    # 4 role + VC: big radio cards
+    page.get_by_test_id('role-join').click()
+    page.get_by_test_id('vc-yes').click()
+    expect(page.get_by_test_id('role-join')).to_have_attribute('aria-checked', 'true')
+    p.check('svs-4-role', tappable=['wizard-back', 'wizard-next', 'role-call', 'role-join', 'vc-yes', 'vc-no'])
+    ui.next_step(page)
+    p.expect_nav_in_view()
+    p.check('svs-5-review', tappable=['wizard-back', 'wizard-submit', 'review-edit-1', 'review-edit-2'])
+    ui.submit(page)
+    p.check('svs-success', tappable=['reopen-application'])
+    _, app = api.call('GET', f'/api/events/svs/current/application/{fid}')
+    assert app['answers'] == {'hours': ['12:00', '13:00'], 'role': 'join', 'discord_vc': True, 'language': lang}
+
+
 # ------------------------------------------------------------------ closed / no round (Tyrant; restored after)
 
 @pytest.mark.parametrize('lang,locale', [('en', 'en-US'), ('ar', 'ar-SA')])

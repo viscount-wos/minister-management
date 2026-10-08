@@ -256,7 +256,7 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
             />
             <Bars
               testId="by-role"
-              title={t('svs:step4.roleTitle')}
+              title={t('svs:admin.col.role')}
               total={summary.total}
               rows={[...ROLES, ...(summary.roles.none ? (['none'] as const) : [])].map((r) => ({
                 key: r,
@@ -359,7 +359,7 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
           />
           <div>
             <label htmlFor="filter-role" className="block text-sm font-medium text-theme-text mb-2">
-              {t('svs:step4.roleTitle')}
+              {t('svs:admin.col.role')}
             </label>
             <select
               id="filter-role"
@@ -645,7 +645,7 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="add-role" className="block text-sm font-medium text-theme-text mb-2">
-                {t('svs:step4.roleTitle')}
+                {t('svs:admin.col.role')}
               </label>
               <select
                 id="add-role"

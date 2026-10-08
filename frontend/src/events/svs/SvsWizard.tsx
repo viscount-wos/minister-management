@@ -110,10 +110,14 @@ function Choice({
       data-testid={testId}
       onClick={onSelect}
       className={`w-full flex items-center gap-3 ${compact ? 'justify-center min-h-[48px] px-3 py-2' : 'min-h-[60px] px-4 py-3 text-start'} rounded-lg border-2 font-medium transition-colors ${
-        selected ? 'border-accent bg-accent/15 text-theme-text' : 'border-theme-border bg-dark-bg text-theme-text hover:border-accent'
+        selected
+          ? compact
+            ? 'border-accent bg-accent text-dark-bg'
+            : 'border-accent bg-accent/15 text-theme-text'
+          : 'border-theme-border bg-dark-bg text-theme-text hover:border-accent'
       }`}
     >
-      {icon && <span className={`shrink-0 ${selected ? 'text-accent' : 'text-theme-dim'}`}>{icon}</span>}
+      {icon && <span className={`shrink-0 ${selected ? (compact ? 'text-dark-bg' : 'text-accent') : 'text-theme-dim'}`}>{icon}</span>}
       <span className="min-w-0">
         <span className="block break-words">{children}</span>
         {sub && <span className="block text-sm font-normal text-theme-dim break-words">{sub}</span>}
@@ -665,7 +669,8 @@ export default function SvsWizard() {
           <div data-testid="wizard-step-3">
             {stepHeader(3)}
             <p className="mb-4 p-3 rounded-lg bg-accent/10 border border-accent/30 text-sm text-theme-text" data-testid="camp-hint">
-              {t('tyrant:step4.campHint')} {t('svs:step3.tierHint')}
+              <span className="block">{t('tyrant:step4.campHint')}</span>
+              <span className="block mt-1 font-semibold">{t('svs:step3.tierHint')}</span>
             </p>
             <div className="space-y-4">
               {TROOP_TYPES.map((kind) => {
