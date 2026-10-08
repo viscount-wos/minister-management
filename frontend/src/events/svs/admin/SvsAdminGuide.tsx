@@ -13,7 +13,26 @@ export default function SvsAdminGuide() {
 
   return (
     <div data-testid="admin-guide-svs">
-      <p className="text-theme-dim mb-6 sm:mb-8">{k('subtitle')}</p>
+      <p className="text-theme-dim mb-4">{k('subtitle')}</p>
+      {/* Jump links: this guide is long (the Battle plan alone has seven sections) */}
+      <nav className="mb-6 sm:mb-8 flex flex-wrap gap-2" aria-label={k('subtitle')} data-testid="guide-toc">
+        {(
+          [
+            ['players', 'tableTitle'],
+            ['plan', 'planTitle'],
+            ['share', 'shareTitle'],
+            ['heroes', 'heroesTitle'],
+          ] as const
+        ).map(([id, title]) => (
+          <a
+            key={id}
+            href={`#${id}`}
+            className="inline-flex items-center min-h-[44px] px-3 rounded-full border border-theme-border text-sm text-accent hover:bg-dark-card-hover"
+          >
+            {k(title)}
+          </a>
+        ))}
+      </nav>
       <div className="space-y-6 sm:space-y-8">
         <GuideSection icon={Settings} title={k('overviewTitle')}>
           <p>{k('overviewBody')}</p>
@@ -71,7 +90,7 @@ export default function SvsAdminGuide() {
         </GuideSection>
 
         {/* Heroes tab */}
-        <GuideSection icon={Image} title={k('heroesTitle')}>
+        <GuideSection icon={Image} title={k('heroesTitle')} id="heroes">
           <p>{k('heroesBody')}</p>
         </GuideSection>
 
