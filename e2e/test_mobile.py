@@ -278,10 +278,27 @@ def test_minister_wizard_new_on_phone(phone, api, device, lang, locale):
         overflow = grid.evaluate("g => [...g.querySelectorAll('button')].filter(b => b.scrollWidth > b.clientWidth + 1).length")
         assert overflow == 0, f'{day}: text clipped in {overflow} hour buttons'
         p.expect_nav_in_view()
+        if picks[day]:
+            # 'Times shown in <zone>': the zone is an LTR isolate (no bracket/number scramble in Arabic)
+            note = page.get_by_test_id('times-shown-in')
+            expect(note).to_contain_text(ui.tr(lang, 'ministry:form.timesShownIn'))
+            assert note.locator('bdi[dir=ltr]').count() == 1
         p.check(f'minister-{n}-{day}', tappable=['wizard-back', 'wizard-next', 'wizard-timezone'])
         ui.next_step(page)
     ui.expect_step(page, ui.REVIEW_STEP)
     ui.expect_review_slots(page, picks)
+    # review heading names the zone the times are shown in (was a fixed '(UTC)')
+    heading = page.get_by_test_id('review-times-heading')
+    expect(heading).to_contain_text(ui.tr(lang, 'ministry:form.step2Title'))
+    assert 'UTC' not in heading.inner_text()
+    # chips: '<local> (<utc> UTC)', each time an LTR isolate; local time first in reading order
+    chip = page.get_by_test_id('review-slots-construction').locator('[data-slot="10:00"]')
+    expect(chip.get_by_test_id('time-utc')).to_have_text('(10:00 UTC)')
+    assert chip.get_by_test_id('time-utc').get_attribute('dir') == 'ltr'
+    expect(chip.get_by_test_id('time-local')).to_have_text('19:00')        # Asia/Seoul = UTC+9
+    local_x = chip.get_by_test_id('time-local').bounding_box()['x']
+    utc_x = chip.get_by_test_id('time-utc').bounding_box()['x']
+    assert (local_x > utc_x) if lang == 'ar' else (local_x < utc_x), (lang, local_x, utc_x)
     p.expect_nav_in_view()
     p.check('minister-5-review', tappable=['wizard-back', 'wizard-submit'])
     ui.submit(page)
@@ -329,11 +346,18 @@ def test_tyrant_wizard_new_on_phone(phone, api, device, lang, locale):
     page.get_by_test_id('gem-spend').fill('5000')
     p.check('tyrant-3-stats', tappable=['wizard-back', 'wizard-next', 'furnace-level', 'power-millions', 'gem-spend'])
     ui.next_step(page)
-    # 4 troops
+    # 4 troops: CAMP levels (FC10..FC1 only) + tier, all required
+    expect(page.get_by_test_id('camp-hint')).to_have_text(ui.tr(lang, 'tyrant:step4.campHint'))
+    for kind in ('infantry', 'lancer', 'marksman'):
+        expect(page.locator(f'label[for=troop-{kind}-furnace]')).to_have_text(ui.tr(lang, f'tyrant:step4.camp.{kind}'))
+        opts = page.get_by_test_id(f'troop-{kind}-furnace').locator('option').evaluate_all('os => os.map(o => o.value)')
+        assert opts == ['', 'FC10', 'FC9', 'FC8', 'FC7', 'FC6', 'FC5', 'FC4', 'FC3', 'FC2', 'FC1']
+    page.get_by_test_id('wizard-next').click()
+    expect(page.get_by_test_id('form-error')).to_have_text(ui.tr(lang, 'tyrant:errors.campRequired'))
     for kind in ('infantry', 'lancer', 'marksman'):
         page.get_by_test_id(f'troop-{kind}-furnace').select_option('FC5')
         page.get_by_test_id(f'troop-{kind}-tier').select_option('10')
-    p.check('tyrant-4-troops', tappable=['wizard-back', 'wizard-next'])
+    p.check('tyrant-4-troops', tappable=['wizard-back', 'wizard-next'] + [f'troop-{k}-{f}' for k in ('infantry', 'lancer', 'marksman') for f in ('furnace', 'tier')])
     ui.next_step(page)
     # 5 roles
     page.locator('label[for=role-joiner]').click()
@@ -398,7 +422,66 @@ def test_admin_usable_on_phone(phone, api, base_url, lang, locale):
     page.wait_for_load_state('networkidle')
     p.check('admin-tyrant-players')
     page.get_by_test_id('tab-settings').click()
+    expect(page.get_by_test_id('windows-editor')).to_be_visible()
+    # 16px / 44px time inputs (no iOS zoom), rush checkboxes are whole-row tap targets
+    for tid in ('window-start-0', 'window-end-0'):
+        assert page.get_by_test_id(tid).bounding_box()['height'] >= TAP
+    assert page.get_by_test_id('window-rush-0').locator('xpath=..').bounding_box()['height'] >= TAP
+    assert page.get_by_test_id('window-rush-0').bounding_box()['width'] >= 20
     p.check('admin-tyrant-settings')
+
+
+def seed_tyrant_filter_players(api: ui.Api) -> tuple[str, str]:
+    best, other = fresh_fid(), fresh_fid()
+    full = lambda camp, tier: {k: {'furnace_level': camp, 'tier': tier} for k in ('infantry', 'lancer', 'marksman')}  # noqa: E731
+    for fid, troops in ((best, full('FC10', 11)), (other, full('FC8', 10))):
+        api.call('PUT', f'/api/events/tyrant/current/application/{fid}', {
+            'profile': {'game_name': f'Mob {fid}', 'alliance': 'MOB', 'furnace_level': 'FC10', 'troops': troops},
+            'answers': {'availability': ['w1'], 'gem_spend': 100}})
+    return best, other
+
+
+@pytest.mark.parametrize('lang,locale', [('en', 'en-US'), ('ar', 'ar-SA')])
+def test_admin_tyrant_filters_on_phone(phone, api, base_url, lang, locale):
+    """Chips, bar filters, pills and Clear filters on a phone: 44px targets, no sideways scroll, RTL."""
+    ensure_tyrant_round(api)
+    best, other = seed_tyrant_filter_players(api)
+    device = 'iPhone 13'
+    page = phone(device, locale=locale)
+    p = Phone(page, device, lang)
+    ui.use_admin_token(page, base_url, api.token(), ui.admin_dashboard_url('tyrant'))
+    expect(page.get_by_test_id('tyrant-table')).to_be_visible()
+    page.wait_for_load_state('networkidle')
+    expect(page.get_by_test_id('stat-gems')).to_have_count(0)
+    total = int(page.get_by_test_id('stat-total-value').inner_text())
+    chips = ['chip-infantry-camp-FC10', 'chip-infantry-tier-T11', 'filter-troop', 'filter-min-camp', 'filter-min-tier',
+             'alliance-filter', 'windows-filter', 'filter-more', 'sort-strength', 'sort-name']
+    p.check('admin-tyrant-filters', tappable=chips)
+    # tap a chip: table + summary narrow, chip highlighted, pill
+    page.get_by_test_id('chip-infantry-camp-FC8').click()
+    expect(page.get_by_test_id(f'player-row-{other}')).to_be_visible()
+    expect(page.get_by_test_id(f'player-row-{best}')).to_have_count(0)
+    expect(page.get_by_test_id('chip-infantry-camp-FC8')).to_have_attribute('aria-pressed', 'true')
+    expect(page.get_by_test_id('filter-pill-infantry_camp')).to_be_visible()
+    assert int(page.get_by_test_id('stat-total-value').inner_text()) < total
+    p.check('admin-tyrant-chip', tappable=['filter-pill-infantry_camp', 'clear-filters'])
+    page.get_by_test_id('filter-pill-infantry_camp').click()
+    expect(page.get_by_test_id('stat-total-value')).to_have_text(str(total))
+    # the bar: All three, at least FC10, T11 only (URL survives a reload)
+    page.get_by_test_id('filter-min-camp').select_option('FC10')
+    page.get_by_test_id('filter-min-tier').select_option('11')
+    expect(page.get_by_test_id(f'player-row-{best}')).to_be_visible()
+    expect(page.get_by_test_id(f'player-row-{other}')).to_have_count(0)
+    page.reload()
+    page.wait_for_load_state('networkidle')
+    expect(page.get_by_test_id('filter-pill-min_camp')).to_be_visible()
+    expect(page.get_by_test_id(f'player-row-{other}')).to_have_count(0)
+    p.check('admin-tyrant-fc10-t11', tappable=['filter-pill-min_camp', 'filter-pill-min_tier', 'clear-filters'])
+    page.get_by_test_id('clear-filters').click()
+    expect(page.get_by_test_id('stat-total-value')).to_have_text(str(total))
+    # More filters fit on a phone too
+    page.get_by_test_id('filter-more').click()
+    p.check('admin-tyrant-more-filters', tappable=['filter-vc', 'filter-days', 'roles-filter', 'filter-min-power'])
 
 
 def test_admin_tap_to_move_on_phone(phone, api, base_url):
@@ -438,3 +521,19 @@ def test_admin_tap_to_move_on_phone(phone, api, base_url):
     page.get_by_test_id(f'move-{fid}').click()
     page.get_by_test_id('move-here-unassigned').click()
     expect(page.get_by_test_id(f'slot-box-{empty}').get_by_test_id(f'card-{fid}')).to_have_count(0)
+
+
+def test_assignment_wants_in_display_timezone(phone, api, base_url):
+    """The 'Wants:' line under an unassigned player follows the admin's display timezone, like the slots."""
+    fid = fresh_fid()
+    api.put_application(fid, f'Wants {RUN}', 'WNT', {
+        'construction_speedups_days': 1, 'research_speedups_days': 0, 'troop_training_speedups_days': 0,
+        'time_slots_by_day': {'construction': ['05:00'], 'research': [], 'troop': []}})
+    page = phone('iPhone 13', timezone_id='Asia/Seoul')
+    ui.use_admin_token(page, base_url, api.token(), ui.admin_dashboard_url('ministry'))
+    page.get_by_test_id('tab-assignments').click()
+    page.get_by_test_id('assign-day-monday').click()
+    wants = page.get_by_test_id(f'wants-{fid}')
+    expect(wants).to_contain_text('14:00')                 # 05:00 UTC in Seoul (UTC+9)
+    expect(wants).not_to_contain_text('05:00')
+    assert wants.locator('[data-utc="05:00"]').count() == 1

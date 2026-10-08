@@ -21,6 +21,7 @@ RUN = time.strftime('%H%M%S')
 FID_A = str(70_000_000 + secrets.randbelow(9_999_999))   # English NEW -> EDIT -> new round + last answers
 FID_AR = str(80_000_000 + secrets.randbelow(9_999_999))  # Arabic
 STEPS = 6
+FC_ONLY = ['', 'FC10', 'FC9', 'FC8', 'FC7', 'FC6', 'FC5', 'FC4', 'FC3', 'FC2', 'FC1']  # Tyrant (owner rule p2d)
 
 
 def tr(key: str, lang: str = 'en', **v) -> str:
@@ -48,6 +49,13 @@ class TApi:
     def profile(self, fid: str):
         _, res = self.api.call('GET', f'/api/profile/{fid}')
         return res
+
+    def delete_application(self, fid: str):
+        """Remove a helper sign-up again, so the admin counts later in this module stay as they were."""
+        _, res = self.api.call('GET', f'/api/admin/tyrant/rounds/current/applications?q={fid}', admin=True)
+        for a in res['applications']:
+            if a['fid'] == fid:
+                self.api.call('DELETE', f'/api/admin/applications/{a["id"]}', admin=True)
 
     def update_round(self, rid: int, **body):
         _, res = self.api.call('PUT', f'/api/admin/rounds/{rid}', body, admin=True)
@@ -188,19 +196,19 @@ def test_full_wizard_new_in_english(page: Page, base_url, shot, tapi, tyrant_rou
     at_step(page, 1)
     fill_all_steps(page, name='Tyra', alliance='woo', discord='tyra#0001', windows=['w1', 'w3'], vc=True,
                    furnace='FC8', power='410.5', gems='10000',
-                   troops={'infantry': ('FC5', '10'), 'lancer': ('30', '9'), 'marksman': ('', '11')},
+                   troops={'infantry': ('FC5', '10'), 'lancer': ('FC9', '9'), 'marksman': ('FC10', '11')},
                    roles=['rally_leader', 'joiner'], shot=shot, tag='en-')
     expect(page.get_by_test_id('review-furnace-level')).to_contain_text('FC8')
     expect(page.get_by_test_id('review-troop-infantry')).to_contain_text('FC5 / T10')
-    expect(page.get_by_test_id('review-troop-marksman')).to_contain_text('— / T11')
+    expect(page.get_by_test_id('review-troop-marksman')).to_contain_text('FC10 / T11')
     expect(page.get_by_test_id('review-alliance')).to_contain_text('WOO')
     shot('en-step6-review')
     # Edit per section (tyrantpoll's review) -> back to that step
     page.get_by_test_id('review-edit-3').click()
     at_step(page, 3)
-    # furnace dropdown order: empty, FC10..FC1, then 30..1
+    # Tyrant furnace dropdown: exactly FC10..FC1 (no pre-FC 30..1)
     values = page.get_by_test_id('furnace-level').locator('option').evaluate_all('os => os.map(o => o.value)')
-    assert values[:3] == ['', 'FC10', 'FC9'] and values[10:12] == ['FC1', '30'] and values[-1] == '1' and len(values) == 41
+    assert values == FC_ONLY, values
     page.get_by_test_id('gem-spend').fill('12000')
     for n in (4, 5, 6):
         next_step(page, n)
@@ -217,8 +225,8 @@ def test_full_wizard_new_in_english(page: Page, base_url, shot, tapi, tyrant_rou
     assert prof['game_name'] == 'Tyra' and prof['alliance'] == 'WOO' and prof['discord_id'] == 'tyra#0001'
     assert prof['furnace_level'] == 'FC8' and prof['power'] == 410_500_000
     assert prof['troops'] == {'infantry': {'furnace_level': 'FC5', 'tier': 10},
-                              'lancer': {'furnace_level': '30', 'tier': 9},
-                              'marksman': {'furnace_level': None, 'tier': 11}}
+                              'lancer': {'furnace_level': 'FC9', 'tier': 9},
+                              'marksman': {'furnace_level': 'FC10', 'tier': 11}}
 
 
 def test_edit_via_fid(page: Page, base_url, shot, tapi, tyrant_round):
@@ -239,7 +247,7 @@ def test_edit_via_fid(page: Page, base_url, shot, tapi, tyrant_round):
     expect(page.get_by_test_id('power-millions')).to_have_value('410.5')
     expect(page.get_by_test_id('gem-spend')).to_have_value('12000')
     next_step(page, 4)
-    expect(page.get_by_test_id('troop-lancer-furnace')).to_have_value('30')
+    expect(page.get_by_test_id('troop-lancer-furnace')).to_have_value('FC9')
     expect(page.get_by_test_id('troop-infantry-tier')).to_have_value('10')
     next_step(page, 5)
     expect(page.get_by_test_id('role-rally_leader')).to_be_checked()
@@ -267,7 +275,8 @@ def test_arabic_rtl_wizard(page: Page, base_url, shot, tapi, tyrant_round):
     assert one['x'] > six['x']
     expect(page.get_by_test_id('wizard-step-title')).to_have_text(tr('tyrant:step1.title', 'ar'))
     fill_all_steps(page, name='طاغية', alliance='ARB', discord='', windows=['w2', 'w4'], vc=False,
-                   furnace='FC3', power='95', gems='', troops={'infantry': ('FC3', '8')}, roles=['gathering'],
+                   furnace='FC3', power='95', gems='',
+                   troops={'infantry': ('FC3', '8'), 'lancer': ('FC1', '11'), 'marksman': ('FC3', '9')}, roles=['gathering'],
                    shot=shot, tag='ar-')
     expect(page.get_by_test_id('wizard-step-title')).to_have_text(tr('tyrant:step6.title', 'ar'))
     expect(page.get_by_test_id('review-furnace-level')).to_contain_text('FC3')
@@ -282,6 +291,79 @@ def test_arabic_rtl_wizard(page: Page, base_url, shot, tapi, tyrant_round):
     assert app['answers']['availability'] == ['w2', 'w4'] and app['answers']['language'] == 'ar'
     assert tapi.profile(FID_AR)['furnace_level'] == 'FC3'
     ui.switch_language(page, 'en')
+
+
+def test_fc_only_dropdowns_camp_labels_and_required(page: Page, base_url, shot, tapi):
+    """Furnace + every camp: exactly FC10..FC1; camps are labelled as CAMP levels with a hint; the furnace and
+    each camp level + tier are required (any combination is fine)."""
+    fid = str(61_000_000 + secrets.randbelow(999_999))
+    assert open_wizard(page, base_url, fid) == 'new'
+    page.get_by_test_id('profile-game-name').fill('Req')
+    page.get_by_test_id('profile-alliance').fill('REQ')
+    next_step(page, 2)
+    next_step(page, 3)
+    page.get_by_test_id('wizard-next').click()
+    at_step(page, 3)
+    expect(page.get_by_test_id('form-error')).to_have_text(tr('tyrant:errors.furnaceRequired'))
+    page.get_by_test_id('furnace-level').select_option('FC2')
+    next_step(page, 4)
+    expect(page.get_by_test_id('camp-hint')).to_have_text(tr('tyrant:step4.campHint'))
+    for kind in ('infantry', 'lancer', 'marksman'):
+        sel = page.get_by_test_id(f'troop-{kind}-furnace')
+        assert sel.locator('option').evaluate_all('os => os.map(o => o.value)') == FC_ONLY
+        expect(page.locator(f'label[for=troop-{kind}-furnace]')).to_have_text(tr(f'tyrant:step4.camp.{kind}'))
+        tiers = page.get_by_test_id(f'troop-{kind}-tier').locator('option').evaluate_all('os => os.map(o => o.value)')
+        assert tiers == ['', '8', '9', '10', '11']
+    page.get_by_test_id('wizard-next').click()
+    at_step(page, 4)
+    expect(page.get_by_test_id('form-error')).to_have_text(tr('tyrant:errors.campRequired'))
+    # any combination: camps above the furnace, T11 in an FC1 camp
+    for kind, (camp, tier) in {'infantry': ('FC10', '11'), 'lancer': ('FC1', '11'), 'marksman': ('FC7', '8')}.items():
+        page.get_by_test_id(f'troop-{kind}-furnace').select_option(camp)
+        if kind != 'marksman':
+            page.get_by_test_id(f'troop-{kind}-tier').select_option(tier)
+    page.get_by_test_id('wizard-next').click()
+    at_step(page, 4)  # the marksman tier is still missing
+    expect(page.get_by_test_id('troop-marksman-tier')).to_have_attribute('aria-invalid', 'true')
+    page.get_by_test_id('troop-marksman-tier').select_option('8')
+    shot('troops-step-required')
+    next_step(page, 5)
+    next_step(page, 6)
+    page.get_by_test_id('wizard-submit').click()
+    expect(page.get_by_test_id('save-success')).to_be_visible()
+    assert tapi.profile(fid)['troops']['lancer'] == {'furnace_level': 'FC1', 'tier': 11}
+    tapi.delete_application(fid)
+
+
+def test_legacy_pre_fc_profile_must_repick(page: Page, base_url, shot, tapi):
+    """A profile saved with pre-FC levels (Minister, or before the rule) shows them as unselected in Tyrant."""
+    fid = str(62_000_000 + secrets.randbelow(999_999))
+    legacy = {k: {'furnace_level': '25', 'tier': 10} for k in ('infantry', 'lancer', 'marksman')}
+    tapi.api.call('PUT', f'/api/profile/{fid}', {'game_name': 'Oldie', 'alliance': 'OLD', 'furnace_level': '28',
+                                                 'troops': legacy})
+    assert open_wizard(page, base_url, fid) == 'new'
+    next_step(page, 2)
+    next_step(page, 3)
+    expect(page.get_by_test_id('furnace-level')).to_have_value('')
+    page.get_by_test_id('wizard-next').click()
+    expect(page.get_by_test_id('form-error')).to_have_text(tr('tyrant:errors.furnaceRequired'))
+    page.get_by_test_id('furnace-level').select_option('FC1')
+    next_step(page, 4)
+    for kind in ('infantry', 'lancer', 'marksman'):
+        expect(page.get_by_test_id(f'troop-{kind}-furnace')).to_have_value('')
+        expect(page.get_by_test_id(f'troop-{kind}-tier')).to_have_value('10')
+    shot('legacy-pre-fc-step4')
+    page.get_by_test_id('wizard-next').click()
+    expect(page.get_by_test_id('form-error')).to_have_text(tr('tyrant:errors.campRequired'))
+    for kind in ('infantry', 'lancer', 'marksman'):
+        page.get_by_test_id(f'troop-{kind}-furnace').select_option('FC1')
+    next_step(page, 5)
+    next_step(page, 6)
+    page.get_by_test_id('wizard-submit').click()
+    expect(page.get_by_test_id('save-success')).to_be_visible()
+    prof = tapi.profile(fid)
+    assert prof['furnace_level'] == 'FC1' and prof['troops']['lancer'] == {'furnace_level': 'FC1', 'tier': 10}
+    tapi.delete_application(fid)
 
 
 def test_no_raw_keys_every_step_9_languages(page: Page, base_url, shot):
@@ -358,6 +440,11 @@ def test_admin_stats_filter_sort_export_settings(page: Page, base_url, admin_pas
     expect(page.get_by_test_id('stat-opening-rush-value')).to_have_text('1')
     expect(page.get_by_test_id('stat-discord-vc-value')).to_have_text('1')
     expect(page.get_by_test_id('stat-alliances-value')).to_have_text('2')
+    expect(page.get_by_test_id('stat-gems')).to_have_count(0)  # owner: no aggregate gem total
+    # compact per-troop summary under the name
+    expect(page.get_by_test_id(f'troop-summary-{FID_A}')).to_have_text(
+        f"{tr('tyrant:admin.troopShort.infantry')} FC5 T10 · {tr('tyrant:admin.troopShort.lancer')} FC9 T9 · "
+        f"{tr('tyrant:admin.troopShort.marksman')} FC10 T11")
     expect(page.get_by_test_id('by-window-w1')).to_have_attribute('data-count', '1')
     expect(page.get_by_test_id('by-role-gathering')).to_have_attribute('data-count', '1')
     expect(page.get_by_test_id(f'player-row-{FID_A}').get_by_test_id('furnace-badge')).to_have_text('FC8')
@@ -367,15 +454,20 @@ def test_admin_stats_filter_sort_export_settings(page: Page, base_url, admin_pas
     expect(page.locator('[data-testid^="player-row-"]')).to_have_count(1)
     page.get_by_test_id('tyrant-search').fill('')
     expect(page.locator('[data-testid^="player-row-"]')).to_have_count(2)
-    page.get_by_test_id('alliance-filter').select_option('ARB')
+    page.get_by_test_id('alliance-filter').click()
+    page.get_by_test_id('alliance-filter-option-ARB').click()
+    page.keyboard.press('Escape')
     expect(page.locator('[data-testid^="player-row-"]')).to_have_count(1)
     expect(page.get_by_test_id(f'player-row-{FID_AR}')).to_be_visible()
     expect(page.get_by_test_id('stat-total-value')).to_have_text('1')
-    page.get_by_test_id('alliance-filter').select_option('')
+    page.get_by_test_id('filter-pill-alliance-ARB').click()
+    expect(page.get_by_test_id('filter-pills')).to_have_count(0)
+    page.get_by_test_id('filter-more').click()
     page.get_by_test_id('furnace-filter').select_option('FC5')
     expect(page.locator('[data-testid^="player-row-"]')).to_have_count(1)
     expect(page.get_by_test_id(f'player-row-{FID_A}')).to_be_visible()
     page.get_by_test_id('furnace-filter').select_option('')
+    expect(page.locator('[data-testid^="player-row-"]')).to_have_count(2)
     page.get_by_test_id('sort-furnace').click()
     expect(page.locator('[data-testid^="player-row-"]').first).to_have_attribute('data-testid', f'player-row-{FID_A}')
     page.get_by_test_id('sort-furnace').click()
