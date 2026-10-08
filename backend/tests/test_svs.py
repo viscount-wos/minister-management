@@ -95,12 +95,28 @@ def test_troops_t10_t11_only_and_required(client, admin):
         (troops(marksman={'furnace_level': 'FC9', 'tier': None}), 'profile.troops.marksman.tier'),
         (troops(lancer={'tier': 10}), 'profile.troops.lancer.furnace_level'),
         ({'infantry': {'furnace_level': 'FC1', 'tier': 10}}, 'profile.troops.lancer.furnace_level'),
-        (None, 'profile.troops'),
+        (None, 'profile.troops.infantry.furnace_level'),
     ]:
         r = put(client, '503', profile={'troops': tr})
         assert r.status_code == 400 and r.json['field'] == field, (tr, r.json)
     r = put(client, '503', profile={'troops': troops(camp='fc4', tier='T10')})
     assert r.status_code == 201 and r.json['profile']['troops']['infantry'] == {'furnace_level': 'FC4', 'tier': 10}
+
+
+def test_returning_player_need_not_resend_valid_troops(client, admin):
+    start_round(client, admin, 'SVS', event=EVENT)
+    assert put(client, '510').status_code == 201
+    r = client.put('/api/events/svs/current/application/510', json={'profile': {}, 'answers': good(role='call')})
+    assert r.status_code == 200, r.json
+    # ... but a stored T9 (e.g. from Frost Dragon Tyrant) must be replaced by T10/T11
+    client.put('/api/profile/511', json={'game_name': 'T9', 'alliance': 'NIN', 'troops': {
+        'infantry': {'furnace_level': 'FC6', 'tier': 9}, 'lancer': {'furnace_level': 'FC6', 'tier': 10},
+        'marksman': {'furnace_level': 'FC6', 'tier': 10}}})
+    r = client.put('/api/events/svs/current/application/511', json={'profile': {}, 'answers': good()})
+    assert r.status_code == 400 and r.json['field'] == 'profile.troops.infantry.tier'
+    r = client.put('/api/events/svs/current/application/511', json={
+        'profile': {'troops': {'infantry': {'tier': 10}}}, 'answers': good()})
+    assert r.status_code == 201 and r.json['profile']['troops']['infantry'] == {'furnace_level': 'FC6', 'tier': 10}
 
 
 def test_alliance_only_needed_for_new_players(client, admin):

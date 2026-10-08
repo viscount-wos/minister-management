@@ -169,3 +169,15 @@ def validate_troops(value, field='profile.troops', strict=True):
         if sent:
             out[kind] = sent
     return out
+
+
+def require_complete_troops(troops, field='profile.troops'):
+    """Player submits: every troop type needs an FC camp level and a T10/T11 tier (after the merge)."""
+    from core.furnace import is_fc
+    for kind in TROOP_TYPES:
+        entry = troops.get(kind) if isinstance(troops, dict) else None
+        entry = entry if isinstance(entry, dict) else {}
+        if not is_fc(entry.get('furnace_level')):
+            raise validation_error(f'{kind} camp level is required (FC1-FC10)', f'{field}.{kind}.furnace_level')
+        if entry.get('tier') not in TIERS:
+            raise validation_error(f'{kind} tier is required (T10 or T11)', f'{field}.{kind}.tier')

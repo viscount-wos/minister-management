@@ -229,9 +229,15 @@ class SvsEvent(EventSpec):
                 'hours': sv.battle_hours(settings)}
 
     def validate_profile(self, fields, existing=None, admin=False):
+        """What is sent must be valid SVS troops (FC camps, T10/T11); it is merged into the shared profile
+        (core/troops.py). A PLAYER submit then needs the merged result complete for all three types, so a returning
+        player whose profile already holds valid SVS troops may resubmit without re-sending them, while a stored
+        T8/T9 or pre-FC camp has to be replaced. Admin create/edit may leave troops blank."""
         if 'troops' in fields or not admin:
-            sent = sv.validate_troops(fields.get('troops'), strict=not admin)
+            sent = sv.validate_troops(fields.get('troops'), strict=False)
             fields['troops'] = merge_troops(stored_troops(existing), sent)
+            if not admin:
+                sv.require_complete_troops(fields['troops'])
         return fields
 
     def validate_answers(self, answers, round_, existing=None, admin=False):

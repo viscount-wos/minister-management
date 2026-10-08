@@ -41,8 +41,13 @@ MINISTRY_ANSWERS_HELP = (
     'rally_leader, joiner, gathering, battle_mgmt, event_prep; language: en|es|fr|de|pl|ko|zh|tr|ar or null. '
     'Tyrant requires profile.game_name and profile.alliance; power (absolute, not millions), discord_id and troops '
     '(camp level + tier per troop type) live on the PROFILE. Tyrant does NOT ask the main furnace: a '
-    'profile.furnace_level sent with a tyrant application is ignored (not stored). svs accepts free-form JSON '
-    'objects for now.'
+    'profile.furnace_level sent with a tyrant application is ignored (not stored). '
+    'SVS answers (event key "svs", full set): hours: list of hour starts "HH:MM" (UTC) from the current round\'s '
+    'settings.hours (default 11:00, 12:00, 13:00, 14:00, 15:00; start time and duration are round settings), at '
+    'least one; role: "call" (calls rallies) or "join" (joins rallies); discord_vc: bool (can join Discord voice '
+    'chat); language or null. SVS profile: game_name, alliance (required only for a NEW player) and troops: ALL '
+    'three types with a camp level "FC1".."FC10" and tier 10 or 11 ONLY (T8/T9 are refused in SVS). Troops are '
+    'shared with Frost Dragon Tyrant: values sent replace the stored ones per type and field; blanks never clear.'
 )
 MAX_LIST = 200
 
@@ -106,6 +111,56 @@ TYRANT_FILTERS_HELP = (
     '"FC10"}), roles + roles_mode any|all, submitted_from/to (YYYY-MM-DD), days. There is no main-furnace filter: '
     'Tyrant does not ask the furnace; camp levels + tiers (and joiner_strength) are the strength signal.'
 )
+
+
+class SvsFilters(BaseModel):
+    """SVS admin filters (all optional, combined with AND); passed to the API as query params."""
+    model_config = ConfigDict(extra='forbid')
+
+    q: str | None = Field(None, max_length=64, description='FID or in-game name contains.')
+    alliances: list[str] | None = Field(None, description='Any of these alliance tags.')
+    camp: dict[TroopKind, str] | None = Field(None, description=(
+        'EXACT camp level per troop type, e.g. {"infantry": "FC10"}; a code or "none".'))
+    tier: dict[TroopKind, int | str] | None = Field(None, description=(
+        'EXACT tier per troop type, e.g. {"lancer": 11}; 10, 11, "T11" or "none".'))
+    submitted_from: str | None = Field(None, description='Submitted on/after YYYY-MM-DD (UTC).')
+    submitted_to: str | None = Field(None, description='Submitted on/before YYYY-MM-DD (UTC).')
+    days: int | None = Field(None, ge=1, le=3650, description='Submitted in the last N days.')
+
+
+SVS_FILTERS_HELP = (
+    'SVS filters (all optional, AND): `hours` list of hour starts ("12:00"; the player attends ALL of them), '
+    '`role` "call"|"join"|"none" (none = admin-added without a role), `vc` true/false (Discord voice chat), '
+    '`alliance`, `min_camp` FC code, `min_tier` 10/11, `troop` "infantry"|"lancer"|"marksman"|"all" (default all '
+    '= EVERY troop type must meet min_camp/min_tier). `svs_filters` takes the rest: q, alliances, camp/tier (EXACT per '
+    'troop type), submitted_from/to, days. Examples: rally callers on VC -> role="call", vc=true; joiners for the '
+    '12:00 hour with FC10 T11 everywhere -> role="join", hours=["12:00"], min_camp="FC10", min_tier=11.'
+)
+
+
+def _svs_params(filters: 'SvsFilters | None', hours: list[str] | None, role: str | None, vc: bool | None,
+                min_camp: str | None, min_tier: int | str | None, troop: str | None,
+                alliance: str | None = None) -> dict[str, str]:
+    """SVS filter arguments -> the API's query params (docs/API.md "SVS")."""
+    p: dict[str, Any] = {}
+    if filters is not None:
+        f = filters.model_dump(exclude_none=True)
+        for kind, v in (f.pop('camp', None) or {}).items():
+            p[f'{kind}_camp'] = v
+        for kind, v in (f.pop('tier', None) or {}).items():
+            p[f'{kind}_tier'] = v
+        if 'alliances' in f:
+            p['alliance'] = ','.join(f.pop('alliances'))
+        p.update(f)
+    if hours:
+        p['hours'] = ','.join(hours)
+    if vc is not None:
+        p['vc'] = 'yes' if vc else 'no'
+    for key, v in (('role', role), ('min_camp', min_camp), ('min_tier', min_tier), ('troop', troop),
+                   ('alliance', alliance)):
+        if v is not None and v != '':
+            p[key] = v
+    return {k: str(v) for k, v in p.items() if v is not None and v != ''}
 
 
 def _tyrant_params(filters: 'TyrantFilters | None', min_camp: str | None, min_tier: int | str | None,
@@ -242,6 +297,22 @@ the round), "thursday") returns {{"published": false}} or the slot -> [{{game_na
             return bad
         return R.from_api(await api.get(f'/api/events/ministry/current/schedule/{seg(day)}'))
 
+    @server.tool(annotations=_ro('Get heroes'), description=f"""The hero library (for SVS planning): every
+hero up to generation `max_gen` (default: the state's hero generation, an admin setting), each with slug, name,
+troop (infantry|lancer|marksman), generation (1-17, or null for rare/epic heroes, which are always included and
+flagged has_generation=false), rarity (rare|epic|mythic) and image (a path on the app, e.g. /heroes/jeronimo.webp).
+Optional `troop` narrows to one troop type. Result also has state_generation, max_gen and attribution (hero art and
+names are (c) Century Games; credit it when showing them). {UNTRUSTED} {ERRORS}""")
+    async def get_heroes(
+            max_gen: Annotated[int | None, Field(ge=1, le=99, description='Highest generation to include.')] = None,
+            troop: Literal['infantry', 'lancer', 'marksman'] | None = None) -> CallToolResult:
+        params: dict[str, str] = {}
+        if max_gen is not None:
+            params['max_gen'] = str(max_gen)
+        if troop:
+            params['troop'] = troop
+        return R.from_api(await api.get('/api/heroes', params=params or None))
+
     @server.tool(annotations=_ro('Get my minister assignments'), description=f"""Minister event (key 'ministry') only: the
 player's assigned time slots in the current round, for PUBLISHED days only ({{"round_id",
 "published_days", "assignments": {{"monday": [{{"time_slot": "10:00"}}]}}}}). Slots are UTC.
@@ -295,7 +366,8 @@ current round of `event`). Optional `alliance` filter (3-letter tag). Paged: `of
 (default 50, max {MAX_LIST}); the result has total/offset/limit/returned (total counts AFTER filters).
 Tyrant only (event="tyrant"; a non-tyrant round -> NOT_FOUND): {TYRANT_FILTERS_HELP}
 `sort` (tyrant): submitted|updated|name|alliance|fid|power|gems|strength, `direction` asc|desc (blanks
-last). Tyrant rows carry `joiner_strength` = sum over the 3 troop types of camp FC number (FC1=1..FC10=10,
+last). SVS only (event="svs"): {SVS_FILTERS_HELP} `sort` (svs): submitted|updated|name|alliance|fid|strength|hours.
+SVS rows carry answers {{hours, role, discord_vc, language}} and joiner_strength. Tyrant rows carry `joiner_strength` = sum over the 3 troop types of camp FC number (FC1=1..FC10=10,
 pre-FC/blank 0) + tier (blank 0); 63 = FC10 camps with T11 everywhere; null when no troop data.
 {UNTRUSTED} {ERRORS}""")
     async def list_applications(
@@ -313,9 +385,16 @@ pre-FC/blank 0) + tier (blank 0); 63 = FC10 camps with T11 everywhere; null when
                 description='Tyrant: which troop type the minimums apply to; default "all".')] = None,
             sort: Annotated[str | None, Field(max_length=16, description='Tyrant: sort key, e.g. "strength".')] = None,
             direction: Literal['asc', 'desc'] | None = None,
-            filters: TyrantFilters | None = None) -> CallToolResult:
+            filters: TyrantFilters | None = None,
+            hours: Annotated[list[str] | None, Field(description='SVS: hour starts the player attends (ALL).')] = None,
+            role: Literal['call', 'join', 'none'] | None = None,
+            vc: Annotated[bool | None, Field(description='SVS: can join Discord voice chat.')] = None,
+            svs_filters: SvsFilters | None = None) -> CallToolResult:
         if bad := refused(ctx):
             return bad
+        svs = event == 'svs' or bool(hours) or role is not None or vc is not None or svs_filters is not None
+        if svs and filters is not None:
+            return R.error(400, 'VALIDATION_ERROR', 'filters is for tyrant; use svs_filters for svs', field='filters')
         if round_id == 'current':
             if bad := R.check_segment('event', event):
                 return bad
@@ -323,8 +402,20 @@ pre-FC/blank 0) + tier (blank 0); 63 = FC10 camps with T11 everywhere; null when
             if not cur.ok:
                 return R.from_api(cur)
             round_id = cur.body.get('id')
+        sort_params = {k: v for k, v in (('sort', sort), ('dir', direction)) if v}
+        if svs:
+            # the svs list route filters/sorts server-side (and 404s a non-svs round)
+            params = _svs_params(svs_filters, hours, role, vc, min_camp, min_tier, troop, alliance)
+            params.update(sort_params)
+            res = await api.admin('GET', f'/api/admin/svs/rounds/{seg(round_id)}/applications', params=params or None)
+            if res.ok:
+                apps = res.body.get('applications') or []
+                page = apps[offset:offset + limit]
+                res.body = {'round_id': res.body.get('round_id', round_id), 'total': len(apps),
+                            'offset': offset, 'limit': limit, 'returned': len(page), 'applications': page}
+            return R.from_api(res)
         tyrant_params = _tyrant_params(filters, min_camp, min_tier, troop)
-        tyrant_params.update({k: v for k, v in (('sort', sort), ('dir', direction)) if v})
+        tyrant_params.update(sort_params)
         params = {'alliance': alliance} if alliance else {}
         if event == 'tyrant' or tyrant_params:
             # the tyrant list route filters/sorts server-side (and 404s a non-tyrant round)
@@ -431,6 +522,65 @@ also has round_total (unfiltered), alliance_options and the active `filters`. `r
             params['alliance'] = alliance
         params = params or None
         return R.from_api(await api.admin('GET', f'/api/admin/tyrant/rounds/{seg(round_id)}/summary', params=params))
+
+    @server.tool(annotations=_ro('Get SVS summary'), description=f"""{ADMIN} SVS only: summary of one round's
+sign-ups: total, rally_callers (role call), joiners (role join), discord_vc (can join voice chat), hours (players
+per battle hour: [{{"hour": "11:00", "count": n}}, ...] in battle order), roles ({{"call", "join", "none"}}),
+alliances (count each), troop_tiers and camp_levels per troop type ({{"infantry": {{"T11": n, "T10": n, "none": n}}}}).
+Counts are for the FILTERED set; round_total is unfiltered; also alliance_options and the active `filters`.
+`round_id` is an svs round id or "current". {SVS_FILTERS_HELP} {UNTRUSTED} {ERRORS}""")
+    async def get_svs_summary(ctx: Context,
+                              round_id: Annotated[int | Literal['current'], Field(
+                                  description='Round id or "current".')] = 'current',
+                              alliance: Annotated[str | None, Field(max_length=64)] = None,
+                              hours: list[str] | None = None,
+                              role: Literal['call', 'join', 'none'] | None = None,
+                              vc: bool | None = None,
+                              min_camp: Annotated[str | None, Field(max_length=4)] = None,
+                              min_tier: int | str | None = None,
+                              troop: Literal['infantry', 'lancer', 'marksman', 'all'] | None = None,
+                              svs_filters: SvsFilters | None = None) -> CallToolResult:
+        if bad := refused(ctx):
+            return bad
+        params = _svs_params(svs_filters, hours, role, vc, min_camp, min_tier, troop, alliance)
+        return R.from_api(await api.admin('GET', f'/api/admin/svs/rounds/{seg(round_id)}/summary',
+                                          params=params or None))
+
+    @server.tool(annotations=_rw('Add player', idempotent=False), description=f"""{ADMIN} "Add player": create a
+sign-up in a round for a player who didn't sign up themselves (any event with rounds: ministry, tyrant, svs).
+`fid` is required; a FID with no profile yet also needs profile.game_name. Everything else is OPTIONAL here (admin
+mode): e.g. SVS hours/role/discord_vc and troop levels may be left out, but anything you DO pass is validated with
+the event's rules (SVS tiers 10/11 only, tyrant window ids, ...). Troops merge into the shared profile (blanks never
+clear stored values). Works after the closing time; closed rounds refuse (ROUND_CLOSED). If the FID already has a
+sign-up in that round: 409 APPLICATION_EXISTS (use update_application instead). `round_id` is a round id or
+"current" (the current round of `event`). Returns the new application (admin shape) + profile_created.
+{MINISTRY_ANSWERS_HELP} {EVENTS_HELP} {UNTRUSTED} {ERRORS}""")
+    async def add_player(event: EventKey, fid: Fid, ctx: Context,
+                         profile: ProfileFields | None = None,
+                         answers: Annotated[dict[str, Any] | None, Field(
+                             description='Event-specific answers; any subset (admin mode).')] = None,
+                         round_id: Annotated[int | Literal['current'], Field(
+                             description='Round id or "current".')] = 'current') -> CallToolResult:
+        for name, value in (('event', event), ('fid', fid)):
+            if (bad := refused(ctx)) or (bad := R.check_segment(name, value)):
+                return bad
+        body: dict[str, Any] = {'fid': fid}
+        prof = _profile_body(profile)
+        if prof is not None:
+            body['profile'] = prof
+        if answers is not None:
+            body['answers'] = answers
+        return R.from_api(await api.admin('POST', f'/api/admin/rounds/{seg(round_id)}/applications', json=body,
+                                          params={'event': event} if round_id == 'current' else None))
+
+    @server.tool(annotations=_rw('Set state hero generation'), description=f"""{ADMIN} Set the state's hero
+generation (a whole number 1..the newest generation in the hero library, 17 today). It is state-wide (not per round):
+get_heroes and the planners then only offer heroes up to this generation (rare/epic heroes without a generation are
+always offered). Returns the public settings {{state_number, state_generation}}. {ERRORS}""")
+    async def set_state_generation(generation: Annotated[int, Field(ge=1, le=99)], ctx: Context) -> CallToolResult:
+        if bad := refused(ctx):
+            return bad
+        return R.from_api(await api.admin('PUT', '/api/admin/settings', json={'state_generation': generation}))
 
     @server.tool(annotations=_ro('Get minister assignments'), description=f"""{ADMIN} Minister event (key 'ministry') only:
 the saved assignments for one day of a round, including unpublished days: occupied slots ->
