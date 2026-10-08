@@ -90,7 +90,8 @@ export default function AddPlayerDialog({ event, roundId, onClose, onAdded, chil
   useEffect(() => {
     dialogRef.current?.querySelector<HTMLInputElement>(editing ? '#edit-name' : '#add-fid')?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      // an open menu inside the dialog (Tyrant roles) takes the first Esc
+      if (e.key === 'Escape' && !dialogRef.current?.querySelector('[aria-expanded="true"]')) onClose();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
@@ -219,7 +220,7 @@ export default function AddPlayerDialog({ event, roundId, onClose, onAdded, chil
                 value={fid}
                 readOnly
                 aria-readonly="true"
-                inputClassName="opacity-80 cursor-default"
+                inputClassName="!bg-dark-bg border-dashed text-theme-dim cursor-default focus:ring-0"
                 hint={t('admin:playerEdit.fidFixed')}
               />
             ) : (

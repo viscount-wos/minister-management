@@ -742,7 +742,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
           </p>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <ClosedRoundNote show={readOnly} />
           <table className="w-full text-sm" data-testid="tyrant-table">
             <thead className="border-b border-theme-border">

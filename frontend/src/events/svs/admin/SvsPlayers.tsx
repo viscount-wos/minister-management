@@ -689,7 +689,9 @@ export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: P
           </p>
         )}
 
-        <div className="overflow-x-auto">
+        {/* relative: the Plan column's sr-only text is position:absolute; without a positioned scroller it escaped the
+            horizontal scroll and widened the whole page on phones (579px at 390) */}
+        <div className="relative overflow-x-auto">
           <ClosedRoundNote show={readOnly} />
           <table className="w-full text-sm" data-testid="svs-table">
             <thead className="border-b border-theme-border">
