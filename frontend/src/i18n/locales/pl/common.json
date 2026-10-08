@@ -1,0 +1,14 @@
+{
+  "appTitle": "Zarządzanie Ministerstwami",
+  "theme": {
+    "title": "Motyw",
+    "dark": "Ciemny ministerialny",
+    "reading": "Do czytania",
+    "lowGlare": "Przygaszony"
+  },
+  "cancel": "Anuluj",
+  "save": "Zapisz",
+  "close": "Zamknij",
+  "yes": "Tak",
+  "no": "Nie"
+}

@@ -26,7 +26,7 @@ export default function AdminLogin() {
       // Navigate to dashboard
       navigate('/admin/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.invalidPassword'));
+      setError(err.response?.data?.error || t('admin:invalidPassword'));
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ export default function AdminLogin() {
           className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
-          {t('update.backHome')}
+          {t('ministry:update.backHome')}
         </button>
 
         <div className="text-center mb-8">
@@ -48,15 +48,15 @@ export default function AdminLogin() {
             <Shield className="w-10 h-10 text-accent" />
           </div>
           <h2 className="text-3xl font-bold text-accent mb-2">
-            {t('admin.title')}
+            {t('admin:title')}
           </h2>
-          <p className="text-theme-dim">{t('admin.enterPassword')}</p>
+          <p className="text-theme-dim">{t('admin:enterPassword')}</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-theme-text mb-2">
-              {t('admin.password')}
+              {t('admin:password')}
             </label>
             <input
               type="password"
@@ -79,7 +79,7 @@ export default function AdminLogin() {
             disabled={loading}
             className="w-full px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50"
           >
-            {loading ? t('form.loading') : t('admin.login')}
+            {loading ? t('ministry:form.loading') : t('admin:login')}
           </button>
         </form>
       </div>

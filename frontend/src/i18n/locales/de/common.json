@@ -1,0 +1,14 @@
+{
+  "appTitle": "Ministeriumsverwaltung",
+  "theme": {
+    "title": "Farbschema",
+    "dark": "Ministerium Dunkel",
+    "reading": "Lesemodus",
+    "lowGlare": "Blendarm"
+  },
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "close": "Schließen",
+  "yes": "Ja",
+  "no": "Nein"
+}

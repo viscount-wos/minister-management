@@ -1,0 +1,14 @@
+{
+  "appTitle": "Bakanlık Yönetimi",
+  "theme": {
+    "title": "Tema",
+    "dark": "Koyu Bakanlık",
+    "reading": "Okuma",
+    "lowGlare": "Düşük Parlama"
+  },
+  "cancel": "İptal",
+  "save": "Kaydet",
+  "close": "Kapat",
+  "yes": "Evet",
+  "no": "Hayır"
+}

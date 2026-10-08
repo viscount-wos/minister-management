@@ -83,9 +83,9 @@ export default function PlayerForm() {
 
   // Map step number to day type
   const stepDayType = { 2: 'construction', 3: 'research', 4: 'troop' } as const;
-  const researchDayName = t(`form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
+  const researchDayName = t(`ministry:form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
   const dayTypeLabel = (dayType: string) =>
-    t(`form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
+    t(`ministry:form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
 
   const toggleTimeSlot = (utcValue: string) => {
     const dayType = stepDayType[step as 2 | 3 | 4];
@@ -102,17 +102,17 @@ export default function PlayerForm() {
 
   const validateStep1 = async () => {
     if (!playerData.game_name.trim()) {
-      setError(t('form.required'));
+      setError(t('ministry:form.required'));
       return false;
     }
     // FID is now required
     if (!playerData.fid || !playerData.fid.trim()) {
-      setError(t('form.fidRequired'));
+      setError(t('profile:fidRequired'));
       return false;
     }
     // Alliance is required
     if (!playerData.alliance || !playerData.alliance.trim()) {
-      setError(t('form.allianceRequired'));
+      setError(t('profile:allianceRequired'));
       return false;
     }
 
@@ -123,7 +123,7 @@ export default function PlayerForm() {
         game_name: playerData.game_name.trim(),
       });
       if (res.data.fid_exists || res.data.name_exists) {
-        setDuplicateWarning(t('form.playerAlreadyExists'));
+        setDuplicateWarning(t('profile:playerAlreadyExists'));
         setError('');
         return false;
       }
@@ -144,7 +144,7 @@ export default function PlayerForm() {
     if (step >= 2 && step <= 4) {
       const dayType = stepDayType[step as 2 | 3 | 4];
       if (selectedTimesByDay[dayType].length === 0) {
-        if (!window.confirm(t('form.noTimeSlotsConfirm'))) {
+        if (!window.confirm(t('ministry:form.noTimeSlotsConfirm'))) {
           return;
         }
       }
@@ -174,7 +174,7 @@ export default function PlayerForm() {
         navigate('/');
       }, 5000);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('form.submitError'));
+      setError(err.response?.data?.error || t('ministry:form.submitError'));
     } finally {
       setLoading(false);
     }
@@ -185,8 +185,8 @@ export default function PlayerForm() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center">
           <CheckCircle className="w-20 h-20 text-success mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-accent mb-4">{t('form.success')}</h2>
-          <p className="text-theme-dim mb-6">{t('form.submissionSuccess')}</p>
+          <h2 className="text-3xl font-bold text-accent mb-4">{t('ministry:form.success')}</h2>
+          <p className="text-theme-dim mb-6">{t('ministry:form.submissionSuccess')}</p>
         </div>
       </div>
     );
@@ -197,14 +197,14 @@ export default function PlayerForm() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center">
           <XCircle className="w-20 h-20 text-danger mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-danger mb-4">{t('home.applicationsClosed')}</h2>
-          <p className="text-theme-dim mb-6">{t('form.applicationsClosedDesc')}</p>
+          <h2 className="text-3xl font-bold text-danger mb-4">{t('ministry:home.applicationsClosed')}</h2>
+          <p className="text-theme-dim mb-6">{t('ministry:form.applicationsClosedDesc')}</p>
           <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            {t('update.backHome')}
+            {t('ministry:update.backHome')}
           </button>
         </div>
       </div>
@@ -242,12 +242,12 @@ export default function PlayerForm() {
         {step === 1 && (
           <div>
             <h2 className="text-3xl font-bold text-accent mb-6 text-center">
-              {t('form.step1Title')}
+              {t('ministry:form.step1Title')}
             </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-theme-text mb-2">
-                  {t('form.playerID')} *
+                  {t('profile:playerID')} *
                 </label>
                 <input
                   type="text"
@@ -255,7 +255,7 @@ export default function PlayerForm() {
                   value={playerData.fid}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
-                  placeholder={t('form.playerIDPlaceholder')}
+                  placeholder={t('profile:playerIDPlaceholder')}
                   required
                 />
               </div>
@@ -263,7 +263,7 @@ export default function PlayerForm() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.gameName')} *
+                    {t('profile:gameName')} *
                   </label>
                   <input
                     type="text"
@@ -276,7 +276,7 @@ export default function PlayerForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.alliance')} *
+                    {t('profile:alliance')} *
                   </label>
                   <input
                     type="text"
@@ -285,7 +285,7 @@ export default function PlayerForm() {
                     onChange={(e) => setPlayerData(prev => ({ ...prev, alliance: e.target.value.toUpperCase().slice(0, 3) }))}
                     maxLength={3}
                     className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent uppercase"
-                    placeholder={t('form.alliancePlaceholder')}
+                    placeholder={t('profile:alliancePlaceholder')}
                     required
                   />
                 </div>
@@ -293,7 +293,7 @@ export default function PlayerForm() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.constructionSpeedups')}
+                    {t('ministry:form.constructionSpeedups')}
                   </label>
                   <input
                     type="number"
@@ -307,7 +307,7 @@ export default function PlayerForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.researchSpeedups')}
+                    {t('ministry:form.researchSpeedups')}
                   </label>
                   <input
                     type="number"
@@ -321,7 +321,7 @@ export default function PlayerForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-theme-text mb-2">
-                    {t('form.troopSpeedups')}
+                    {t('ministry:form.troopSpeedups')}
                   </label>
                   <input
                     type="number"
@@ -336,7 +336,7 @@ export default function PlayerForm() {
                 {showFireCrystals && (
                   <div>
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.fireCrystals')}
+                      {t('ministry:form.fireCrystals')}
                     </label>
                     <input
                       type="number"
@@ -351,7 +351,7 @@ export default function PlayerForm() {
                 {showFireCrystals && (
                   <div>
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.refinedFireCrystals')}
+                      {t('ministry:form.refinedFireCrystals')}
                     </label>
                     <input
                       type="number"
@@ -366,7 +366,7 @@ export default function PlayerForm() {
                 {showFireCrystals && (
                   <div>
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.fireCrystalShards')}
+                      {t('ministry:form.fireCrystalShards')}
                     </label>
                     <input
                       type="number"
@@ -382,7 +382,7 @@ export default function PlayerForm() {
               {/* General Speedups Note */}
               <div className="mt-4 p-4 bg-accent/10 border border-accent/30 rounded-lg">
                 <p className="text-sm text-accent">
-                  <strong>💡 </strong>{t('form.generalSpeedupsNote')}
+                  <strong>💡 </strong>{t('ministry:form.generalSpeedupsNote')}
                 </p>
               </div>
             </div>
@@ -399,11 +399,11 @@ export default function PlayerForm() {
                 {dayTypeLabel(dayType)}
               </h2>
               <div className="flex items-center justify-center gap-4 mb-4">
-                <p className="text-theme-dim">{t('form.selectMultiple')}</p>
+                <p className="text-theme-dim">{t('ministry:form.selectMultiple')}</p>
                 <TimezoneSelector value={timezone} onChange={setTimezone} />
               </div>
               <p className="text-sm text-accent text-center mb-6 font-medium">
-                {t('form.selectAllAvailable')}
+                {t('ministry:form.selectAllAvailable')}
               </p>
               {(() => {
                 const dayHeatmap = heatmapData[dayType] || {};
@@ -454,23 +454,23 @@ export default function PlayerForm() {
                     </div>
                     {maxCount > 0 && (
                       <p className="text-xs text-theme-dim mt-2 text-center italic">
-                        {t('form.heatmapLegend')}
+                        {t('ministry:form.heatmapLegend')}
                       </p>
                     )}
                   </>
                 );
               })()}
               <p className="text-sm text-theme-dim mt-4 text-center">
-                {t('form.selectedSlots', { count: slots.length })}
+                {t('ministry:form.selectedSlots', { count: slots.length })}
                 {timezone !== 'UTC' && (
                   <span className="ml-2 text-accent">
-                    ({t('form.timesShownIn')} {getTimezoneAbbr(timezone)})
+                    ({t('ministry:form.timesShownIn')} {getTimezoneAbbr(timezone)})
                   </span>
                 )}
               </p>
               <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded-lg">
                 <p className="text-sm text-accent text-center">
-                  <strong>⏱ </strong>{t('form.timeToleranceNote')}
+                  <strong>⏱ </strong>{t('ministry:form.timeToleranceNote')}
                 </p>
               </div>
             </div>
@@ -481,50 +481,50 @@ export default function PlayerForm() {
         {step === 5 && (
           <div>
             <h2 className="text-3xl font-bold text-accent mb-6 text-center">
-              {t('form.step3Title')}
+              {t('ministry:form.step3Title')}
             </h2>
             <div className="space-y-4">
               <div className="bg-dark-bg p-6 rounded-lg border border-theme-border">
-                <h3 className="font-semibold text-lg mb-4 text-accent">{t('form.playerInfo')}</h3>
+                <h3 className="font-semibold text-lg mb-4 text-accent">{t('profile:playerInfo')}</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-theme-dim">{t('form.gameName')}:</span>
+                    <span className="text-theme-dim">{t('profile:gameName')}:</span>
                     <span className="ml-2 font-medium text-theme-text">
                       {playerData.alliance && <span className="text-accent">[{playerData.alliance}] </span>}
                       {playerData.game_name}
                     </span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">{t('form.playerID')}:</span>
+                    <span className="text-theme-dim">{t('profile:playerID')}:</span>
                     <span className="ml-2 font-medium text-theme-text">{playerData.fid}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">{t('form.constructionSpeedups')}:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.construction_speedups_days} {t('form.days')}</span>
+                    <span className="text-theme-dim">{t('ministry:form.constructionSpeedups')}:</span>
+                    <span className="ml-2 font-medium text-theme-text">{playerData.construction_speedups_days} {t('ministry:form.days')}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">{t('form.researchSpeedups')}:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.research_speedups_days} {t('form.days')}</span>
+                    <span className="text-theme-dim">{t('ministry:form.researchSpeedups')}:</span>
+                    <span className="ml-2 font-medium text-theme-text">{playerData.research_speedups_days} {t('ministry:form.days')}</span>
                   </div>
                   <div>
-                    <span className="text-theme-dim">{t('form.troopSpeedups')}:</span>
-                    <span className="ml-2 font-medium text-theme-text">{playerData.troop_training_speedups_days} {t('form.days')}</span>
+                    <span className="text-theme-dim">{t('ministry:form.troopSpeedups')}:</span>
+                    <span className="ml-2 font-medium text-theme-text">{playerData.troop_training_speedups_days} {t('ministry:form.days')}</span>
                   </div>
                   {showFireCrystals && (
                     <div>
-                      <span className="text-theme-dim">{t('form.fireCrystals')}:</span>
+                      <span className="text-theme-dim">{t('ministry:form.fireCrystals')}:</span>
                       <span className="ml-2 font-medium text-theme-text">{playerData.fire_crystals}</span>
                     </div>
                   )}
                   {showFireCrystals && (
                     <div>
-                      <span className="text-theme-dim">{t('form.refinedFireCrystals')}:</span>
+                      <span className="text-theme-dim">{t('ministry:form.refinedFireCrystals')}:</span>
                       <span className="ml-2 font-medium text-theme-text">{playerData.refined_fire_crystals}</span>
                     </div>
                   )}
                   {showFireCrystals && (
                     <div>
-                      <span className="text-theme-dim">{t('form.fireCrystalShards')}:</span>
+                      <span className="text-theme-dim">{t('ministry:form.fireCrystalShards')}:</span>
                       <span className="ml-2 font-medium text-theme-text">{playerData.fire_crystal_shards}</span>
                     </div>
                   )}
@@ -532,7 +532,7 @@ export default function PlayerForm() {
               </div>
               <div className="bg-dark-bg p-6 rounded-lg border border-theme-border">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-lg text-accent">{t('form.timePreferences')}</h3>
+                  <h3 className="font-semibold text-lg text-accent">{t('ministry:form.timePreferences')}</h3>
                   <TimezoneSelector value={timezone} onChange={setTimezone} />
                 </div>
                 {(['construction', 'research', 'troop'] as const).map((dayType) => (
@@ -551,7 +551,7 @@ export default function PlayerForm() {
                         </span>
                       ))}
                       {selectedTimesByDay[dayType].length === 0 && (
-                        <span className="text-theme-dim text-sm">{t('form.noTimeSelected')}</span>
+                        <span className="text-theme-dim text-sm">{t('ministry:form.noTimeSelected')}</span>
                       )}
                     </div>
                   </div>
@@ -572,7 +572,7 @@ export default function PlayerForm() {
               onClick={() => navigate('/update')}
               className="mt-3 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors text-sm"
             >
-              {t('update.title')}
+              {t('ministry:update.title')}
             </button>
           </div>
         )}
@@ -592,14 +592,14 @@ export default function PlayerForm() {
             className="flex items-center gap-2 px-6 py-3 border-2 border-theme-border rounded-lg hover:bg-dark-card-hover font-medium transition-colors text-theme-text"
           >
             <ArrowLeft className="w-5 h-5" />
-            {t('form.back')}
+            {t('ministry:form.back')}
           </button>
           {step < 5 ? (
             <button
               onClick={handleNext}
               className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
             >
-              {t('form.next')}
+              {t('ministry:form.next')}
               <ArrowRight className="w-5 h-5" />
             </button>
           ) : (
@@ -608,7 +608,7 @@ export default function PlayerForm() {
               disabled={loading}
               className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? t('form.loading') : t('form.submit')}
+              {loading ? t('ministry:form.loading') : t('ministry:form.submit')}
               <CheckCircle className="w-5 h-5" />
             </button>
           )}

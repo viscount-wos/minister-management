@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { isRtl } from './i18n/index';
 import Home from './pages/Home';
 import PlayerForm from './pages/PlayerForm';
 import UpdateSubmission from './pages/UpdateSubmission';
@@ -16,7 +17,7 @@ function App() {
   const { i18n } = useTranslation();
 
   // Set document direction for RTL languages
-  document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.dir = isRtl(i18n.language) ? 'rtl' : 'ltr';
 
   return (
     <Router>

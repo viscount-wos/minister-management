@@ -84,7 +84,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
           <div className="text-xs text-theme-dim mt-1">FID: {player.fid} • {(player.points ?? 0).toLocaleString()} pts</div>
           {preferredTimes && preferredTimes.length > 0 ? (
             <div className="mt-2 border-t border-theme-border pt-2">
-              <div className="text-xs font-medium text-theme-dim mb-1">{t('admin.requestedTimes', 'Requested Times')}:</div>
+              <div className="text-xs font-medium text-theme-dim mb-1">{t('admin:requestedTimes', 'Requested Times')}:</div>
               <div className="flex flex-wrap gap-1">
                 {preferredTimes.map((time) => (
                   <span key={time} className="text-xs px-1.5 py-0.5 bg-accent/15 text-accent rounded">
@@ -95,7 +95,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone }: { playe
             </div>
           ) : (
             <div className="mt-2 border-t border-theme-border pt-2 text-xs text-theme-dim italic">
-              {t('admin.noTimePref', 'No time preferences set')}
+              {t('admin:noTimePref', 'No time preferences set')}
             </div>
           )}
           {/* Arrow */}
@@ -269,15 +269,15 @@ export default function AssignmentManagement() {
   // same real-time slot (Mon 23:50+ == Tue 23:50; Thu 23:50+ == Fri 23:50).
   const sharedBoundary = (() => {
     if (timeSlotScheme !== 'max_slots') return null;
-    const dayName = (k: string) => t(`admin.${k}`).split(' - ')[0];
+    const dayName = (k: string) => t(`admin:${k}`).split(' - ')[0];
     if (selectedDay === 'monday' && researchDay === 'tuesday')
-      return { slot: '23:50+', note: t('admin.sharedSlotNote', { day: dayName('tuesday') }) };
+      return { slot: '23:50+', note: t('admin:sharedSlotNote', { day: dayName('tuesday') }) };
     if (selectedDay === 'tuesday' && researchDay === 'tuesday')
-      return { slot: '23:50', note: t('admin.sharedSlotNote', { day: dayName('monday') }) };
+      return { slot: '23:50', note: t('admin:sharedSlotNote', { day: dayName('monday') }) };
     if (selectedDay === 'thursday' && researchDay === 'friday')
-      return { slot: '23:50+', note: t('admin.sharedSlotNote', { day: dayName('friday') }) };
+      return { slot: '23:50+', note: t('admin:sharedSlotNote', { day: dayName('friday') }) };
     if (selectedDay === 'friday' && researchDay === 'friday')
-      return { slot: '23:50', note: t('admin.sharedSlotNote', { day: dayName('thursday') }) };
+      return { slot: '23:50', note: t('admin:sharedSlotNote', { day: dayName('thursday') }) };
     return null;
   })();
 
@@ -336,7 +336,7 @@ export default function AssignmentManagement() {
       );
       setPublishedDays(response.data.published_days || []);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.publishError'));
+      setError(err.response?.data?.error || t('admin:publishError'));
     }
   };
 
@@ -350,7 +350,7 @@ export default function AssignmentManagement() {
       );
       setPublishedDays(response.data.published_days || []);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.unpublishError'));
+      setError(err.response?.data?.error || t('admin:unpublishError'));
     }
   };
 
@@ -371,7 +371,7 @@ export default function AssignmentManagement() {
       // Unassigned players are now returned on load, not just after auto-assign
       setUnassignedPlayers(response.data.unassigned || []);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.fetchAssignmentsError'));
+      setError(err.response?.data?.error || t('admin:fetchAssignmentsError'));
     } finally {
       setLoading(false);
     }
@@ -392,7 +392,7 @@ export default function AssignmentManagement() {
       setAssignments(response.data.assignments);
       setUnassignedPlayers(response.data.unassigned);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.autoAssignError'));
+      setError(err.response?.data?.error || t('admin:autoAssignError'));
     } finally {
       setLoading(false);
     }
@@ -524,7 +524,7 @@ export default function AssignmentManagement() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.saveError'));
+      setError(err.response?.data?.error || t('admin:saveError'));
     }
   };
 
@@ -544,7 +544,7 @@ export default function AssignmentManagement() {
       link.click();
       link.remove();
     } catch (err: any) {
-      setError(t('admin.exportError'));
+      setError(t('admin:exportError'));
     }
   };
 
@@ -562,7 +562,7 @@ export default function AssignmentManagement() {
                 : 'text-theme-dim hover:text-theme-text'
             }`}
           >
-            {t(`admin.${day}`)}
+            {t(`admin:${day}`)}
           </button>
         ))}
       </div>
@@ -575,14 +575,14 @@ export default function AssignmentManagement() {
           className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50"
         >
           <Sparkles className="w-5 h-5" />
-          {t('admin.autoAssign')}
+          {t('admin:autoAssign')}
         </button>
         <button
           onClick={handleExport}
           className="flex items-center gap-2 px-6 py-3 bg-success text-dark-bg rounded-lg hover:bg-success-dark font-medium transition-colors"
         >
           <Download className="w-5 h-5" />
-          {t('admin.exportExcel')}
+          {t('admin:exportExcel')}
         </button>
 
         {/* Publish / Unpublish Button */}
@@ -592,7 +592,7 @@ export default function AssignmentManagement() {
             className="flex items-center gap-2 px-6 py-3 bg-danger/80 text-white rounded-lg hover:bg-danger font-medium transition-colors"
           >
             <EyeOff className="w-5 h-5" />
-            {t('admin.unpublish')}
+            {t('admin:unpublish')}
           </button>
         ) : (
           <button
@@ -600,7 +600,7 @@ export default function AssignmentManagement() {
             className="flex items-center gap-2 px-6 py-3 bg-accent/80 text-dark-bg rounded-lg hover:bg-accent font-medium transition-colors"
           >
             <Globe className="w-5 h-5" />
-            {t('admin.publish')}
+            {t('admin:publish')}
           </button>
         )}
 
@@ -618,7 +618,7 @@ export default function AssignmentManagement() {
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-theme-dim">{t('form.loading')}</p>
+          <p className="text-theme-dim">{t('ministry:form.loading')}</p>
         </div>
       ) : (
         <DndContext
@@ -630,7 +630,7 @@ export default function AssignmentManagement() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Time Slots */}
             <div className="lg:col-span-3">
-              <h3 className="text-lg font-semibold mb-4 text-accent">{t('admin.assigned')}</h3>
+              <h3 className="text-lg font-semibold mb-4 text-accent">{t('admin:assigned')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto">
                 {timeSlots.map((slot) => {
                   const slotPlayers = assignments[slot] || [];
@@ -664,7 +664,7 @@ export default function AssignmentManagement() {
             {/* Unassigned Players */}
             <div className="lg:col-span-1">
               <h3 className="text-lg font-semibold mb-4 text-accent">
-                {t('admin.unassigned')} ({unassignedPlayers.length})
+                {t('admin:unassigned')} ({unassignedPlayers.length})
               </h3>
               <DroppableUnassigned isOver={overSlotId === 'unassigned'}>
                 <div className="space-y-2">
@@ -677,7 +677,7 @@ export default function AssignmentManagement() {
                       />
                       {player.preferred_times && player.preferred_times.length > 0 && (
                         <div className="text-xs text-theme-dim mt-1 pl-2">
-                          {t('admin.wants')}: {player.preferred_times.join(', ')}
+                          {t('admin:wants')}: {player.preferred_times.join(', ')}
                         </div>
                       )}
                     </div>
@@ -685,7 +685,7 @@ export default function AssignmentManagement() {
                 </div>
                 {unassignedPlayers.length === 0 && !activePlayer && (
                   <p className="text-theme-dim text-sm text-center mt-8">
-                    {t('admin.allAssigned', 'All players assigned!')}
+                    {t('admin:allAssigned', 'All players assigned!')}
                   </p>
                 )}
               </DroppableUnassigned>
@@ -703,7 +703,7 @@ export default function AssignmentManagement() {
 
       <div className="mt-6 p-4 bg-accent/10 border border-accent/30 rounded-lg">
         <p className="text-sm text-accent">
-          <strong>{t('admin.tip')}:</strong> {t('admin.dragToAssign')}. {t('admin.dragTip')}
+          <strong>{t('admin:tip')}:</strong> {t('admin:dragToAssign')}. {t('admin:dragTip')}
         </p>
       </div>
     </div>

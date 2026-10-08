@@ -39,8 +39,8 @@ export default function AdminDashboard() {
         <div className="bg-dark-card rounded-xl border border-theme-border p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-accent">{t('admin.title')}</h1>
-              <p className="text-theme-dim mt-1">{t('admin.managePlayers')}</p>
+              <h1 className="text-3xl font-bold text-accent">{t('admin:title')}</h1>
+              <p className="text-theme-dim mt-1">{t('admin:managePlayers')}</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -48,14 +48,14 @@ export default function AdminDashboard() {
                 className="flex items-center gap-2 px-4 py-2 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 transition-colors"
               >
                 <HelpCircle className="w-5 h-5" />
-                {t('adminGuide.linkText')}
+                {t('guide:admin.linkText')}
               </button>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark transition-colors"
               >
                 <LogOut className="w-5 h-5" />
-                {t('admin.logout')}
+                {t('admin:logout')}
               </button>
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
               }`}
             >
               <Users className="w-5 h-5" />
-              {t('admin.players')}
+              {t('admin:players')}
             </button>
             <button
               onClick={() => setActiveTab('assignments')}
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
               }`}
             >
               <Calendar className="w-5 h-5" />
-              {t('admin.assignments')}
+              {t('admin:assignments')}
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -93,7 +93,7 @@ export default function AdminDashboard() {
               }`}
             >
               <Settings className="w-5 h-5" />
-              {t('admin.settings')}
+              {t('admin:settings')}
             </button>
           </div>
         </div>

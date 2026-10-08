@@ -16,7 +16,7 @@ export default function ThemeSelector() {
   return (
     <div className="flex items-center gap-2 flex-wrap justify-end">
       <Palette className="w-4 h-4 text-theme-dim shrink-0" aria-hidden="true" />
-      <span className="sr-only">{t('theme.title')}</span>
+      <span className="sr-only">{t('common:theme.title')}</span>
       {THEMES.map((option) => (
         <button
           key={option.id}

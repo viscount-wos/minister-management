@@ -1,0 +1,14 @@
+{
+  "appTitle": "Ministry Management",
+  "theme": {
+    "title": "Theme",
+    "dark": "Ministry Dark",
+    "reading": "Reading",
+    "lowGlare": "Low Glare"
+  },
+  "cancel": "Cancel",
+  "save": "Save",
+  "close": "Close",
+  "yes": "Yes",
+  "no": "No"
+}

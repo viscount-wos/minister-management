@@ -54,15 +54,15 @@ export default function UpdateSubmission() {
       .catch(() => {});
   }, []);
 
-  const researchDayName = t(`form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
+  const researchDayName = t(`ministry:form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
   const dayTypeLabel = (dayType: string) =>
-    t(`form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
+    t(`ministry:form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
 
   const timeSlotOptions = generatePlayerTimeSlots(timezone);
 
   const handleSearch = async () => {
     if (!searchFid.trim()) {
-      setError(t('form.enterPlayerID'));
+      setError(t('profile:enterPlayerID'));
       return;
     }
 
@@ -94,9 +94,9 @@ export default function UpdateSubmission() {
       }
     } catch (err: any) {
       if (err.response?.status === 404) {
-        setError(t('update.notFound'));
+        setError(t('ministry:update.notFound'));
       } else {
-        setError(err.response?.data?.error || t('form.errorOccurred'));
+        setError(err.response?.data?.error || t('ministry:form.errorOccurred'));
       }
       setPlayerData(null);
     } finally {
@@ -135,7 +135,7 @@ export default function UpdateSubmission() {
 
     // Alliance is required
     if (!playerData.alliance || !playerData.alliance.trim()) {
-      setError(t('form.allianceRequired'));
+      setError(t('profile:allianceRequired'));
       return;
     }
 
@@ -143,7 +143,7 @@ export default function UpdateSubmission() {
     const byDay = playerData.time_slots_by_day || { construction: [], research: [], troop: [] };
     const totalSlots = byDay.construction.length + byDay.research.length + byDay.troop.length;
     if (totalSlots === 0) {
-      if (!window.confirm(t('form.noTimeSlotsConfirm'))) {
+      if (!window.confirm(t('ministry:form.noTimeSlotsConfirm'))) {
         return;
       }
     }
@@ -162,7 +162,7 @@ export default function UpdateSubmission() {
         navigate('/');
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('form.updateError'));
+      setError(err.response?.data?.error || t('ministry:form.updateError'));
     } finally {
       setLoading(false);
     }
@@ -173,8 +173,8 @@ export default function UpdateSubmission() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center">
           <CheckCircle className="w-20 h-20 text-success mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-accent mb-4">{t('form.success')}</h2>
-          <p className="text-theme-dim">{t('form.updateSuccess')}</p>
+          <h2 className="text-3xl font-bold text-accent mb-4">{t('ministry:form.success')}</h2>
+          <p className="text-theme-dim">{t('ministry:form.updateSuccess')}</p>
         </div>
       </div>
     );
@@ -188,23 +188,23 @@ export default function UpdateSubmission() {
           className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
-          {t('update.backHome')}
+          {t('ministry:update.backHome')}
         </button>
 
         <h2 className="text-3xl font-bold text-accent mb-6 text-center">
-          {t('update.title')}
+          {t('ministry:update.title')}
         </h2>
 
         {!playerData ? (
           <div>
-            <p className="text-theme-dim text-center mb-6">{t('update.enterFID')}</p>
+            <p className="text-theme-dim text-center mb-6">{t('ministry:update.enterFID')}</p>
             <div className="flex gap-4">
               <input
                 type="text"
                 value={searchFid}
                 onChange={(e) => setSearchFid(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder={t('update.fidLabel')}
+                placeholder={t('ministry:update.fidLabel')}
                 className="flex-1 px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
               />
               <button
@@ -213,7 +213,7 @@ export default function UpdateSubmission() {
                 className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50"
               >
                 <Search className="w-5 h-5" />
-                {t('update.load')}
+                {t('ministry:update.load')}
               </button>
             </div>
           </div>
@@ -223,14 +223,14 @@ export default function UpdateSubmission() {
             {playerAssignments !== null && (() => {
               const dayOrder = activeDaysInOrder(researchDay);
               const dayLabels: Record<string, string> = {
-                monday: t('admin.monday'),
-                tuesday: t('admin.tuesday'),
-                friday: t('admin.friday'),
-                thursday: t('admin.thursday'),
+                monday: t('admin:monday'),
+                tuesday: t('admin:tuesday'),
+                friday: t('admin:friday'),
+                thursday: t('admin:thursday'),
               };
               return (
                 <div className="bg-success/10 border border-success/30 rounded-lg p-5">
-                  <h3 className="text-lg font-semibold text-success mb-3">{t('update.currentAssignments')}</h3>
+                  <h3 className="text-lg font-semibold text-success mb-3">{t('ministry:update.currentAssignments')}</h3>
                   <div className="space-y-2">
                     {dayOrder.map((day) => {
                       const slots = playerAssignments[day] || [];
@@ -250,14 +250,14 @@ export default function UpdateSubmission() {
                               ))}
                             </div>
                           ) : (
-                            <span className="text-theme-dim text-sm italic">{t('update.noneAssigned')}</span>
+                            <span className="text-theme-dim text-sm italic">{t('ministry:update.noneAssigned')}</span>
                           )}
                         </div>
                       );
                     })}
                   </div>
                   <p className="text-xs text-theme-dim mt-3 italic">
-                    {t('update.assignmentDisclaimer')}
+                    {t('ministry:update.assignmentDisclaimer')}
                   </p>
                 </div>
               );
@@ -265,12 +265,12 @@ export default function UpdateSubmission() {
 
             {/* Player Information */}
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-accent">{t('form.playerInfo')}</h3>
+              <h3 className="text-xl font-semibold mb-4 text-accent">{t('profile:playerInfo')}</h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.gameName')}
+                      {t('profile:gameName')}
                     </label>
                     <input
                       type="text"
@@ -282,7 +282,7 @@ export default function UpdateSubmission() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.alliance')} *
+                      {t('profile:alliance')} *
                     </label>
                     <input
                       type="text"
@@ -291,7 +291,7 @@ export default function UpdateSubmission() {
                       onChange={(e) => setPlayerData(prev => prev ? { ...prev, alliance: e.target.value.toUpperCase().slice(0, 3) } : prev)}
                       maxLength={3}
                       className="w-full px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent uppercase"
-                      placeholder={t('form.alliancePlaceholder')}
+                      placeholder={t('profile:alliancePlaceholder')}
                       required
                     />
                   </div>
@@ -299,7 +299,7 @@ export default function UpdateSubmission() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.constructionSpeedups')}
+                      {t('ministry:form.constructionSpeedups')}
                     </label>
                     <input
                       type="number"
@@ -313,7 +313,7 @@ export default function UpdateSubmission() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.researchSpeedups')}
+                      {t('ministry:form.researchSpeedups')}
                     </label>
                     <input
                       type="number"
@@ -327,7 +327,7 @@ export default function UpdateSubmission() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-theme-text mb-2">
-                      {t('form.troopSpeedups')}
+                      {t('ministry:form.troopSpeedups')}
                     </label>
                     <input
                       type="number"
@@ -342,7 +342,7 @@ export default function UpdateSubmission() {
                   {showFireCrystals && (
                     <div>
                       <label className="block text-sm font-medium text-theme-text mb-2">
-                        {t('form.fireCrystals')}
+                        {t('ministry:form.fireCrystals')}
                       </label>
                       <input
                         type="number"
@@ -357,7 +357,7 @@ export default function UpdateSubmission() {
                   {showFireCrystals && (
                     <div>
                       <label className="block text-sm font-medium text-theme-text mb-2">
-                        {t('form.refinedFireCrystals')}
+                        {t('ministry:form.refinedFireCrystals')}
                       </label>
                       <input
                         type="number"
@@ -372,7 +372,7 @@ export default function UpdateSubmission() {
                   {showFireCrystals && (
                     <div>
                       <label className="block text-sm font-medium text-theme-text mb-2">
-                        {t('form.fireCrystalShards')}
+                        {t('ministry:form.fireCrystalShards')}
                       </label>
                       <input
                         type="number"
@@ -388,7 +388,7 @@ export default function UpdateSubmission() {
                 {/* General Speedups Note */}
                 <div className="mt-4 p-4 bg-accent/10 border border-accent/30 rounded-lg">
                   <p className="text-sm text-accent">
-                    <strong>💡 </strong>{t('form.generalSpeedupsNote')}
+                    <strong>💡 </strong>{t('ministry:form.generalSpeedupsNote')}
                   </p>
                 </div>
               </div>
@@ -397,12 +397,12 @@ export default function UpdateSubmission() {
             {/* Time Preferences */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-accent">{t('form.selectTimes')}</h3>
+                <h3 className="text-xl font-semibold text-accent">{t('ministry:form.selectTimes')}</h3>
                 <TimezoneSelector value={timezone} onChange={setTimezone} />
               </div>
 
               <p className="text-sm text-accent text-center mb-4 font-medium">
-                {t('form.selectAllAvailable')}
+                {t('ministry:form.selectAllAvailable')}
               </p>
 
               {/* Day type tabs */}
@@ -479,23 +479,23 @@ export default function UpdateSubmission() {
                     </div>
                     {maxCount > 0 && (
                       <p className="text-xs text-theme-dim mt-2 text-center italic">
-                        {t('form.heatmapLegend')}
+                        {t('ministry:form.heatmapLegend')}
                       </p>
                     )}
                   </>
                 );
               })()}
               <p className="text-sm text-theme-dim mt-4 text-center">
-                {t('form.selectedSlots', { count: (playerData.time_slots_by_day?.[activeTimeTab] || []).length })}
+                {t('ministry:form.selectedSlots', { count: (playerData.time_slots_by_day?.[activeTimeTab] || []).length })}
                 {timezone !== 'UTC' && (
                   <span className="ml-2 text-accent">
-                    ({t('form.timesShownIn')} {getTimezoneAbbr(timezone)})
+                    ({t('ministry:form.timesShownIn')} {getTimezoneAbbr(timezone)})
                   </span>
                 )}
               </p>
               <div className="mt-3 p-3 bg-accent/10 border border-accent/30 rounded-lg">
                 <p className="text-sm text-accent text-center">
-                  <strong>⏱ </strong>{t('form.timeToleranceNote')}
+                  <strong>⏱ </strong>{t('ministry:form.timeToleranceNote')}
                 </p>
               </div>
             </div>
@@ -507,7 +507,7 @@ export default function UpdateSubmission() {
               className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50"
             >
               <Save className="w-5 h-5" />
-              {loading ? t('form.loading') : t('form.update')}
+              {loading ? t('ministry:form.loading') : t('ministry:form.update')}
             </button>
           </div>
         )}

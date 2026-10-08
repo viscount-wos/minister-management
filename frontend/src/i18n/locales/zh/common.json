@@ -1,0 +1,14 @@
+{
+  "appTitle": "部长管理",
+  "theme": {
+    "title": "主题",
+    "dark": "部长深色",
+    "reading": "阅读",
+    "lowGlare": "低眩光"
+  },
+  "cancel": "取消",
+  "save": "保存",
+  "close": "关闭",
+  "yes": "是",
+  "no": "否"
+}

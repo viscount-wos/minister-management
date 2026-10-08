@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
-import './i18n'
+import './i18n/index'
 import { applyTheme, getSavedTheme } from './utils/theme'
 
 // Applied before the first render so the saved theme is already on <html>

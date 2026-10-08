@@ -59,9 +59,9 @@ export default function PlayerManagement() {
       .catch(() => {});
   }, []);
 
-  const researchDayName = t(`form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
+  const researchDayName = t(`ministry:form.${researchDay === 'friday' ? 'fridayName' : 'tuesdayName'}`);
   const dayTypeLabel = (dayType: string) =>
-    t(`form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
+    t(`ministry:form.${dayType}Times`, dayType === 'research' ? { day: researchDayName } : {});
 
   const fetchPlayers = async () => {
     setLoading(true);
@@ -72,7 +72,7 @@ export default function PlayerManagement() {
       });
       setPlayers(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.fetchError'));
+      setError(err.response?.data?.error || t('admin:fetchError'));
     } finally {
       setLoading(false);
     }
@@ -121,7 +121,7 @@ export default function PlayerManagement() {
       setPlayers(players.filter((p) => p.id !== playerId));
       setShowDeleteConfirm(null);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.deleteError'));
+      setError(err.response?.data?.error || t('admin:deleteError'));
     }
   };
 
@@ -136,7 +136,7 @@ export default function PlayerManagement() {
       await fetchPlayers();
       setEditingPlayer(null);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.playerUpdateError'));
+      setError(err.response?.data?.error || t('admin:playerUpdateError'));
     }
   };
 
@@ -149,7 +149,7 @@ export default function PlayerManagement() {
       setPlayers([]);
       setShowDeleteAllConfirm(false);
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.deleteAllError'));
+      setError(err.response?.data?.error || t('admin:deleteAllError'));
     }
   };
 
@@ -168,7 +168,7 @@ export default function PlayerManagement() {
       link.click();
       link.remove();
     } catch (err: any) {
-      setError(err.response?.data?.error || t('admin.exportError'));
+      setError(err.response?.data?.error || t('admin:exportError'));
     }
   };
 
@@ -180,7 +180,7 @@ export default function PlayerManagement() {
       const text = await file.text();
       const data = JSON.parse(text);
       if (!data.players || !Array.isArray(data.players)) {
-        setError(t('admin.importInvalidFile'));
+        setError(t('admin:importInvalidFile'));
         return;
       }
 
@@ -190,13 +190,13 @@ export default function PlayerManagement() {
       });
 
       const { imported, updated, errors } = response.data;
-      setImportMessage(t('admin.importSuccess', { imported, updated }) + (errors > 0 ? ` (${errors} errors)` : ''));
+      setImportMessage(t('admin:importSuccess', { imported, updated }) + (errors > 0 ? ` (${errors} errors)` : ''));
       await fetchPlayers();
     } catch (err: any) {
       if (err instanceof SyntaxError) {
-        setError(t('admin.importInvalidFile'));
+        setError(t('admin:importInvalidFile'));
       } else {
-        setError(err.response?.data?.error || t('admin.importError'));
+        setError(err.response?.data?.error || t('admin:importError'));
       }
     }
     // Reset the file input
@@ -218,7 +218,7 @@ export default function PlayerManagement() {
   if (loading) {
     return (
       <div className="bg-dark-card rounded-xl border border-theme-border p-12 text-center">
-        <p className="text-theme-dim">{t('form.loading')}</p>
+        <p className="text-theme-dim">{t('ministry:form.loading')}</p>
       </div>
     );
   }
@@ -228,9 +228,9 @@ export default function PlayerManagement() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-accent">{t('admin.playerManagement')}</h2>
+          <h2 className="text-2xl font-bold text-accent">{t('admin:playerManagement')}</h2>
           <p className="text-theme-dim mt-1">
-            {t('admin.totalPlayers')}: {players.length}
+            {t('admin:totalPlayers')}: {players.length}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -239,11 +239,11 @@ export default function PlayerManagement() {
             className="flex items-center gap-2 px-4 py-2 bg-success text-dark-bg rounded-lg hover:bg-success/80 font-medium transition-colors"
           >
             <Download className="w-4 h-4" />
-            {t('admin.exportJSON')}
+            {t('admin:exportJSON')}
           </button>
           <label className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors cursor-pointer">
             <Upload className="w-4 h-4" />
-            {t('admin.importJSON')}
+            {t('admin:importJSON')}
             <input
               type="file"
               accept=".json"
@@ -257,7 +257,7 @@ export default function PlayerManagement() {
               className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium transition-colors"
             >
               <Trash2 className="w-4 h-4" />
-              {t('admin.removeAll')}
+              {t('admin:removeAll')}
             </button>
           )}
         </div>
@@ -271,7 +271,7 @@ export default function PlayerManagement() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('admin.search')}
+            placeholder={t('admin:search')}
             className="w-full pl-10 pr-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent"
           />
         </div>
@@ -301,22 +301,22 @@ export default function PlayerManagement() {
           <thead>
             <tr className="border-b-2 border-theme-border">
               <th className="text-left p-3 font-semibold text-theme-dim">
-                <SortButton field="game_name" label={t('admin.gameName')} />
+                <SortButton field="game_name" label={t('admin:gameName')} />
               </th>
               <th className="text-left p-3 font-semibold text-theme-dim">
                 <SortButton field="fid" label="FID" />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">
-                <SortButton field="monday_points" label={t('admin.monday').split(' - ')[0]} />
+                <SortButton field="monday_points" label={t('admin:monday').split(' - ')[0]} />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">
-                <SortButton field="research_points" label={t(`admin.${players[0]?.research_day || 'tuesday'}`).split(' - ')[0]} />
+                <SortButton field="research_points" label={t(`admin:${players[0]?.research_day || 'tuesday'}`).split(' - ')[0]} />
               </th>
               <th className="text-center p-3 font-semibold text-theme-dim">
-                <SortButton field="thursday_points" label={t('admin.thursday').split(' - ')[0]} />
+                <SortButton field="thursday_points" label={t('admin:thursday').split(' - ')[0]} />
               </th>
-              <th className="text-center p-3 font-semibold text-theme-dim">{t('admin.timeSlots')}</th>
-              <th className="text-center p-3 font-semibold text-theme-dim">{t('admin.actions')}</th>
+              <th className="text-center p-3 font-semibold text-theme-dim">{t('admin:timeSlots')}</th>
+              <th className="text-center p-3 font-semibold text-theme-dim">{t('admin:actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -341,21 +341,21 @@ export default function PlayerManagement() {
                   {player.thursday_points.toLocaleString()}
                 </td>
                 <td className="p-3 text-center text-sm text-theme-dim">
-                  {player.time_slots ? player.time_slots.length : 0} {t('admin.selected')}
+                  {player.time_slots ? player.time_slots.length : 0} {t('admin:selected')}
                 </td>
                 <td className="p-3">
                   <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => { setActiveTimeTab('construction'); setEditingPlayer(player); }}
                       className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
-                      title={t('admin.edit')}
+                      title={t('admin:edit')}
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setShowDeleteConfirm(player.id)}
                       className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors"
-                      title={t('admin.delete')}
+                      title={t('admin:delete')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -368,7 +368,7 @@ export default function PlayerManagement() {
 
         {filteredAndSortedPlayers.length === 0 && (
           <div className="text-center py-12 text-theme-dim">
-            {t('admin.noPlayersFound')}
+            {t('admin:noPlayersFound')}
           </div>
         )}
       </div>
@@ -378,7 +378,7 @@ export default function PlayerManagement() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-dark-card rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-theme-border">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-accent">{t('admin.editPlayer')}</h3>
+              <h3 className="text-2xl font-bold text-accent">{t('admin:editPlayer')}</h3>
               <button
                 onClick={() => setEditingPlayer(null)}
                 className="text-theme-dim hover:text-theme-text"
@@ -390,7 +390,7 @@ export default function PlayerManagement() {
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-theme-text mb-2">{t('admin.gameName')}</label>
+                  <label className="block text-sm font-medium text-theme-text mb-2">{t('admin:gameName')}</label>
                   <input
                     type="text"
                     value={editingPlayer.game_name}
@@ -401,7 +401,7 @@ export default function PlayerManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-theme-text mb-2">{t('admin.allianceLabel')}</label>
+                  <label className="block text-sm font-medium text-theme-text mb-2">{t('admin:allianceLabel')}</label>
                   <input
                     type="text"
                     value={editingPlayer.alliance || ''}
@@ -417,14 +417,14 @@ export default function PlayerManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { key: 'construction_speedups_days', label: t('admin.constructionDays') },
-                  { key: 'research_speedups_days', label: t('admin.researchDays') },
-                  { key: 'troop_training_speedups_days', label: t('admin.troopDays') },
-                  { key: 'general_speedups_days', label: t('admin.generalDays') },
+                  { key: 'construction_speedups_days', label: t('admin:constructionDays') },
+                  { key: 'research_speedups_days', label: t('admin:researchDays') },
+                  { key: 'troop_training_speedups_days', label: t('admin:troopDays') },
+                  { key: 'general_speedups_days', label: t('admin:generalDays') },
                   ...(showFireCrystals ? [
-                    { key: 'fire_crystals', label: t('form.fireCrystals') },
-                    { key: 'refined_fire_crystals', label: t('form.refinedFireCrystals') },
-                    { key: 'fire_crystal_shards', label: t('form.fireCrystalShards') },
+                    { key: 'fire_crystals', label: t('ministry:form.fireCrystals') },
+                    { key: 'refined_fire_crystals', label: t('ministry:form.refinedFireCrystals') },
+                    { key: 'fire_crystal_shards', label: t('ministry:form.fireCrystalShards') },
                   ] : []),
                 ].map(({ key, label }) => (
                   <div key={key}>
@@ -449,7 +449,7 @@ export default function PlayerManagement() {
               {/* Time Preferences */}
               <div className="mt-6">
                 <label className="block text-sm font-medium text-theme-text mb-2">
-                  {t('form.timePreferences')}
+                  {t('ministry:form.timePreferences')}
                 </label>
 
                 {/* Day type tabs */}
@@ -512,10 +512,10 @@ export default function PlayerManagement() {
                   })}
                 </div>
                 <p className="text-xs text-theme-dim mt-2">
-                  {t('form.selectedSlots', { count: (editingPlayer.time_slots_by_day?.[activeTimeTab] || []).length })}
+                  {t('ministry:form.selectedSlots', { count: (editingPlayer.time_slots_by_day?.[activeTimeTab] || []).length })}
                   {timezone !== 'UTC' && (
                     <span className="ml-2 text-accent">
-                      ({t('form.timesShownIn')} {getTimezoneAbbr(timezone)})
+                      ({t('ministry:form.timesShownIn')} {getTimezoneAbbr(timezone)})
                     </span>
                   )}
                 </p>
@@ -527,13 +527,13 @@ export default function PlayerManagement() {
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium"
                 >
                   <Save className="w-5 h-5" />
-                  {t('common.save')}
+                  {t('common:save')}
                 </button>
                 <button
                   onClick={() => setEditingPlayer(null)}
                   className="flex-1 px-4 py-3 bg-dark-bg text-theme-text rounded-lg hover:bg-dark-card-hover font-medium border border-theme-border"
                 >
-                  {t('common.cancel')}
+                  {t('common:cancel')}
                 </button>
               </div>
             </div>
@@ -545,19 +545,19 @@ export default function PlayerManagement() {
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-dark-card rounded-xl p-6 max-w-md w-full border border-theme-border">
-            <h3 className="text-xl font-bold text-theme-text mb-4">{t('admin.confirmDelete')}</h3>
+            <h3 className="text-xl font-bold text-theme-text mb-4">{t('admin:confirmDelete')}</h3>
             <div className="flex gap-3">
               <button
                 onClick={() => handleDelete(showDeleteConfirm)}
                 className="flex-1 px-4 py-3 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium"
               >
-                {t('common.yes')}
+                {t('common:yes')}
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(null)}
                 className="flex-1 px-4 py-3 bg-dark-bg text-theme-text rounded-lg hover:bg-dark-card-hover font-medium border border-theme-border"
               >
-                {t('common.no')}
+                {t('common:no')}
               </button>
             </div>
           </div>
@@ -570,23 +570,23 @@ export default function PlayerManagement() {
           <div className="bg-dark-card rounded-xl p-6 max-w-md w-full border border-theme-border">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="w-8 h-8 text-danger" />
-              <h3 className="text-xl font-bold text-theme-text">{t('admin.removeAllConfirm')}</h3>
+              <h3 className="text-xl font-bold text-theme-text">{t('admin:removeAllConfirm')}</h3>
             </div>
             <p className="text-theme-dim mb-6">
-              {t('admin.removeAllWarning', { count: players.length })}
+              {t('admin:removeAllWarning', { count: players.length })}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={handleDeleteAll}
                 className="flex-1 px-4 py-3 bg-danger text-white rounded-lg hover:bg-danger-dark font-medium"
               >
-                {t('admin.yesDeleteAll')}
+                {t('admin:yesDeleteAll')}
               </button>
               <button
                 onClick={() => setShowDeleteAllConfirm(false)}
                 className="flex-1 px-4 py-3 bg-dark-bg text-theme-text rounded-lg hover:bg-dark-card-hover font-medium border border-theme-border"
               >
-                {t('common.cancel')}
+                {t('common:cancel')}
               </button>
             </div>
           </div>

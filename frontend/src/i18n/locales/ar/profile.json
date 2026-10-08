@@ -1,0 +1,14 @@
+{
+  "gameName": "اسم الزعيم في اللعبة",
+  "playerID": "معرف اللاعب (FID)",
+  "playerIDOptional": "معرف اللاعب (FID) - اختياري",
+  "playerIDPlaceholder": "أدخل معرف اللاعب الفريد الخاص بك",
+  "fidRequired": "معرف اللاعب (FID) مطلوب",
+  "playerAlreadyExists": "يوجد بالفعل لاعب بهذا المعرف أو الاسم. استخدم صفحة التحديث لتعديل إرسالك.",
+  "furnaceLevel": "مستوى الفرن",
+  "alliance": "علامة التحالف",
+  "alliancePlaceholder": "3 أحرف كحد أقصى (مثال ABC)",
+  "playerInfo": "معلومات اللاعب",
+  "enterPlayerID": "يرجى إدخال معرف اللاعب",
+  "allianceRequired": "علامة التحالف مطلوبة"
+}

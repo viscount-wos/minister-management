@@ -1,0 +1,14 @@
+{
+  "gameName": "首领游戏名称",
+  "playerID": "玩家 ID (FID)",
+  "playerIDOptional": "玩家 ID (FID) - 可选",
+  "playerIDPlaceholder": "输入您的唯一玩家 ID",
+  "fidRequired": "玩家 ID (FID) 为必填项",
+  "playerAlreadyExists": "已存在具有此 FID 或名称的玩家。请使用更新页面修改您的提交。",
+  "furnaceLevel": "熔炉等级",
+  "alliance": "联盟标签",
+  "alliancePlaceholder": "最多3个字符 (例: ABC)",
+  "playerInfo": "玩家信息",
+  "enterPlayerID": "请输入玩家 ID",
+  "allianceRequired": "联盟标签为必填项"
+}

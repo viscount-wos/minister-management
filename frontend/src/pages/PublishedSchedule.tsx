@@ -53,7 +53,7 @@ export default function PublishedSchedule() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <p className="text-theme-dim">{t('form.loading')}</p>
+        <p className="text-theme-dim">{t('ministry:form.loading')}</p>
       </div>
     );
   }
@@ -63,14 +63,14 @@ export default function PublishedSchedule() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="bg-dark-card rounded-2xl p-12 border border-theme-border max-w-md w-full text-center">
           <Calendar className="w-16 h-16 text-theme-dim mx-auto mb-6" />
-          <h2 className="text-2xl font-bold text-theme-text mb-4">{t('schedule.noSchedule')}</h2>
-          <p className="text-theme-dim mb-6">{t('schedule.noScheduleDesc')}</p>
+          <h2 className="text-2xl font-bold text-theme-text mb-4">{t('ministry:schedule.noSchedule')}</h2>
+          <p className="text-theme-dim mb-6">{t('ministry:schedule.noScheduleDesc')}</p>
           <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim"
           >
             <ArrowLeft className="w-5 h-5" />
-            {t('update.backHome')}
+            {t('ministry:update.backHome')}
           </button>
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function PublishedSchedule() {
 
   // Translate the day label
   const dayKey = data.day || '';
-  const translatedDayLabel = t(`admin.${dayKey}`, { defaultValue: data.day_label || dayKey });
+  const translatedDayLabel = t(`admin:${dayKey}`, { defaultValue: data.day_label || dayKey });
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -93,12 +93,12 @@ export default function PublishedSchedule() {
           className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
-          {t('update.backHome')}
+          {t('ministry:update.backHome')}
         </button>
 
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-accent mb-2">
-            {t('schedule.title')}
+            {t('ministry:schedule.title')}
           </h2>
           <p className="text-xl text-theme-dim">{translatedDayLabel}</p>
         </div>
@@ -106,7 +106,7 @@ export default function PublishedSchedule() {
         {appsStillOpen && (
           <div className="mb-6 p-4 bg-warning/10 border border-warning/30 rounded-lg flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0" />
-            <p className="text-warning text-sm font-medium">{t('schedule.disclaimer')}</p>
+            <p className="text-warning text-sm font-medium">{t('ministry:schedule.disclaimer')}</p>
           </div>
         )}
 
@@ -115,7 +115,7 @@ export default function PublishedSchedule() {
         </div>
 
         {!hasAnyAssignments ? (
-          <p className="text-center text-theme-dim py-8">{t('schedule.noAssignments')}</p>
+          <p className="text-center text-theme-dim py-8">{t('ministry:schedule.noAssignments')}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {allSlots.map(slot => {
@@ -144,7 +144,7 @@ export default function PublishedSchedule() {
                   </div>
                   {isEmpty ? (
                     <div className="p-2 border border-dashed border-theme-border/30 rounded-lg text-center">
-                      <span className="text-theme-dim/50 text-sm">{t('schedule.unfilled')}</span>
+                      <span className="text-theme-dim/50 text-sm">{t('ministry:schedule.unfilled')}</span>
                     </div>
                   ) : (
                     players.map((player, idx) => (
@@ -168,7 +168,7 @@ export default function PublishedSchedule() {
         )}
 
         <div className="mt-6 text-center text-sm text-theme-dim">
-          <p>{t('schedule.timesNote')}</p>
+          <p>{t('ministry:schedule.timesNote')}</p>
         </div>
       </div>
     </div>

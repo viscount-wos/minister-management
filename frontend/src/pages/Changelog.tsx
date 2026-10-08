@@ -23,14 +23,14 @@ export default function Changelog() {
           className="inline-flex items-center gap-2 text-accent hover:text-accent-dim transition-colors text-sm font-medium mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          {t('changelog.backHome')}
+          {t('changelog:backHome')}
         </button>
 
         <h1 className="text-3xl sm:text-4xl font-bold text-accent mb-2">
-          {t('changelog.title')}
+          {t('changelog:title')}
         </h1>
         <p className="text-theme-dim mb-10 leading-relaxed">
-          {t('changelog.subtitle')}
+          {t('changelog:subtitle')}
         </p>
 
         <div className="space-y-5">
@@ -42,16 +42,16 @@ export default function Changelog() {
               {/* Wraps to two rows on a narrow screen rather than squashing */}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
                 <h2 className="text-lg font-semibold text-theme-text">
-                  {t(`changelog.${release.key}Title`)}
+                  {t(`changelog:${release.key}Title`)}
                 </h2>
                 {index === 0 && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/20 text-accent text-xs font-semibold">
                     <Sparkles className="w-3 h-3" />
-                    {t('changelog.latest')}
+                    {t('changelog:latest')}
                   </span>
                 )}
                 <span className="text-theme-dim text-sm ms-auto whitespace-nowrap">
-                  {t(`changelog.${release.key}Date`)}
+                  {t(`changelog:${release.key}Date`)}
                 </span>
               </div>
 
@@ -59,7 +59,7 @@ export default function Changelog() {
                 {release.items.map((item) => (
                   <li key={item} className="flex gap-3 text-theme-text leading-relaxed">
                     <span className="text-accent shrink-0" aria-hidden="true">&bull;</span>
-                    <span>{t(`changelog.${release.key}${item}`)}</span>
+                    <span>{t(`changelog:${release.key}${item}`)}</span>
                   </li>
                 ))}
               </ul>

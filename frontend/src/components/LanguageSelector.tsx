@@ -1,29 +1,17 @@
 import { useTranslation } from 'react-i18next';
-
-const languages = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'pl', name: 'Polski', flag: '🇵🇱' },
-  { code: 'ko', name: '한국어', flag: '🇰🇷' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
-];
+import { LANGUAGES } from '../i18n/index';
 
 export default function LanguageSelector() {
   const { i18n } = useTranslation();
 
   const handleLanguageChange = (langCode: string) => {
+    // <html dir> follows via the languageChanged listener in i18n/index.ts
     i18n.changeLanguage(langCode);
-    // Update document direction for RTL languages
-    document.documentElement.dir = langCode === 'ar' ? 'rtl' : 'ltr';
   };
 
   return (
     <div className="flex items-center gap-2 flex-wrap justify-end">
-      {languages.map((lang) => (
+      {LANGUAGES.map((lang) => (
         <button
           key={lang.code}
           onClick={() => handleLanguageChange(lang.code)}

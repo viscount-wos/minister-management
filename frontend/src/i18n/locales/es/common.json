@@ -1,0 +1,14 @@
+{
+  "appTitle": "Gestión de Ministerios",
+  "theme": {
+    "title": "Tema",
+    "dark": "Ministerio Oscuro",
+    "reading": "Lectura",
+    "lowGlare": "Brillo Suave"
+  },
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "close": "Cerrar",
+  "yes": "Sí",
+  "no": "No"
+}

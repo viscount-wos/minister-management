@@ -49,7 +49,7 @@ export default function AdminSettings() {
   }, []);
 
   const showSaveMessage = () => {
-    setSaveMessage(t('admin.settingsSaved'));
+    setSaveMessage(t('admin:settingsSaved'));
     setTimeout(() => setSaveMessage(''), 3000);
   };
 
@@ -154,14 +154,14 @@ export default function AdminSettings() {
 
       {/* State Number */}
       <div className="bg-dark-card rounded-xl border border-theme-border p-6">
-        <h3 className="text-xl font-bold text-accent mb-2">{t('admin.stateNumber')}</h3>
-        <p className="text-theme-dim text-sm mb-4">{t('admin.stateNumberDesc')}</p>
+        <h3 className="text-xl font-bold text-accent mb-2">{t('admin:stateNumber')}</h3>
+        <p className="text-theme-dim text-sm mb-4">{t('admin:stateNumberDesc')}</p>
         <div className="flex gap-3 items-center">
           <input
             type="text"
             value={stateNumber}
             onChange={(e) => setStateNumber(e.target.value)}
-            placeholder={t('admin.stateNumberPlaceholder')}
+            placeholder={t('admin:stateNumberPlaceholder')}
             className="px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent focus:border-accent w-48"
           />
           <button
@@ -169,15 +169,15 @@ export default function AdminSettings() {
             className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
           >
             <Save className="w-4 h-4" />
-            {t('common.save')}
+            {t('common:save')}
           </button>
         </div>
       </div>
 
       {/* Application Closing Time */}
       <div className="bg-dark-card rounded-xl border border-theme-border p-6">
-        <h3 className="text-xl font-bold text-accent mb-2">{t('admin.closingTime')}</h3>
-        <p className="text-theme-dim text-sm mb-4">{t('admin.closingTimeDesc')}</p>
+        <h3 className="text-xl font-bold text-accent mb-2">{t('admin:closingTime')}</h3>
+        <p className="text-theme-dim text-sm mb-4">{t('admin:closingTimeDesc')}</p>
         <div className="flex flex-wrap gap-3 items-center">
           <input
             type="datetime-local"
@@ -190,31 +190,31 @@ export default function AdminSettings() {
             className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
           >
             <Save className="w-4 h-4" />
-            {t('common.save')}
+            {t('common:save')}
           </button>
           <button
             onClick={handleClearClosingTime}
             className="flex items-center gap-2 px-4 py-2 bg-danger/20 text-danger rounded-lg hover:bg-danger/30 font-medium transition-colors"
           >
             <X className="w-4 h-4" />
-            {t('admin.clear')}
+            {t('admin:clear')}
           </button>
         </div>
         <div className="mt-3 text-sm">
           {currentClosingTime ? (
             <p className={isClosed ? 'text-danger' : 'text-success'}>
-              {t('admin.currentClosingTime')}: {new Date(currentClosingTime).toLocaleString()}
-              {isClosed && <span className="ml-2 font-medium">({t('home.applicationsClosed')})</span>}
+              {t('admin:currentClosingTime')}: {new Date(currentClosingTime).toLocaleString()}
+              {isClosed && <span className="ml-2 font-medium">({t('ministry:home.applicationsClosed')})</span>}
             </p>
           ) : (
-            <p className="text-theme-dim italic">{t('admin.noClosingTime')}</p>
+            <p className="text-theme-dim italic">{t('admin:noClosingTime')}</p>
           )}
         </div>
       </div>
       {/* Research Day Toggle */}
       <div className="bg-dark-card rounded-xl border border-theme-border p-6">
-        <h3 className="text-xl font-bold text-accent mb-2">{t('admin.researchDayToggle')}</h3>
-        <p className="text-theme-dim text-sm mb-4">{t('admin.researchDayDesc')}</p>
+        <h3 className="text-xl font-bold text-accent mb-2">{t('admin:researchDayToggle')}</h3>
+        <p className="text-theme-dim text-sm mb-4">{t('admin:researchDayDesc')}</p>
         <button
           onClick={handleToggleResearchDay}
           className="flex items-center gap-2 px-4 py-3 bg-dark-bg border border-theme-border rounded-lg hover:border-accent transition-colors"
@@ -222,12 +222,12 @@ export default function AdminSettings() {
           {researchDay === 'tuesday' ? (
             <>
               <ToggleLeft className="w-7 h-7 text-accent" />
-              <span className="text-accent font-medium text-lg">{t('admin.tuesday').split(' - ')[0]}</span>
+              <span className="text-accent font-medium text-lg">{t('admin:tuesday').split(' - ')[0]}</span>
             </>
           ) : (
             <>
               <ToggleRight className="w-7 h-7 text-accent" />
-              <span className="text-accent font-medium text-lg">{t('admin.friday').split(' - ')[0]}</span>
+              <span className="text-accent font-medium text-lg">{t('admin:friday').split(' - ')[0]}</span>
             </>
           )}
         </button>
@@ -235,8 +235,8 @@ export default function AdminSettings() {
 
       {/* Show Fire Crystal Fields */}
       <div className="bg-dark-card rounded-xl border border-theme-border p-6">
-        <h3 className="text-xl font-bold text-accent mb-2">{t('admin.showFireCrystals')}</h3>
-        <p className="text-theme-dim text-sm mb-4">{t('admin.showFireCrystalsDesc')}</p>
+        <h3 className="text-xl font-bold text-accent mb-2">{t('admin:showFireCrystals')}</h3>
+        <p className="text-theme-dim text-sm mb-4">{t('admin:showFireCrystalsDesc')}</p>
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -245,19 +245,19 @@ export default function AdminSettings() {
             className="w-5 h-5 accent-accent"
           />
           <span className={`font-medium ${showFireCrystals ? 'text-accent' : 'text-theme-dim'}`}>
-            {showFireCrystals ? t('admin.enabled') : t('admin.disabled')}
+            {showFireCrystals ? t('admin:enabled') : t('admin:disabled')}
           </span>
         </label>
       </div>
 
       {/* Time Slot Scheme */}
       <div className="bg-dark-card rounded-xl border border-theme-border p-6">
-        <h3 className="text-xl font-bold text-accent mb-2">{t('admin.timeSlotScheme')}</h3>
-        <p className="text-theme-dim text-sm mb-4">{t('admin.timeSlotSchemeDesc')}</p>
+        <h3 className="text-xl font-bold text-accent mb-2">{t('admin:timeSlotScheme')}</h3>
+        <p className="text-theme-dim text-sm mb-4">{t('admin:timeSlotSchemeDesc')}</p>
         <div className="grid gap-3 sm:grid-cols-2">
           {([
-            { value: 'exact_alignment' as const, title: t('admin.schemeExact'), desc: t('admin.schemeExactDesc') },
-            { value: 'max_slots' as const, title: t('admin.schemeMax'), desc: t('admin.schemeMaxDesc') },
+            { value: 'exact_alignment' as const, title: t('admin:schemeExact'), desc: t('admin:schemeExactDesc') },
+            { value: 'max_slots' as const, title: t('admin:schemeMax'), desc: t('admin:schemeMaxDesc') },
           ]).map(opt => {
             const active = timeSlotScheme === opt.value;
             return (

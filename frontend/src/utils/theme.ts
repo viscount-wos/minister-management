@@ -10,9 +10,9 @@ export type ThemeId = 'ministry-dark' | 'reading' | 'low-glare';
 export const DEFAULT_THEME: ThemeId = 'ministry-dark';
 
 export const THEMES: { id: ThemeId; labelKey: string }[] = [
-  { id: 'ministry-dark', labelKey: 'theme.dark' },
-  { id: 'reading', labelKey: 'theme.reading' },
-  { id: 'low-glare', labelKey: 'theme.lowGlare' },
+  { id: 'ministry-dark', labelKey: 'common:theme.dark' },
+  { id: 'reading', labelKey: 'common:theme.reading' },
+  { id: 'low-glare', labelKey: 'common:theme.lowGlare' },
 ];
 
 const STORAGE_KEY = 'preferred_theme';

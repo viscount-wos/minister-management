@@ -1,0 +1,14 @@
+{
+  "gameName": "Nombre de Juego del Jefe",
+  "playerID": "ID de Jugador (FID)",
+  "playerIDOptional": "ID de Jugador (FID) - Opcional",
+  "playerIDPlaceholder": "Ingresa tu ID de Jugador único",
+  "fidRequired": "El ID de Jugador (FID) es obligatorio",
+  "playerAlreadyExists": "Ya existe un jugador con este FID o nombre. Usa la página de Actualizar para modificar tu envío.",
+  "furnaceLevel": "Nv. de Horno",
+  "alliance": "Etiqueta de Alianza",
+  "alliancePlaceholder": "Máx. 3 caracteres (ej. ABC)",
+  "playerInfo": "Información del Jugador",
+  "enterPlayerID": "Por favor ingresa un ID de Jugador",
+  "allianceRequired": "La etiqueta de alianza es obligatoria"
+}

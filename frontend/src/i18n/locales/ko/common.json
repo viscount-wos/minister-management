@@ -1,0 +1,14 @@
+{
+  "appTitle": "장관 관리",
+  "theme": {
+    "title": "테마",
+    "dark": "장관 다크",
+    "reading": "읽기",
+    "lowGlare": "눈부심 감소"
+  },
+  "cancel": "취소",
+  "save": "저장",
+  "close": "닫기",
+  "yes": "예",
+  "no": "아니오"
+}

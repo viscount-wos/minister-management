@@ -1,0 +1,14 @@
+{
+  "gameName": "Nom de jeu du Chef",
+  "playerID": "ID Joueur (FID)",
+  "playerIDOptional": "ID Joueur (FID) - Facultatif",
+  "playerIDPlaceholder": "Saisissez votre ID Joueur unique",
+  "fidRequired": "L'ID Joueur (FID) est requis",
+  "playerAlreadyExists": "Un joueur avec ce FID ou ce nom existe déjà. Utilisez la page de Modification pour modifier votre soumission.",
+  "furnaceLevel": "Niv. Fourneau",
+  "alliance": "Tag d'Alliance",
+  "alliancePlaceholder": "3 caractères max (ex. ABC)",
+  "playerInfo": "Informations du joueur",
+  "enterPlayerID": "Veuillez saisir un ID Joueur",
+  "allianceRequired": "Le tag d'alliance est requis"
+}

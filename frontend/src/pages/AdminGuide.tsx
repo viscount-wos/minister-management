@@ -14,11 +14,11 @@ export default function AdminGuide() {
           className="flex items-center gap-2 text-theme-dim hover:text-accent transition-colors mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
-          {t('adminGuide.backToDashboard')}
+          {t('guide:admin.backToDashboard')}
         </button>
 
-        <h1 className="text-4xl font-bold text-accent mb-2">{t('adminGuide.title')}</h1>
-        <p className="text-theme-dim mb-8">{t('adminGuide.subtitle')}</p>
+        <h1 className="text-4xl font-bold text-accent mb-2">{t('guide:admin.title')}</h1>
+        <p className="text-theme-dim mb-8">{t('guide:admin.subtitle')}</p>
 
         <div className="space-y-8">
           {/* Overview */}
@@ -27,9 +27,9 @@ export default function AdminGuide() {
               <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
                 <Settings className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.overviewTitle')}</h2>
+              <h2 className="text-2xl font-bold text-theme-text">{t('guide:admin.overviewTitle')}</h2>
             </div>
-            <p className="text-theme-dim leading-relaxed">{t('adminGuide.overviewBody')}</p>
+            <p className="text-theme-dim leading-relaxed">{t('guide:admin.overviewBody')}</p>
           </section>
 
           {/* Player Management */}
@@ -38,29 +38,29 @@ export default function AdminGuide() {
               <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
                 <Users className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.playersTitle')}</h2>
+              <h2 className="text-2xl font-bold text-theme-text">{t('guide:admin.playersTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-4">
               <div>
-                <h3 className="text-lg font-semibold text-theme-text mb-2">{t('adminGuide.playersViewHeader')}</h3>
+                <h3 className="text-lg font-semibold text-theme-text mb-2">{t('guide:admin.playersViewHeader')}</h3>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>{t('adminGuide.playersView1')}</li>
-                  <li>{t('adminGuide.playersView2')}</li>
-                  <li>{t('adminGuide.playersView3')}</li>
-                  <li>{t('adminGuide.playersView4')}</li>
+                  <li>{t('guide:admin.playersView1')}</li>
+                  <li>{t('guide:admin.playersView2')}</li>
+                  <li>{t('guide:admin.playersView3')}</li>
+                  <li>{t('guide:admin.playersView4')}</li>
                 </ul>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-theme-text mb-2">{t('adminGuide.playersEditHeader')}</h3>
+                <h3 className="text-lg font-semibold text-theme-text mb-2">{t('guide:admin.playersEditHeader')}</h3>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>{t('adminGuide.playersEdit1')}</li>
-                  <li>{t('adminGuide.playersEdit2')}</li>
-                  <li>{t('adminGuide.playersEdit3')}</li>
+                  <li>{t('guide:admin.playersEdit1')}</li>
+                  <li>{t('guide:admin.playersEdit2')}</li>
+                  <li>{t('guide:admin.playersEdit3')}</li>
                 </ul>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-theme-text mb-2">{t('adminGuide.playersDeleteHeader')}</h3>
-                <p>{t('adminGuide.playersDeleteBody')}</p>
+                <h3 className="text-lg font-semibold text-theme-text mb-2">{t('guide:admin.playersDeleteHeader')}</h3>
+                <p>{t('guide:admin.playersDeleteBody')}</p>
               </div>
             </div>
           </section>
@@ -71,20 +71,20 @@ export default function AdminGuide() {
               <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
                 <Download className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.exportImportTitle')}</h2>
+              <h2 className="text-2xl font-bold text-theme-text">{t('guide:admin.exportImportTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-4">
               <div>
                 <h3 className="text-lg font-semibold text-theme-text mb-2 flex items-center gap-2">
-                  <Download className="w-4 h-4" /> {t('adminGuide.exportHeader')}
+                  <Download className="w-4 h-4" /> {t('guide:admin.exportHeader')}
                 </h3>
-                <p>{t('adminGuide.exportBody')}</p>
+                <p>{t('guide:admin.exportBody')}</p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-theme-text mb-2 flex items-center gap-2">
-                  <Upload className="w-4 h-4" /> {t('adminGuide.importHeader')}
+                  <Upload className="w-4 h-4" /> {t('guide:admin.importHeader')}
                 </h3>
-                <p>{t('adminGuide.importBody')}</p>
+                <p>{t('guide:admin.importBody')}</p>
               </div>
             </div>
           </section>
@@ -95,37 +95,37 @@ export default function AdminGuide() {
               <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
                 <Calendar className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.assignTitle')}</h2>
+              <h2 className="text-2xl font-bold text-theme-text">{t('guide:admin.assignTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-4">
               <div>
-                <h3 className="text-lg font-semibold text-theme-text mb-2">{t('adminGuide.autoAssignHeader')}</h3>
+                <h3 className="text-lg font-semibold text-theme-text mb-2">{t('guide:admin.autoAssignHeader')}</h3>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>{t('adminGuide.autoAssign1')}</li>
-                  <li>{t('adminGuide.autoAssign2')}</li>
-                  <li>{t('adminGuide.autoAssign3')}</li>
-                  <li>{t('adminGuide.autoAssign4')}</li>
+                  <li>{t('guide:admin.autoAssign1')}</li>
+                  <li>{t('guide:admin.autoAssign2')}</li>
+                  <li>{t('guide:admin.autoAssign3')}</li>
+                  <li>{t('guide:admin.autoAssign4')}</li>
                 </ul>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-theme-text mb-2 flex items-center gap-2">
-                  <GripVertical className="w-4 h-4" /> {t('adminGuide.dragDropHeader')}
+                  <GripVertical className="w-4 h-4" /> {t('guide:admin.dragDropHeader')}
                 </h3>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>{t('adminGuide.dragDrop1')}</li>
-                  <li>{t('adminGuide.dragDrop2')}</li>
-                  <li>{t('adminGuide.dragDrop3')}</li>
+                  <li>{t('guide:admin.dragDrop1')}</li>
+                  <li>{t('guide:admin.dragDrop2')}</li>
+                  <li>{t('guide:admin.dragDrop3')}</li>
                 </ul>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-theme-text mb-2 flex items-center gap-2">
-                  <Lock className="w-4 h-4" /> {t('adminGuide.stickyHeader')}
+                  <Lock className="w-4 h-4" /> {t('guide:admin.stickyHeader')}
                 </h3>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>{t('adminGuide.sticky1')}</li>
-                  <li>{t('adminGuide.sticky2')}</li>
-                  <li>{t('adminGuide.sticky3')}</li>
-                  <li>{t('adminGuide.sticky4')}</li>
+                  <li>{t('guide:admin.sticky1')}</li>
+                  <li>{t('guide:admin.sticky2')}</li>
+                  <li>{t('guide:admin.sticky3')}</li>
+                  <li>{t('guide:admin.sticky4')}</li>
                 </ul>
               </div>
             </div>
@@ -137,9 +137,9 @@ export default function AdminGuide() {
               <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
                 <Globe className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.researchDayTitle')}</h2>
+              <h2 className="text-2xl font-bold text-theme-text">{t('guide:admin.researchDayTitle')}</h2>
             </div>
-            <p className="text-theme-dim leading-relaxed">{t('adminGuide.researchDayBody')}</p>
+            <p className="text-theme-dim leading-relaxed">{t('guide:admin.researchDayBody')}</p>
           </section>
 
           {/* Settings Tab */}
@@ -148,15 +148,15 @@ export default function AdminGuide() {
               <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
                 <Settings className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.settingsTitle')}</h2>
+              <h2 className="text-2xl font-bold text-theme-text">{t('guide:admin.settingsTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-3">
-              <p>{t('adminGuide.settingsBody')}</p>
+              <p>{t('guide:admin.settingsBody')}</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>{t('adminGuide.settingsState')}</li>
-                <li>{t('adminGuide.settingsClosing')}</li>
-                <li>{t('adminGuide.settingsResearch')}</li>
-                <li>{t('adminGuide.settingsFireCrystals')}</li>
+                <li>{t('guide:admin.settingsState')}</li>
+                <li>{t('guide:admin.settingsClosing')}</li>
+                <li>{t('guide:admin.settingsResearch')}</li>
+                <li>{t('guide:admin.settingsFireCrystals')}</li>
               </ul>
             </div>
           </section>
@@ -167,14 +167,14 @@ export default function AdminGuide() {
               <div className="w-10 h-10 bg-success/20 rounded-full flex items-center justify-center">
                 <Calendar className="w-5 h-5 text-success" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.publishTitle')}</h2>
+              <h2 className="text-2xl font-bold text-theme-text">{t('guide:admin.publishTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-3">
-              <p>{t('adminGuide.publishBody')}</p>
+              <p>{t('guide:admin.publishBody')}</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>{t('adminGuide.publish1')}</li>
-                <li>{t('adminGuide.publish2')}</li>
-                <li>{t('adminGuide.publish3')}</li>
+                <li>{t('guide:admin.publish1')}</li>
+                <li>{t('guide:admin.publish2')}</li>
+                <li>{t('guide:admin.publish3')}</li>
               </ul>
             </div>
           </section>
@@ -185,30 +185,30 @@ export default function AdminGuide() {
               <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
                 <FileSpreadsheet className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="text-2xl font-bold text-theme-text">{t('adminGuide.excelTitle')}</h2>
+              <h2 className="text-2xl font-bold text-theme-text">{t('guide:admin.excelTitle')}</h2>
             </div>
             <div className="text-theme-dim leading-relaxed space-y-3">
-              <p>{t('adminGuide.excelBody')}</p>
+              <p>{t('guide:admin.excelBody')}</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>{t('adminGuide.excel1')}</li>
-                <li>{t('adminGuide.excel2')}</li>
-                <li>{t('adminGuide.excel3')}</li>
+                <li>{t('guide:admin.excel1')}</li>
+                <li>{t('guide:admin.excel2')}</li>
+                <li>{t('guide:admin.excel3')}</li>
               </ul>
             </div>
           </section>
 
           {/* Workflow Tips */}
           <section className="bg-accent/10 border border-accent/30 rounded-xl p-6">
-            <h2 className="text-2xl font-bold text-accent mb-4">{t('adminGuide.workflowTitle')}</h2>
+            <h2 className="text-2xl font-bold text-accent mb-4">{t('guide:admin.workflowTitle')}</h2>
             <ol className="space-y-2 text-theme-dim list-decimal list-inside">
-              <li>{t('adminGuide.workflow1')}</li>
-              <li>{t('adminGuide.workflow2')}</li>
-              <li>{t('adminGuide.workflow3')}</li>
-              <li>{t('adminGuide.workflow4')}</li>
-              <li>{t('adminGuide.workflow5')}</li>
-              <li>{t('adminGuide.workflow6')}</li>
-              <li>{t('adminGuide.workflow7')}</li>
-              <li>{t('adminGuide.workflow8')}</li>
+              <li>{t('guide:admin.workflow1')}</li>
+              <li>{t('guide:admin.workflow2')}</li>
+              <li>{t('guide:admin.workflow3')}</li>
+              <li>{t('guide:admin.workflow4')}</li>
+              <li>{t('guide:admin.workflow5')}</li>
+              <li>{t('guide:admin.workflow6')}</li>
+              <li>{t('guide:admin.workflow7')}</li>
+              <li>{t('guide:admin.workflow8')}</li>
             </ol>
           </section>
         </div>
