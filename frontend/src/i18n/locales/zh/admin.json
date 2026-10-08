@@ -154,5 +154,24 @@
     "count": "至第 {{gen}} 代共 {{n}} 位英雄",
     "generation": "本州英雄世代",
     "generationDesc": "你所在州的最新英雄世代。之后世代的英雄不会被列出。适用于整个州。"
+  },
+  "playerEdit": {
+    "desc": "修改该玩家在本轮的报名。",
+    "shared": "名字、联盟和部队与其他活动共享：在这里修改，所有地方都会同步。",
+    "sharedTyrant": "名字、联盟、部队、战力和 Discord ID 与其他活动共享：在这里修改，所有地方都会同步。",
+    "troopsHint": "等级留空会保留已保存的数值。",
+    "fidFixed": "玩家 ID 无法修改。",
+    "editLabel": "编辑 {{name}}",
+    "deleteLabel": "移除 {{name}}",
+    "closed": "本轮已关闭：无法编辑或移除玩家。",
+    "old": "旧",
+    "oldHour": "已不在本场战斗中；保留自其报名。",
+    "oldWindow": "已不在本轮中；保留自其报名。",
+    "deleteTitle": "移除 {{name}}？",
+    "deleteBody": "这会删除其在本轮的报名。其资料（名字、联盟、部队）会保留给其他活动。",
+    "deleteConfirm": "移除",
+    "saved": "已保存 {{name}}。",
+    "removed": "已将 {{name}} 移出本轮。",
+    "removedPlan": "已将 {{name}} 移出本轮和作战计划。"
   }
 }

@@ -331,6 +331,12 @@
       "selected": "{{n}} sélectionnés",
       "add": "Ajouter les {{n}} sélectionnés au rallye…",
       "clear": "Effacer la sélection"
+    },
+    "deletePlan": {
+      "leader": "Il mène le rallye {{leader}} ({{group}}) ; il sera aussi retiré du plan de bataille. La carte du rallye reste, sans chef.",
+      "joiner": "Il est le renfort {{n}} avec {{leader}} ({{group}}) ; il sera aussi retiré du plan de bataille.",
+      "extra": "Il est renfort extra avec {{leader}} ({{group}}) ; il sera aussi retiré du plan de bataille.",
+      "group": "Il est dans {{group}} ; il sera aussi retiré du plan de bataille."
     }
   }
 }

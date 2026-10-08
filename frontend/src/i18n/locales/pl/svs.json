@@ -331,6 +331,12 @@
       "selected": "Zaznaczono: {{n}}",
       "add": "Dodaj zaznaczonych ({{n}}) do rajdu…",
       "clear": "Wyczyść zaznaczenie"
+    },
+    "deletePlan": {
+      "leader": "Prowadzi rajd {{leader}} ({{group}}); zostanie też usunięty z planu bitwy. Karta rajdu zostaje, bez lidera.",
+      "joiner": "Jest dołączającym {{n}} u {{leader}} ({{group}}); zostanie też usunięty z planu bitwy.",
+      "extra": "Jest dodatkowym dołączającym u {{leader}} ({{group}}); zostanie też usunięty z planu bitwy.",
+      "group": "Jest w {{group}}; zostanie też usunięty z planu bitwy."
     }
   }
 }

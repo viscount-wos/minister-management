@@ -5,7 +5,7 @@ import { usePageTitle } from '../shared/usePageTitle';
 
 // Newest first. Each entry maps to a block of keys in locales/<lang>/changelog.json (all 9 languages).
 const RELEASES = [
-  { version: '2.2.1', key: 'v221', items: ['a'] },
+  { version: '2.2.1', key: 'v221', items: ['a', 'edit'] },
   { version: '2.2.0', key: 'v220', items: ['a', 'b', 'c', 'd'] },
   { version: '2.1.0', key: 'v210', items: ['a', 'b', 'c', 'd', 'e'] },
   { version: '2.0.0', key: 'v200', items: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] },

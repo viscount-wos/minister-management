@@ -154,5 +154,24 @@
     "count": "{{n}} heroes up to Gen {{gen}}",
     "generation": "State hero generation",
     "generationDesc": "The newest hero generation your state has. Planners never offer heroes from a later generation. Applies to the whole state."
+  },
+  "playerEdit": {
+    "desc": "Change this player's sign-up for this round.",
+    "shared": "Name, alliance and troops are shared with other events: a change here shows everywhere.",
+    "sharedTyrant": "Name, alliance, troops, power and Discord ID are shared with other events: a change here shows everywhere.",
+    "troopsHint": "A blank level keeps what is already stored.",
+    "fidFixed": "The player ID can't be changed.",
+    "editLabel": "Edit {{name}}",
+    "deleteLabel": "Remove {{name}}",
+    "closed": "This round is closed: players can't be edited or removed.",
+    "old": "old",
+    "oldHour": "No longer in this battle; kept from their sign-up.",
+    "oldWindow": "No longer in this round; kept from their sign-up.",
+    "deleteTitle": "Remove {{name}}?",
+    "deleteBody": "This removes their sign-up from this round. Their profile (name, alliance, troops) is kept for other events.",
+    "deleteConfirm": "Remove",
+    "saved": "Saved {{name}}.",
+    "removed": "Removed {{name}} from this round.",
+    "removedPlan": "Removed {{name}} from this round and from the battle plan."
   }
 }

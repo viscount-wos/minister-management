@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Trash2, FileSpreadsheet, FileText, ChevronUp, ChevronDown, AlertCircle, SlidersHorizontal, CheckCircle, UserPlus, X } from 'lucide-react';
+import { Search, FileSpreadsheet, FileText, ChevronUp, ChevronDown, AlertCircle, SlidersHorizontal, CheckCircle, UserPlus, X } from 'lucide-react';
 import { Round, downloadBlob } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
 import { useFormatDateTime } from '../../../shared/DateTime';
@@ -9,7 +9,9 @@ import { useUrlFilters, splitList } from '../../../shared/filters/useUrlFilters'
 import { CheckboxMenu, ChipButton, FilterPill, FilterPills } from '../../../shared/filters/FilterControls';
 import { Bars, DebouncedInput, StatCard } from '../../../shared/filters/Breakdowns';
 import AddPlayerDialog, { AddPlayerButton } from '../../../admin/AddPlayerDialog';
-import TroopFields, { TroopValues, blankTroopValues, filledTroops } from '../../../admin/TroopFields';
+import TroopFields, { TroopValues, blankTroopValues, changedTroops, filledTroops } from '../../../admin/TroopFields';
+import { InlineError, useDialogError } from '../../../admin/dialogErrors';
+import { ClosedRoundNote, DeletePlayerDialog, PlayerRowActions, useToast } from '../../../admin/PlayerRowActions';
 import {
   FILTER_KEYS,
   FilterKey,
@@ -28,9 +30,9 @@ import {
 } from '../api';
 import { TroopIcon } from '../../../shared/heroes/HeroCard';
 import { planApi } from '../plan/api';
-import { makePlayerName, placementShort } from '../plan/labels';
+import { leaderLabel, groupLabel, makePlayerName, placementShort } from '../plan/labels';
 import { normalizeDoc, placements } from '../plan/model';
-import type { Person, PlanDoc } from '../plan/model';
+import type { Person, Placement, PlanDoc } from '../plan/model';
 import AddToRally, { type RallyPlayer } from './AddToRally';
 
 // SVS admin Players tab (modelled on Frost Dragon Tyrant's, owner's dashboard order): headline stats -> breakdown
@@ -57,13 +59,116 @@ interface Props {
 
 const tierValue = (label: string) => (label === 'none' ? 'none' : label.replace(/^T/, ''));
 
-/** SVS answers for the add-player dialog: all optional. */
+/** SVS answers for the add/edit player dialog: all optional (admin mode). */
 interface AddState {
   hours: string[];
   vc: '' | 'yes' | 'no';
   troops: TroopValues;
 }
 const blankAdd = (): AddState => ({ hours: [], vc: '', troops: blankTroopValues() });
+
+/** Edit dialog state: the form, the troops as loaded (only changes are sent) and the row button to refocus. */
+interface EditState {
+  app: SvsAdminApplication;
+  el: HTMLElement;
+  form: AddState;
+  before: TroopValues;
+}
+
+/** The delete confirm's plan sentence: "They are Joiner 2 with Rally Caller 01 (Main); ...". */
+function planWarning(t: ReturnType<typeof useTranslation>['t'], d: PlanDoc, p: Placement, people: Record<string, Person>): string {
+  const name = makePlayerName(people);
+  const g = d.groups.find((x) => x.id === p.groupId);
+  const group = g ? groupLabel(t, g) : '';
+  if (p.kind === 'extraGroup') return t('svs:players.deletePlan.group', { group });
+  const l = d.leaders.find((x) => x.id === p.leaderId);
+  const leader = l ? leaderLabel(t, d, l, name) : '?';
+  if (p.kind === 'leader') return t('svs:players.deletePlan.leader', { leader, group });
+  if (p.kind === 'joiner') return t('svs:players.deletePlan.joiner', { leader, group, n: p.index + 1 });
+  return t('svs:players.deletePlan.extra', { leader, group });
+}
+
+/** Hours, Discord VC and troops: the SVS part of the add AND edit dialogs. `oldHours`: hours this sign-up keeps
+ * that the round no longer has (start/duration changed); they stay selectable so an edit doesn't drop them. */
+function SvsAnswerFields({
+  value,
+  onChange,
+  hours,
+  oldHours = [],
+  prefix,
+  troopsHint,
+}: {
+  value: AddState;
+  onChange: (f: (s: AddState) => AddState) => void;
+  hours: string[];
+  oldHours?: string[];
+  prefix: string;
+  troopsHint?: string;
+}) {
+  const { t } = useTranslation();
+  const hoursErr = useDialogError('answers.hours');
+  const vcErr = useDialogError('answers.discord_vc');
+  return (
+    <>
+      <div>
+        <p className="block text-sm font-medium text-theme-text mb-2" id={`${prefix}-hours-label`}>
+          {t('svs:step2.title')}
+        </p>
+        <div
+          className={`flex flex-wrap gap-2 ${hoursErr ? 'p-1 rounded-lg ring-2 ring-danger' : ''}`}
+          role="group"
+          aria-labelledby={`${prefix}-hours-label`}
+          aria-describedby={hoursErr ? `${prefix}-hours-error` : undefined}
+          data-testid={`${prefix}-hours`}
+        >
+          {[...hours, ...oldHours].map((h) => {
+            const on = value.hours.includes(h);
+            const old = !hours.includes(h);
+            return (
+              <button
+                key={h}
+                type="button"
+                aria-pressed={on}
+                aria-invalid={(hoursErr && h === hours[0]) || undefined}
+                data-testid={`${prefix}-hour-${h}`}
+                data-old={old ? 'true' : undefined}
+                title={old ? t('admin:playerEdit.oldHour') : undefined}
+                onClick={() => onChange((s) => ({ ...s, hours: on ? s.hours.filter((x) => x !== h) : [...s.hours, h] }))}
+                className={`min-h-[44px] px-3 rounded-lg border-2 text-sm font-semibold ${old ? 'border-dashed' : ''} ${on ? 'bg-accent border-accent text-dark-bg' : 'border-theme-border text-theme-text hover:border-accent'}`}
+              >
+                <bdi dir="ltr">{h} UTC</bdi>
+                {old && <span className="ms-1 text-xs font-normal">({t('admin:playerEdit.old')})</span>}
+              </button>
+            );
+          })}
+        </div>
+        <InlineError id={`${prefix}-hours-error`} message={hoursErr} />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor={`${prefix}-vc`} className="block text-sm font-medium text-theme-text mb-2">
+            {t('svs:step4.vc')}
+          </label>
+          <select
+            id={`${prefix}-vc`}
+            data-testid={`${prefix}-vc`}
+            value={value.vc}
+            aria-invalid={!!vcErr || undefined}
+            aria-describedby={vcErr ? `${prefix}-vc-error` : undefined}
+            onChange={(e) => onChange((s) => ({ ...s, vc: e.target.value as AddState['vc'] }))}
+            className={`${SELECT_CLASS} ${vcErr ? 'border-danger' : 'border-theme-border'}`}
+          >
+            <option value="">—</option>
+            <option value="yes">{t('common:yes')}</option>
+            <option value="no">{t('common:no')}</option>
+          </select>
+          <InlineError id={`${prefix}-vc-error`} message={vcErr} />
+        </div>
+      </div>
+      <TroopFields value={value.troops} onChange={(tr) => onChange((s) => ({ ...s, troops: tr }))} tiers={SVS_TIERS} idPrefix={prefix} hint={troopsHint} />
+    </>
+  );
+}
 
 export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: Props) {
   const { t } = useTranslation();
@@ -88,6 +193,9 @@ export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: P
   const [selected, setSelected] = useState<Map<string, string>>(new Map()); // fid -> name
   const [rally, setRally] = useState<{ anchor: HTMLElement; players: RallyPlayer[] } | null>(null);
   const [rallyNote, setRallyNote] = useState<{ text: string; warn: boolean } | null>(null);
+  const [editing, setEditing] = useState<EditState | null>(null);
+  const [deleting, setDeleting] = useState<{ app: SvsAdminApplication; el: HTMLElement; warning: string | null } | null>(null);
+  const toast = useToast();
   const sort: SortKey = SORT_KEYS.includes(v.sort as SortKey) ? (v.sort as SortKey) : 'submitted';
   const dir: 'asc' | 'desc' = v.dir === 'asc' ? 'asc' : 'desc';
 
@@ -144,13 +252,56 @@ export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: P
 
   const toggleExact = (key: FilterKey, value: string) => F.set({ [key]: v[key] === value ? null : value });
 
+  // ------------------------------------------------------------ edit / remove (v2.2.1)
+  const openEdit = (a: SvsAdminApplication, el: HTMLElement) => {
+    const troops = svsTroops(a.profile.troops);
+    const vc = a.answers.discord_vc;
+    setEditing({ app: a, el, before: troops, form: { hours: [...(a.answers.hours ?? [])], vc: vc == null ? '' : vc ? 'yes' : 'no', troops } });
+  };
+  const closeEdit = () => {
+    const el = editing?.el;
+    setEditing(null);
+    el?.focus();
+  };
+  /** Summary counts follow an edit; the list itself is patched in place (no reload: filters, page and scroll stay). */
+  const refreshSummary = () =>
+    svsApi.admin
+      .summary(round.id, filters)
+      .then(setSummary)
+      .catch(() => undefined);
+
+  const openDelete = async (a: SvsAdminApplication, el: HTMLElement) => {
+    // the plan as it is NOW (another leader may have changed it since the list loaded)
+    const plan = await planApi.get(round.id).catch(() => null);
+    let warning: string | null = null;
+    if (plan) {
+      const d = normalizeDoc(plan.plan);
+      setPlanDoc(d);
+      setPlanPeople(plan.people);
+      const p = placements(d).get(`fid:${a.fid}`);
+      if (p) warning = planWarning(t, d, p, plan.people);
+    }
+    setDeleting({ app: a, el, warning });
+  };
+  const closeDelete = () => {
+    const el = deleting?.el;
+    setDeleting(null);
+    el?.focus();
+  };
   const remove = async (a: SvsAdminApplication) => {
-    if (!window.confirm(t('tyrant:admin.confirmDelete', { name: a.profile.game_name }))) return;
     try {
-      await svsApi.admin.deleteApplication(a.id);
+      const res = await svsApi.admin.deleteApplication(a.id);
+      setDeleting(null);
+      setSelected((m) => {
+        const n = new Map(m);
+        n.delete(a.fid);
+        return n;
+      });
+      toast.show(t(res.plan_removed?.length ? 'admin:playerEdit.removedPlan' : 'admin:playerEdit.removed', { name: a.profile.game_name }));
       onChanged();
       load();
     } catch (e) {
+      setDeleting(null);
       setError(errorText(t, e, 'admin:deleteError'));
     }
   };
@@ -539,6 +690,7 @@ export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: P
         )}
 
         <div className="overflow-x-auto">
+          <ClosedRoundNote show={readOnly} />
           <table className="w-full text-sm" data-testid="svs-table">
             <thead className="border-b border-theme-border">
               <tr>
@@ -562,7 +714,7 @@ export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: P
                 {th(null, t('tyrant:admin.col.vc'))}
                 {th('strength', t('tyrant:admin.col.strength'))}
                 {th('submitted', t('tyrant:admin.col.submitted'))}
-                {!readOnly && th(null, t('admin:actions'))}
+                {th(null, t('admin:actions'))}
               </tr>
             </thead>
             <tbody>
@@ -629,8 +781,15 @@ export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: P
                       {a.joiner_strength ?? '—'}
                     </td>
                     <td className="px-2 py-2 text-xs text-theme-dim whitespace-nowrap">{fmt(a.created_at, { withZone: false, weekday: false, isolate: false })}</td>
-                    {!readOnly && (
-                      <td className="px-2 py-2 whitespace-nowrap">
+                    <td className="px-2 py-2 whitespace-nowrap">
+                      <PlayerRowActions
+                        fid={a.fid}
+                        name={a.profile.game_name}
+                        readOnly={readOnly}
+                        onEdit={(el) => openEdit(a, el)}
+                        onDelete={(el) => openDelete(a, el)}
+                      >
+                        {!readOnly && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -647,17 +806,9 @@ export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: P
                         >
                           <UserPlus className="w-4 h-4" aria-hidden="true" />
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => remove(a)}
-                          data-testid={`delete-${a.fid}`}
-                          aria-label={t('admin:delete')}
-                          className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-danger hover:bg-danger/10 rounded-lg"
-                        >
-                          <Trash2 className="w-4 h-4" aria-hidden="true" />
-                        </button>
-                      </td>
-                    )}
+                        )}
+                      </PlayerRowActions>
+                    </td>
                   </tr>
                 );
               })}
@@ -757,47 +908,56 @@ export default function SvsPlayers({ round, readOnly, onChanged, onOpenPlan }: P
             return { answers, ...(troops ? { profile: { troops } } : {}) };
           }}
         >
-          <div>
-            <p className="block text-sm font-medium text-theme-text mb-2">{t('svs:step2.title')}</p>
-            <div className="flex flex-wrap gap-2" data-testid="add-hours">
-              {hours.map((h) => {
-                const on = add.hours.includes(h);
-                return (
-                  <button
-                    key={h}
-                    type="button"
-                    aria-pressed={on}
-                    data-testid={`add-hour-${h}`}
-                    onClick={() => setAdd((s) => ({ ...s, hours: on ? s.hours.filter((x) => x !== h) : [...s.hours, h] }))}
-                    className={`min-h-[44px] px-3 rounded-lg border-2 text-sm font-semibold ${on ? 'bg-accent border-accent text-dark-bg' : 'border-theme-border text-theme-text hover:border-accent'}`}
-                  >
-                    <bdi dir="ltr">{h} UTC</bdi>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="add-vc" className="block text-sm font-medium text-theme-text mb-2">
-                {t('svs:step4.vc')}
-              </label>
-              <select
-                id="add-vc"
-                data-testid="add-vc"
-                value={add.vc}
-                onChange={(e) => setAdd((s) => ({ ...s, vc: e.target.value as AddState['vc'] }))}
-                className={`${SELECT_CLASS} border-theme-border`}
-              >
-                <option value="">—</option>
-                <option value="yes">{t('common:yes')}</option>
-                <option value="no">{t('common:no')}</option>
-              </select>
-            </div>
-          </div>
-          <TroopFields value={add.troops} onChange={(tr) => setAdd((s) => ({ ...s, troops: tr }))} tiers={SVS_TIERS} />
+          <SvsAnswerFields value={add} onChange={setAdd} hours={hours} prefix="add" />
         </AddPlayerDialog>
       )}
+
+      {editing && (
+        <AddPlayerDialog
+          event="svs"
+          roundId={round.id}
+          edit={{ appId: editing.app.id, fid: editing.app.fid, name: editing.app.profile.game_name, alliance: editing.app.profile.alliance ?? '' }}
+          sharedNote={t('admin:playerEdit.shared')}
+          onClose={closeEdit}
+          onSaved={(raw, name) => {
+            const u = raw as SvsAdminApplication;
+            // in place: keep the row's plan placement (an edit doesn't move anyone in the plan)
+            setApps((list) => list.map((x) => (x.id === u.id ? { ...x, ...u, plan_place: x.plan_place } : x)));
+            setPlanPeople((pp) => (pp[u.fid] ? { ...pp, [u.fid]: { ...pp[u.fid], game_name: u.profile.game_name, alliance: u.profile.alliance } } : pp));
+            closeEdit();
+            toast.show(t('admin:playerEdit.saved', { name }));
+            refreshSummary();
+          }}
+          extra={() => {
+            const f = editing.form;
+            const all = [...hours, ...(editing.app.answers.hours ?? []).filter((h) => !hours.includes(h))];
+            const answers: Record<string, unknown> = { hours: all.filter((h) => f.hours.includes(h)), discord_vc: f.vc ? f.vc === 'yes' : null };
+            const troops = changedTroops(f.troops, editing.before);
+            return { answers, ...(troops ? { profile: { troops } } : {}) };
+          }}
+        >
+          <SvsAnswerFields
+            value={editing.form}
+            onChange={(fn) => setEditing((e) => (e ? { ...e, form: fn(e.form) } : e))}
+            hours={hours}
+            oldHours={(editing.app.answers.hours ?? []).filter((h) => !hours.includes(h))}
+            prefix="edit"
+            troopsHint={t('admin:playerEdit.troopsHint')}
+          />
+        </AddPlayerDialog>
+      )}
+
+      {deleting && (
+        <DeletePlayerDialog
+          name={deleting.app.profile.game_name}
+          alliance={deleting.app.profile.alliance}
+          fid={deleting.app.fid}
+          planWarning={deleting.warning}
+          onConfirm={() => remove(deleting.app)}
+          onClose={closeDelete}
+        />
+      )}
+      {toast.node}
     </div>
   );
 }

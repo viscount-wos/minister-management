@@ -331,6 +331,12 @@
       "selected": "{{n}} selected",
       "add": "Add {{n}} selected to rally…",
       "clear": "Clear selection"
+    },
+    "deletePlan": {
+      "leader": "They lead the rally {{leader}} ({{group}}); they will be removed from the battle plan too. The rally card stays, without a leader.",
+      "joiner": "They are Joiner {{n}} with {{leader}} ({{group}}); they will be removed from the battle plan too.",
+      "extra": "They are an extra joiner with {{leader}} ({{group}}); they will be removed from the battle plan too.",
+      "group": "They are in {{group}}; they will be removed from the battle plan too."
     }
   }
 }

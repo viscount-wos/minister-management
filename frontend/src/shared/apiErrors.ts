@@ -27,6 +27,11 @@ const FIELD_LABELS: Record<string, string> = {
   state_generation: 'admin:heroes.generation',
   'answers.hours': 'svs:step2.title',
   'answers.discord_vc': 'svs:step4.vc',
+  'answers.availability': 'tyrant:step2.title',
+  'answers.roles': 'tyrant:step5.title',
+  'answers.gem_spend': 'tyrant:step3.gemSpend',
+  'profile.power': 'tyrant:step3.power',
+  'profile.discord_id': 'tyrant:fields.discordId',
   password: 'admin:password',
 };
 

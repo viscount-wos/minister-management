@@ -154,5 +154,24 @@
     "count": "{{n}} bohaterów do Gen {{gen}}",
     "generation": "Generacja bohaterów stanu",
     "generationDesc": "Najnowsza generacja bohaterów w twoim stanie. Bohaterowie z późniejszych generacji nigdy nie są proponowani. Dotyczy całego stanu."
+  },
+  "playerEdit": {
+    "desc": "Zmień zgłoszenie tego gracza w tej rundzie.",
+    "shared": "Nazwa, sojusz i wojska są wspólne z innymi wydarzeniami: zmiana tutaj będzie widoczna wszędzie.",
+    "sharedTyrant": "Nazwa, sojusz, wojska, moc i ID Discord są wspólne z innymi wydarzeniami: zmiana tutaj będzie widoczna wszędzie.",
+    "troopsHint": "Puste pole poziomu zachowuje zapisaną wartość.",
+    "fidFixed": "Nie można zmienić ID gracza.",
+    "editLabel": "Edytuj: {{name}}",
+    "deleteLabel": "Usuń: {{name}}",
+    "closed": "Ta runda jest zamknięta: graczy nie można edytować ani usuwać.",
+    "old": "stara",
+    "oldHour": "Już nie w tej bitwie; zachowana z jego zgłoszenia.",
+    "oldWindow": "Już nie w tej rundzie; zachowana z jego zgłoszenia.",
+    "deleteTitle": "Usunąć gracza {{name}}?",
+    "deleteBody": "To usuwa jego zgłoszenie z tej rundy. Profil (nazwa, sojusz, wojska) zostaje zachowany dla innych wydarzeń.",
+    "deleteConfirm": "Usuń",
+    "saved": "Zapisano: {{name}}.",
+    "removed": "Usunięto gracza {{name}} z tej rundy.",
+    "removedPlan": "Usunięto gracza {{name}} z tej rundy i z planu bitwy."
   }
 }

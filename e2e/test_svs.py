@@ -427,8 +427,9 @@ def test_add_player_every_event(page: Page, base_url, api, event, shot):
     page.get_by_test_id('add-player').click()
     dialog = page.get_by_test_id('add-player-dialog')
     expect(dialog).to_have_attribute('data-event', event)
-    page.get_by_test_id('add-save').click()                       # FID required
-    expect(page.get_by_test_id('add-error')).to_have_text(tr('profile:fidRequired'))
+    page.get_by_test_id('add-save').click()                       # FID required: shown under the FID field
+    expect(dialog.get_by_test_id('field-error')).to_have_text(tr('profile:fidRequired'))
+    expect(page.get_by_test_id('add-fid')).to_have_attribute('aria-invalid', 'true')
     page.get_by_test_id('add-fid').fill(fid)
     page.get_by_test_id('add-lookup').click()
     expect(page.get_by_test_id('add-status')).to_have_attribute('data-known', 'false')
@@ -463,7 +464,7 @@ def test_add_player_every_event(page: Page, base_url, api, event, shot):
     expect(page.get_by_test_id('add-status')).to_have_attribute('data-known', 'true')
     expect(page.get_by_test_id('add-name')).to_have_value(added_name(event))
     page.get_by_test_id('add-save').click()
-    expect(page.get_by_test_id('add-error')).to_have_text(tr('admin:addPlayer.exists'))
+    expect(page.get_by_test_id('add-player-dialog').get_by_test_id('field-error')).to_have_text(tr('admin:addPlayer.exists'))
     page.get_by_test_id('add-player-close').click()
 
 

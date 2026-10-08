@@ -154,5 +154,24 @@
     "count": "{{n}} héroes hasta Gen {{gen}}",
     "generation": "Generación de héroes del estado",
     "generationDesc": "La generación de héroes más reciente de tu estado. Nunca se ofrecen héroes de una generación posterior. Se aplica a todo el estado."
+  },
+  "playerEdit": {
+    "desc": "Cambia la inscripción de este jugador en esta ronda.",
+    "shared": "El nombre, la alianza y las tropas se comparten con otros eventos: un cambio aquí se ve en todas partes.",
+    "sharedTyrant": "El nombre, la alianza, las tropas, el poder y el ID de Discord se comparten con otros eventos: un cambio aquí se ve en todas partes.",
+    "troopsHint": "Un nivel en blanco conserva lo que ya está guardado.",
+    "fidFixed": "El ID de jugador no se puede cambiar.",
+    "editLabel": "Editar a {{name}}",
+    "deleteLabel": "Quitar a {{name}}",
+    "closed": "Esta ronda está cerrada: no se pueden editar ni quitar jugadores.",
+    "old": "antigua",
+    "oldHour": "Ya no está en esta batalla; se conserva de su inscripción.",
+    "oldWindow": "Ya no está en esta ronda; se conserva de su inscripción.",
+    "deleteTitle": "¿Quitar a {{name}}?",
+    "deleteBody": "Esto elimina su inscripción de esta ronda. Su perfil (nombre, alianza, tropas) se conserva para otros eventos.",
+    "deleteConfirm": "Quitar",
+    "saved": "{{name}} guardado.",
+    "removed": "{{name}} se quitó de esta ronda.",
+    "removedPlan": "{{name}} se quitó de esta ronda y del plan de batalla."
   }
 }

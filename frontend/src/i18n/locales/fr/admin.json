@@ -154,5 +154,24 @@
     "count": "{{n}} héros jusqu'à la Gén {{gen}}",
     "generation": "Génération de héros de l'État",
     "generationDesc": "La génération de héros la plus récente de votre État. Les héros d'une génération ultérieure ne sont jamais proposés. S'applique à tout l'État."
+  },
+  "playerEdit": {
+    "desc": "Modifiez l'inscription de ce joueur pour cette manche.",
+    "shared": "Le nom, l'alliance et les troupes sont partagés avec les autres événements : une modification ici s'applique partout.",
+    "sharedTyrant": "Le nom, l'alliance, les troupes, la puissance et l'ID Discord sont partagés avec les autres événements : une modification ici s'applique partout.",
+    "troopsHint": "Un niveau laissé vide conserve la valeur déjà enregistrée.",
+    "fidFixed": "L'ID du joueur ne peut pas être modifié.",
+    "editLabel": "Modifier {{name}}",
+    "deleteLabel": "Retirer {{name}}",
+    "closed": "Cette manche est fermée : les joueurs ne peuvent être ni modifiés ni retirés.",
+    "old": "ancienne",
+    "oldHour": "Ne fait plus partie de cette bataille ; conservée depuis son inscription.",
+    "oldWindow": "Ne fait plus partie de cette manche ; conservée depuis son inscription.",
+    "deleteTitle": "Retirer {{name}} ?",
+    "deleteBody": "Cela supprime son inscription de cette manche. Son profil (nom, alliance, troupes) est conservé pour les autres événements.",
+    "deleteConfirm": "Retirer",
+    "saved": "{{name}} enregistré.",
+    "removed": "{{name}} a été retiré de cette manche.",
+    "removedPlan": "{{name}} a été retiré de cette manche et du plan de bataille."
   }
 }

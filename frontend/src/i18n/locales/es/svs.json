@@ -331,6 +331,12 @@
       "selected": "{{n}} seleccionados",
       "add": "Añadir {{n}} seleccionados al rally…",
       "clear": "Quitar selección"
+    },
+    "deletePlan": {
+      "leader": "Lidera el rally {{leader}} ({{group}}); también se quitará del plan de batalla. La tarjeta del rally se queda, sin líder.",
+      "joiner": "Es el unido {{n}} con {{leader}} ({{group}}); también se quitará del plan de batalla.",
+      "extra": "Es un unido extra con {{leader}} ({{group}}); también se quitará del plan de batalla.",
+      "group": "Está en {{group}}; también se quitará del plan de batalla."
     }
   }
 }

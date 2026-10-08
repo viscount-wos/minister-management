@@ -154,5 +154,24 @@
     "count": "{{n}} Helden bis Gen {{gen}}",
     "generation": "Heldengeneration des Staates",
     "generationDesc": "Die neueste Heldengeneration deines Staates. Helden späterer Generationen werden nie angeboten. Gilt für den ganzen Staat."
+  },
+  "playerEdit": {
+    "desc": "Ändere die Anmeldung dieses Spielers für diese Runde.",
+    "shared": "Name, Allianz und Truppen werden mit anderen Events geteilt: Eine Änderung hier gilt überall.",
+    "sharedTyrant": "Name, Allianz, Truppen, Macht und Discord-ID werden mit anderen Events geteilt: Eine Änderung hier gilt überall.",
+    "troopsHint": "Ein leeres Level behält den gespeicherten Wert.",
+    "fidFixed": "Die Spieler-ID kann nicht geändert werden.",
+    "editLabel": "{{name}} bearbeiten",
+    "deleteLabel": "{{name}} entfernen",
+    "closed": "Diese Runde ist geschlossen: Spieler können nicht bearbeitet oder entfernt werden.",
+    "old": "alt",
+    "oldHour": "Nicht mehr Teil dieser Schlacht; aus der Anmeldung übernommen.",
+    "oldWindow": "Nicht mehr Teil dieser Runde; aus der Anmeldung übernommen.",
+    "deleteTitle": "{{name}} entfernen?",
+    "deleteBody": "Damit wird die Anmeldung aus dieser Runde entfernt. Das Profil (Name, Allianz, Truppen) bleibt für andere Events erhalten.",
+    "deleteConfirm": "Entfernen",
+    "saved": "{{name}} gespeichert.",
+    "removed": "{{name}} wurde aus dieser Runde entfernt.",
+    "removedPlan": "{{name}} wurde aus dieser Runde und aus dem Schlachtplan entfernt."
   }
 }
