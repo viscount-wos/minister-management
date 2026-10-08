@@ -397,6 +397,29 @@ GCS FUSE volume mounts require `--execution-environment gen2`. Gen1 does not sup
 
 ## Version History
 
+**Changelog rule:** every user-visible feature or fix gets a short, player-friendly line on the
+What's new page (`/changelog`) in the same change. The text goes in the `changelog` namespace for
+all 9 languages, and `RELEASES` in `frontend/src/shell/Changelog.tsx` must be updated. Add new
+items to the latest release until it ships; start a new release block once a version is deployed.
+Record the developer-level detail here as well.
+
+- **v2.0.0** (October 2026): State event hub (wos-events). Deployed as Cloud Run service `wos-events` at hunterisadonkey.com.
+  Details in `docs/SPEC.md`.
+  - Event registry: Minister (key `ministry`, shown as "Minister"), Frost Dragon Tyrant, SVS and
+    Tundra Arms League placeholders. Shared per-FID profiles; one application per FID per round.
+  - Frost Dragon Tyrant wizard and admin: per-troop camp FC level (FC1-FC10) and tier, no main
+    furnace. Admin filters on almost every column, clickable summary chips, URL filter state,
+    filtered exports, a joiner-strength sort.
+  - The Event Management admin shell covers every event, with per-event guides.
+  - Phone-first pass: compact header dropdowns; language auto-detected from the browser language;
+    the timezone is auto-detected too. Sticky wizard navigation, 44px tap targets, tap-to-move on
+    the assignment board.
+  - Furnace dropdown: FC10..FC1 then 30..1.
+  - Security: real admin tokens replace v1.4's fixed 'admin-token'. Production refuses default
+    passwords. Login rate limit, formula-injection-safe exports, closed rounds read-only on the server.
+  - The MCP server (`mcp/`) sits in front of the HTTP API.
+  - Migration from v1.4 is a separate step (`python -m core.migrate`); see `docs/DEPLOY-CUTOVER.md`.
+
 - **v1.4.0** (September 2026): Themes, accessibility, changelog
   - **Colour themes**: three user-selectable schemes — `ministry-dark` (default, unchanged),
     `reading` (warm light ground, dark non-black text, bronze accent) and `low-glare`
