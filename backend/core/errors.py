@@ -24,11 +24,14 @@ class ApiError(Exception):
         self.message = message
         self.field = field
         self.details = details
+        self.headers = None
 
     def to_response(self):
         body = {'error': self.message, 'code': self.code, 'field': self.field}
         if self.details is not None:
             body['details'] = self.details
+        if self.headers:
+            return jsonify(body), self.status, self.headers
         return jsonify(body), self.status
 
 
@@ -63,6 +66,7 @@ _HTTP_CODES = {
     404: 'NOT_FOUND',
     405: 'METHOD_NOT_ALLOWED',
     413: 'PAYLOAD_TOO_LARGE',
+    429: 'TOO_MANY_ATTEMPTS',
 }
 
 
@@ -82,6 +86,17 @@ def register_error_handlers(app):
         logger.warning('Integrity error on %s %s: %s', request.method, request.path, err)
         return jsonify({'error': 'Conflicting concurrent change, please retry', 'code': 'CONFLICT',
                         'field': None}), 409
+
+    @app.errorhandler(sqlite3.OperationalError)
+    def _operational(err):
+        msg = str(err).lower()
+        if 'locked' in msg or 'busy' in msg:
+            # another write held the lock for longer than the busy timeout: transient, safe to retry
+            logger.warning('Database busy on %s %s: %s', request.method, request.path, err)
+            return jsonify({'error': 'The database is busy, please retry', 'code': 'RETRY',
+                            'field': None}), 503, {'Retry-After': '2'}
+        logger.error('Database error on %s %s', request.method, request.path, exc_info=err)
+        return jsonify({'error': 'Internal server error', 'code': 'INTERNAL_ERROR', 'field': None}), 500
 
     @app.errorhandler(Exception)
     def _unhandled(err):

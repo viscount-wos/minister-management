@@ -200,9 +200,9 @@ async def test_schedule_and_my_assignments_hide_unpublished_days(public, api):
         err, data = await call(c, 'get_my_assignments', {'fid': fid()})
         assert err and data['code'] == 'NOT_FOUND'
 
-        # The API answers an unknown day with published=false (see docs/BACKEND_ISSUES.md);
-        # the tool passes that through rather than inventing its own rule.
+        # An unknown day is rejected by the API (fixed in p1c, was published=false);
+        # the tool passes the API's structured error through.
         err, data = await call(c, 'get_published_schedule', {'day': 'funday'})
-        assert not err and data['published'] is False
+        assert err and data['code'] == 'VALIDATION_ERROR' and data['field'] == 'day'
         err, data = await call(c, 'get_published_schedule', {'day': 'mon/../x'})
         assert err and data['code'] == 'VALIDATION_ERROR' and data['field'] == 'day'

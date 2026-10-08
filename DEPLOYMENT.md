@@ -158,14 +158,15 @@ minister.yourdomain.com {
 
 ## Option 2: Docker / Docker Compose
 
-### Quick Start with Docker Compose
+### Quick Start with Docker Compose (local development only)
 
 ```bash
-cp .env.example .env
-# Edit .env with your passwords
 docker compose up --build
-# Open http://localhost:8080
+# Open http://127.0.0.1:8080 (bound to localhost only; HOST_PORT=8091 docker compose up to change the port)
 ```
+
+`docker-compose.yml` is a development setup: it uses placeholder secrets that the app accepts only
+because it also sets `FLASK_ENV=development` and `ALLOW_INSECURE_DEV=1`. Do not expose or deploy it.
 
 Data persists in the `./data/` directory on your host machine.
 
@@ -232,6 +233,9 @@ Before deploying, understand these requirements:
 | Setting | Value | Why |
 |---------|-------|-----|
 | `--min-instances 1` | **Required** | Without this, Cloud Run scales to zero aggressively. Cold starts cause crash loops as GCS FUSE races with gunicorn startup. |
+| `--max-instances 1` | **Required** | SQLite on GCS FUSE has NO cross-host locking: two instances = last writer wins (lost writes, in the worst case a lost migration). The admin-login limiter is also per process. Exactly one instance, always. |
+| `SECRET_KEY` (secret) | **Required** | The app refuses to start in production without a non-placeholder key of 16+ characters. |
+| v1.4 → v2 import | **Explicit** | The app refuses to boot on a v1.4 database. The cut-over (import, verify, rollback) is in [docs/DEPLOY-CUTOVER.md](docs/DEPLOY-CUTOVER.md). |
 | `--execution-environment gen2` | **Required** | Gen2 is needed for GCS FUSE volume mounts. |
 | `--workers 1` | **Required** | Multiple gunicorn workers cause concurrent SQLite writes, producing `OutOfOrderError` on GCS FUSE. |
 | `journal_mode=DELETE` | Set in code | WAL mode creates `-shm` and `-wal` sidecar files that are incompatible with GCS FUSE (out-of-order write errors). This is already configured in `database.py`. |
@@ -296,7 +300,7 @@ gcloud run deploy ministry-management \
     --cpu 1 \
     --timeout 300 \
     --min-instances 1 \
-    --max-instances 3 \
+    --max-instances 1 \
     --set-env-vars "FLASK_ENV=production,DATABASE_PATH=/data/minister.db" \
     --set-secrets "SECRET_KEY=minister-secret-key:latest,ADMIN_PASSWORD=admin-password:latest,MINISTER_PASSWORD=minister-password:latest" \
     --add-volume name=data,type=cloud-storage,bucket=$BUCKET_NAME \
@@ -373,9 +377,13 @@ The app runs anywhere that supports Docker and persistent filesystem storage for
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `FLASK_ENV` | `development` or `production` | `production` | No |
-| `SECRET_KEY` | Flask session secret key | `dev-secret-key` | Yes (production) |
-| `ADMIN_PASSWORD` | Admin login password | `admin123` | Yes |
-| `MINISTER_PASSWORD` | Minister login password | `minister123` | Yes |
+| `SECRET_KEY` | Signs admin tokens. Missing, a known placeholder or < 16 chars → the app refuses to start (development: missing → random per-process key) | none | Yes |
+| `ADMIN_PASSWORD` | Admin login password (unset = role disabled; known defaults like `admin123` refused) | none | Yes |
+| `MINISTER_PASSWORD` | Minister login password (same rules) | none | Yes |
+| `ALLOW_INSECURE_DEV` | `1` together with `FLASK_ENV=development` accepts placeholder secrets and the `admin123`/`minister123` defaults. Local only | off | No |
+| `MIGRATE_V14` | `1` = this boot may import a v1.4 database (one-off; prefer `python -m core.migrate`) | off | No |
+| `TRUSTED_PROXY_HOPS` | X-Forwarded-For entries (from the right) added by trusted proxies, for login throttling. Cloud Run = 1 | `1` | No |
+| `CORS_ORIGINS` | Comma-separated origins allowed cross-origin on `/api/*` (SPA is same-origin, so normally unset) | none | No |
 | `DATABASE_PATH` | Path to SQLite database file | `/data/minister.db` | Yes |
 | `PORT` | Server port | `8080` | No |
 
@@ -457,4 +465,12 @@ journalctl -u minister -f
 **Cloud Run database errors:**
 - Ensure `--workers 1` in gunicorn CMD (multiple workers break SQLite on GCS FUSE)
 - Verify `journal_mode=DELETE` is set (check `database.py`)
-- If you see `OutOfOrderError`, delete the database from the GCS bucket and let it recreate
+- If you see `OutOfOrderError`, restore the database from a backup / object version (never just delete it)
+- Check `--max-instances 1`: more than one instance corrupts SQLite on GCS FUSE
+
+**"holds a v1.4 (minister_management) database. Refusing to start":**
+- Expected on the first deploy of v2 over a v1.4 bucket. Follow [docs/DEPLOY-CUTOVER.md](docs/DEPLOY-CUTOVER.md).
+
+**"SECRET_KEY is not set" / "known placeholder" (ConfigError at start):**
+- Set a real secret (`--set-secrets SECRET_KEY=...`). Placeholders are only accepted locally with
+  `FLASK_ENV=development` + `ALLOW_INSECURE_DEV=1`.

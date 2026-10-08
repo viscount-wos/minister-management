@@ -6,13 +6,25 @@ from flask import Blueprint, jsonify, request
 from core.auth import require_admin
 from core.db import get_db
 from core.errors import ApiError, get_json_body, not_found, validation_error
-from core.profiles import (get_profile_by_id, get_profile_row, profile_to_json, snapshot, upsert_profile,
-                           validate_profile_fields)
-from core.rounds import current_round_row, get_round_row, require_current_round, require_round
-from core.validation import is_past, now_iso, validate_fid
+from core.profiles import (find_profile, get_profile_by_id, profile_to_json, public_profile,
+                           resolve_fid_for_write, snapshot, upsert_profile, validate_profile_fields)
+from core.rounds import (current_round_row, get_round_row, paginate, require_current_round, require_writable,
+                         resolve_round_ref)
+from core.validation import is_past, now_iso
 from events import get_event
 
 bp = Blueprint('applications', __name__)
+
+
+# What anyone holding an FID may read about an application (M6): no internal ids, no profile
+# snapshot, no created_at. ``updated_at`` stays so a UI can show "last saved".
+PUBLIC_APPLICATION_FIELDS = ('fid', 'event', 'round_id', 'round_name', 'answers', 'updated_at')
+
+
+def public_application(app_json):
+    if app_json is None:
+        return None
+    return {k: app_json.get(k) for k in PUBLIC_APPLICATION_FIELDS}
 
 
 def application_to_json(row, round_row=None):
@@ -99,22 +111,22 @@ def delete_application_row(app_row):
 @bp.route('/api/events/<event>/current/application/<fid>', methods=['GET'])
 def get_current_application(event, fid):
     rnd = require_current_round(event)
-    prof = get_profile_row(fid)
+    prof = find_profile(fid)
     app_row = get_application(rnd['id'], prof['id']) if prof else None
     if not app_row:
         raise not_found('No application in the current round', code='NOT_FOUND')
-    return jsonify(application_to_json(app_row, rnd))
+    return jsonify(public_application(application_to_json(app_row, rnd)))
 
 
 @bp.route('/api/events/<event>/previous-application/<fid>', methods=['GET'])
 def get_previous_application(event, fid):
     get_event(event)
-    prof = get_profile_row(fid)
+    prof = find_profile(fid)
     cur = current_round_row(event)
     row = previous_application(event, prof['id'], cur['id'] if cur else None) if prof else None
     if not row:
         raise not_found('No earlier application found')
-    return jsonify(application_to_json(row))
+    return jsonify(public_application(application_to_json(row)))
 
 
 @bp.route('/api/events/<event>/current/application/<fid>', methods=['PUT'])
@@ -128,49 +140,54 @@ def put_current_application(event, fid):
     spec = get_event(event)
     rnd = require_current_round(event)
     data = get_json_body()
-    fid = validate_fid(fid)
+    # Existing (incl. legacy, non-canonical) FIDs resolve to their stored row; new FIDs must be digits.
+    store_fid, existing_profile = resolve_fid_for_write(fid)
     body_fid = (data.get('profile') or {}).get('fid') if isinstance(data.get('profile'), dict) else None
-    if body_fid is not None and str(body_fid).strip() != fid:
+    if body_fid is not None and str(body_fid).strip() not in (str(fid).strip(), str(store_fid).strip()):
         raise validation_error('profile.fid does not match the FID in the URL', 'profile.fid')
 
-    existing_profile = get_profile_row(fid)
     existing_app = get_application(rnd['id'], existing_profile['id']) if existing_profile else None
     if existing_app is None and is_past(rnd['closing_time']):
         raise ApiError(403, 'APPLICATIONS_CLOSED', 'Applications are closed')
 
-    fields = validate_profile_fields(data.get('profile'))
-    answers = spec.validate_answers(data.get('answers'), rnd)
-    profile, profile_created = upsert_profile(fid, fields, required=spec.required_profile_fields, commit=False)
+    fields = validate_profile_fields(data.get('profile'), existing=existing_profile)
+    previous_answers = json.loads(existing_app['answers'] or '{}') if existing_app else None
+    answers = spec.validate_answers(data.get('answers'), rnd, existing=previous_answers)
+    profile, profile_created = upsert_profile(store_fid, fields, required=spec.required_profile_fields,
+                                              commit=False, existing=existing_profile)
     app_row, created = save_application(rnd, profile, answers, commit=False)
     get_db().commit()
     return jsonify({
         'created': created,
         'profile_created': profile_created,
-        'application': application_to_json(app_row, rnd),
-        'profile': profile,
+        'application': public_application(application_to_json(app_row, rnd)),
+        'profile': public_profile(profile),
     }), (201 if created else 200)
 
 
 # ---------------------------------------------------------------- admin routes
 
-@bp.route('/api/admin/rounds/<int:round_id>/applications', methods=['GET'])
+@bp.route('/api/admin/rounds/<ref>/applications', methods=['GET'])
 @require_admin
-def admin_list_applications(round_id):
-    rnd = require_round(round_id)
+def admin_list_applications(ref):
+    rnd = resolve_round_ref(ref)
+    round_id = rnd['id']
     spec = get_event(rnd['event'], need_rounds=False)
     sql = 'SELECT a.*, p.fid FROM applications a JOIN profiles p ON p.id = a.player_id WHERE a.round_id = ?'
     params = [round_id]
     alliance = request.args.get('alliance', '').strip()
     if alliance:
-        sql += ' AND UPPER(p.alliance) = ?'
-        params.append(alliance.upper())
+        sql += ' AND casefold(trim(p.alliance)) = ?'
+        params.append(alliance.casefold())
     sql += ' ORDER BY a.created_at DESC, a.id DESC'
     out = []
     for row in get_db().execute(sql, params).fetchall():
         app_json = application_to_json(row, rnd)
         app_json['profile'] = profile_to_json(get_profile_by_id(row['player_id']))
         out.append(spec.decorate_application(app_json, rnd))
-    return jsonify({'round_id': round_id, 'applications': out})
+    body = {'round_id': round_id}
+    body.update(paginate(out, 'applications'))
+    return jsonify(body)
 
 
 @bp.route('/api/admin/applications/<int:app_id>', methods=['GET'])
@@ -196,16 +213,21 @@ def admin_update_application(app_id):
     if not row:
         raise not_found('Application not found')
     rnd = get_round_row(row['round_id'])
+    require_writable(rnd)
     spec = get_event(rnd['event'], need_rounds=False)
     data = get_json_body()
-    fields = validate_profile_fields(data.get('profile'))
-    answers = json.loads(row['answers'] or '{}')
+    existing_profile = get_profile_by_id(row['player_id'])
+    fields = validate_profile_fields(data.get('profile'), existing=existing_profile)
+    stored = json.loads(row['answers'] or '{}')
+    answers = dict(stored)
     if 'answers' in data:
         if not isinstance(data['answers'], dict):
             raise validation_error('answers must be an object', 'answers')
         answers.update(data['answers'])
-    answers = spec.validate_answers(answers, rnd)
-    profile, _ = upsert_profile(row['fid'], fields, required=('game_name',), commit=False)
+    answers = spec.validate_answers(answers, rnd, existing=stored)
+    # update BY ID: the application already names its profile, whatever its (legacy) FID looks like
+    profile, _ = upsert_profile(row['fid'], fields, required=('game_name',), commit=False,
+                                existing=existing_profile)
     app_row, _ = save_application(rnd, profile, answers, commit=False)
     get_db().commit()
     out = application_to_json(app_row, rnd)
@@ -219,12 +241,13 @@ def admin_delete_application(app_id):
     row = get_application_by_id(app_id)
     if not row:
         raise not_found('Application not found')
+    require_writable(get_round_row(row['round_id']))
     delete_application_row(row)
     return jsonify({'deleted': True, 'id': app_id})
 
 
-@bp.route('/api/admin/rounds/<int:round_id>/export', methods=['GET'])
+@bp.route('/api/admin/rounds/<ref>/export', methods=['GET'])
 @require_admin
-def admin_export_round(round_id):
-    rnd = require_round(round_id)
+def admin_export_round(ref):
+    rnd = resolve_round_ref(ref)
     return get_event(rnd['event'], need_rounds=False).export_round(rnd)

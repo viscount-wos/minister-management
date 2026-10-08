@@ -13,8 +13,14 @@ The source of truth is `backend/core/*.py` and `backend/events/ministry/routes.p
   `field` is `null` unless the error is about one input (dotted path into the request body; `fid` = the URL FID).
   Optional `details` may appear.
 - **Timestamps**: ISO-8601 UTC with `Z` (`2026-10-13T18:00:00Z`). Input datetimes may carry any offset; naive = UTC.
-- **FID**: digits only, 1-20 chars, on every write. (Profiles imported from v1.4 keep whatever FID they had and are
-  still readable.)
+- **FID**: always a JSON **string** (never a number: FIDs above 2^53 and leading zeros must survive; `0040021` and
+  `40021` are different players). A NEW profile needs digits only, 1-20 chars (surrounding whitespace is trimmed).
+  Lookups match the FID exactly, then trimmed. Profiles imported from v1.4 keep their stored FID (the import trims
+  stray whitespace when unambiguous) and stay readable AND writable under it, including non-digit legacy FIDs.
+- **Absent strings** are `null`, not `''`.
+- **Admin lists** (`/api/admin/events/{event}/rounds`, `/api/admin/rounds/{ref}/applications`,
+  `/api/admin/profiles`) always include `"total"`; optional `?limit=` (1-1000) and `&offset=` return one page and echo
+  `"limit"`/`"offset"`.
 - **Events**: fixed keys `ministry`, `tyrant`, `svs`, `tal`. `tal` has no rounds yet. `tyrant`/`svs` accept free-form
   JSON `answers` until their phases land.
 
@@ -31,6 +37,9 @@ The source of truth is `backend/core/*.py` and `backend/events/ministry/routes.p
 | 401 | `TOKEN_EXPIRED` | token older than 12 h: log in again |
 | 401 | `INVALID_PASSWORD` | login failed |
 | 403 | `APPLICATIONS_CLOSED` | NEW application after the round's `closing_time` |
+| 409 | `ROUND_CLOSED` | admin write (application edit/delete, assignments, auto-assign, publish, import, round settings) on a `closed` round; reopen it first |
+| 429 | `TOO_MANY_ATTEMPTS` | admin login throttled after repeated failures; `Retry-After` header + `details.retry_after` seconds |
+| 503 | `RETRY` | database busy (another write held the lock); retry after `Retry-After` seconds |
 | 404 | `NOT_FOUND` | resource (profile, application, round, endpoint) not found |
 | 404 | `UNKNOWN_EVENT` | event key not in the fixed set |
 | 404 | `NO_CURRENT_ROUND` | event has no open round |
@@ -43,9 +52,16 @@ The source of truth is `backend/core/*.py` and `backend/events/ministry/routes.p
 
 Admin endpoints (`/api/admin/**` except login) need `Authorization: Bearer <token>` (a bare token is also accepted, as in v1.4).
 Tokens are signed with `SECRET_KEY` (itsdangerous `URLSafeTimedSerializer`, payload `{role}`), valid 12 hours.
-Both roles (`admin`, `minister`) have identical permissions. If `SECRET_KEY` is unset or a known placeholder outside
-development, a random per-process key is used (tokens then die on restart). A role whose password env var is unset
-cannot log in (development mode keeps the v1.4 defaults `admin123`/`minister123`).
+Both roles (`admin`, `minister`) have identical permissions. Outside development the app refuses to start without a
+real `SECRET_KEY` (missing, known placeholder or <16 chars) or with a well-known default password. A role whose
+password env var is unset cannot log in. The v1.4 defaults `admin123`/`minister123` exist only with
+`FLASK_ENV=development` + `ALLOW_INSECURE_DEV=1`. Tokens cannot be revoked individually: rotating a password does not
+end existing sessions (≤12 h), rotating `SECRET_KEY` ends all of them.
+
+Login throttling: after 5 failed logins from one client address, further attempts wait 1 s, 2 s, 4 s ... (max 15 min)
+and get `429 TOO_MANY_ATTEMPTS` (the password is not checked while waiting). A global budget (30 failures/minute)
+applies across all addresses. A success clears that address. The client address is the right-most
+`TRUSTED_PROXY_HOPS` entry of `X-Forwarded-For` (default 1, Cloud Run).
 
 ### POST /api/admin/login
 ```json
@@ -84,15 +100,16 @@ cannot log in (development mode keeps the v1.4 defaults `admin123`/`minister123`
 ```json
 {"fid": "1001", "game_name": "Alice", "alliance": "ABC", "timezone": "Europe/London",
  "furnace_level": 30, "power": 123456789, "troops": {"infantry": 5},
- "avatar_image": null, "stove_lv": null, "stove_lv_content": null,
- "created_at": "2026-10-08T09:06:14Z", "updated_at": "2026-10-08T09:06:14Z", "id": 1}
+ "avatar_image": null, "stove_lv": null, "stove_lv_content": null}
 ```
 404 `NOT_FOUND` if unknown. `avatar_image`/`stove_lv`/`stove_lv_content` are legacy, read-only (pre-Aug-2026 rows).
+**Removed in 1c** (M6): `id`, `created_at`, `updated_at` (no consumer used them; admins get them from
+`GET /api/admin/profiles/{fid}`).
 
 ### PUT /api/profile/{fid}
 Partial profile update (or create; `game_name` required then). Same field rules as below. Players have no login, so
 this has the same trust model as the application PUT (knowing the FID is enough). Intended for the MCP
-`update_profile` tool. → `{"profile": {...}, "created": bool}` (201 when created).
+`update_profile` tool. → `{"profile": {...public profile...}, "created": bool}` (201 when created).
 
 ### GET /api/events/{event}/current
 Current (open) round with public settings. 404 `NO_CURRENT_ROUND`.
@@ -109,14 +126,15 @@ Current (open) round with public settings. 404 `NO_CURRENT_ROUND`.
 The player's application in the current round, or 404 `NOT_FOUND` → UI shows **"New application for <round>"**;
 200 → **"Edit your application for <round>"**.
 ```json
-{"id": 12, "round_id": 3, "player_id": 1, "fid": "1001",
+{"fid": "1001", "event": "ministry", "round_id": 3, "round_name": "SVS week of 13 Oct",
  "answers": {"construction_speedups_days": 2.0, "research_speedups_days": 0.0,
              "troop_training_speedups_days": 0.0, "general_speedups_days": 1.5,
              "fire_crystals": 0, "refined_fire_crystals": 0, "fire_crystal_shards": 0,
              "time_slots_by_day": {"construction": ["10:00"], "research": [], "troop": []}},
- "profile_snapshot": {"fid": "1001", "game_name": "Alice", "alliance": "ABC", "...": "..."},
- "created_at": "...", "updated_at": "...", "event": "ministry", "round_name": "SVS week of 13 Oct"}
+ "updated_at": "2026-10-08T09:06:14Z"}
 ```
+**Removed in 1c** from public application responses (M6): `id`, `player_id`, `profile_snapshot`, `created_at`.
+The admin application endpoints keep the full shape (`id`, `player_id`, `profile_snapshot`, timestamps, `profile`).
 
 ### GET /api/events/{event}/previous-application/{fid}
 "Use my last answers": the player's application from the most recent round **earlier** than the current round
@@ -134,17 +152,20 @@ Upserts the profile and the player's application in the current round.
              "research_speedups_days": 0, "troop_training_speedups_days": 0,
              "time_slots_by_day": {"construction": ["10:00", "11:00"], "research": ["05:00"], "troop": []}}}
 // 201 (new) / 200 (edit)
-{"created": true, "profile_created": true, "application": {...as above...}, "profile": {...profile...}}
+{"created": true, "profile_created": true, "application": {...public application as above...},
+ "profile": {...public profile...}}
 ```
 Rules:
 - `profile` fields are optional/partial for an existing profile (omitted fields are kept). `profile.fid`, if sent,
   must equal the URL FID.
 - Profile validation: `game_name` ≤64 chars; `alliance` ≤3 chars, upper-cased; `timezone` ≤64; `furnace_level`
-  int 1-100 or null; `power` int ≥0 or null; `troops` JSON object/array or null.
+  int 1-100 or null; `power` int ≥0 or null; `troops` JSON object/array or null. A stored legacy value that breaks
+  these limits (e.g. the v1.4 alliance `love`) is accepted when sent back unchanged and kept as stored.
 - Ministry requires `game_name` and `alliance` (as v1.4).
 - Ministry answers: the 4 speedup fields are numbers 0-99999 (decimals allowed); the 3 crystal fields are whole
-  numbers 0-99999; missing numbers default to 0. `time_slots_by_day` keys ⊆ {construction, research, troop}, values
-  lists of `"HH:MM"` (deduplicated). The v1.4 `time_slots` list is accepted and copied to all three day types.
+  numbers 0-99999 (exception: a fractional value imported from v1.4, e.g. `12.5`, is accepted when re-sent
+  unchanged and kept exactly); missing numbers default to 0. `time_slots_by_day` keys ⊆ {construction, research,
+  troop}, values lists of `"HH:MM"` (deduplicated, returned sorted). The v1.4 `time_slots` list is accepted and copied to all three day types.
   Answers are replaced wholesale on each PUT (send the full set).
 - After `closing_time`: if the player has no application in this round → 403 `APPLICATIONS_CLOSED` (nothing written).
   Existing applications stay editable until an admin closes the round.
@@ -154,9 +175,22 @@ Rules:
 | | |
 |---|---|
 | `GET /api/events/ministry/current/heatmap` | `{"construction": {"10:00": 3}, "research": {...}, "troop": {...}}` |
-| `GET /api/events/ministry/current/schedule` | `{"round_id": 3, "published_days": ["monday", "thursday"]}` (weekday order) |
-| `GET /api/events/ministry/current/schedule/{day}` | unpublished: `{"published": false, "day": "monday", "round_id": 3}`; published: `{"published": true, "day": "monday", "day_label": "Monday - Construction", "assignments": {"10:00": [{"game_name": "Alice", "alliance": "ABC"}]}, "round_id": 3}` — no points/resources |
-| `GET /api/events/ministry/current/assignments/{fid}` | `{"round_id": 3, "published_days": [...], "assignments": {"monday": [{"time_slot": "10:00"}]}}`; 404 if no application this round. As v1.4 this includes unpublished days; `published_days` is supplied so the UI can filter. |
+| `GET /api/events/ministry/current/schedule` | `{"round_id": 3, "published_days": ["monday", "thursday"]}` (weekday order; only active days of the round) |
+| `GET /api/events/ministry/current/schedule/{day}` | `day` must be monday/tuesday/thursday/friday, else 400 `VALIDATION_ERROR` (field `day`). Unpublished or inactive: `{"published": false, "day": "monday", "round_id": 3}`; published: `{"published": true, "day": "monday", "day_label": "Monday - Construction", "assignments": {"10:00": [{"game_name": "Alice", "alliance": "ABC"}]}, "round_id": 3}` — no points/resources |
+| `GET /api/events/ministry/current/assignments/{fid}` | `{"round_id": 3, "published_days": [...], "assignments": {"monday": [{"time_slot": "10:00"}]}}`; 404 if no application this round. **Changed in 1c:** only PUBLISHED days are listed (v1.4 and phase 1 also returned drafts to anyone with the FID). |
+
+### What an FID gives a stranger (M6, accepted by the owner)
+Players never log in, so knowing (or guessing; FIDs are short numbers) an FID is enough to:
+- **read**: the public profile (fid, game name, alliance, timezone, furnace level, power, troops, legacy avatar/stove),
+  the current and the previous-round application (`answers`: 7 resource numbers + preferred hours per day,
+  `round_id`, `round_name`, `updated_at`), and that player's slots on **published** days. Everyone can read the heat
+  map, published schedules (game name + alliance per slot) and the published-day list.
+- **write**: create profiles and applications for new FIDs; change any existing player's name, alliance, timezone,
+  furnace level, power, troops; replace their current-round answers (e.g. zero their speedups so they drop at the next
+  auto-assign). Free-form answers for tyrant/svs are limited to 50 KB per application.
+- **not**: read or change anything admin-only (unpublished schedules, points, other players' resources, rounds,
+  settings), internal ids, the profile snapshot, or timestamps other than the application's `updated_at`.
+No per-IP limit on public writes and no audit trail yet (possible later: rate limits, an `audit_log`).
 
 ## Admin endpoints
 
@@ -164,12 +198,20 @@ Rules:
 - `GET /api/admin/settings` → `{"state_number": "2807"}`
 - `PUT /api/admin/settings` `{"state_number": "2807"}` → same shape
 
+### Round references and closed rounds
+`{ref}` in `/api/admin/rounds/{ref}`, `/api/admin/rounds/{ref}/applications` and `/api/admin/rounds/{ref}/export` is a
+round id or `current` (the open round of `?event=`, default `ministry`; 404 `NO_CURRENT_ROUND` if none).
+A `closed` round is read-only: writes answer 409 `ROUND_CLOSED`. Reads and exports always work. Reopen with
+`PUT /api/admin/rounds/{id}` `{"status": "draft"}` (or `"open"` if no other round of the event is open); other fields
+may change in the same request.
+
 ### Rounds
-- `GET /api/admin/events/{event}/rounds` → `{"rounds": [round + "application_count", ...]}` newest first.
+- `GET /api/admin/events/{event}/rounds` → `{"rounds": [round + "application_count", ...], "total": N}` newest first.
 - `POST /api/admin/events/{event}/rounds` `{"name", "status"?: "draft"|"open"|"closed" (default draft), "closing_time"?, "settings"?}` → 201 round.
   409 `ROUND_ALREADY_OPEN` if opening a second round.
 - `GET /api/admin/rounds/{id}` → round (full settings).
 - `PUT /api/admin/rounds/{id}` any of `{"name", "status", "closing_time" (null clears), "settings" (partial, merged)}` → round.
+  Switching `research_day` drops the old research day from `published_days`.
   Changing ministry `time_slot_scheme` remaps that round's assignments to the nearest slot of the new grid
   (collisions: higher points keeps the slot) and adds `"remapped": <kept count>` to the response.
 - `POST /api/admin/events/{event}/start-new-round` `{"name", "closing_time"?, "settings"?}` → 201
@@ -181,16 +223,17 @@ Ministry round settings: `research_day` (`tuesday`|`friday`), `show_fire_crystal
 `time_slot_scheme` (`exact_alignment`|`max_slots`), `published_days` (list of active days). Unknown keys → 400.
 
 ### Applications
-- `GET /api/admin/rounds/{id}/applications?alliance=ABC` →
-  `{"round_id": 3, "applications": [application + "profile": {...current profile...} + ministry "monday_points", "research_points", "thursday_points", "research_day"]}`
-  newest first.
+- `GET /api/admin/rounds/{ref}/applications?alliance=ABC` →
+  `{"round_id": 3, "total": N, "applications": [application + "profile": {...current profile...} + ministry "monday_points", "research_points", "thursday_points", "research_day"]}`
+  newest first. `alliance` is compared Unicode-case-insensitively.
 - `GET /api/admin/applications/{id}` → one, same shape.
 - `PUT /api/admin/applications/{id}` `{"profile"?: {...partial...}, "answers"?: {...partial, merged then validated...}}` → updated application. No closing-time check.
 - `DELETE /api/admin/applications/{id}` → `{"deleted": true, "id": 12}`; also removes that player's assignments in the round. Profile kept.
 - `GET /api/admin/rounds/{id}/export` → xlsx (event-specific; ministry below).
 
 ### Profiles
-- `GET /api/admin/profiles?alliance=ABC&q=ali` → `{"profiles": [profile + "application_count"]}` (q matches FID or name).
+- `GET /api/admin/profiles?alliance=ABC&q=ali` → `{"profiles": [profile + "application_count"], "total": N}` (q matches FID
+  or name, Unicode-case-insensitive, `%`/`_` literal).
 - `GET /api/admin/profiles/{fid}` → profile.
 - `PUT /api/admin/profiles/{fid}` `{game_name?, alliance?, timezone?, furnace_level?, power?, troops?}` → `{"profile": {...}, "created": bool}` (201 when created).
 - `DELETE /api/admin/profiles/{fid}` → `{"deleted": true, "fid": "1001", "applications_deleted": 2}` (cascades applications + assignments in all rounds).
@@ -202,8 +245,8 @@ Ministry round settings: `research_day` (`tuesday`|`friday`), `show_fire_crystal
   ```json
   {"day": "monday", "round_id": 3,
    "assignments": {"00:00": [], "10:00": [{"id": 1, "player_id": 1, "fid": "1001", "game_name": "Alice",
-                    "points": 2880, "preferred_times": ["10:00"], "avatar_image": "", "stove_lv": null,
-                    "stove_lv_content": "", "alliance": "ABC", "is_sticky": false}], "...": []},
+                    "points": 2880, "preferred_times": ["10:00"], "avatar_image": null, "stove_lv": null,
+                    "stove_lv_content": null, "alliance": "ABC", "is_sticky": false}], "...": []},
    "unassigned": [{...same card shape...}]}
   ```
   v1.4 algorithm: highest points first into the first free slot matching an hourly preference; sticky placements
@@ -218,10 +261,13 @@ Ministry round settings: `research_day` (`tuesday`|`friday`), `show_fire_crystal
   `Friday - Research`, `Thursday - Troop Training` (assigned rows, then an UNASSIGNED PLAYERS section, as v1.4) and an
   `Unassigned` summary sheet (Day, FID, Alliance, Game Name, Points). Same as `/api/admin/rounds/{id}/export`.
 - `GET /api/admin/ministry/rounds/{ref}/export-json` → download
-  `{"version": 2, "exported_at", "round": {"id", "name", "settings"}, "players": [{fid, game_name, alliance, timezone, avatar_image, stove_lv, stove_lv_content, <7 numeric fields>, time_slots_by_day}]}`
+  `{"version": 2, "exported_at" (UTC, ...Z), "round": {"id", "name", "settings"}, "players": [{fid, game_name, alliance, timezone, avatar_image, stove_lv, stove_lv_content, <7 numeric fields>, time_slots_by_day}]}`
 - `POST /api/admin/ministry/rounds/{ref}/import` body = an export-json file (v2, or the v1.4 `{"players": [...]}` backup) →
   `{"round_id", "imported": 2, "updated": 0, "errors": 1, "error_details": [{"index": 3, "fid": "bad", "error": "...", "field": "fid"}]}`.
-  Upserts profiles and applications in that round.
+  Upserts profiles and applications in that round. Each entry is applied in its own savepoint: validation AND
+  database errors are reported per entry in `error_details`.
+- Excel exports write user text that starts with `= + - @`, TAB or CR as quote-prefixed text (never a formula). Ties
+  in the UNASSIGNED section are ordered by player id.
 
 ## v1.4 → v2 endpoint map (for the frontend rewire)
 
@@ -254,12 +300,19 @@ The v1.4 endpoints are **removed** (no compatibility shims); the v1.4 frontend w
 
 Tables: `schema_version`, `settings` (global), `profiles`, `rounds` (partial unique index: one `open` per event),
 `applications` (UNIQUE(round_id, player_id)), `ministry_assignments` (round-scoped). Migrations live in
-`backend/core/db.py` (`MIGRATIONS`), run automatically at startup, each in one transaction.
+`backend/core/db.py` (`MIGRATIONS`). Pending migrations run at startup in ONE transaction taken with `BEGIN IMMEDIATE`
+before the version is read — except the v1.4 import, which is explicit: on a v1.4 file the app refuses to start
+until `python -m core.migrate` (or one boot with `MIGRATE_V14=1`) has run. See docs/DEPLOY-CUTOVER.md.
 
-Migration 1 on a v1.4 file (detected by `players.construction_speedups_days`): backup copy
-`<db>.pre-v2-<UTCtimestamp>.bak` (SQLite backup API), rename old tables to `legacy_*`, create the v2 schema, then:
+Migration 1 on a v1.4 file (detected by a `players` TABLE with `construction_speedups_days`): backup copy
+`<db>.pre-v2-<UTCtimestamp>.bak` (SQLite backup API; written as `.bak.partial` and renamed after COMMIT, removed if the
+import fails), rename old tables to `legacy_*`, create the v2 schema, then:
 players → profiles (same ids), one open ministry round "Imported from previous system" with the old research_day,
 show_fire_crystals, time_slot_scheme, published days and closing time, one application per player (resource columns +
 time preferences by day_type), assignments → `ministry_assignments` with sticky flags. If the old DB had no stored
 `time_slot_scheme`, it is inferred from stored slots (`:20`/`:50` ⇒ `max_slots`, else `exact_alignment`). Orphan
-assignments whose player no longer exists are left in `legacy_assignments` only. Re-running is a no-op.
+assignments whose player no longer exists are left in `legacy_assignments` only. Crystal values are kept exactly
+(fractions included), preferred hours sorted, FID whitespace trimmed when unambiguous. Re-running is a no-op.
+
+Migration 2 (every database): guard VIEWs `players`, `time_preferences`, `assignments`, `admin_users` (v1.4 columns,
+no rows) and triggers that reject the v1.4 round-setting keys in `settings`, so a stray v1.4 instance fails loudly.

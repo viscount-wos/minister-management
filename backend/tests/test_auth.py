@@ -97,9 +97,3 @@ def test_role_disabled_when_password_unset(db_path):
                       'MINISTER_PASSWORD': None})
     c = app.test_client()
     assert c.post('/api/admin/login', json={'password': 'minister123'}).status_code == 401
-
-
-def test_placeholder_secret_key_replaced(db_path):
-    from app import create_app
-    app = create_app({'DATABASE_PATH': db_path, 'SECRET_KEY': 'dev-secret-key', 'DEV_MODE': False})
-    assert app.config['SECRET_KEY'] != 'dev-secret-key'
