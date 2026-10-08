@@ -120,7 +120,7 @@ function HeroPalette() {
             }`}
           >
             {k && <TroopIcon troop={k} className="w-3.5 h-3.5" />}
-            {t(`tyrant:admin.troopName.${k || 'all'}`)}
+            {k ? t(`tyrant:admin.troopShort.${k}`) : t('svs:plan.allTroops')}
           </button>
         ))}
       </div>
@@ -255,7 +255,7 @@ export default function Sidebar({ tab, setTab }: { tab: 'heroes' | 'players'; se
   const ctx = usePlanner();
   const left = [...ctx.signups.values()].filter((s) => !ctx.placed.has(`fid:${s.fid}`)).length;
   return (
-    <aside className="lg:sticky lg:top-2 lg:max-h-[calc(100vh-1rem)] flex flex-col bg-dark-card border border-theme-border rounded-xl" data-testid="planner-sidebar">
+    <aside className="lg:sticky lg:top-[4.25rem] lg:max-h-[calc(100vh-5rem)] flex flex-col bg-dark-card border border-theme-border rounded-xl" data-testid="planner-sidebar">
       <div className="flex border-b border-theme-border" role="tablist">
         {(['heroes', 'players'] as const).map((k) => (
           <button
@@ -271,7 +271,7 @@ export default function Sidebar({ tab, setTab }: { tab: 'heroes' | 'players'; se
           </button>
         ))}
       </div>
-      <div className="p-3 overflow-y-auto">{tab === 'heroes' ? <HeroPalette /> : <Unplaced />}</div>
+      <div className="p-3 overflow-y-auto min-h-0">{tab === 'heroes' ? <HeroPalette /> : <Unplaced />}</div>
     </aside>
   );
 }

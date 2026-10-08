@@ -233,8 +233,13 @@
       "confirmRotate": "Créer un nouveau lien ? L'actuel cesse de fonctionner immédiatement.",
       "confirmDisable": "Arrêter le partage ? Le lien cesse de fonctionner immédiatement.",
       "realNames": "Montrer les vrais noms à l'État",
-      "realNamesHint": "Les chefs déguisés affichent aussi leur vrai nom sur la page partagée. La photo et l'alias sont ce que l'ennemi voit en jeu ; ceci ne change que notre page."
-    }
+      "realNamesHint": "Les chefs déguisés affichent aussi leur vrai nom sur la page partagée. La photo et l'alias sont ce que l'ennemi voit en jeu ; ceci ne change que notre page.",
+      "button": "Partager",
+      "buttonOn": "Partagé"
+    },
+    "heroesAndRatio": "Héros et ratio de troupes",
+    "leadHeroShort": "Héros principal",
+    "allTroops": "Tous"
   },
   "view": {
     "title": "Plan de bataille",

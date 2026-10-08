@@ -19,7 +19,7 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { AlertCircle, AlertTriangle, CheckCircle2, CloudOff, Loader2, Plus, RefreshCw, Info } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, CloudOff, Loader2, Plus, RefreshCw, Info, Share2 } from 'lucide-react';
 import api, { isApiError, type Round } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
 import HeroCard from '../../../shared/heroes/HeroCard';
@@ -98,6 +98,16 @@ export default function SvsPlanner({ round, readOnly: shellReadOnly }: { round: 
   const [active, setActive] = useState<Record<string, unknown> | null>(null);
   const [addingGroup, setAddingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!shareOpen) return;
+    const close = (e: PointerEvent) => {
+      if (shareRef.current && !shareRef.current.contains(e.target as Node)) setShareOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, [shareOpen]);
   const timer = useRef<number | null>(null);
   const saving = useRef(false);
   const dirty = useRef(false);
@@ -602,6 +612,26 @@ export default function SvsPlanner({ round, readOnly: shellReadOnly }: { round: 
           <div className="ms-auto text-sm" aria-live="polite">
             {statusView}
           </div>
+          <div className="relative" ref={shareRef}>
+            <button
+              type="button"
+              onClick={() => setShareOpen((v) => !v)}
+              aria-expanded={shareOpen}
+              data-testid="share-button"
+              data-enabled={share.enabled}
+              className={`inline-flex items-center gap-2 min-h-[40px] px-3 rounded-lg border text-sm font-semibold ${
+                share.enabled ? 'border-success/60 text-success bg-success/10' : 'border-accent/60 text-accent hover:bg-accent/10'
+              }`}
+            >
+              <Share2 className="w-4 h-4" aria-hidden="true" />
+              {share.enabled ? t('svs:plan.share.buttonOn') : t('svs:plan.share.button')}
+            </button>
+            {shareOpen && (
+              <div className="absolute z-40 end-0 top-full mt-1 w-[24rem] max-w-[90vw] shadow-2xl">
+                <SharePanel roundId={round.id} share={share} onShare={setShare} />
+              </div>
+            )}
+          </div>
         </div>
 
         {conflict != null && (
@@ -635,7 +665,7 @@ export default function SvsPlanner({ round, readOnly: shellReadOnly }: { round: 
         )}
 
         <DndContext sensors={sensors} collisionDetection={collision} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActive(null)}>
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_19.5rem] gap-4 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_21rem] gap-4 items-start">
             <div className="space-y-4 min-w-0">
               <div className={doc.strategy === 'main_counter' ? 'grid grid-cols-1 xl:grid-cols-2 gap-4 items-start' : ''}>
                 {battleGroups.map((g) => (
@@ -650,10 +680,7 @@ export default function SvsPlanner({ round, readOnly: shellReadOnly }: { round: 
                 </div>
               )}
             </div>
-            <div className="space-y-4 lg:sticky lg:top-16">
-              <SharePanel roundId={round.id} share={share} onShare={setShare} />
-              <Sidebar tab={sidebarTab} setTab={setSidebarTab} />
-            </div>
+            <Sidebar tab={sidebarTab} setTab={setSidebarTab} />
           </div>
           <DragOverlay dropAnimation={null}>
             {activeHero ? (

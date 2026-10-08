@@ -15,7 +15,7 @@ const SEG: Record<(typeof RATIO_KEYS)[number], string> = { inf: 'bg-troop-inf', 
 const SEG_TEXT: Record<(typeof RATIO_KEYS)[number], string> = { inf: 'text-troop-inf', lan: 'text-troop-lan', mks: 'text-troop-mks' };
 
 /** Stacked infantry / lancer / marksman bar with the percentages written under it. */
-export function RatioBar({ ratio, compact = false, testid }: { ratio: Ratio | null; compact?: boolean; testid?: string }) {
+export function RatioBar({ ratio, compact = false, labels = true, testid }: { ratio: Ratio | null; compact?: boolean; labels?: boolean; testid?: string }) {
   const { t } = useTranslation();
   if (!ratio) {
     return (
@@ -29,7 +29,7 @@ export function RatioBar({ ratio, compact = false, testid }: { ratio: Ratio | nu
       <div className={`flex w-full overflow-hidden rounded-full bg-dark-input ${compact ? 'h-2' : 'h-3'}`} dir="ltr" aria-hidden="true">
         {RATIO_KEYS.map((k) => (ratio[k] > 0 ? <div key={k} className={SEG[k]} style={{ width: `${ratio[k]}%` }} /> : null))}
       </div>
-      <div className={`mt-1 flex flex-wrap gap-x-3 gap-y-0.5 ${compact ? 'text-[11px]' : 'text-xs'}`}>
+      {labels && <div className={`mt-1 flex flex-wrap gap-x-3 gap-y-0.5 ${compact ? 'text-[11px]' : 'text-xs'}`}>
         {RATIO_KEYS.map((k) => (
           <span key={k} className="inline-flex items-center gap-1 whitespace-nowrap">
             <span className={SEG_TEXT[k]}>
@@ -41,7 +41,7 @@ export function RatioBar({ ratio, compact = false, testid }: { ratio: Ratio | nu
             </bdi>
           </span>
         ))}
-      </div>
+      </div>}
     </div>
   );
 }

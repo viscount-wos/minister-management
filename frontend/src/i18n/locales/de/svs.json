@@ -233,8 +233,13 @@
       "confirmRotate": "Neuen Link erstellen? Der aktuelle Link funktioniert sofort nicht mehr.",
       "confirmDisable": "Teilen beenden? Der Link funktioniert sofort nicht mehr.",
       "realNames": "Echte Namen dem Staat zeigen",
-      "realNamesHint": "Getarnte Leiter zeigen auf der geteilten Seite auch ihren echten Namen. Profilbild und Alias sieht der Gegner im Spiel; dies ändert nur unsere Seite."
-    }
+      "realNamesHint": "Getarnte Leiter zeigen auf der geteilten Seite auch ihren echten Namen. Profilbild und Alias sieht der Gegner im Spiel; dies ändert nur unsere Seite.",
+      "button": "Teilen",
+      "buttonOn": "Geteilt"
+    },
+    "heroesAndRatio": "Helden und Truppenverhältnis",
+    "leadHeroShort": "Anführer-Held",
+    "allTroops": "Alle"
   },
   "view": {
     "title": "Schlachtplan",

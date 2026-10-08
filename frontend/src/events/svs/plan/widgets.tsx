@@ -182,7 +182,7 @@ export function RatioEditor({
       </div>
       {valid && (
         <div className="mt-1.5">
-          <RatioBar ratio={{ inf: Number(draft.inf) || 0, lan: Number(draft.lan) || 0, mks: Number(draft.mks) || 0 }} compact />
+          <RatioBar ratio={{ inf: Number(draft.inf) || 0, lan: Number(draft.lan) || 0, mks: Number(draft.mks) || 0 }} compact labels={false} />
         </div>
       )}
     </fieldset>

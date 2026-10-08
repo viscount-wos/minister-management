@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useDroppable } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ChevronDown, ChevronUp, Drama, GripVertical, MoreVertical, PawPrint, Trash2, Users, X, ArrowRightLeft, ArrowUp, ArrowDown, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, ChevronUp, Drama, Swords, GripVertical, MoreVertical, PawPrint, Trash2, Users, X, ArrowRightLeft, ArrowUp, ArrowDown, SlidersHorizontal } from 'lucide-react';
 import { usePlanner } from './PlannerContext';
 import { HeroSlotBox, PetBuffControl, PlayerName, RatioEditor } from './widgets';
 import PlayerSearch from './PlayerSearch';
@@ -295,7 +295,10 @@ export default function LeaderCard({ leader, group, number }: { leader: Leader; 
 
           {/* Marches */}
           <section>
-            <label className="flex items-center gap-2 mb-2 text-xs text-theme-text cursor-pointer w-fit">
+            <SectionTitle
+              icon={Swords}
+              extra={
+            <label className="flex items-center gap-2 text-xs text-theme-text cursor-pointer w-fit">
               <input
                 type="checkbox"
                 checked={leader.split}
@@ -311,12 +314,16 @@ export default function LeaderCard({ leader, group, number }: { leader: Leader; 
               />
               {t('svs:plan.split')}
             </label>
-            <div className={leader.split ? 'grid grid-cols-1 2xl:grid-cols-2 gap-3' : ''}>
+              }
+            >
+              {t('svs:plan.heroesAndRatio')}
+            </SectionTitle>
+            <div className={leader.split ? 'space-y-2' : ''}>
               {sides.map((side) => {
                 const march = side === 'rally' ? leader.rally : leader.garrison ?? blankMarch();
                 return (
                   <div key={side} className={leader.split ? 'rounded-lg border border-theme-border/60 p-2' : ''} data-testid={`march-${side}`}>
-                    {leader.split && <h5 className="text-xs font-bold uppercase tracking-wide text-accent mb-1.5">{sideName(side)}</h5>}
+                    {leader.split && <h5 className={`text-xs font-bold uppercase tracking-wide mb-1.5 ${team.text}`}>{sideName(side)}</h5>}
                     <div className="flex gap-2 mb-2">
                       {[0, 1, 2].map((i) => (
                         <HeroSlotBox
@@ -356,7 +363,16 @@ export default function LeaderCard({ leader, group, number }: { leader: Leader; 
           {/* Named joiners */}
           <section data-testid="named-joiners">
             <SectionTitle icon={Users}>{t('svs:plan.namedJoiners')}</SectionTitle>
-            <p className="text-[11px] text-theme-dim -mt-1 mb-2">{t('svs:plan.namedJoinersHint')}</p>
+            <p className="text-[11px] text-theme-dim -mt-1 mb-1">{t('svs:plan.namedJoinersHint')}</p>
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wide text-theme-dim mb-1" aria-hidden="true">
+              <span className="flex-1" />
+              {sides.map((sd) => (
+                <span key={sd} className="w-12 flex justify-center whitespace-nowrap">
+                  {leader.split ? sideName(sd) : t('svs:plan.leadHeroShort')}
+                </span>
+              ))}
+              <span className="w-8" />
+            </div>
             <ol className="space-y-2">
               {leader.named_joiners.slice(0, NAMED_JOINERS).map((j, idx) => {
                 const s = j.player?.fid ? ctx.signups.get(j.player.fid) : undefined;

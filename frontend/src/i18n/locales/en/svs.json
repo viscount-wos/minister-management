@@ -233,8 +233,13 @@
       "confirmRotate": "Make a new link? The current link stops working at once.",
       "confirmDisable": "Turn off sharing? The link stops working at once.",
       "realNames": "Show real names to the state",
-      "realNamesHint": "Disguised leaders also show their real name on the shared page. The PFP and alias are what the enemy sees in game; this only changes our page."
-    }
+      "realNamesHint": "Disguised leaders also show their real name on the shared page. The PFP and alias are what the enemy sees in game; this only changes our page.",
+      "button": "Share",
+      "buttonOn": "Shared"
+    },
+    "heroesAndRatio": "Heroes and troop ratio",
+    "leadHeroShort": "Lead hero",
+    "allTroops": "All"
   },
   "view": {
     "title": "Battle plan",

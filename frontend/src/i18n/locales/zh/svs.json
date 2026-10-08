@@ -233,8 +233,13 @@
       "confirmRotate": "生成新链接？当前链接会立即失效。",
       "confirmDisable": "关闭分享？链接会立即失效。",
       "realNames": "向全州显示真实名字",
-      "realNamesHint": "伪装的队长在分享页面上也会显示真实名字。头像和化名是敌人在游戏里看到的；此设置只改变我们的页面。"
-    }
+      "realNamesHint": "伪装的队长在分享页面上也会显示真实名字。头像和化名是敌人在游戏里看到的；此设置只改变我们的页面。",
+      "button": "分享",
+      "buttonOn": "已分享"
+    },
+    "heroesAndRatio": "英雄和兵种比例",
+    "leadHeroShort": "带队英雄",
+    "allTroops": "全部"
   },
   "view": {
     "title": "作战计划",

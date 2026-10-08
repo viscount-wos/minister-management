@@ -174,7 +174,6 @@ export default function PlayerSearch({
                 id={optionId(i)}
                 role="option"
                 aria-selected={active === i}
-                aria-disabled={!!where || undefined}
                 data-testid={`option-${s.fid}`}
                 data-placed={where ? 'true' : undefined}
                 onPointerEnter={() => setActive(i)}

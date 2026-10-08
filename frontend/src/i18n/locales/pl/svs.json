@@ -233,8 +233,13 @@
       "confirmRotate": "Utworzyć nowy link? Obecny od razu przestanie działać.",
       "confirmDisable": "Wyłączyć udostępnianie? Link od razu przestanie działać.",
       "realNames": "Pokaż stanowi prawdziwe nazwy",
-      "realNamesHint": "Przebrani liderzy pokazują na udostępnionej stronie także prawdziwą nazwę. Zdjęcie i alias widzi wróg w grze; to zmienia tylko naszą stronę."
-    }
+      "realNamesHint": "Przebrani liderzy pokazują na udostępnionej stronie także prawdziwą nazwę. Zdjęcie i alias widzi wróg w grze; to zmienia tylko naszą stronę.",
+      "button": "Udostępnij",
+      "buttonOn": "Udostępniony"
+    },
+    "heroesAndRatio": "Bohaterowie i proporcje wojsk",
+    "leadHeroShort": "Bohater prowadzący",
+    "allTroops": "Wszystkie"
   },
   "view": {
     "title": "Plan bitwy",

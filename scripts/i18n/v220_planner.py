@@ -173,6 +173,11 @@ EN = {
     'view.notFoundTitle': "This plan link doesn't work",
     'view.notFoundBody': 'It may have been replaced by a new link or turned off. Ask your leaders for the current link.',
     'view.timesNote': 'Battle times are game time (UTC).',
+    'plan.heroesAndRatio': 'Heroes and troop ratio',
+    'plan.leadHeroShort': 'Lead hero',
+    'plan.allTroops': 'All',
+    'plan.share.button': 'Share',
+    'plan.share.buttonOn': 'Shared',
 }
 CHANGELOG_EN = 'SVS battle plans: leaders can share a plan so everyone sees their role, heroes, troop ratio and timings. Type your name in "Find me" to jump to your place.'
 
@@ -233,6 +238,7 @@ TR['es'] = [
     'Proporción propia', 'Proporción del líder', 'Aún no hay líderes de rally.', 'Este enlace del plan no funciona',
     'Puede que lo hayan cambiado por uno nuevo o desactivado. Pide el enlace actual a tus líderes.',
     'Las horas de batalla son hora del juego (UTC).',
+    'Héroes y proporción de tropas', 'Héroe líder', 'Todos', 'Compartir', 'Compartido',
 ]
 TR['fr'] = [
     'Plan de bataille', 'Glissez héros et joueurs dans le plan, ou cliquez une case puis un héros. Chaque modification est enregistrée toute seule.',
@@ -289,6 +295,7 @@ TR['fr'] = [
     'Ratio propre', 'Ratio du chef', 'Pas encore de chef de rassemblement.', 'Ce lien de plan ne fonctionne pas',
     'Il a peut-être été remplacé par un nouveau lien ou désactivé. Demandez le lien actuel à vos chefs.',
     "Les horaires de bataille sont en heure du jeu (UTC).",
+    'Héros et ratio de troupes', 'Héros principal', 'Tous', 'Partager', 'Partagé',
 ]
 TR['de'] = [
     'Schlachtplan', 'Ziehe Helden und Spieler in den Plan, oder klicke ein Feld und dann einen Helden an. Jede Änderung wird automatisch gespeichert.',
@@ -345,6 +352,7 @@ TR['de'] = [
     'Eigenes Verhältnis', 'Verhältnis des Leiters', 'Noch keine Rally-Leiter.', 'Dieser Plan-Link funktioniert nicht',
     'Er wurde vielleicht durch einen neuen Link ersetzt oder abgeschaltet. Frag deine Leiter nach dem aktuellen Link.',
     'Kampfzeiten sind Spielzeit (UTC).',
+    'Helden und Truppenverhältnis', 'Anführer-Held', 'Alle', 'Teilen', 'Geteilt',
 ]
 TR['pl'] = [
     'Plan bitwy', 'Przeciągaj bohaterów i graczy do planu albo kliknij pole, a potem bohatera. Każda zmiana zapisuje się sama.',
@@ -401,6 +409,7 @@ TR['pl'] = [
     'Własne proporcje', 'Proporcje lidera', 'Nie ma jeszcze liderów rajdów.', 'Ten link do planu nie działa',
     'Mógł zostać zastąpiony nowym linkiem albo wyłączony. Poproś liderów o aktualny link.',
     'Godziny bitwy to czas gry (UTC).',
+    'Bohaterowie i proporcje wojsk', 'Bohater prowadzący', 'Wszystkie', 'Udostępnij', 'Udostępniony',
 ]
 TR['ko'] = [
     '전투 계획', '영웅과 플레이어를 계획으로 끌어오거나, 칸을 누른 뒤 영웅을 누르세요. 모든 변경은 자동 저장됩니다.',
@@ -457,6 +466,7 @@ TR['ko'] = [
     '개별 비율', '리더의 병력 비율', '아직 집결 리더가 없습니다.', '이 계획 링크는 작동하지 않습니다',
     '새 링크로 바뀌었거나 꺼졌을 수 있습니다. 리더에게 현재 링크를 요청하세요.',
     '전투 시간은 게임 시간(UTC)입니다.',
+    '영웅과 병력 비율', '선두 영웅', '전체', '공유', '공유 중',
 ]
 TR['zh'] = [
     '作战计划', '把英雄和玩家拖进计划，或先点格子再点英雄。所有修改都会自动保存。',
@@ -513,6 +523,7 @@ TR['zh'] = [
     '专属比例', '队长的兵种比例', '还没有集结队长。', '这个计划链接无法使用',
     '它可能已被新链接取代或已关闭。请向队长索取当前链接。',
     '战斗时间为游戏时间（UTC）。',
+    '英雄和兵种比例', '带队英雄', '全部', '分享', '已分享',
 ]
 TR['tr'] = [
     'Savaş planı', 'Kahramanları ve oyuncuları plana sürükle ya da bir kutuya, sonra bir kahramana tıkla. Her değişiklik kendiliğinden kaydedilir.',
@@ -569,6 +580,7 @@ TR['tr'] = [
     'Kendi oranı', 'Liderin birlik oranı', 'Henüz ralli lideri yok.', 'Bu plan bağlantısı çalışmıyor',
     'Yeni bir bağlantıyla değiştirilmiş ya da kapatılmış olabilir. Güncel bağlantıyı liderlerinden iste.',
     'Savaş saatleri oyun saatidir (UTC).',
+    'Kahramanlar ve birlik oranı', 'Öncü kahraman', 'Tümü', 'Paylaş', 'Paylaşıldı',
 ]
 TR['ar'] = [
     'خطة المعركة', 'اسحب الأبطال واللاعبين إلى الخطة، أو اضغط خانة ثم بطلًا. يُحفظ كل تغيير تلقائيًا.',
@@ -625,6 +637,7 @@ TR['ar'] = [
     'نسبة خاصة', 'نسبة قوات القائد', 'لا يوجد قادة حشود بعد.', 'رابط الخطة هذا لا يعمل',
     'ربما استُبدل برابط جديد أو أُوقف. اطلب الرابط الحالي من قادتك.',
     'أوقات المعركة بتوقيت اللعبة (UTC).',
+    'الأبطال ونسبة القوات', 'البطل القائد', 'الكل', 'مشاركة', 'تمت المشاركة',
 ]
 CHANGELOG = {
     'en': CHANGELOG_EN,

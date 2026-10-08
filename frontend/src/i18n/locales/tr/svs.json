@@ -233,8 +233,13 @@
       "confirmRotate": "Yeni bağlantı oluşturulsun mu? Mevcut bağlantı hemen çalışmaz olur.",
       "confirmDisable": "Paylaşım kapatılsın mı? Bağlantı hemen çalışmaz olur.",
       "realNames": "Gerçek isimleri eyalete göster",
-      "realNamesHint": "Kılık değiştiren liderlerin gerçek isimleri de paylaşılan sayfada görünür. Profil resmi ve takma ad düşmanın oyunda gördüğüdür; bu yalnızca bizim sayfamızı değiştirir."
-    }
+      "realNamesHint": "Kılık değiştiren liderlerin gerçek isimleri de paylaşılan sayfada görünür. Profil resmi ve takma ad düşmanın oyunda gördüğüdür; bu yalnızca bizim sayfamızı değiştirir.",
+      "button": "Paylaş",
+      "buttonOn": "Paylaşıldı"
+    },
+    "heroesAndRatio": "Kahramanlar ve birlik oranı",
+    "leadHeroShort": "Öncü kahraman",
+    "allTroops": "Tümü"
   },
   "view": {
     "title": "Savaş planı",

@@ -233,8 +233,13 @@
       "confirmRotate": "¿Crear un enlace nuevo? El actual deja de funcionar al instante.",
       "confirmDisable": "¿Dejar de compartir? El enlace deja de funcionar al instante.",
       "realNames": "Mostrar los nombres reales al estado",
-      "realNamesHint": "Los líderes disfrazados también muestran su nombre real en la página compartida. La foto y el alias son lo que ve el enemigo en el juego; esto solo cambia nuestra página."
-    }
+      "realNamesHint": "Los líderes disfrazados también muestran su nombre real en la página compartida. La foto y el alias son lo que ve el enemigo en el juego; esto solo cambia nuestra página.",
+      "button": "Compartir",
+      "buttonOn": "Compartido"
+    },
+    "heroesAndRatio": "Héroes y proporción de tropas",
+    "leadHeroShort": "Héroe líder",
+    "allTroops": "Todos"
   },
   "view": {
     "title": "Plan de batalla",
