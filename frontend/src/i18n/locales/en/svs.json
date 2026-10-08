@@ -1,4 +1,90 @@
 {
   "name": "SVS Castle",
-  "tagline": "Sign up for the castle battle in State vs State"
+  "tagline": "Sign up for the castle battle in State vs State",
+  "home": {
+    "subtitle": "Tell your leaders when you can fight and how strong your troops are"
+  },
+  "apply": {
+    "title": "SVS sign-up",
+    "notOpenTitle": "SVS sign-ups are not open",
+    "notOpenBody": "There is no open SVS round right now. Check back later.",
+    "backHome": "Back to SVS"
+  },
+  "step1": {
+    "title": "Player",
+    "desc": "Tell us who you are",
+    "allianceKnown": "We have your alliance from an earlier sign-up. Change it only if you moved.",
+    "allianceNew": "Your 3-letter alliance tag."
+  },
+  "step2": {
+    "title": "Battle hours",
+    "desc": "Tap every hour of the battle you will be online for",
+    "utcNote": "Hours are game time (UTC).",
+    "localNote": "Small text: your time ({{zone}}).",
+    "gameTime": "Hours (UTC)",
+    "selectAll": "I can do every hour",
+    "clearAll": "Clear all hours"
+  },
+  "step3": {
+    "title": "Troops",
+    "desc": "Pick each troop camp's FC level and your troop tier",
+    "tierHint": "SVS only counts T10 and T11 troops."
+  },
+  "step4": {
+    "title": "Your role",
+    "desc": "How will you fight, and can you talk with us?",
+    "roleTitle": "In the battle I will…",
+    "vc": "Can you join Discord voice chat?",
+    "vcHint": "Voice chat helps leaders call the timing. Listening is enough."
+  },
+  "step5": {
+    "title": "Review",
+    "desc": "Check everything before you submit"
+  },
+  "roles": {
+    "call": "Call rallies",
+    "callDesc": "I start rallies for others to join",
+    "join": "Join rallies",
+    "joinDesc": "I send my troops into other players' rallies",
+    "none": "No role given"
+  },
+  "errors": {
+    "hoursRequired": "Pick at least one hour",
+    "troopsRequired": "Pick the camp level and the tier (T10 or T11) for every troop type",
+    "roleRequired": "Pick a role: call rallies or join rallies",
+    "vcRequired": "Tell us if you can join Discord voice chat"
+  },
+  "admin": {
+    "adminSubtitle": "SVS: sign-ups, hours, troops and exports",
+    "defaultRoundName": "SVS {{date}}",
+    "stats": {
+      "callers": "Rally callers",
+      "joiners": "Joiners",
+      "vc": "Discord VC"
+    },
+    "byHour": "Players per hour (UTC)",
+    "search": "Search name or FID...",
+    "col": {
+      "hours": "Hours (UTC)",
+      "role": "Role"
+    },
+    "filter": {
+      "hours": "Hours (UTC)",
+      "anyHour": "Any hour"
+    },
+    "pill": {
+      "hour": "Hour {{v}} UTC",
+      "role": "Role: {{v}}",
+      "vcYes": "Discord VC: yes",
+      "vcNo": "Discord VC: no"
+    },
+    "settings": {
+      "battleTitle": "Battle hours (UTC)",
+      "battleDesc": "When the battle starts and how many hours it lasts. Players pick from these hours. A new round copies them.",
+      "start": "Battle starts (UTC)",
+      "duration": "Duration (hours)",
+      "preview": "Players will see these hours:",
+      "error": "Could not save the settings. Check the start time and the duration (1-24 hours)."
+    }
+  }
 }

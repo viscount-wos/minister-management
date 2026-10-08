@@ -133,5 +133,26 @@
     "swapHere": "Intercambiar aquí",
     "toUnassigned": "Mover a Sin asignar",
     "tip": "En el móvil: toca el icono de mover de un jugador y luego \"Mover aquí\" en una franja. Una pulsación larga también inicia el arrastre."
+  },
+  "addPlayer": {
+    "button": "Añadir jugador",
+    "title": "Añadir un jugador",
+    "desc": "Crea una inscripción para alguien que no se inscribió. Solo hacen falta el ID de jugador y el nombre en el juego; rellena lo que sepas.",
+    "lookup": "Buscar",
+    "known": "Jugador conocido: datos rellenados desde su perfil.",
+    "newPlayer": "Jugador nuevo: escribe su nombre en el juego.",
+    "optionalHint": "Opcional: deja en blanco lo que no sepas. El jugador puede completarlo luego con su ID.",
+    "save": "Añadir jugador",
+    "added": "{{name}} se añadió a esta ronda.",
+    "exists": "Este jugador ya tiene una inscripción en esta ronda. Edita esa.",
+    "error": "No se pudo añadir al jugador."
+  },
+  "heroes": {
+    "tab": "Héroes",
+    "title": "Biblioteca de héroes",
+    "desc": "Los héroes que pueden elegir los planificadores: todos hasta la generación de héroes del estado, más los raros y épicos (sin generación).",
+    "count": "{{n}} héroes hasta Gen {{gen}}",
+    "generation": "Generación de héroes del estado",
+    "generationDesc": "La generación de héroes más reciente de tu estado. Nunca se ofrecen héroes de una generación posterior. Se aplica a todo el estado."
   }
 }

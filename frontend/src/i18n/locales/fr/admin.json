@@ -133,5 +133,26 @@
     "swapHere": "Échanger ici",
     "toUnassigned": "Déplacer vers Non assignés",
     "tip": "Sur téléphone : touchez l’icône de déplacement d’un joueur, puis « Déplacer ici » sur un créneau. Un appui long lance aussi le glisser-déposer."
+  },
+  "addPlayer": {
+    "button": "Ajouter un joueur",
+    "title": "Ajouter un joueur",
+    "desc": "Créez une inscription pour quelqu'un qui ne s'est pas inscrit. Seuls l'ID joueur et le nom en jeu sont nécessaires ; remplissez ce que vous savez.",
+    "lookup": "Rechercher",
+    "known": "Joueur connu : informations reprises de son profil.",
+    "newPlayer": "Nouveau joueur : saisissez son nom en jeu.",
+    "optionalHint": "Facultatif : laissez vide ce que vous ne savez pas. Le joueur pourra compléter avec son ID.",
+    "save": "Ajouter le joueur",
+    "added": "{{name}} a été ajouté à cette manche.",
+    "exists": "Ce joueur a déjà une inscription dans cette manche. Modifiez plutôt celle-ci.",
+    "error": "Impossible d'ajouter le joueur."
+  },
+  "heroes": {
+    "tab": "Héros",
+    "title": "Bibliothèque des héros",
+    "desc": "Les héros que les planificateurs peuvent choisir : tous jusqu'à la génération de héros de l'État, plus les héros rares et épiques (sans génération).",
+    "count": "{{n}} héros jusqu'à la Gén {{gen}}",
+    "generation": "Génération de héros de l'État",
+    "generationDesc": "La génération de héros la plus récente de votre État. Les héros d'une génération ultérieure ne sont jamais proposés. S'applique à tout l'État."
   }
 }

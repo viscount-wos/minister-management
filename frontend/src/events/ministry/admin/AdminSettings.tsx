@@ -8,6 +8,7 @@ import { isoToZonedInput, zonedInputToIso } from '../../../shared/datetime';
 import { useFormatDateTime } from '../../../shared/DateTime';
 import { useTimezone } from '../../../shared/TimezoneContext';
 import { timezoneShortLabel } from '../../../shared/timezone';
+import HeroGenerationSetting from '../../../admin/HeroGenerationSetting';
 
 // Global settings (state number) plus the selected round's own settings:
 // name, closing time, research day, fire crystals, slot scheme, published days.
@@ -50,7 +51,7 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
   const saveStateNumber = async () => {
     try {
       const res = await api.admin.updateSettings({ state_number: stateNumber.trim() });
-      setStateNumber(res.state_number);
+      setStateNumber(res.state_number ?? '');
       saved();
     } catch (err) {
       failed(err);
@@ -127,6 +128,9 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
           </button>
         </div>
       </div>
+
+      {/* Global: the state's hero generation (SVS planner / hero library) */}
+      <HeroGenerationSetting />
 
       {round && s && (
         <>

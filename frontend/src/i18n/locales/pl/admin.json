@@ -133,5 +133,26 @@
     "swapHere": "Zamień tutaj",
     "toUnassigned": "Przenieś do nieprzypisanych",
     "tip": "Na telefonie: dotknij ikonę przenoszenia przy graczu, a potem „Przenieś tutaj” przy przedziale. Długie przytrzymanie też rozpoczyna przeciąganie."
+  },
+  "addPlayer": {
+    "button": "Dodaj gracza",
+    "title": "Dodaj gracza",
+    "desc": "Utwórz zapis dla kogoś, kto się nie zapisał. Potrzebne są tylko ID gracza i nazwa w grze; uzupełnij, co wiesz.",
+    "lookup": "Sprawdź",
+    "known": "Znany gracz: dane uzupełnione z jego profilu.",
+    "newPlayer": "Nowy gracz: wpisz jego nazwę w grze.",
+    "optionalHint": "Opcjonalne: zostaw puste, czego nie wiesz. Gracz może to później uzupełnić swoim ID.",
+    "save": "Dodaj gracza",
+    "added": "{{name}} został dodany do tej rundy.",
+    "exists": "Ten gracz ma już zapis w tej rundzie. Edytuj tamten.",
+    "error": "Nie udało się dodać gracza."
+  },
+  "heroes": {
+    "tab": "Bohaterowie",
+    "title": "Biblioteka bohaterów",
+    "desc": "Bohaterowie do wyboru dla planujących: wszyscy do generacji bohaterów stanu, plus rzadcy i epiccy (bez generacji).",
+    "count": "{{n}} bohaterów do Gen {{gen}}",
+    "generation": "Generacja bohaterów stanu",
+    "generationDesc": "Najnowsza generacja bohaterów w twoim stanie. Bohaterowie z późniejszych generacji nigdy nie są proponowani. Dotyczy całego stanu."
   }
 }

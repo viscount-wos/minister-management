@@ -1,4 +1,90 @@
 {
   "name": "SVS 城堡",
-  "tagline": "报名参加州对州中的城堡争夺战"
+  "tagline": "报名参加州对州中的城堡争夺战",
+  "home": {
+    "subtitle": "告诉指挥官你什么时候能参战、部队有多强"
+  },
+  "apply": {
+    "title": "SVS 报名",
+    "notOpenTitle": "SVS 报名未开放",
+    "notOpenBody": "目前没有开放的 SVS 轮次。请稍后再来。",
+    "backHome": "返回 SVS"
+  },
+  "step1": {
+    "title": "玩家",
+    "desc": "告诉我们你是谁",
+    "allianceKnown": "我们已从之前的报名中得知你的联盟。只有换了联盟才需要修改。",
+    "allianceNew": "你联盟的 3 字母标签。"
+  },
+  "step2": {
+    "title": "战斗时段",
+    "desc": "点选你会在线的每一个战斗小时",
+    "utcNote": "时间为游戏时间（UTC）。",
+    "localNote": "小字：你的时间（{{zone}}）。",
+    "gameTime": "时段（UTC）",
+    "selectAll": "我每个小时都可以",
+    "clearAll": "清除所有时段"
+  },
+  "step3": {
+    "title": "部队",
+    "desc": "选择每个兵营的 FC 等级和你的部队阶级",
+    "tierHint": "SVS 只计算 T10 和 T11 部队。"
+  },
+  "step4": {
+    "title": "你的角色",
+    "desc": "你会怎样作战？能和我们语音吗？",
+    "roleTitle": "战斗中我会…",
+    "vc": "你能加入 Discord 语音频道吗？",
+    "vcHint": "语音能帮助指挥官把握时机。只听也可以。"
+  },
+  "step5": {
+    "title": "确认",
+    "desc": "提交前请检查所有内容"
+  },
+  "roles": {
+    "call": "发起集结",
+    "callDesc": "我发起集结，让其他人加入",
+    "join": "加入集结",
+    "joinDesc": "我把部队派进其他玩家的集结",
+    "none": "未填写角色"
+  },
+  "errors": {
+    "hoursRequired": "请至少选择一个小时",
+    "troopsRequired": "请为每种兵种选择兵营等级和阶级（T10 或 T11）",
+    "roleRequired": "请选择角色：发起集结或加入集结",
+    "vcRequired": "请告诉我们你能否加入 Discord 语音"
+  },
+  "admin": {
+    "adminSubtitle": "SVS：报名、时段、部队与导出",
+    "defaultRoundName": "SVS {{date}}",
+    "stats": {
+      "callers": "集结发起者",
+      "joiners": "加入者",
+      "vc": "Discord 语音"
+    },
+    "byHour": "每小时玩家数（UTC）",
+    "search": "搜索名称或 FID...",
+    "col": {
+      "hours": "时段（UTC）",
+      "role": "角色"
+    },
+    "filter": {
+      "hours": "时段（UTC）",
+      "anyHour": "任意时段"
+    },
+    "pill": {
+      "hour": "{{v}} UTC",
+      "role": "角色：{{v}}",
+      "vcYes": "Discord 语音：是",
+      "vcNo": "Discord 语音：否"
+    },
+    "settings": {
+      "battleTitle": "战斗时段（UTC）",
+      "battleDesc": "战斗何时开始、持续几小时。玩家从这些小时中选择。新轮次会复制这些设置。",
+      "start": "战斗开始（UTC）",
+      "duration": "持续时间（小时）",
+      "preview": "玩家将看到这些时段：",
+      "error": "无法保存。请检查开始时间和持续时间（1-24 小时）。"
+    }
+  }
 }

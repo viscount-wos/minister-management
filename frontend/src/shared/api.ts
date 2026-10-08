@@ -36,6 +36,7 @@ export type ErrorCode =
   | 'ROUND_CLOSED'
   | 'TOO_MANY_ATTEMPTS'
   | 'RATE_LIMITED'
+  | 'APPLICATION_EXISTS'
   | 'RETRY'
   | 'CONFLICT'
   | 'INTERNAL_ERROR'
@@ -68,6 +69,12 @@ export interface ProfileInput {
   furnace_level?: string | null;
   power?: number | null;
   troops?: unknown;
+}
+
+/** GET /api/settings/public (and the admin settings). state_generation: the state's hero generation (1..17). */
+export interface PublicSettings {
+  state_number: string | null;
+  state_generation: number;
 }
 
 export interface MinistrySettings {
@@ -366,7 +373,7 @@ export const api = {
   // ---- public
   health: () => request<{ status: string }>('GET', '/health'),
   events: () => request<{ events: EventInfo[] }>('GET', '/api/events'),
-  publicSettings: () => request<{ state_number: string }>('GET', '/api/settings/public'),
+  publicSettings: () => request<PublicSettings>('GET', '/api/settings/public'),
 
   profile: (fid: string) => request<Profile>('GET', `/api/profile/${enc(fid)}`),
 
@@ -397,9 +404,9 @@ export const api = {
       request<{ token: string; role: string; expires_in: number }>('POST', '/api/admin/login', { body: { password } }),
     me: () => request<{ role: string }>('GET', '/api/admin/me', { admin: true }),
 
-    settings: () => request<{ state_number: string }>('GET', '/api/admin/settings', { admin: true }),
-    updateSettings: (body: { state_number: string }) =>
-      request<{ state_number: string }>('PUT', '/api/admin/settings', { admin: true, body }),
+    settings: () => request<PublicSettings>('GET', '/api/admin/settings', { admin: true }),
+    updateSettings: (body: { state_number?: string; state_generation?: number }) =>
+      request<PublicSettings>('PUT', '/api/admin/settings', { admin: true, body }),
 
     rounds: (event: EventKey) => request<{ rounds: Round[] }>('GET', `/api/admin/events/${event}/rounds`, { admin: true }),
     round: (id: number) => request<Round>('GET', `/api/admin/rounds/${id}`, { admin: true }),
@@ -419,6 +426,9 @@ export const api = {
         query: { alliance },
       }),
     application: (id: number) => request<AdminApplication>('GET', `/api/admin/applications/${id}`, { admin: true }),
+    /** Admin "add player": a sign-up for someone who didn't sign up (any event). 409 APPLICATION_EXISTS if the FID has one. */
+    addPlayer: (roundId: number, body: { fid: string; profile?: Record<string, unknown>; answers?: Record<string, unknown> }) =>
+      request<AdminApplication & { profile_created: boolean }>('POST', `/api/admin/rounds/${roundId}/applications`, { admin: true, body }),
     updateApplication: (id: number, body: { profile?: ProfileInput; answers?: Partial<MinistryAnswers> }) =>
       request<AdminApplication>('PUT', `/api/admin/applications/${id}`, { admin: true, body }),
     deleteApplication: (id: number) =>

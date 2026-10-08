@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Trash2, FileSpreadsheet, FileText, ChevronUp, ChevronDown, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import { Round, downloadBlob } from '../../../shared/api';
@@ -7,12 +7,17 @@ import { useFormatDateTime } from '../../../shared/DateTime';
 import FurnaceLevelSelect from '../../../shared/FurnaceLevelSelect';
 import { useUrlFilters, splitList, joinList } from '../../../shared/filters/useUrlFilters';
 import { CheckboxMenu, ChipButton, FilterPill, FilterPills } from '../../../shared/filters/FilterControls';
+import { Bars, DebouncedInput, StatCard } from '../../../shared/filters/Breakdowns';
+import AddPlayerDialog, { AddPlayerButton } from '../../../admin/AddPlayerDialog';
+import TroopFields, { TroopValues, blankTroopValues, filledTroops } from '../../../admin/TroopFields';
 import {
   FILTER_KEYS,
   FilterKey,
   FilterQuery,
   ROLES,
+  Role,
   SortKey,
+  TIERS,
   TROOP_TYPES,
   TroopType,
   TyrantAdminApplication,
@@ -42,105 +47,6 @@ interface Props {
   onChanged: () => void;
 }
 
-function StatCard({ label, value, testId, sub }: { label: string; value: ReactNode; testId: string; sub?: ReactNode }) {
-  return (
-    <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5 text-center" data-testid={testId}>
-      <div className="text-3xl font-bold text-accent" data-testid={`${testId}-value`}>
-        {value}
-      </div>
-      <div className="text-sm text-theme-dim mt-1">{label}</div>
-      {sub && <div className="text-xs text-theme-dim mt-0.5">{sub}</div>}
-    </div>
-  );
-}
-
-/** Horizontal bar list: label + count, bar width relative to the shown total. Each row toggles a filter. */
-function Bars({
-  title,
-  rows,
-  total,
-  testId,
-}: {
-  title: string;
-  rows: { key: string; label: ReactNode; n: number; active: boolean; onClick: () => void }[];
-  total: number;
-  testId: string;
-}) {
-  return (
-    <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5" data-testid={testId}>
-      <h3 className="font-semibold text-accent mb-3">{title}</h3>
-      <div className="space-y-1">
-        {rows.map((r) => (
-          <button
-            key={r.key}
-            type="button"
-            onClick={r.onClick}
-            aria-pressed={r.active}
-            className={`w-full min-h-[44px] px-2 py-1 rounded-lg text-sm text-start border ${
-              r.active ? 'border-accent bg-accent/15' : 'border-transparent hover:bg-dark-card-hover'
-            }`}
-            data-testid={`${testId}-${r.key}`}
-            data-count={r.n}
-            data-active={r.active ? 'true' : undefined}
-          >
-            <div className="flex justify-between gap-2 text-theme-text">
-              <span>{r.label}</span>
-              <span className="font-semibold">{r.n}</span>
-            </div>
-            <div className="h-1.5 rounded bg-dark-bg mt-1 overflow-hidden">
-              <div className="h-full bg-accent" style={{ width: `${total ? Math.round((r.n / total) * 100) : 0}%` }} />
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/** A number/date input that writes to the URL after a short pause (not on every keystroke). */
-function DebouncedInput({
-  id,
-  label,
-  value,
-  onCommit,
-  type = 'number',
-  inputMode,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onCommit: (v: string) => void;
-  type?: string;
-  inputMode?: 'decimal' | 'numeric';
-}) {
-  const [local, setLocal] = useState(value);
-  useEffect(() => setLocal(value), [value]);
-  useEffect(() => {
-    if (local === value) return;
-    const h = setTimeout(() => onCommit(local), 400);
-    return () => clearTimeout(h);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [local]);
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-theme-text mb-2">
-        {label}
-      </label>
-      <input
-        id={id}
-        data-testid={id}
-        type={type}
-        min={0}
-        step="any"
-        inputMode={inputMode}
-        value={local}
-        onChange={(e) => setLocal(e.target.value)}
-        className={INPUT_SM}
-      />
-    </div>
-  );
-}
-
 const Range = ({ start, end }: { start: string; end: string }) => (
   <bdi dir="ltr">
     {start}–{end}
@@ -168,6 +74,14 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
   const [error, setError] = useState('');
   const moreActive = MORE_KEYS.filter((k) => v[k]).length;
   const [moreOpen, setMoreOpen] = useState(moreActive > 0);
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState('');
+  const [add, setAdd] = useState<{ windows: string[]; vc: '' | 'yes' | 'no'; roles: Role[]; troops: TroopValues }>({
+    windows: [],
+    vc: '',
+    roles: [],
+    troops: blankTroopValues(),
+  });
   const sort: SortKey = SORT_KEYS.includes(v.sort as SortKey) ? (v.sort as SortKey) : 'submitted';
   const dir: 'asc' | 'desc' = v.dir === 'asc' ? 'asc' : 'desc';
 
@@ -318,6 +232,12 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
         <div className="p-3 bg-danger/10 border border-danger/30 rounded-lg flex items-center gap-2 text-danger" role="alert">
           <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
           {error}
+        </div>
+      )}
+
+      {added && (
+        <div className="p-3 bg-success/10 border border-success/30 rounded-lg text-success" role="status" data-testid="add-player-done">
+          {added}
         </div>
       )}
 
@@ -593,6 +513,14 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
           <p className="text-sm text-theme-dim flex-1" data-testid="result-count">
             {filtered && summary ? t('tyrant:admin.showingOf', { n: total, total: summary.round_total }) : t('tyrant:admin.showing', { n: total })}
           </p>
+          {!readOnly && (
+            <AddPlayerButton
+              onClick={() => {
+                setAdd({ windows: [], vc: '', roles: [], troops: blankTroopValues() });
+                setAdding(true);
+              }}
+            />
+          )}
           <button
             type="button"
             onClick={() => doExport('csv')}
@@ -734,6 +662,78 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
           </div>
         )}
       </div>
+      {adding && (
+        <AddPlayerDialog
+          event="tyrant"
+          roundId={round.id}
+          onClose={() => setAdding(false)}
+          onAdded={(name) => {
+            setAdding(false);
+            setAdded(t('admin:addPlayer.added', { name }));
+            setTimeout(() => setAdded(''), 4000);
+            onChanged();
+            load();
+          }}
+          onProfile={(p) => {
+            const tr = parseTroops(p?.troops);
+            setAdd((s) => ({ ...s, troops: { infantry: { ...tr.infantry }, lancer: { ...tr.lancer }, marksman: { ...tr.marksman } } }));
+          }}
+          extra={() => {
+            const answers: Record<string, unknown> = { availability: windows.map((w) => w.id).filter((id) => add.windows.includes(id)), roles: add.roles };
+            if (add.vc) answers.discord_vc = add.vc === 'yes';
+            const troops = filledTroops(add.troops);
+            return { answers, ...(troops ? { profile: { troops } } : {}) };
+          }}
+        >
+          <div>
+            <p className="block text-sm font-medium text-theme-text mb-2">{t('tyrant:step2.title')}</p>
+            <div className="flex flex-wrap gap-2" data-testid="add-windows">
+              {windows.map((w) => {
+                const on = add.windows.includes(w.id);
+                return (
+                  <button
+                    key={w.id}
+                    type="button"
+                    aria-pressed={on}
+                    data-testid={`add-window-${w.id}`}
+                    onClick={() => setAdd((s) => ({ ...s, windows: on ? s.windows.filter((x) => x !== w.id) : [...s.windows, w.id] }))}
+                    className={`min-h-[44px] px-3 rounded-lg border-2 text-sm font-semibold ${on ? 'bg-accent border-accent text-dark-bg' : 'border-theme-border text-theme-text hover:border-accent'}`}
+                  >
+                    <Range start={w.start} end={w.end} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="add-vc" className="block text-sm font-medium text-theme-text mb-2">
+                {t('tyrant:step2.discordVc')}
+              </label>
+              <select
+                id="add-vc"
+                data-testid="add-vc"
+                value={add.vc}
+                onChange={(e) => setAdd((s) => ({ ...s, vc: e.target.value as '' | 'yes' | 'no' }))}
+                className={`${SELECT_CLASS} border-theme-border`}
+              >
+                <option value="">—</option>
+                <option value="yes">{t('common:yes')}</option>
+                <option value="no">{t('common:no')}</option>
+              </select>
+            </div>
+            <CheckboxMenu
+              id="add-roles"
+              label={t('tyrant:step5.title')}
+              summary={chosen(add.roles.length, '—')}
+              options={ROLES.map((r) => ({ value: r, label: t(`tyrant:roles.${r}`) }))}
+              selected={add.roles}
+              onToggle={(r) => setAdd((s) => ({ ...s, roles: ROLES.filter((x) => (x === r ? !s.roles.includes(r as Role) : s.roles.includes(x))) }))}
+            />
+          </div>
+          <TroopFields value={add.troops} onChange={(tr) => setAdd((s) => ({ ...s, troops: tr }))} tiers={[...TIERS].reverse()} />
+        </AddPlayerDialog>
+      )}
     </div>
   );
 }

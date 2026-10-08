@@ -133,5 +133,26 @@
     "swapHere": "Burada değiştir",
     "toUnassigned": "Atanmamışa taşı",
     "tip": "Telefonda: oyuncunun taşıma simgesine, sonra bir zaman dilimindeki \"Buraya taşı\"ya dokunun. Uzun basmak da sürüklemeyi başlatır."
+  },
+  "addPlayer": {
+    "button": "Oyuncu ekle",
+    "title": "Oyuncu ekle",
+    "desc": "Kendisi kaydolmayan biri için kayıt oluştur. Yalnızca oyuncu kimliği ve oyun içi isim gerekli; bildiklerini doldur.",
+    "lookup": "Sorgula",
+    "known": "Bilinen oyuncu: bilgiler profilinden dolduruldu.",
+    "newPlayer": "Yeni oyuncu: oyun içi ismini gir.",
+    "optionalHint": "İsteğe bağlı: bilmediklerini boş bırak. Oyuncu daha sonra kendi kimliğiyle tamamlayabilir.",
+    "save": "Oyuncu ekle",
+    "added": "{{name}} bu tura eklendi.",
+    "exists": "Bu oyuncunun bu turda zaten bir kaydı var. Onun yerine o kaydı düzenle.",
+    "error": "Oyuncu eklenemedi."
+  },
+  "heroes": {
+    "tab": "Kahramanlar",
+    "title": "Kahraman kütüphanesi",
+    "desc": "Planlayıcıların seçebileceği kahramanlar: eyaletin kahraman neslinden önceki herkes ve nesli olmayan nadir ile epik kahramanlar.",
+    "count": "Nesil {{gen}}'e kadar {{n}} kahraman",
+    "generation": "Eyalet kahraman nesli",
+    "generationDesc": "Eyaletindeki en yeni kahraman nesli. Daha sonraki nesillerin kahramanları asla önerilmez. Tüm eyalete uygulanır."
   }
 }

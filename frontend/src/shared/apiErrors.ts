@@ -24,6 +24,10 @@ const FIELD_LABELS: Record<string, string> = {
   name: 'admin:round.name',
   closing_time: 'admin:closingTime',
   state_number: 'admin:stateNumber',
+  state_generation: 'admin:heroes.generation',
+  'answers.hours': 'svs:step2.title',
+  'answers.role': 'svs:step4.roleTitle',
+  'answers.discord_vc': 'svs:step4.vc',
   password: 'admin:password',
 };
 
@@ -31,6 +35,7 @@ export function fieldLabelKey(field: string | null | undefined): string | null {
   if (!field) return null;
   if (FIELD_LABELS[field]) return FIELD_LABELS[field];
   if (field.startsWith('answers.time_slots')) return FIELD_LABELS['answers.time_slots_by_day'];
+  if (field.startsWith('profile.troops')) return 'tyrant:step4.title';
   return null;
 }
 
@@ -66,6 +71,8 @@ export function errorText(t: TFunction, err: unknown, fallbackKey = 'common:erro
       return t('admin:sessionExpired');
     case 'INVALID_PASSWORD':
       return t('admin:invalidPassword');
+    case 'APPLICATION_EXISTS':
+      return t('admin:addPlayer.exists');
     case 'ROUND_ALREADY_OPEN':
       return t('admin:round.alreadyOpen');
     default:

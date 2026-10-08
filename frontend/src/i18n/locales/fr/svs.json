@@ -1,4 +1,90 @@
 {
   "name": "Château SVS",
-  "tagline": "Inscrivez-vous pour la bataille du château en État contre État"
+  "tagline": "Inscrivez-vous pour la bataille du château en État contre État",
+  "home": {
+    "subtitle": "Dites à vos chefs quand vous pouvez combattre et la force de vos troupes"
+  },
+  "apply": {
+    "title": "Inscription SVS",
+    "notOpenTitle": "Les inscriptions SVS ne sont pas ouvertes",
+    "notOpenBody": "Aucune manche SVS n'est ouverte pour le moment. Revenez plus tard.",
+    "backHome": "Retour à SVS"
+  },
+  "step1": {
+    "title": "Joueur",
+    "desc": "Dites-nous qui vous êtes",
+    "allianceKnown": "Nous avons votre alliance d'une inscription précédente. Changez-la seulement si vous avez changé d'alliance.",
+    "allianceNew": "Le tag de 3 lettres de votre alliance."
+  },
+  "step2": {
+    "title": "Heures de bataille",
+    "desc": "Touchez chaque heure de la bataille où vous serez en ligne",
+    "utcNote": "Les heures sont en heure du jeu (UTC).",
+    "localNote": "Petit texte : votre heure ({{zone}}).",
+    "gameTime": "Heures (UTC)",
+    "selectAll": "Je peux toutes les heures",
+    "clearAll": "Effacer toutes les heures"
+  },
+  "step3": {
+    "title": "Troupes",
+    "desc": "Choisissez le niveau FC de chaque camp et le palier de vos troupes",
+    "tierHint": "En SVS, seules les troupes T10 et T11 comptent."
+  },
+  "step4": {
+    "title": "Votre rôle",
+    "desc": "Comment allez-vous combattre, et pouvez-vous nous parler ?",
+    "roleTitle": "Pendant la bataille, je vais…",
+    "vc": "Pouvez-vous rejoindre le salon vocal Discord ?",
+    "vcHint": "Le vocal aide les chefs à donner le bon moment. Écouter suffit."
+  },
+  "step5": {
+    "title": "Vérification",
+    "desc": "Vérifiez tout avant d'envoyer"
+  },
+  "roles": {
+    "call": "Lancer des rassemblements",
+    "callDesc": "Je lance des rassemblements que les autres rejoignent",
+    "join": "Rejoindre des rassemblements",
+    "joinDesc": "J'envoie mes troupes dans les rassemblements des autres",
+    "none": "Aucun rôle indiqué"
+  },
+  "errors": {
+    "hoursRequired": "Choisissez au moins une heure",
+    "troopsRequired": "Choisissez le niveau du camp et le palier (T10 ou T11) pour chaque type de troupe",
+    "roleRequired": "Choisissez un rôle : lancer ou rejoindre des rassemblements",
+    "vcRequired": "Dites-nous si vous pouvez rejoindre le vocal Discord"
+  },
+  "admin": {
+    "adminSubtitle": "SVS : inscriptions, heures, troupes et exports",
+    "defaultRoundName": "SVS {{date}}",
+    "stats": {
+      "callers": "Lanceurs",
+      "joiners": "Participants",
+      "vc": "Vocal Discord"
+    },
+    "byHour": "Joueurs par heure (UTC)",
+    "search": "Rechercher nom ou FID...",
+    "col": {
+      "hours": "Heures (UTC)",
+      "role": "Rôle"
+    },
+    "filter": {
+      "hours": "Heures (UTC)",
+      "anyHour": "Toute heure"
+    },
+    "pill": {
+      "hour": "Heure {{v}} UTC",
+      "role": "Rôle : {{v}}",
+      "vcYes": "Vocal Discord : oui",
+      "vcNo": "Vocal Discord : non"
+    },
+    "settings": {
+      "battleTitle": "Heures de bataille (UTC)",
+      "battleDesc": "Quand la bataille commence et combien d'heures elle dure. Les joueurs choisissent parmi ces heures. Une nouvelle manche les reprend.",
+      "start": "Début de la bataille (UTC)",
+      "duration": "Durée (heures)",
+      "preview": "Les joueurs verront ces heures :",
+      "error": "Impossible d'enregistrer. Vérifiez l'heure de début et la durée (1 à 24 heures)."
+    }
+  }
 }

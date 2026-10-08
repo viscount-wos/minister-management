@@ -1,4 +1,90 @@
 {
   "name": "SVS Kalesi",
-  "tagline": "Eyalet-Eyalet kale savaşına kaydol"
+  "tagline": "Eyalet-Eyalet kale savaşına kaydol",
+  "home": {
+    "subtitle": "Liderlerine ne zaman savaşabileceğini ve birliklerinin ne kadar güçlü olduğunu söyle"
+  },
+  "apply": {
+    "title": "SVS kaydı",
+    "notOpenTitle": "SVS kayıtları açık değil",
+    "notOpenBody": "Şu anda açık bir SVS turu yok. Daha sonra tekrar bak.",
+    "backHome": "SVS'ye dön"
+  },
+  "step1": {
+    "title": "Oyuncu",
+    "desc": "Bize kim olduğunu söyle",
+    "allianceKnown": "İttifakını önceki bir kayıttan biliyoruz. Yalnızca ittifak değiştirdiysen değiştir.",
+    "allianceNew": "İttifakının 3 harfli etiketi."
+  },
+  "step2": {
+    "title": "Savaş saatleri",
+    "desc": "Çevrimiçi olacağın her savaş saatine dokun",
+    "utcNote": "Saatler oyun saatidir (UTC).",
+    "localNote": "Küçük yazı: senin saatin ({{zone}}).",
+    "gameTime": "Saatler (UTC)",
+    "selectAll": "Her saat uygunum",
+    "clearAll": "Tüm saatleri temizle"
+  },
+  "step3": {
+    "title": "Birlikler",
+    "desc": "Her birlik kampının FC seviyesini ve birlik kademeni seç",
+    "tierHint": "SVS'de yalnızca T10 ve T11 birlikleri sayılır."
+  },
+  "step4": {
+    "title": "Rolün",
+    "desc": "Nasıl savaşacaksın ve bizimle konuşabilir misin?",
+    "roleTitle": "Savaşta ben…",
+    "vc": "Discord sesli sohbete katılabilir misin?",
+    "vcHint": "Sesli sohbet liderlerin zamanlamayı vermesine yardımcı olur. Dinlemek yeterli."
+  },
+  "step5": {
+    "title": "Gözden geçir",
+    "desc": "Göndermeden önce her şeyi kontrol et"
+  },
+  "roles": {
+    "call": "Ralli başlatacağım",
+    "callDesc": "Başkalarının katılacağı ralliler açarım",
+    "join": "Rallilere katılacağım",
+    "joinDesc": "Birliklerimi diğer oyuncuların rallilerine gönderirim",
+    "none": "Rol belirtilmedi"
+  },
+  "errors": {
+    "hoursRequired": "En az bir saat seç",
+    "troopsRequired": "Her birlik türü için kamp seviyesini ve kademeyi (T10 veya T11) seç",
+    "roleRequired": "Bir rol seç: ralli başlatmak veya rallilere katılmak",
+    "vcRequired": "Discord sesli sohbete katılıp katılamayacağını söyle"
+  },
+  "admin": {
+    "adminSubtitle": "SVS: kayıtlar, saatler, birlikler ve dışa aktarma",
+    "defaultRoundName": "SVS {{date}}",
+    "stats": {
+      "callers": "Ralli başlatanlar",
+      "joiners": "Katılanlar",
+      "vc": "Discord VC"
+    },
+    "byHour": "Saat başına oyuncu (UTC)",
+    "search": "İsim veya FID ara...",
+    "col": {
+      "hours": "Saatler (UTC)",
+      "role": "Rol"
+    },
+    "filter": {
+      "hours": "Saatler (UTC)",
+      "anyHour": "Herhangi bir saat"
+    },
+    "pill": {
+      "hour": "Saat {{v}} UTC",
+      "role": "Rol: {{v}}",
+      "vcYes": "Discord VC: evet",
+      "vcNo": "Discord VC: hayır"
+    },
+    "settings": {
+      "battleTitle": "Savaş saatleri (UTC)",
+      "battleDesc": "Savaşın ne zaman başladığı ve kaç saat sürdüğü. Oyuncular bu saatlerden seçer. Yeni bir tur bunları kopyalar.",
+      "start": "Savaş başlangıcı (UTC)",
+      "duration": "Süre (saat)",
+      "preview": "Oyuncular bu saatleri görecek:",
+      "error": "Kaydedilemedi. Başlangıç saatini ve süreyi (1-24 saat) kontrol et."
+    }
+  }
 }

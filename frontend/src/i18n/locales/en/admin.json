@@ -133,5 +133,26 @@
     "swapHere": "Swap here",
     "toUnassigned": "Move to Unassigned",
     "tip": "On a phone: tap the move icon on a player, then \"Move here\" on a slot. A long press also starts a drag."
+  },
+  "addPlayer": {
+    "button": "Add player",
+    "title": "Add a player",
+    "desc": "Create a sign-up for someone who didn't sign up themselves. Only the player ID and the in-game name are needed; fill in what you know.",
+    "lookup": "Look up",
+    "known": "Known player: details filled in from their profile.",
+    "newPlayer": "New player: enter their in-game name.",
+    "optionalHint": "Optional: leave blank what you don't know. The player can complete it later with their player ID.",
+    "save": "Add player",
+    "added": "{{name}} was added to this round.",
+    "exists": "This player already has a sign-up in this round. Edit that one instead.",
+    "error": "Could not add the player."
+  },
+  "heroes": {
+    "tab": "Heroes",
+    "title": "Hero library",
+    "desc": "The heroes planners can choose from: everything up to the state's hero generation, plus rare and epic heroes (no generation).",
+    "count": "{{n}} heroes up to Gen {{gen}}",
+    "generation": "State hero generation",
+    "generationDesc": "The newest hero generation your state has. Planners never offer heroes from a later generation. Applies to the whole state."
   }
 }

@@ -67,5 +67,14 @@
     "remove": "Quitar filtro: {{label}}",
     "more": "Más filtros",
     "fewer": "Menos filtros"
+  },
+  "heroes": {
+    "gen": "Gen {{n}}",
+    "credit": "Nombres e imágenes de héroes © Century Games (Whiteout Survival).",
+    "rarity": {
+      "rare": "Raro",
+      "epic": "Épico",
+      "mythic": "Mítico"
+    }
   }
 }

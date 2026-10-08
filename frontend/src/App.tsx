@@ -17,6 +17,7 @@ const AdminGuidePage = PAGES.adminGuide.Component;
 const TyrantPage = PAGES.tyrantHome.Component;
 const TyrantWizard = PAGES.tyrantApply.Component;
 const SvsPage = PAGES.svs.Component;
+const SvsWizard = PAGES.svsApply.Component;
 const TalPage = PAGES.tal.Component;
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
             <Route path="/tyrant" element={<TyrantPage />} />
             <Route path="/tyrant/apply" element={<TyrantWizard />} />
             <Route path="/svs" element={<SvsPage />} />
+            <Route path="/svs/apply" element={<SvsWizard />} />
             <Route path="/tal" element={<TalPage />} />
 
             {/* Event Management: one admin for every event; ?event=<key> picks the event (admin/paths.ts) */}

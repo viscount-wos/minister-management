@@ -67,5 +67,14 @@
     "remove": "Filtreyi kaldır: {{label}}",
     "more": "Daha fazla filtre",
     "fewer": "Daha az filtre"
+  },
+  "heroes": {
+    "gen": "Nesil {{n}}",
+    "credit": "Kahraman adları ve görselleri © Century Games (Whiteout Survival).",
+    "rarity": {
+      "rare": "Nadir",
+      "epic": "Epik",
+      "mythic": "Mitik"
+    }
   }
 }

@@ -133,5 +133,26 @@
     "swapHere": "Hier tauschen",
     "toUnassigned": "Zu „Nicht zugewiesen“",
     "tip": "Am Handy: tippe beim Spieler auf das Verschieben-Symbol, dann bei einem Zeitfenster auf „Hierher“. Langes Drücken startet auch das Ziehen."
+  },
+  "addPlayer": {
+    "button": "Spieler hinzufügen",
+    "title": "Spieler hinzufügen",
+    "desc": "Lege eine Anmeldung für jemanden an, der sich nicht selbst angemeldet hat. Nur Spieler-ID und Spielname sind nötig; trag ein, was du weißt.",
+    "lookup": "Nachschlagen",
+    "known": "Bekannter Spieler: Angaben aus seinem Profil übernommen.",
+    "newPlayer": "Neuer Spieler: gib seinen Spielnamen ein.",
+    "optionalHint": "Optional: Lass leer, was du nicht weißt. Der Spieler kann es später mit seiner ID ergänzen.",
+    "save": "Spieler hinzufügen",
+    "added": "{{name}} wurde zu dieser Runde hinzugefügt.",
+    "exists": "Dieser Spieler hat in dieser Runde schon eine Anmeldung. Bearbeite stattdessen diese.",
+    "error": "Spieler konnte nicht hinzugefügt werden."
+  },
+  "heroes": {
+    "tab": "Helden",
+    "title": "Heldenbibliothek",
+    "desc": "Die Helden, aus denen Planer wählen können: alle bis zur Heldengeneration des Staates, dazu seltene und epische Helden (ohne Generation).",
+    "count": "{{n}} Helden bis Gen {{gen}}",
+    "generation": "Heldengeneration des Staates",
+    "generationDesc": "Die neueste Heldengeneration deines Staates. Helden späterer Generationen werden nie angeboten. Gilt für den ganzen Staat."
   }
 }

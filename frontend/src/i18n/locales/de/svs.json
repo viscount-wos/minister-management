@@ -1,4 +1,90 @@
 {
   "name": "SVS-Burg",
-  "tagline": "Melde dich für die Burgschlacht in Staat gegen Staat an"
+  "tagline": "Melde dich für die Burgschlacht in Staat gegen Staat an",
+  "home": {
+    "subtitle": "Sag deinen Anführern, wann du kämpfen kannst und wie stark deine Truppen sind"
+  },
+  "apply": {
+    "title": "SVS-Anmeldung",
+    "notOpenTitle": "SVS-Anmeldungen sind nicht offen",
+    "notOpenBody": "Gerade ist keine SVS-Runde offen. Schau später wieder vorbei.",
+    "backHome": "Zurück zu SVS"
+  },
+  "step1": {
+    "title": "Spieler",
+    "desc": "Sag uns, wer du bist",
+    "allianceKnown": "Wir kennen deine Allianz aus einer früheren Anmeldung. Ändere sie nur, wenn du gewechselt hast.",
+    "allianceNew": "Das 3-Buchstaben-Kürzel deiner Allianz."
+  },
+  "step2": {
+    "title": "Kampfstunden",
+    "desc": "Tippe jede Stunde der Schlacht an, in der du online bist",
+    "utcNote": "Die Stunden sind Spielzeit (UTC).",
+    "localNote": "Kleine Schrift: deine Zeit ({{zone}}).",
+    "gameTime": "Stunden (UTC)",
+    "selectAll": "Ich kann jede Stunde",
+    "clearAll": "Alle Stunden abwählen"
+  },
+  "step3": {
+    "title": "Truppen",
+    "desc": "Wähle die FC-Stufe jedes Truppenlagers und deine Truppenstufe",
+    "tierHint": "Bei SVS zählen nur T10- und T11-Truppen."
+  },
+  "step4": {
+    "title": "Deine Rolle",
+    "desc": "Wie kämpfst du, und kannst du mit uns reden?",
+    "roleTitle": "In der Schlacht werde ich…",
+    "vc": "Kannst du dem Discord-Sprachchat beitreten?",
+    "vcHint": "Der Sprachchat hilft den Anführern beim Timing. Zuhören reicht."
+  },
+  "step5": {
+    "title": "Überprüfen",
+    "desc": "Prüfe alles, bevor du absendest"
+  },
+  "roles": {
+    "call": "Sammelangriffe starten",
+    "callDesc": "Ich starte Sammelangriffe, denen andere beitreten",
+    "join": "Sammelangriffen beitreten",
+    "joinDesc": "Ich schicke meine Truppen in die Sammelangriffe anderer",
+    "none": "Keine Rolle angegeben"
+  },
+  "errors": {
+    "hoursRequired": "Wähle mindestens eine Stunde",
+    "troopsRequired": "Wähle Lagerstufe und Truppenstufe (T10 oder T11) für jede Truppenart",
+    "roleRequired": "Wähle eine Rolle: Sammelangriffe starten oder beitreten",
+    "vcRequired": "Sag uns, ob du dem Discord-Sprachchat beitreten kannst"
+  },
+  "admin": {
+    "adminSubtitle": "SVS: Anmeldungen, Stunden, Truppen und Exporte",
+    "defaultRoundName": "SVS {{date}}",
+    "stats": {
+      "callers": "Starter",
+      "joiners": "Beitretende",
+      "vc": "Discord-VC"
+    },
+    "byHour": "Spieler pro Stunde (UTC)",
+    "search": "Name oder FID suchen...",
+    "col": {
+      "hours": "Stunden (UTC)",
+      "role": "Rolle"
+    },
+    "filter": {
+      "hours": "Stunden (UTC)",
+      "anyHour": "Jede Stunde"
+    },
+    "pill": {
+      "hour": "Stunde {{v}} UTC",
+      "role": "Rolle: {{v}}",
+      "vcYes": "Discord-VC: ja",
+      "vcNo": "Discord-VC: nein"
+    },
+    "settings": {
+      "battleTitle": "Kampfstunden (UTC)",
+      "battleDesc": "Wann die Schlacht beginnt und wie viele Stunden sie dauert. Spieler wählen aus diesen Stunden. Eine neue Runde übernimmt sie.",
+      "start": "Schlachtbeginn (UTC)",
+      "duration": "Dauer (Stunden)",
+      "preview": "Spieler sehen diese Stunden:",
+      "error": "Speichern fehlgeschlagen. Prüfe Startzeit und Dauer (1-24 Stunden)."
+    }
+  }
 }

@@ -67,5 +67,14 @@
     "remove": "移除筛选：{{label}}",
     "more": "更多筛选",
     "fewer": "收起筛选"
+  },
+  "heroes": {
+    "gen": "第 {{n}} 代",
+    "credit": "英雄名称与图片 © Century Games（无尽冬日 Whiteout Survival）。",
+    "rarity": {
+      "rare": "稀有",
+      "epic": "史诗",
+      "mythic": "神话"
+    }
   }
 }

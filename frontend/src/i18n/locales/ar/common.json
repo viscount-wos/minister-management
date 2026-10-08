@@ -67,5 +67,14 @@
     "remove": "إزالة عامل التصفية: {{label}}",
     "more": "عوامل تصفية أخرى",
     "fewer": "عوامل تصفية أقل"
+  },
+  "heroes": {
+    "gen": "الجيل {{n}}",
+    "credit": "أسماء الأبطال وصورهم © Century Games (Whiteout Survival).",
+    "rarity": {
+      "rare": "نادر",
+      "epic": "ملحمي",
+      "mythic": "أسطوري"
+    }
   }
 }

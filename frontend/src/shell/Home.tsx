@@ -5,6 +5,7 @@ import { Crown, Flame, Castle, Swords, Shield, Sparkles, LucideIcon } from 'luci
 import api from '../shared/api';
 import { MINISTRY_PATHS } from '../events/ministry/paths';
 import { TYRANT_PATHS } from '../events/tyrant/paths';
+import { SVS_PATHS } from '../events/svs/paths';
 import { usePageTitle } from '../shared/usePageTitle';
 import Tile, { LinkButton, PageHero } from '../shared/Tile';
 
@@ -21,7 +22,7 @@ interface EventTile {
 const EVENTS: EventTile[] = [
   { key: 'ministry', path: MINISTRY_PATHS.home, icon: Crown, status: 'open' },
   { key: 'tyrant', path: TYRANT_PATHS.home, icon: Flame, status: 'open' },
-  { key: 'svs', path: '/svs', icon: Castle, status: 'nextRelease' },
+  { key: 'svs', path: SVS_PATHS.home, icon: Castle, status: 'open' },
   { key: 'tal', path: '/tal', icon: Swords, status: 'comingSoon' },
 ];
 

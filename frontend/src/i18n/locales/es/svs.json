@@ -1,4 +1,90 @@
 {
   "name": "Castillo SVS",
-  "tagline": "Inscríbete para la batalla del castillo en Estado contra Estado"
+  "tagline": "Inscríbete para la batalla del castillo en Estado contra Estado",
+  "home": {
+    "subtitle": "Dile a tus líderes cuándo puedes luchar y qué tan fuertes son tus tropas"
+  },
+  "apply": {
+    "title": "Inscripción SVS",
+    "notOpenTitle": "Las inscripciones de SVS no están abiertas",
+    "notOpenBody": "No hay ninguna ronda de SVS abierta ahora mismo. Vuelve más tarde.",
+    "backHome": "Volver a SVS"
+  },
+  "step1": {
+    "title": "Jugador",
+    "desc": "Dinos quién eres",
+    "allianceKnown": "Ya tenemos tu alianza de una inscripción anterior. Cámbiala solo si te has movido.",
+    "allianceNew": "La etiqueta de 3 letras de tu alianza."
+  },
+  "step2": {
+    "title": "Horas de batalla",
+    "desc": "Toca cada hora de la batalla en la que estarás conectado",
+    "utcNote": "Las horas son hora del juego (UTC).",
+    "localNote": "Texto pequeño: tu hora ({{zone}}).",
+    "gameTime": "Horas (UTC)",
+    "selectAll": "Puedo todas las horas",
+    "clearAll": "Quitar todas las horas"
+  },
+  "step3": {
+    "title": "Tropas",
+    "desc": "Elige el nivel FC de cada campamento y el nivel de tus tropas",
+    "tierHint": "En SVS solo cuentan las tropas T10 y T11."
+  },
+  "step4": {
+    "title": "Tu papel",
+    "desc": "¿Cómo lucharás y puedes hablar con nosotros?",
+    "roleTitle": "En la batalla voy a…",
+    "vc": "¿Puedes unirte al chat de voz de Discord?",
+    "vcHint": "El chat de voz ayuda a los líderes a marcar los tiempos. Basta con escuchar."
+  },
+  "step5": {
+    "title": "Revisión",
+    "desc": "Comprueba todo antes de enviar"
+  },
+  "roles": {
+    "call": "Lanzar rallies",
+    "callDesc": "Inicio rallies para que otros se unan",
+    "join": "Unirme a rallies",
+    "joinDesc": "Envío mis tropas a los rallies de otros jugadores",
+    "none": "Sin papel indicado"
+  },
+  "errors": {
+    "hoursRequired": "Elige al menos una hora",
+    "troopsRequired": "Elige el nivel del campamento y el nivel de tropa (T10 o T11) para cada tipo",
+    "roleRequired": "Elige un papel: lanzar rallies o unirte a rallies",
+    "vcRequired": "Indica si puedes unirte al chat de voz de Discord"
+  },
+  "admin": {
+    "adminSubtitle": "SVS: inscripciones, horas, tropas y exportaciones",
+    "defaultRoundName": "SVS {{date}}",
+    "stats": {
+      "callers": "Lanzan rallies",
+      "joiners": "Se unen",
+      "vc": "VC de Discord"
+    },
+    "byHour": "Jugadores por hora (UTC)",
+    "search": "Buscar nombre o FID...",
+    "col": {
+      "hours": "Horas (UTC)",
+      "role": "Papel"
+    },
+    "filter": {
+      "hours": "Horas (UTC)",
+      "anyHour": "Cualquier hora"
+    },
+    "pill": {
+      "hour": "Hora {{v}} UTC",
+      "role": "Papel: {{v}}",
+      "vcYes": "VC de Discord: sí",
+      "vcNo": "VC de Discord: no"
+    },
+    "settings": {
+      "battleTitle": "Horas de batalla (UTC)",
+      "battleDesc": "Cuándo empieza la batalla y cuántas horas dura. Los jugadores eligen entre estas horas. Una ronda nueva las copia.",
+      "start": "Inicio de la batalla (UTC)",
+      "duration": "Duración (horas)",
+      "preview": "Los jugadores verán estas horas:",
+      "error": "No se pudo guardar. Revisa la hora de inicio y la duración (1-24 horas)."
+    }
+  }
 }

@@ -67,5 +67,14 @@
     "remove": "필터 제거: {{label}}",
     "more": "필터 더 보기",
     "fewer": "필터 접기"
+  },
+  "heroes": {
+    "gen": "{{n}}세대",
+    "credit": "영웅 이름과 그림 © Century Games (Whiteout Survival).",
+    "rarity": {
+      "rare": "레어",
+      "epic": "에픽",
+      "mythic": "미식"
+    }
   }
 }

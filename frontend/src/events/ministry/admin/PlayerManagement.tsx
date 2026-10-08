@@ -9,6 +9,7 @@ import { Field } from '../../../shared/fields';
 import { useTimezone } from '../../../shared/TimezoneContext';
 import { AnswersForm, CRYSTAL_FIELDS, answersToForm, formToAnswers, totalSlots } from '../answers';
 import TimeSlotPicker from '../TimeSlotPicker';
+import AddPlayerDialog, { AddPlayerButton } from '../../../admin/AddPlayerDialog';
 
 // Applications of ONE round (the dashboard's selected round). Admin edits go
 // to the application (answers) and the player's profile (name, alliance).
@@ -81,6 +82,9 @@ export default function PlayerManagement({
   const [editing, setEditing] = useState<EditState | null>(null);
   const [deleting, setDeleting] = useState<Row | null>(null);
   const [importMessage, setImportMessage] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [addFurnace, setAddFurnace] = useState('');
+  const [addDays, setAddDays] = useState<Record<string, string>>({});
   const { timezone, setTimezone } = useTimezone();
   const researchDay = round.settings.research_day;
 
@@ -219,7 +223,16 @@ export default function PlayerManagement({
             {t('admin:totalPlayers')}: {rows.length}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {!readOnly && (
+            <AddPlayerButton
+              onClick={() => {
+                setAddFurnace('');
+                setAddDays({});
+                setAdding(true);
+              }}
+            />
+          )}
           <button
             onClick={handleExportJSON}
             data-testid="export-json"
@@ -438,6 +451,47 @@ export default function PlayerManagement({
             </div>
           </div>
         </div>
+      )}
+
+      {adding && (
+        <AddPlayerDialog
+          event="ministry"
+          roundId={round.id}
+          onClose={() => setAdding(false)}
+          onAdded={(name) => {
+            setAdding(false);
+            setImportMessage(t('admin:addPlayer.added', { name }));
+            fetchRows();
+            onChanged?.();
+          }}
+          onProfile={(p) => setAddFurnace(toFurnaceCode(p?.furnace_level))}
+          extra={() => {
+            const answers: Record<string, number> = {};
+            for (const { key } of ADMIN_NUMBER_FIELDS) {
+              const raw = (addDays[key] ?? '').trim();
+              if (raw !== '') answers[key] = Number(raw);
+            }
+            return { answers, ...(addFurnace ? { profile: { furnace_level: addFurnace } } : {}) };
+          }}
+        >
+          <FurnaceLevelSelect id="add-furnace-level" label={t('profile:furnaceLevel')} value={addFurnace} onChange={setAddFurnace} />
+          <div className="grid grid-cols-2 gap-4">
+            {ADMIN_NUMBER_FIELDS.map(({ key, label }) => (
+              <Field
+                key={key}
+                id={`add-${key}`}
+                type="number"
+                min={0}
+                step={0.1}
+                inputMode="decimal"
+                placeholder="0"
+                label={t(label)}
+                value={addDays[key] ?? ''}
+                onChange={(e) => setAddDays((d) => ({ ...d, [key]: e.target.value }))}
+              />
+            ))}
+          </div>
+        </AddPlayerDialog>
       )}
 
       {deleting && (
