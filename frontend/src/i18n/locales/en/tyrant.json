@@ -53,8 +53,7 @@
   },
   "step3": {
     "title": "Player Stats",
-    "desc": "Enter your current furnace level and power",
-    "furnaceLevel": "Furnace Level",
+    "desc": "Enter your current power and estimated gem spend",
     "power": "Power in Millions",
     "powerPlaceholder": "e.g. 410",
     "gemSpend": "Est. Max Gem Spend",
@@ -93,7 +92,6 @@
   "errors": {
     "power": "Power must be a number (in millions), e.g. 410",
     "gems": "Gem spend must be a whole number, e.g. 10000",
-    "furnaceRequired": "Pick your furnace level (FC1-FC10)",
     "campRequired": "Pick the camp level and the tier for every troop type"
   },
   "admin": {
@@ -113,8 +111,6 @@
     "search": "Search name, FID or Discord...",
     "allianceFilter": "Alliance",
     "allAlliances": "All alliances",
-    "minFurnace": "Furnace at least",
-    "anyFurnace": "Any level",
     "exportCsv": "Export CSV",
     "exportExcel": "Export Excel",
     "exportError": "Export failed",
@@ -198,7 +194,6 @@
       "camp": "{{troop}} camp: {{v}}",
       "tier": "{{troop}} tier: {{v}}",
       "window": "Window {{v}}",
-      "furnace": "Furnace ≥ {{v}}",
       "minPower": "Power ≥ {{v}}M",
       "maxPower": "Power ≤ {{v}}M",
       "minGems": "Gems ≥ {{v}}",

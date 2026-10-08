@@ -53,8 +53,7 @@
   },
   "step3": {
     "title": "Stats du joueur",
-    "desc": "Indiquez votre niveau de fournaise et votre puissance",
-    "furnaceLevel": "Niveau de fournaise",
+    "desc": "Indiquez votre puissance actuelle et vos dépenses de gemmes estimées",
     "power": "Puissance en millions",
     "powerPlaceholder": "ex. 410",
     "gemSpend": "Dépense max. estimée en gemmes",
@@ -93,7 +92,6 @@
   "errors": {
     "power": "La puissance doit être un nombre (en millions), ex. 410",
     "gems": "La dépense en gemmes doit être un nombre entier, ex. 10000",
-    "furnaceRequired": "Choisissez le niveau de votre fournaise (FC1-FC10)",
     "campRequired": "Choisissez le niveau de camp et le niveau T de chaque type de troupe"
   },
   "admin": {
@@ -113,8 +111,6 @@
     "search": "Chercher nom, FID ou Discord...",
     "allianceFilter": "Alliance",
     "allAlliances": "Toutes les alliances",
-    "minFurnace": "Fournaise minimum",
-    "anyFurnace": "Tous niveaux",
     "exportCsv": "Exporter CSV",
     "exportExcel": "Exporter Excel",
     "exportError": "Échec de l'export",
@@ -198,7 +194,6 @@
       "camp": "Camp {{troop}} : {{v}}",
       "tier": "Niveau T {{troop}} : {{v}}",
       "window": "Créneau {{v}}",
-      "furnace": "Fournaise ≥ {{v}}",
       "minPower": "Puissance ≥ {{v}}M",
       "maxPower": "Puissance ≤ {{v}}M",
       "minGems": "Gemmes ≥ {{v}}",

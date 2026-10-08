@@ -26,7 +26,7 @@ export interface TyrantSettings {
 }
 
 export interface TroopLevel {
-  /** Furnace code 'FC1'..'FC10' / '1'..'30' or null. */
+  /** The troop's CAMP level: 'FC1'..'FC10' (legacy rows may hold '1'..'30') or null. */
   furnace_level: string | null;
   tier: number | null;
 }
@@ -46,7 +46,6 @@ export interface TyrantProfile {
   game_name: string;
   alliance: string | null;
   discord_id?: string | null;
-  furnace_level: string | null;
   power: number | null;
   troops: unknown;
   id?: number;
@@ -56,7 +55,6 @@ export interface TyrantProfileInput {
   game_name: string;
   alliance: string;
   discord_id: string | null;
-  furnace_level: string | null;
   power: number | null;
   troops: Troops;
 }
@@ -95,16 +93,14 @@ export interface TyrantSummary {
   troop_tiers: Record<TroopType, Record<string, number>>;
   /** Camp level counts per troop type: FC10..FC1, legacy pre-FC codes as stored, then 'none'. */
   camp_levels: Record<TroopType, Record<string, number>>;
-  furnace_levels: Record<string, number>;
 }
 
-export type SortKey = 'submitted' | 'updated' | 'name' | 'alliance' | 'fid' | 'furnace' | 'power' | 'gems' | 'strength';
+export type SortKey = 'submitted' | 'updated' | 'name' | 'alliance' | 'fid' | 'power' | 'gems' | 'strength';
 
 /** Admin filters: the API's query params (docs/API.md "Frost Dragon Tyrant"); the admin URL uses the same keys. */
 export const FILTER_KEYS = [
   'q',
   'alliance',
-  'min_furnace',
   'min_power',
   'max_power',
   'min_gems',

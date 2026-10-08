@@ -53,8 +53,7 @@
   },
   "step3": {
     "title": "Statystyki gracza",
-    "desc": "Podaj obecny poziom pieca i siłę",
-    "furnaceLevel": "Poziom pieca",
+    "desc": "Podaj obecną siłę i szacowane wydatki klejnotów",
     "power": "Siła w milionach",
     "powerPlaceholder": "np. 410",
     "gemSpend": "Szac. maks. wydatek klejnotów",
@@ -93,7 +92,6 @@
   "errors": {
     "power": "Siła musi być liczbą (w milionach), np. 410",
     "gems": "Wydatek klejnotów musi być liczbą całkowitą, np. 10000",
-    "furnaceRequired": "Wybierz poziom pieca (FC1-FC10)",
     "campRequired": "Wybierz poziom obozu i poziom T dla każdego typu wojsk"
   },
   "admin": {
@@ -113,8 +111,6 @@
     "search": "Szukaj nicku, FID lub Discorda...",
     "allianceFilter": "Sojusz",
     "allAlliances": "Wszystkie sojusze",
-    "minFurnace": "Piec co najmniej",
-    "anyFurnace": "Dowolny poziom",
     "exportCsv": "Eksport CSV",
     "exportExcel": "Eksport Excel",
     "exportError": "Eksport nie powiódł się",
@@ -198,7 +194,6 @@
       "camp": "Obóz ({{troop}}): {{v}}",
       "tier": "Poziom T ({{troop}}): {{v}}",
       "window": "Okno {{v}}",
-      "furnace": "Piec ≥ {{v}}",
       "minPower": "Siła ≥ {{v}} mln",
       "maxPower": "Siła ≤ {{v}} mln",
       "minGems": "Klejnoty ≥ {{v}}",

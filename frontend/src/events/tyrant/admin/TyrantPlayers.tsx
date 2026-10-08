@@ -25,11 +25,11 @@ import {
 // FILTERED set, sortable table. Filters are documented in docs/API.md "Frost Dragon Tyrant".
 
 const PAGE_SIZE = 50;
-const SORT_KEYS: SortKey[] = ['submitted', 'updated', 'name', 'alliance', 'fid', 'furnace', 'power', 'gems', 'strength'];
+const SORT_KEYS: SortKey[] = ['submitted', 'updated', 'name', 'alliance', 'fid', 'power', 'gems', 'strength'];
 const URL_KEYS = [...FILTER_KEYS, 'sort', 'dir'] as const;
 type UrlKey = (typeof URL_KEYS)[number];
 /** Keys shown in the "More filters" panel (the rest sit in the main row). */
-const MORE_KEYS: FilterKey[] = ['min_furnace', 'min_power', 'max_power', 'min_gems', 'max_gems', 'vc', 'roles', 'roles_mode', 'submitted_from', 'submitted_to', 'days'];
+const MORE_KEYS: FilterKey[] = ['min_power', 'max_power', 'min_gems', 'max_gems', 'vc', 'roles', 'roles_mode', 'submitted_from', 'submitted_to', 'days'];
 const RUSH = '__rush';
 const SELECT_CLASS = 'w-full min-h-[44px] px-3 py-2 text-base bg-dark-input border rounded-lg text-theme-text';
 const INPUT_SM =
@@ -265,7 +265,6 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
   }
   if (v.rush) pill('rush', t('tyrant:step2.openingRush'), () => F.set({ rush: null }));
   for (const w of splitList(filters.windows)) pill(`window-${w}`, t('tyrant:admin.pill.window', { v: windowLabel(w) }), () => F.toggleInList('windows', w));
-  if (v.min_furnace) pill('min_furnace', t('tyrant:admin.pill.furnace', { v: v.min_furnace }), () => F.set({ min_furnace: null }));
   if (v.min_power) pill('min_power', t('tyrant:admin.pill.minPower', { v: millions(v.min_power) }), () => F.set({ min_power: null }));
   if (v.max_power) pill('max_power', t('tyrant:admin.pill.maxPower', { v: millions(v.max_power) }), () => F.set({ max_power: null }));
   if (v.min_gems) pill('min_gems', t('tyrant:admin.pill.minGems', { v: Number(v.min_gems).toLocaleString() }), () => F.set({ min_gems: null }));
@@ -424,14 +423,6 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
 
         {moreOpen && (
           <div id="more-filters" data-testid="more-filters" className="grid grid-cols-2 md:grid-cols-4 gap-3 items-end pt-3 border-t border-theme-border">
-            <FurnaceLevelSelect
-              id="furnace-filter"
-              label={t('tyrant:admin.minFurnace')}
-              emptyLabel={t('tyrant:admin.anyFurnace')}
-              fcOnly
-              value={v.min_furnace ?? ''}
-              onChange={(code) => F.set({ min_furnace: code || null })}
-            />
             <div>
               <label htmlFor="filter-vc" className="block text-sm font-medium text-theme-text mb-2">
                 {t('tyrant:admin.stats.discordVc')}
@@ -585,7 +576,6 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                 {th('fid', t('admin:fid'))}
                 {th('alliance', t('tyrant:fields.alliance'))}
                 {th('strength', t('tyrant:admin.col.strength'))}
-                {th('furnace', t('tyrant:step3.furnaceLevel'))}
                 {th('power', t('tyrant:admin.col.power'))}
                 {th('gems', t('tyrant:admin.col.gems'))}
                 {th(null, t('tyrant:admin.col.windows'))}
@@ -621,15 +611,6 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                     <td className="px-2 py-2 text-accent font-semibold">{a.profile.alliance}</td>
                     <td className="px-2 py-2 text-theme-text font-semibold" data-testid="strength">
                       {a.joiner_strength ?? '—'}
-                    </td>
-                    <td className="px-2 py-2">
-                      {a.profile.furnace_level ? (
-                        <span className="px-2 py-0.5 rounded bg-accent/20 text-accent text-xs font-semibold" data-testid="furnace-badge">
-                          {a.profile.furnace_level}
-                        </span>
-                      ) : (
-                        '—'
-                      )}
                     </td>
                     <td className="px-2 py-2 text-theme-text">{a.profile.power != null ? `${Math.round(a.profile.power / 1e5) / 10}M` : '—'}</td>
                     <td className="px-2 py-2 text-theme-text">{a.answers.gem_spend != null ? a.answers.gem_spend.toLocaleString() : '—'}</td>

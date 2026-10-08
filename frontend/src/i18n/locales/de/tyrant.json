@@ -53,8 +53,7 @@
   },
   "step3": {
     "title": "Spielerwerte",
-    "desc": "Gib deine aktuelle Ofenstufe und Macht ein",
-    "furnaceLevel": "Ofenstufe",
+    "desc": "Gib deine aktuelle Macht und deine geschätzten Edelsteinausgaben ein",
     "power": "Macht in Millionen",
     "powerPlaceholder": "z. B. 410",
     "gemSpend": "Geschätzte max. Edelsteinausgabe",
@@ -93,7 +92,6 @@
   "errors": {
     "power": "Macht muss eine Zahl sein (in Millionen), z. B. 410",
     "gems": "Edelsteinausgabe muss eine ganze Zahl sein, z. B. 10000",
-    "furnaceRequired": "Wähle deine Ofenstufe (FC1-FC10)",
     "campRequired": "Wähle Lagerstufe und T-Stufe für jeden Truppentyp"
   },
   "admin": {
@@ -113,8 +111,6 @@
     "search": "Name, FID oder Discord suchen...",
     "allianceFilter": "Allianz",
     "allAlliances": "Alle Allianzen",
-    "minFurnace": "Ofen mindestens",
-    "anyFurnace": "Jede Stufe",
     "exportCsv": "CSV exportieren",
     "exportExcel": "Excel exportieren",
     "exportError": "Export fehlgeschlagen",
@@ -198,7 +194,6 @@
       "camp": "{{troop}}-Lager: {{v}}",
       "tier": "{{troop}}-T-Stufe: {{v}}",
       "window": "Zeitfenster {{v}}",
-      "furnace": "Ofen ≥ {{v}}",
       "minPower": "Macht ≥ {{v}} Mio.",
       "maxPower": "Macht ≤ {{v}} Mio.",
       "minGems": "Edelsteine ≥ {{v}}",

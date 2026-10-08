@@ -53,8 +53,7 @@
   },
   "step3": {
     "title": "Oyuncu İstatistikleri",
-    "desc": "Mevcut fırın seviyenizi ve gücünüzü girin",
-    "furnaceLevel": "Fırın Seviyesi",
+    "desc": "Mevcut gücünüzü ve tahmini mücevher harcamanızı girin",
     "power": "Güç (Milyon)",
     "powerPlaceholder": "ör. 410",
     "gemSpend": "Tahmini Maks. Elmas Harcaması",
@@ -93,7 +92,6 @@
   "errors": {
     "power": "Güç bir sayı olmalı (milyon), ör. 410",
     "gems": "Elmas harcaması tam sayı olmalı, ör. 10000",
-    "furnaceRequired": "Fırın seviyenizi seçin (FC1-FC10)",
     "campRequired": "Her birlik türü için kamp seviyesini ve T-seviyesini seçin"
   },
   "admin": {
@@ -113,8 +111,6 @@
     "search": "İsim, FID veya Discord ara...",
     "allianceFilter": "İttifak",
     "allAlliances": "Tüm ittifaklar",
-    "minFurnace": "En az fırın",
-    "anyFurnace": "Her seviye",
     "exportCsv": "CSV dışa aktar",
     "exportExcel": "Excel dışa aktar",
     "exportError": "Dışa aktarma başarısız",
@@ -198,7 +194,6 @@
       "camp": "{{troop}} kampı: {{v}}",
       "tier": "{{troop}} T-seviyesi: {{v}}",
       "window": "Aralık {{v}}",
-      "furnace": "Fırın ≥ {{v}}",
       "minPower": "Güç ≥ {{v}}M",
       "maxPower": "Güç ≤ {{v}}M",
       "minGems": "Mücevher ≥ {{v}}",

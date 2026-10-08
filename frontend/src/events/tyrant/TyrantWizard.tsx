@@ -44,8 +44,6 @@ interface FormState {
   game_name: string;
   alliance: string;
   discord_id: string;
-  /** '' or a furnace code (shared/furnace.ts). */
-  furnace_level: string;
   /** Power in millions, as typed. */
   power_m: string;
   gem_spend: string;
@@ -68,7 +66,6 @@ const EMPTY: FormState = {
   game_name: '',
   alliance: '',
   discord_id: '',
-  furnace_level: '',
   power_m: '',
   gem_spend: '',
   troops: blankTroops(),
@@ -99,7 +96,7 @@ function stepForField(field: string | null, current: number): number {
   if (!field) return current;
   if (/^profile\.(game_name|alliance|discord_id|fid)$/.test(field) || field === 'fid') return 1;
   if (field.startsWith('answers.availability') || field === 'answers.discord_vc') return 2;
-  if (field === 'profile.furnace_level' || field === 'profile.power' || field === 'answers.gem_spend') return 3;
+  if (field === 'profile.power' || field === 'answers.gem_spend') return 3;
   if (field.startsWith('profile.troops')) return 4;
   if (field.startsWith('answers.roles')) return 5;
   return current;
@@ -110,7 +107,6 @@ const FIELD_LABELS: [RegExp, string][] = [
   [/^profile\.alliance$/, 'tyrant:fields.alliance'],
   [/^profile\.discord_id$/, 'tyrant:fields.discordId'],
   [/^answers\.availability/, 'tyrant:step2.title'],
-  [/^profile\.furnace_level$/, 'tyrant:step3.furnaceLevel'],
   [/^profile\.power$/, 'tyrant:step3.power'],
   [/^answers\.gem_spend$/, 'tyrant:step3.gemSpend'],
   [/^profile\.troops/, 'tyrant:step4.title'],
@@ -244,9 +240,8 @@ export default function TyrantWizard() {
           game_name: prof?.game_name ?? '',
           alliance: (prof?.alliance ?? '').toUpperCase().slice(0, 3),
           discord_id: prof?.discord_id ?? '',
-          // Tyrant offers FC1-FC10 only (owner rule p2d): a saved pre-FC furnace / camp shows as unselected
-          // and must be re-picked (the wizard requires them).
-          furnace_level: toFcCode(prof?.furnace_level),
+          // Tyrant does not ask the main furnace (owner p2e). Camps: FC1-FC10 only (owner rule p2d), so a saved
+          // pre-FC camp shows as unselected and must be re-picked (the wizard requires them).
           power_m: powerToMillions(prof?.power),
           troops: fcOnlyTroops(parseTroops(prof?.troops)),
         };
@@ -330,7 +325,6 @@ export default function TyrantWizard() {
       if (!form.alliance.trim()) return fail('profile.alliance', 'profile:allianceRequired');
     }
     if (s === 3) {
-      if (!form.furnace_level) return fail('profile.furnace_level', 'tyrant:errors.furnaceRequired');
       const p = form.power_m.trim();
       if (p && !(Number.isFinite(Number(p)) && Number(p) >= 0)) return fail('profile.power', 'tyrant:errors.power');
       const g = form.gem_spend.trim();
@@ -378,7 +372,6 @@ export default function TyrantWizard() {
           game_name: form.game_name.trim(),
           alliance: form.alliance.trim().toUpperCase(),
           discord_id: form.discord_id.trim() || null,
-          furnace_level: form.furnace_level || null,
           power: pm ? Math.round(Number(pm) * 1_000_000) : null,
           troops: form.troops,
         },
@@ -566,7 +559,6 @@ export default function TyrantWizard() {
     {
       step: 3,
       rows: [
-        [t('tyrant:step3.furnaceLevel'), dash(form.furnace_level), 'furnace-level'],
         [t('tyrant:step3.power'), dash(form.power_m.trim()), 'power'],
         [t('tyrant:step3.gemSpend'), dash(form.gem_spend.trim()), 'gem-spend'],
       ],
@@ -734,21 +726,6 @@ export default function TyrantWizard() {
         {step === 3 && (
           <div data-testid="wizard-step-3" className="space-y-4">
             {stepHeader(3)}
-            <FurnaceLevelSelect
-              id="furnace-level"
-              label={t('tyrant:step3.furnaceLevel')}
-              fcOnly
-              required
-              value={form.furnace_level}
-              invalid={invalidField === 'profile.furnace_level'}
-              onChange={(code) => {
-                if (invalidField === 'profile.furnace_level' && code) {
-                  setInvalidField(null);
-                  setError('');
-                }
-                set({ furnace_level: code });
-              }}
-            />
             <Field
               id="power-millions"
               name="power"

@@ -53,8 +53,7 @@
   },
   "step3": {
     "title": "玩家数据",
-    "desc": "输入你当前的熔炉等级和战力",
-    "furnaceLevel": "熔炉等级",
+    "desc": "输入你当前的战力和预计宝石花费",
     "power": "战力（百万）",
     "powerPlaceholder": "例如 410",
     "gemSpend": "预计最大宝石消耗",
@@ -93,7 +92,6 @@
   "errors": {
     "power": "战力必须是数字（百万），例如 410",
     "gems": "宝石消耗必须是整数，例如 10000",
-    "furnaceRequired": "请选择熔炉等级（FC1-FC10）",
     "campRequired": "请为每个兵种选择兵营等级和T等级"
   },
   "admin": {
@@ -113,8 +111,6 @@
     "search": "搜索昵称、FID或Discord...",
     "allianceFilter": "联盟",
     "allAlliances": "所有联盟",
-    "minFurnace": "熔炉至少",
-    "anyFurnace": "任意等级",
     "exportCsv": "导出CSV",
     "exportExcel": "导出Excel",
     "exportError": "导出失败",
@@ -198,7 +194,6 @@
       "camp": "{{troop}}兵营：{{v}}",
       "tier": "{{troop}} T等级：{{v}}",
       "window": "时段 {{v}}",
-      "furnace": "熔炉 ≥ {{v}}",
       "minPower": "战力 ≥ {{v}}M",
       "maxPower": "战力 ≤ {{v}}M",
       "minGems": "宝石 ≥ {{v}}",

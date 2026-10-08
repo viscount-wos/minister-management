@@ -53,8 +53,7 @@
   },
   "step3": {
     "title": "Estadísticas",
-    "desc": "Indica tu nivel de horno y tu poder actuales",
-    "furnaceLevel": "Nivel de horno",
+    "desc": "Indica tu poder actual y tu gasto estimado de gemas",
     "power": "Poder en millones",
     "powerPlaceholder": "p. ej. 410",
     "gemSpend": "Gasto máx. estimado de gemas",
@@ -93,7 +92,6 @@
   "errors": {
     "power": "El poder debe ser un número (en millones), p. ej. 410",
     "gems": "El gasto de gemas debe ser un número entero, p. ej. 10000",
-    "furnaceRequired": "Elige el nivel de tu horno (FC1-FC10)",
     "campRequired": "Elige el nivel de campamento y el nivel T de cada tipo de tropa"
   },
   "admin": {
@@ -113,8 +111,6 @@
     "search": "Buscar nombre, FID o Discord...",
     "allianceFilter": "Alianza",
     "allAlliances": "Todas las alianzas",
-    "minFurnace": "Horno mínimo",
-    "anyFurnace": "Cualquier nivel",
     "exportCsv": "Exportar CSV",
     "exportExcel": "Exportar Excel",
     "exportError": "Error al exportar",
@@ -198,7 +194,6 @@
       "camp": "Campamento de {{troop}}: {{v}}",
       "tier": "Nivel T de {{troop}}: {{v}}",
       "window": "Franja {{v}}",
-      "furnace": "Horno ≥ {{v}}",
       "minPower": "Poder ≥ {{v}}M",
       "maxPower": "Poder ≤ {{v}}M",
       "minGems": "Gemas ≥ {{v}}",
