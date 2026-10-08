@@ -148,6 +148,7 @@ any API call.
 | `update_application(application_id, profile?, answers?)` | `PUT /api/admin/applications/{id}` | answers partial/merged; no closing-time check |
 | `start_new_round(event, name, closing_time?, settings?, confirm=false)` | `POST /api/admin/events/{event}/start-new-round` | without `confirm=true` returns a preview of the round it would close and changes nothing |
 | `get_assignments(day, round_id="current")` | `GET /api/admin/ministry/rounds/{ref}/assignments/{day}` | includes unpublished days |
+| `get_tyrant_summary(round_id="current", alliance=None)` | `GET /api/admin/tyrant/rounds/{ref}/summary` | Tyrant stats: totals, opening rush, VC, windows, alliances, roles, troop tiers, furnace levels |
 
 Tool annotations mark read-only tools `readOnlyHint` and `start_new_round` `destructiveHint`.
 
