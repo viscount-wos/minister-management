@@ -1,0 +1,5 @@
+# generated fixture databases are never committed
+*.db
+*.db-journal
+*.bak
+__pycache__/
