@@ -49,7 +49,7 @@ none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gi
 `test_i18n.py`
 - raw-key detector unit test (dotted keys, `ns:key`, `{{var}}`), and a live DOM check
 - home: heading, one tile per event, all 9 language buttons
-- every public page (`/`, `/ministry`, `/ministry/apply`, `/admin`, `/ministry/guide`, `/changelog`)
+- every public page (`/`, `/minister`, `/minister/apply`, `/admin`, `/minister/guide`, `/changelog`)
   in all 9 languages without raw keys; the home heading changes in every language
 - the application form in new and edit mode, all 9 languages
 - Arabic: `dir=rtl` and Arabic text on ministry home, FID lookup, edit form, admin dashboard,
@@ -71,8 +71,8 @@ none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gi
   and says where they came from (also checked in 9 languages and Arabic); saved into the new round
 - auto-assign, lock (assignment save), publish, Excel + JSON export downloads; the player sees the
   published schedule and their own slot
-- old URLs (`/submit`, `/update`, `/apply`, `/guide`, `/ministry/submit|update`, `/ministry/admin`)
-  redirect
+- old URLs (`/submit`, `/update`, `/apply`, `/guide`, `/schedule/:day`, `/ministry/...`, `/ministry/admin`)
+  redirect to `/minister/...` (`/admin?event=ministry`)
 
 `test_round_states.py` (always leaves an open round behind)
 - closing time passed: new FID gets "applications closed" (9 languages + Arabic), an existing
@@ -82,6 +82,16 @@ none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gi
   slot scheme (remap message), closing time save/clear
 - no open round: home tile "Not open yet", ministry banner + disabled tile, apply page "not open"
   (9 languages + Arabic)
+
+`test_admin_shell.py` (Event Management, one API token reused; 2 UI logins)
+- "Event Management" title on login and dashboard + contextual subtitle per event, en and ar
+- event page admin link -> login -> that event's dashboard; logged in -> straight there; Home -> last event (else
+  ministry); old `/admin/dashboard` without `?event=`
+- event switch keeps the login; forged/expired token -> `/admin?event=tyrant&expired=1` -> back to Tyrant
+- guide button opens the current event's guide; guide page event switch; back to that dashboard
+- `document.title` per page (en + ar); raw keys in 9 languages on login, both dashboards and the Tyrant guide
+- welcome line hidden while the state number is unset; no "Ministry" text in English on the main pages; `/ministry/...`
+  redirects to `/minister/...` keeping the query
 
 `test_tyrant.py` (Frost Dragon Tyrant, in order, opens its own tyrant round)
 - home tile live ("Open") -> landing -> wizard; FID digits check; 6-step indicator

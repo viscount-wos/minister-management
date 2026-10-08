@@ -263,11 +263,11 @@ closed card for new FIDs, edit still allowed; no round → "not open". Reuses mi
 follows the page: Arabic step 1 on the right, as both tyrantpoll and ministry do) and arrows mirrored in RTL.
 
 ### Admin
-`/admin/dashboard?event=tyrant` via a Ministry | Frost Dragon Tyrant switch (`shell/AdminEventSwitch`) on both
-dashboards. Round selector, Start new round (shared dialog, `event` prop), Players tab (stats cards: total, opening
+Runs inside the shared Event Management shell (see "Event Management admin"): `/admin/dashboard?event=tyrant`.
+Players tab (stats cards: total, opening
 rush, Discord VC, alliances, est. gems; breakdowns per window/role/alliance/troop tier; search name/FID/Discord,
 alliance filter, minimum-furnace filter, sortable server-paged table, delete; CSV + Excel export), Settings tab
-(windows editor, closing time). Endpoints in docs/API.md "Frost Dragon Tyrant".
+(windows editor, closing time). Endpoints in docs/API.md "Frost Dragon Tyrant". Admin guide: `/admin/guide?event=tyrant`.
 - Exports use the CURRENT profile (as ministry), not the snapshot. CSV: UTF-8 BOM, formula-injection-safe (leading
   `= + - @ TAB CR` prefixed with `'`); xlsx: tyrantpoll's styled sheet + a Summary sheet, quote-prefixed text cells
   (`core/exports.py`, shared helpers).
@@ -285,6 +285,52 @@ from `slot_opening_rush`→w1, `slot_11_13`→w2, `slot_13_15`→w3, `slot_15_16
 ### Known gaps / accepted
 - `discord_id` is part of the public profile (anyone with an FID can read it, M6), like the name and alliance.
 - Profile-level troop/furnace values written by tyrant are visible in ministry (shared profile, by design).
+
+## Event Management admin (p2b/admin-shell)
+Owner: the admin was branded ministry-only ("Minister Administration" even on Frost Dragon Tyrant, login always landed
+on ministry). Decided: ONE blanket admin called **Event Management**, context-aware.
+- **Branding**: `admin:title` = "Event Management" (9 languages) on the login page, the dashboard header and the admin
+  boxes of Home / Minister / Tyrant pages. The dashboard shows a CONTEXTUAL subtitle per event (registry `subtitle`
+  key, e.g. "Minister: applications and assignments", "Frost Dragon Tyrant: sign-ups, stats and exports"). Shared
+  chrome (header, switch, round selector, Start new round, logout, guide button, read-only banner, tabs) carries no
+  event wording; event screens may.
+- **One shell + registry** (`frontend/src/admin/`): `AdminShell` (dashboard), `AdminLogin`, `AdminGuidePage`,
+  `AdminEventSwitch`, `StartNewRoundDialog`; `registry.ts` lists `AdminEventModule`s (`types.ts`: key, label,
+  subtitle, icon, publicPath, tabs[{key,label,icon,needsRound,render(ctx)}], Guide, defaultRoundName). Each event
+  owns `events/<key>/admin/adminModule.tsx`. Adding SVS = write its module + add one line to `ADMIN_EVENTS`.
+  TAL joins when it has rounds; SVS when its module is built. Rounds come from the generic
+  `GET /api/admin/events/<key>/rounds`.
+- **URLs** (`admin/paths.ts`): `/admin?event=<key>` (login), `/admin/dashboard?event=<key>`, `/admin/guide?event=<key>`.
+  Without `?event=` the last event administered on this device (`localStorage.adminLastEvent`, set when a dashboard
+  opens) is used, else ministry; the URL is then rewritten with `?event=`. Old `/admin`, `/admin/dashboard`,
+  `/admin/guide` keep working.
+- **Landing**: event pages link to `/admin?event=<key>` -> after login that event's dashboard; Home links to `/admin`
+  (last event or ministry); a valid token skips the login; a 401 goes to `/admin?event=<key>&expired=1` and back to
+  the same event after login. The event switch only changes `?event=` (token kept). Logout goes to the event's page.
+- **Guides**: the dashboard's guide button opens `/admin/guide?event=<current>`; the guide page has the same event
+  switch. New Frost Dragon Tyrant admin guide (`guide:tyrantAdmin.*`, 9 languages): rounds, Start new round, time
+  windows editor, closing time, stats, search/filters/sort, exports, delete, workflow.
+- **Page titles**: index.html is "State Events · Whiteout Survival"; every page sets `document.title` via
+  `shared/usePageTitle` = parts + `common:appTitle` ("State Events"), e.g. "Frost Dragon Tyrant · State Events",
+  "Frost Dragon Tyrant · Event Management · State Events", translated, follows language changes.
+- **State number**: no hardcoded 2694 anywhere in the UI; the welcome line is hidden until an admin sets one.
+  Backend change (trivial, noted): `core/settings.py` `DEFAULTS['state_number']` is now `None` (public settings
+  return `null` when unset; v1.4 defaulted to "2694").
+- 'TAG' placeholder: none left (alliance placeholders are translated `profile:alliancePlaceholder`).
+
+## "Minister", not "Ministry" (owner rule, p2b/admin-shell)
+"Ministry" was a long-standing typo: the in-game term is minister positions.
+- Every user-visible "Ministry/ministry" is now "Minister/minister" in English (tile, pages, schedule, application,
+  guides, changelog subtitle, admin subtitle, default round name "Minister <date>", theme "Minister Dark", titles,
+  admin download names `minister_round_<id>_...`). Other languages use the word for the PERSON/position, not the
+  department: es Ministro, fr Ministre, de Minister, pl Minister/ministrów, tr Bakan, ar وزير/الوزراء, ko 장관 (was
+  already; one 부처 fixed), zh 大臣 (was 部长; 大臣 per coordinator, to confirm against the Chinese client).
+- Canonical routes: `/minister`, `/minister/apply`, `/minister/schedule/:day`, `/minister/guide`. `/ministry/...`,
+  `/minister/submit|update`, and the v1.x `/submit`, `/apply`, `/update`, `/schedule/:day`, `/guide` redirect there;
+  `/ministry/admin` -> `/admin?event=ministry`. `LegacyRedirect` keeps (and merges) the query string and hash.
+- NOT renamed (not front-facing): event key `ministry` in API/DB/MCP, file/folder names, i18n key names, test ids.
+  The backend's generic xlsx export still names its file `ministry_<round>_<date>.xlsx` (only reached via
+  the API/MCP; the UI names its downloads itself).
 
 ## Furnace levels (owner rule, phase 2; applies to EVERY event)
 - Two kinds: pre-FC furnaces 1-30, Fire Crystal furnaces FC1-FC10 (nothing above FC10). Most players are FC.
