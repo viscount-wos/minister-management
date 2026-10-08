@@ -295,7 +295,6 @@ export default function PlayerManagement({
               <tr key={row.id} className="border-b border-theme-border/50 hover:bg-dark-card-hover" data-testid={`player-row-${row.fid}`}>
                 <td className="p-3 text-theme-text">
                   <div className="flex items-center gap-2">
-                    {row.avatar_image ? <img src={row.avatar_image} alt="" className="w-6 h-6 rounded-full flex-shrink-0" /> : null}
                     {row.alliance && <span className="text-accent font-medium">[{row.alliance}]</span>} {row.game_name}
                   </div>
                 </td>
