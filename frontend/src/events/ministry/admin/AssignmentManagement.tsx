@@ -26,9 +26,6 @@ interface AssignedPlayer {
   game_name: string;
   points: number;
   time_slot?: string;
-  avatar_image?: string;
-  stove_lv?: number;
-  stove_lv_content?: string;
   alliance?: string;
   is_sticky?: boolean;
 }
@@ -107,26 +104,6 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone, disabled 
         </div>
       )}
       <div className="flex items-center gap-2">
-        <div className="relative flex-shrink-0">
-          {player.avatar_image ? (
-            <img
-              src={player.avatar_image}
-              alt=""
-              className="w-8 h-8 rounded-full border border-accent/50"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold text-accent">
-              {(player.game_name || '?').charAt(0).toUpperCase()}
-            </div>
-          )}
-          {player.stove_lv_content && (
-            <img
-              src={player.stove_lv_content}
-              alt={`Lv.${player.stove_lv}`}
-              className="absolute -bottom-1 -right-1 w-4 h-4"
-            />
-          )}
-        </div>
         <div className="min-w-0 flex-1">
           <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
           <div className="text-xs opacity-75">
@@ -161,26 +138,6 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
       className={`p-3 border-2 rounded-lg shadow-lg ${PLAYER_CARD_CLASS}`}
     >
       <div className="flex items-center gap-2">
-        <div className="relative flex-shrink-0">
-          {player.avatar_image ? (
-            <img
-              src={player.avatar_image}
-              alt=""
-              className="w-8 h-8 rounded-full border border-accent/50"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold text-accent">
-              {(player.game_name || '?').charAt(0).toUpperCase()}
-            </div>
-          )}
-          {player.stove_lv_content && (
-            <img
-              src={player.stove_lv_content}
-              alt={`Lv.${player.stove_lv}`}
-              className="absolute -bottom-1 -right-1 w-4 h-4"
-            />
-          )}
-        </div>
         <div className="min-w-0">
           <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
           <div className="text-xs opacity-75">
