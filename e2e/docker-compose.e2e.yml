@@ -1,0 +1,17 @@
+# Isolated local stack for the e2e suite. Leaves the 127.0.0.1:8091 baseline alone.
+#
+#   mkdir -p /tmp/wos-e2e-data            # fresh, empty data dir (or a copy of a v1.4 DB to migrate)
+#   E2E_DATA=/tmp/wos-e2e-data docker compose -p wos-wiring \
+#     -f docker-compose.yml -f e2e/docker-compose.e2e.yml up -d --build
+#   BASE_URL=http://127.0.0.1:8093 e2e/run.sh
+#   docker compose -p wos-wiring -f docker-compose.yml -f e2e/docker-compose.e2e.yml down
+services:
+  app:
+    ports: !override
+      - "127.0.0.1:${E2E_PORT:-8093}:8080"
+    volumes: !override
+      - "${E2E_DATA:?set E2E_DATA to an empty data dir}:/app/data"
+    environment:
+      - FLASK_ENV=development
+      - ADMIN_PASSWORD=admin123
+    restart: "no"

@@ -1,77 +1,90 @@
-# E2E smoke suite (Playwright, Python)
+# E2E suite (Playwright, Python)
 
-UI-level smoke tests for the ministry app. Written and proven against the **v1.4 baseline**
-container (`http://127.0.0.1:8091`), so the same flows can be re-run against wos-events after the
-restructure. Never point it at production: it creates test players.
+UI-level tests for wos-events: the ministry player flow (profiles / rounds / applications), admin
+round management, i18n in all 9 languages and Arabic RTL. Never point it at production: it creates
+test players and starts/closes rounds.
 
 ## Setup and run
 
+Run against an isolated stack, not the 8091 baseline:
+
 ```bash
-e2e/run.sh                                   # creates e2e/.venv, installs chromium, runs pytest
-# or by hand:
-cd e2e && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/playwright install chromium
-.venv/bin/python -m pytest                   # -q, -k admin, --headed, --slowmo 300 ...
+mkdir -p /tmp/wos-e2e-data                    # fresh empty data dir (or copy a v1.4 DB in first to migrate it)
+E2E_DATA=/tmp/wos-e2e-data docker compose -p wos-wiring \
+  -f docker-compose.yml -f e2e/docker-compose.e2e.yml up -d --build      # -> 127.0.0.1:8093
+BASE_URL=http://127.0.0.1:8093 e2e/run.sh     # creates e2e/.venv, installs chromium, runs pytest
+docker compose -p wos-wiring -f docker-compose.yml -f e2e/docker-compose.e2e.yml down
 ```
+
+By hand: `cd e2e && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt &&
+.venv/bin/playwright install chromium && BASE_URL=... .venv/bin/python -m pytest` (`-k admin`,
+`--headed`, `--slowmo 300` ...).
 
 | env | default | |
 |---|---|---|
 | `BASE_URL` | `http://127.0.0.1:8091` | app under test; suite exits early (code 2) if `/health` is down |
 | `ADMIN_PASSWORD` | `admin123` | local dev default only; never a real password |
 
-Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gitignored). A screenshot named
-`*-RAWKEYS.png` is taken whenever a raw i18n key is found. `.venv/`, `artifacts/` and
-`test-results/` are gitignored.
+A fresh install has no rounds: the session fixture `ministry_round` opens one through the API if
+none is open. Screenshots: `e2e/artifacts/<run timestamp>/<test>-<step>.png` (gitignored); a
+`*-RAWKEYS.png` is taken whenever a raw i18n key is found.
+
+## Where things live
+
+- **`ui.py`**: routes, legacy redirects, language buttons, selectors, flow helpers
+  (`open_application`, `pick_slots`, ...), the raw-key detector and a small `Api` client used only
+  to arrange state (start a round, set a closing time, seed an application).
+- UI strings are read from the app's own locale files: `ui.tr('ar', 'ministry:apply.newFor',
+  round=name)`. Nothing is hard-coded, so a wording change does not break tests.
+- Controls are found by `data-testid` (`get_by_test_id`) or by their linked `<label>`
+  (`get_by_label`); inputs keep `name=` too. Key test ids: `fid-input`, `fid-continue`,
+  `application-heading` (`data-mode` = `lookup|new|edit`), `profile-game-name`, `profile-alliance`,
+  `answer-<field>`, `day-tab-<type>`, `slot-<type>-<HH:MM>` (`aria-pressed`), `use-last-answers`,
+  `last-answers-applied`, `save-application`, `save-success`, `applications-closed`, `no-round`;
+  admin: `round-select`, `round-status`, `start-new-round`, `new-round-dialog`, `confirm-new-round`,
+  `read-only-banner`, `tab-<players|assignments|settings>`, `player-row-<fid>`, `card-<fid>`.
 
 ## What it covers
 
 `test_i18n.py`
-- raw-key detector unit test, and a live check that it sees a key injected into the DOM
-- home loads: heading, apply/update tiles, all 9 language buttons
-- for each public page (`/`, `/submit`, `/update`, `/admin`, `/guide`, `/changelog`): switch to each
-  of en es fr de pl ko zh tr ar and assert no raw i18n keys (`form.next`, `ministry.x.y`, `common.x`)
-  or `{{var}}` leftovers in visible text, placeholders, titles, aria-labels or alt text
-- the home heading actually changes in every non-English language (catches silent fallback)
-- Arabic sets `<html dir="rtl">`; switching back sets `ltr`
-- every step of the apply wizard (1-5) in all 9 languages (fills step 1, does not submit)
-- admin dashboard Players/Assignments/Settings tabs and admin guide in all 9 languages
+- raw-key detector unit test (dotted keys, `ns:key`, `{{var}}`), and a live DOM check
+- home: heading, one tile per event, all 9 language buttons
+- every public page (`/`, `/ministry`, `/ministry/apply`, `/admin`, `/ministry/guide`, `/changelog`)
+  in all 9 languages without raw keys; the home heading changes in every language
+- the application form in new and edit mode, all 9 languages
+- Arabic: `dir=rtl` and Arabic text on ministry home, FID lookup, edit form, admin dashboard,
+  start-round dialog and round settings
+- admin Players/Assignments/Settings tabs, the start-round dialog and the admin guide, 9 languages
 
-`test_ministry_flow.py` (runs in order, shares state, fresh FIDs every run)
-- submit an application through the UI in English (FID, name with emoji, alliance lower-case →
-  upper-cased, fractional speedups, slots on Monday + Thursday, Tuesday left empty → `confirm()`)
-- submitting the same FID again shows the duplicate warning and stays on step 1
-- reopen it by FID on the update page, check pre-filled values, edit speedups + a research slot,
-  save, reload and prove the edit persisted
-- full submission with the UI in Arabic (Arabic button labels, RTL kept through success)
-- admin login (`admin123`), search the players table by FID, row shows name and `[E2E]` tag
-- wrong admin password does not reach the dashboard
+`test_ministry_flow.py` (in order, shared state, fresh FIDs every run)
+- home tile -> ministry -> apply (round name shown); FID must be digits
+- new application in English: "New application for <round>", no "Use my last answers" for a
+  first-timer, alliance upper-cased, decimals, slots on two days; verified through the API
+- edit via FID: "Edit your application for <round>", profile + answers + slots pre-filled, own
+  assignments shown, edit persists after reload
+- new application with the UI in Arabic (RTL kept through success)
+- admin: current round selected by default, applicant row found by search; wrong password refused;
+  the old literal `admin-token` is rejected and the UI returns to login with "session expired"
+- **Start new round**: confirm dialog (cancel really cancels), new round becomes current, old one is
+  read-only with its data intact; the same FID then gets "New application for <new round>" with the
+  profile pre-filled and answers blank; **Use my last answers** fills the previous answers and slots
+  and says where they came from (also checked in 9 languages and Arabic); saved into the new round
+- auto-assign, lock (assignment save), publish, Excel + JSON export downloads; the player sees the
+  published schedule and their own slot
+- old URLs (`/submit`, `/update`, `/apply`, `/guide`, `/ministry/submit|update`, `/ministry/admin`)
+  redirect
 
-## Selectors: what will need updating after the restructure
-
-All routes, selectors and UI strings live in **`ui.py`**; update that first.
-
-- `ROUTES`: v1.4 paths `/submit`, `/update`, `/guide`, `/admin/dashboard` move under
-  `/ministry/...` / `/admin/...`. Add a test that the old paths redirect (SPEC requires it).
-- Home: v1.4 has "Submit New Application" / "View Assignment / Update Info" buttons. wos-events
-  has one tile per event, so `test_home_loads`, `test_submit_application_en` and
-  `test_reopen_by_fid_and_edit` must first click the ministry tile.
-- `STRINGS`: copied from v1.4 `frontend/src/i18n.ts`. After the i18n split, load them from
-  `frontend/src/i18n/locales/<lang>/<ns>.json` instead of hard-coding (keys will be namespaced).
-- `FIELD`: v1.4 inputs have `name=` attributes but labels are NOT associated (`<label>` without
-  `for`), so tests use `input[name=...]`. The rewrite should add `id`/`htmlFor` (then use
-  `get_by_label`) or `data-testid`s; please keep `name=` too.
-- Apply flow changes in wos-events: the update page becomes "New application for <round>" /
-  "Edit your application for <round>" via FID; add "Use my last answers" and "Start new round"
-  (admin) tests, which v1.4 cannot have.
-- Language buttons are found by native name (`English`, `العربية` …); keep those labels or update
-  `LANGUAGES`. v1.4 does not persist the language across reloads; tests switch after each `goto`.
-- Time-slot buttons are found by exact text (`12:00`) with the UTC timezone (the default).
-- Admin players table: found by `role=row` filtered by FID text, and the search placeholder
-  `Search players...`. Tabs by their English names.
+`test_round_states.py` (always leaves an open round behind)
+- closing time passed: new FID gets "applications closed" (9 languages + Arabic), an existing
+  application stays editable with the "closed for new players" note
+- closing time passing while the form is open: save returns 403 -> closed state, nothing written
+- admin round settings: research day (assignment tab follows), fire crystals (player form follows),
+  slot scheme (remap message), closing time save/clear
+- no open round: home tile "Not open yet", ministry banner + disabled tile, apply page "not open"
+  (9 languages + Arabic)
 
 ## Not covered
 
-Publish/unpublish and the public schedule page, auto-assign and drag-and-drop assignment editing,
-Excel/JSON export and import, settings changes (closing time, research day, scheme, state number),
-themes, timezone selector conversions, mobile viewport, Firefox/WebKit, accessibility. Test players
-are not cleaned up (the baseline is throwaway; delete them in the admin UI if needed).
+Drag-and-drop between slots (the assignment save path is exercised through the lock toggle), JSON
+import, profile admin endpoints (no UI yet), themes, timezone conversions, mobile viewport,
+Firefox/WebKit. Test data is not cleaned up; use a throwaway data dir.
