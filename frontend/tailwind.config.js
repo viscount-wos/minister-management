@@ -50,6 +50,18 @@ export default {
           mid: token('--c-heat-mid'),
           high: token('--c-heat-high'),
         },
+        // SVS battle planner: group accents (main / counter / extra) and troop-ratio segments. Aliases of the
+        // theme tokens above, so every theme keeps its tested contrast.
+        team: {
+          main: token('--c-heat-low'),
+          counter: token('--c-heat-high'),
+          extra: token('--c-success'),
+        },
+        troop: {
+          inf: token('--c-heat-mid'),
+          lan: token('--c-heat-low'),
+          mks: token('--c-success'),
+        },
       },
     },
   },

@@ -104,7 +104,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
 
   return (
     <div className="min-h-screen bg-dark-bg py-3 sm:py-8 px-2 sm:px-4" data-testid="admin-shell" data-event={event.key}>
-      <div className="max-w-7xl mx-auto" data-testid={`${event.key}-admin`}>
+      <div className={`${tab.wide ? 'max-w-[110rem]' : 'max-w-7xl'} mx-auto`} data-testid={`${event.key}-admin`}>
         <div className="bg-dark-card rounded-xl border border-theme-border p-3 sm:p-6 mb-4 sm:mb-6">
           <div className="mb-4">
             <AdminEventSwitch current={event.key} hrefFor={ADMIN_PATHS.dashboard} />

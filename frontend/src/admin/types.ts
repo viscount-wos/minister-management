@@ -27,6 +27,8 @@ export interface AdminTab {
   icon: LucideIcon;
   /** Show the shared "no rounds yet" card instead of render() when there is no round. */
   needsRound?: boolean;
+  /** Desktop-first boards (the SVS battle planner) get the full screen width instead of the 7xl column. */
+  wide?: boolean;
   render: (ctx: AdminTabContext) => ReactNode;
 }
 
