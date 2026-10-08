@@ -23,6 +23,8 @@ ROUTES = {
     'admin_login': '/admin',
     'admin_dashboard': '/admin/dashboard',
     'player_guide': '/minister/guide',
+    'tyrant_guide': '/tyrant/guide',
+    'svs_guide': '/svs/guide',
     'admin_guide': '/admin/guide',
     'changelog': '/changelog',
 }
@@ -46,7 +48,7 @@ LEGACY_REDIRECTS = {
 }
 
 # Pages that need no login, checked for raw i18n keys in every language.
-PUBLIC_PAGES = ['home', 'ministry', 'apply', 'admin_login', 'player_guide', 'changelog']
+PUBLIC_PAGES = ['home', 'ministry', 'apply', 'admin_login', 'player_guide', 'tyrant_guide', 'svs_guide', 'changelog']
 
 # --- languages ------------------------------------------------------------
 # code -> option label in the header's language dropdown (the native name; same in every UI language)

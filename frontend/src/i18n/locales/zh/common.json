@@ -24,6 +24,13 @@
     "question": "在哪里找到我的玩家 ID？",
     "answer": "在游戏中，点击左上角的头像。你名字下方显示的数字就是你的玩家 ID。"
   },
+  "guideLinks": {
+    "playerLink": "怎么用？阅读指南",
+    "wizardLink": "第一次来？先读一下指南",
+    "planHelp": "这个计划怎么看？",
+    "ministerLink": "这个系统如何工作？阅读玩家指南",
+    "adminLink": "管理员指南"
+  },
   "home": {
     "title": "州活动",
     "subtitle": "选择一个活动进行报名或查看日程",

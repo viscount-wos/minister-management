@@ -24,6 +24,13 @@
     "question": "Oyuncu ID'mi nerede bulurum?",
     "answer": "Oyunda sol üstteki profil resmine dokun. Oyuncu ID'n, adının altında görünen numaradır."
   },
+  "guideLinks": {
+    "playerLink": "Nasıl çalışır? Rehberi okuyun",
+    "wizardLink": "Yeni misiniz? Önce rehberi okuyun",
+    "planHelp": "Bu plan nasıl okunur?",
+    "ministerLink": "Bu sistem nasıl çalışır? Oyuncu Rehberini Oku",
+    "adminLink": "Yönetici Rehberi"
+  },
   "home": {
     "title": "Eyalet Etkinlikleri",
     "subtitle": "Kayıt olmak veya programını görmek için bir etkinlik seç",

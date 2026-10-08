@@ -10,6 +10,9 @@ export default defineConfig({
         // One chunk per language (all its namespaces): a player downloads only the
         // language they use (src/i18n/index.ts loads it on demand).
         manualChunks(id) {
+          // guides are a lazy chunk of their own (i18n/index.ts loadGuides); the rest of a language is one chunk
+          const g = id.match(/[\\/]i18n[\\/]locales[\\/]([a-z]{2})[\\/]guide\.json/)
+          if (g) return `guide-${g[1]}`
           const m = id.match(/[\\/]i18n[\\/]locales[\\/]([a-z]{2})[\\/][^\\/]+\.json/)
           if (m) return `locale-${m[1]}`
           return undefined

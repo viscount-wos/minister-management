@@ -16,8 +16,10 @@ const AdminShell = PAGES.adminShell.Component;
 const AdminGuidePage = PAGES.adminGuide.Component;
 const TyrantPage = PAGES.tyrantHome.Component;
 const TyrantWizard = PAGES.tyrantApply.Component;
+const TyrantGuide = PAGES.tyrantGuide.Component;
 const SvsPage = PAGES.svs.Component;
 const SvsWizard = PAGES.svsApply.Component;
+const SvsGuide = PAGES.svsGuide.Component;
 const SvsPlanView = PAGES.svsPlanView.Component;
 const TalPage = PAGES.tal.Component;
 
@@ -42,8 +44,10 @@ function App() {
             {/* Other events */}
             <Route path="/tyrant" element={<TyrantPage />} />
             <Route path="/tyrant/apply" element={<TyrantWizard />} />
+            <Route path="/tyrant/guide" element={<TyrantGuide />} />
             <Route path="/svs" element={<SvsPage />} />
             <Route path="/svs/apply" element={<SvsWizard />} />
+            <Route path="/svs/guide" element={<SvsGuide />} />
             {/* Shared battle plan (secret link, read-only, phone-first) */}
             <Route path="/svs/plan/:token" element={<SvsPlanView />} />
             <Route path="/tal" element={<TalPage />} />

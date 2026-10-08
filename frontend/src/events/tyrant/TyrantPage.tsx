@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Shield, Clock, Sparkles, CalendarOff, ArrowLeft } from 'lucide-react';
+import { FileText, Shield, Clock, Sparkles, CalendarOff, ArrowLeft, HelpCircle } from 'lucide-react';
 import api, { Round, isApiError } from '../../shared/api';
 import { TyrantSettings, tyrantApi } from './api';
 import { TYRANT_PATHS } from './paths';
@@ -99,6 +99,9 @@ export default function TyrantPage() {
         </div>
 
         <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <LinkButton icon={HelpCircle} accent onClick={() => navigate(TYRANT_PATHS.guide)} testId="tyrant-guide-link">
+            {t('common:guideLinks.playerLink')}
+          </LinkButton>
           <LinkButton icon={ArrowLeft} accent flipInRtl onClick={() => navigate('/')}>
             {t('common:nav.home')}
           </LinkButton>

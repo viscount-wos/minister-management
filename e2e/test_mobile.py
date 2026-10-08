@@ -152,13 +152,15 @@ def test_home_and_static_pages(phone, device, lang, locale):
     page = phone(device, locale=locale)
     p = Phone(page, device, lang)
     for name, path in [('home', '/'), ('minister-home', '/minister'), ('minister-guide', '/minister/guide'),
+                       ('tyrant-guide', '/tyrant/guide'), ('svs-guide', '/svs/guide'),
                        ('minister-schedule-unpublished', '/minister/schedule/monday'), ('tyrant-home', '/tyrant'),
                        ('svs', '/svs'), ('changelog', '/changelog')]:
         p.goto(path)
         assert page.evaluate('document.documentElement.lang') == lang
         assert page.evaluate('document.documentElement.dir') == ('rtl' if lang == 'ar' else 'ltr')
         p.check(name, tappable=['event-tile-ministry', 'event-tile-tyrant', 'home-admin-link', 'nav-home',
-                                'ministry-apply-tile', 'tyrant-apply-tile'])
+                                'ministry-apply-tile', 'tyrant-apply-tile', 'ministry-guide-link', 'tyrant-guide-link',
+                                'svs-guide-link', 'guide-back'])
     p.goto('/')
     expect(page.locator('h1').first).to_have_text(ui.tr(lang, 'common:home.title'))
 

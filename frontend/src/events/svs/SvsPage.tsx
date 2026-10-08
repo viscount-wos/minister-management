@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Shield, Clock, Sparkles, CalendarOff, ArrowLeft } from 'lucide-react';
+import { FileText, Shield, Clock, Sparkles, CalendarOff, ArrowLeft, HelpCircle } from 'lucide-react';
 import api, { Round, isApiError } from '../../shared/api';
 import { SvsSettings, svsApi } from './api';
 import { SVS_PATHS } from './paths';
@@ -100,6 +100,9 @@ export default function SvsPage() {
         </div>
 
         <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <LinkButton icon={HelpCircle} accent onClick={() => navigate(SVS_PATHS.guide)} testId="svs-guide-link">
+            {t('common:guideLinks.playerLink')}
+          </LinkButton>
           <LinkButton icon={ArrowLeft} accent flipInRtl onClick={() => navigate('/')}>
             {t('common:nav.home')}
           </LinkButton>

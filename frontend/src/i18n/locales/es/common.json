@@ -24,6 +24,13 @@
     "question": "¿Dónde encuentro mi ID de jugador?",
     "answer": "En el juego, toca tu foto de perfil (arriba a la izquierda). Tu ID de jugador es el número que aparece debajo de tu nombre."
   },
+  "guideLinks": {
+    "playerLink": "¿Cómo funciona? Lee la guía",
+    "wizardLink": "¿Eres nuevo? Lee primero la guía",
+    "planHelp": "¿Cómo leo este plan?",
+    "ministerLink": "¿Cómo funciona este sistema? Lee la Guía del Jugador",
+    "adminLink": "Guía del Administrador"
+  },
   "home": {
     "title": "Eventos del estado",
     "subtitle": "Elige un evento para inscribirte o consultar tu horario",

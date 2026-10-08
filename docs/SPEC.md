@@ -669,3 +669,15 @@ Refuses the live site. Uses the admin token on every call (admin requests are no
 - Plan editing over MCP is limited to `svs_plan_place` (placing players; v2.2.1).
 - No undo history (autosave + revision conflict only).
 
+
+## Guides (v2.2.1, p7/docs)
+Owner: "We need documentation for each section, available in every language, just like the minister section had.
+Every time we make a change or update, we need to consider if the user/admin documentation is up to date."
+- Player guides: `/minister/guide`, `/tyrant/guide`, `/svs/guide` (the last incl. how to read the shared plan,
+  `#plan`). Admin: `/admin/guide?event=<key>` per event + "Event Management basics" (`&topic=basics`), shown as two
+  tabs at the top; the dashboard's Admin Guide button opens the current event.
+- Links: event pages ("How does it work? Read the guide"), step 1 of each wizard before the FID lookup, the shared
+  plan view header ("How do I read this plan?" -> `/svs/guide#plan`; static text, nothing of the plan).
+- The `guide` i18n namespace is lazy (`guide-<lang>` chunk); link texts are `common:guideLinks.*`.
+- Map, keys and the change checklist: docs/GUIDES.md. Guard: `e2e/test_guides.py`.
+- Not documented yet on purpose: SVS Players "Add to rally" (another branch; the coordinator adds `table4`...).
