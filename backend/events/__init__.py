@@ -15,6 +15,9 @@ class EventSpec:
     has_rounds = True
     # Profile fields that must be non-empty (after merging) when applying.
     required_profile_fields = ('game_name',)
+    # Profile fields this event does not ask: dropped from an application's profile BEFORE validation, so an old
+    # client that still sends one is neither rejected nor allowed to change the shared profile through this event.
+    ignored_profile_fields = ()
 
     def default_settings(self):
         return {}
@@ -33,6 +36,13 @@ class EventSpec:
 
     def public_settings(self, settings):
         return dict(settings)
+
+    def strip_ignored_profile_fields(self, profile):
+        """The application's raw ``profile`` object without ``ignored_profile_fields`` (other shapes unchanged:
+        core validation reports them)."""
+        if isinstance(profile, dict) and self.ignored_profile_fields:
+            return {k: v for k, v in profile.items() if k not in self.ignored_profile_fields}
+        return profile
 
     def validate_profile(self, fields, existing=None):
         """Event-specific checks on the (already core-validated) profile fields sent with an

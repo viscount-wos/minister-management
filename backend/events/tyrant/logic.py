@@ -1,6 +1,8 @@
 """Frost Dragon Tyrant event logic: EventSpec, admin list/summary and exports.
 
-Profile (shared, per FID): game_name, alliance, discord_id, furnace_level, power, troops.
+Profile (shared, per FID): game_name, alliance, discord_id, power, troops (per troop type: CAMP level + tier).
+Tyrant does NOT ask the main furnace (owner decision p2e): a tyrant submit ignores ``profile.furnace_level``, and
+tyrant admin rows, summary and exports carry no furnace (the shared profile keeps it for Minister).
 Round answers: availability (window ids of the round), discord_vc, gem_spend, roles, language.
 """
 import json
@@ -24,7 +26,7 @@ from events.tyrant import validation as tv
 EVENT = 'tyrant'
 ROLE_LABELS = {'rally_leader': 'Rally Leader', 'joiner': 'Joiner', 'gathering': 'Gathering/Looting',
                'battle_mgmt': 'Battle Management', 'event_prep': 'Event Preparation'}
-SORT_KEYS = ('submitted', 'updated', 'name', 'alliance', 'fid', 'furnace', 'power', 'gems', 'strength')
+SORT_KEYS = ('submitted', 'updated', 'name', 'alliance', 'fid', 'power', 'gems', 'strength')
 
 
 def round_settings(round_row):
@@ -48,7 +50,7 @@ def round_applications(db, round_row):
     from core.applications import application_to_json
     from core.profiles import profile_to_json
     rows = db.execute('SELECT a.*, p.fid, p.id AS pid, p.game_name AS p_game_name, p.alliance AS p_alliance, '
-                      'p.timezone AS p_timezone, p.furnace_level AS p_furnace_level, p.power AS p_power, '
+                      'p.timezone AS p_timezone, p.power AS p_power, '
                       'p.troops AS p_troops, p.discord_id AS p_discord_id, p.avatar_image AS p_avatar_image, '
                       'p.stove_lv AS p_stove_lv, p.stove_lv_content AS p_stove_lv_content, '
                       'p.created_at AS p_created_at, p.updated_at AS p_updated_at '
@@ -62,8 +64,17 @@ def round_applications(db, round_row):
         prof['fid'] = r['fid']
         app['profile'] = profile_to_json(prof)
         app['joiner_strength'] = joiner_strength(app['profile'])
-        out.append(app)
+        out.append(without_furnace(app))
     return out
+
+
+def without_furnace(app):
+    """Tyrant rows carry no main furnace (owner decision p2e: camp levels + tiers are the strength signal). The
+    shared profile keeps ``furnace_level`` for Minister; it is only left out of tyrant admin rows/exports/MCP."""
+    for key in ('profile', 'profile_snapshot'):
+        if isinstance(app.get(key), dict):
+            app[key].pop('furnace_level', None)
+    return app
 
 
 def _troops(profile):
@@ -109,7 +120,6 @@ def filter_and_sort(apps, filters=None, settings=None, sort='submitted', directi
         'name': lambda x: (x['profile'].get('game_name') or '').casefold(),
         'alliance': lambda x: (x['profile'].get('alliance') or '').casefold(),
         'fid': lambda x: (len(x['fid'] or ''), x['fid'] or ''),
-        'furnace': lambda x: furnace_ordinal(x['profile'].get('furnace_level')) or None,
         'power': lambda x: x['profile'].get('power'),
         'gems': lambda x: x['answers'].get('gem_spend'),
         'strength': lambda x: x.get('joiner_strength'),
@@ -127,7 +137,6 @@ def summary(apps, settings):
     opening_rush = vc = 0
     roles = Counter()
     alliances = Counter()
-    furnace = Counter()
     troops = {k: Counter() for k in tv.TROOP_TYPES}
     camps = {k: Counter() for k in tv.TROOP_TYPES}
     for a in apps:
@@ -142,7 +151,6 @@ def summary(apps, settings):
         for r in ans.get('roles') or []:
             roles[r] += 1
         alliances[(prof.get('alliance') or '').strip().upper() or None] += 1
-        furnace[prof.get('furnace_level') or 'none'] += 1
         for kind in tv.TROOP_TYPES:
             tier = _troop(prof, kind, 'tier')
             troops[kind][f'T{tier}' if tier else 'none'] += 1
@@ -158,7 +166,6 @@ def summary(apps, settings):
         'troop_tiers': {k: dict(sorted(c.items(), key=lambda kv: _tier_sort(kv[0]))) for k, c in troops.items()},
         # camp level per troop type: FC10 first, legacy pre-FC codes (shown as stored) after FC1, 'none' last
         'camp_levels': {k: dict(sorted(c.items(), key=lambda kv: _furnace_sort(kv[0]))) for k, c in camps.items()},
-        'furnace_levels': dict(sorted(furnace.items(), key=lambda kv: _furnace_sort(kv[0]))),
     }
 
 
@@ -179,7 +186,7 @@ def _window_label(w):
 def export_header(settings):
     return (['FID', 'In-Game Name', 'Alliance', 'Discord ID']
             + [_window_label(w) for w in settings['windows']]
-            + ['Discord VC', 'Furnace Level', 'Power (M)', 'Est. Max Gem Spend']
+            + ['Discord VC', 'Power (M)', 'Est. Max Gem Spend']
             + [f'{k.capitalize()} {p}' for k in tv.TROOP_TYPES for p in ('Camp Level', 'Tier')]
             + ['Joiner Strength']
             + [ROLE_LABELS[r] for r in tv.ROLES]
@@ -194,7 +201,7 @@ def export_rows(apps, settings):
         power = prof.get('power')
         row = [a['fid'], prof.get('game_name'), prof.get('alliance'), prof.get('discord_id')]
         row += [yes(w['id'] in avail) for w in settings['windows']]
-        row += [yes(ans.get('discord_vc')), prof.get('furnace_level'),
+        row += [yes(ans.get('discord_vc')),
                 round(power / 1_000_000, 2) if power is not None else None, ans.get('gem_spend')]
         for kind in tv.TROOP_TYPES:
             fl, tier = _troop(prof, kind, 'furnace_level'), _troop(prof, kind, 'tier')
@@ -294,6 +301,7 @@ class TyrantEvent(EventSpec):
     key = EVENT
     has_rounds = True
     required_profile_fields = ('game_name', 'alliance')  # tyrantpoll required name, FID and alliance
+    ignored_profile_fields = ('furnace_level',)  # owner decision p2e: Tyrant does not ask the main furnace
 
     def default_settings(self):
         return tv.default_settings()
@@ -305,8 +313,6 @@ class TyrantEvent(EventSpec):
         return {'windows': settings.get('windows') or []}
 
     def validate_profile(self, fields, existing=None):
-        if 'furnace_level' in fields:  # Tyrant: FC1-FC10 only (core/profiles.py already normalised the code)
-            fields['furnace_level'] = tv.validate_profile_furnace(fields['furnace_level'])
         if 'troops' in fields:
             fields['troops'] = tv.validate_troops(fields['troops'])
         if fields.get('power') is not None:
@@ -316,6 +322,9 @@ class TyrantEvent(EventSpec):
 
     def validate_answers(self, answers, round_, existing=None):
         return tv.validate_answers(answers, round_settings(round_), existing=existing)
+
+    def decorate_application(self, app, round_):
+        return without_furnace(app)
 
     def export_round(self, round_):
         from core.db import get_db

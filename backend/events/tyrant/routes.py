@@ -34,9 +34,9 @@ def _filters(rnd):
 @bp.route('/api/admin/tyrant/rounds/<ref>/applications', methods=['GET'])
 @require_admin
 def admin_list(ref):
-    """Filters: see events/tyrant/filters.py (q, alliance, min_furnace, min/max_power, min/max_gems, windows, rush,
+    """Filters: see events/tyrant/filters.py (q, alliance, min/max_power, min/max_gems, windows, rush,
     vc, troop, min_camp, min_tier, <type>_camp, <type>_tier, roles, roles_mode, submitted_from/to, days; AND).
-    &sort=submitted|updated|name|alliance|fid|furnace|power|gems|strength &dir=asc|desc &limit= &offset=
+    &sort=submitted|updated|name|alliance|fid|power|gems|strength &dir=asc|desc &limit= &offset=
     -> {round_id, total, applications: [...]} (total = after filters)."""
     rnd = resolve_round(ref)
     apps = logic.filter_and_sort(logic.round_applications(get_db(), rnd), _filters(rnd), logic.round_settings(rnd),

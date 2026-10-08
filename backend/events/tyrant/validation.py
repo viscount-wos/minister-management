@@ -9,11 +9,13 @@ Option lists are the ones of the live tyrantpoll app (templates/poll.html):
 - troops (PROFILE field ``troops``): per troop type its CAMP level (key ``furnace_level``, kept for compatibility)
   and a tier (the UI offers T8-T11), each optional in the API (the wizard requires all six).
 
-Furnace levels: Tyrant accepts Fire Crystal levels ONLY (owner rule, p2d): the profile ``furnace_level`` and each
-troop camp's ``furnace_level`` must be 'FC1'..'FC10' (``core.furnace.validate_fc_level``). Any combination is fine:
-no rule ties a tier to a camp level, and a camp may be above or below the furnace. Pre-FC codes ('1'..'30') stored
-earlier (e.g. by Minister, or before this rule) are kept and shown as they are; they are only rejected when SENT
-on a Tyrant submit. Minister keeps the full list (core/profiles.py).
+Main furnace: Tyrant does NOT ask it (owner decision p2e, superseding p2d's 'furnace required'). A
+``profile.furnace_level`` sent with a tyrant application is ignored (``TyrantEvent.ignored_profile_fields``), so old
+clients keep working and the shared profile's furnace (Minister, 1-30 + FC) is left alone.
+
+Camp levels: Fire Crystal levels ONLY (owner rule, p2d): each troop camp's ``furnace_level`` must be 'FC1'..'FC10'
+(``core.furnace.validate_fc_level``). Any combination is fine: no rule ties a tier to a camp level. Pre-FC camp codes
+('1'..'30') stored earlier are kept and shown as they are; they are only rejected when SENT on a Tyrant submit.
 """
 import re
 
@@ -142,15 +144,10 @@ def _troop_level(value, field, lo, hi):
     return validate_number(value, field, minimum=lo, maximum=hi, integer=True)
 
 
-def validate_profile_furnace(value, field='profile.furnace_level'):
-    """Tyrant furnace: FC1-FC10 or blank."""
-    return validate_fc_level(value, field)
-
-
 def validate_troops(value, field='profile.troops'):
     """Canonical troop levels: {infantry|lancer|marksman: {furnace_level: 'FC1'..'FC10'|null, tier: 1-11|null}}.
 
-    ``furnace_level`` is the troop's CAMP level (camps can lag the furnace)."""
+    ``furnace_level`` is the troop's CAMP level (the key name is kept for compatibility)."""
     if value is None:
         return None
     if not isinstance(value, dict):

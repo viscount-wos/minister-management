@@ -37,12 +37,11 @@ def test_default_windows_and_public_round(client, admin):
 
 def test_submit_profile_and_round_split(client, admin):
     start_round(client, admin, 'FDT 1', event=EVENT)
-    r = put(client, '1001', profile={'discord_id': 'alice#1234', 'furnace_level': 'fc5', 'power': 410_500_000,
-                                     'troops': TROOPS},
+    r = put(client, '1001', profile={'discord_id': 'alice#1234', 'power': 410_500_000, 'troops': TROOPS},
             answers=good_answers())
     assert r.status_code == 201, r.json
     prof = r.json['profile']
-    assert prof['alliance'] == 'ABC' and prof['discord_id'] == 'alice#1234' and prof['furnace_level'] == 'FC5'
+    assert prof['alliance'] == 'ABC' and prof['discord_id'] == 'alice#1234' and prof['furnace_level'] is None
     assert prof['power'] == 410_500_000 and prof['troops']['marksman'] == {'furnace_level': None, 'tier': 11}
     ans = r.json['application']['answers']
     # canonical order (windows order / role list order), not the order sent
@@ -99,12 +98,7 @@ def test_strict_troop_validation(client, admin):
         ({'troops': {'infantry': {'tier': 'T10'}}}, 'profile.troops.infantry.tier'),
         ({'troops': {'infantry': {'level': 3}}}, 'profile.troops.infantry'),
         ({'troops': [1, 2]}, 'profile.troops'),
-        ({'furnace_level': 'FC11'}, 'profile.furnace_level'),
-        ({'furnace_level': '31'}, 'profile.furnace_level'),
-        ({'furnace_level': 0}, 'profile.furnace_level'),
-        # Tyrant: Fire Crystal levels only (owner rule p2d), for the furnace and every camp
-        ({'furnace_level': '30'}, 'profile.furnace_level'),
-        ({'furnace_level': 25}, 'profile.furnace_level'),
+        # Tyrant camps: Fire Crystal levels only (owner rule p2d)
         ({'troops': {'lancer': {'furnace_level': '28', 'tier': 9}}}, 'profile.troops.lancer.furnace_level'),
         ({'troops': {'marksman': {'furnace_level': 1}}}, 'profile.troops.marksman.furnace_level'),
         ({'power': -5}, 'profile.power'),
@@ -213,19 +207,17 @@ def test_admin_list_filter_search_sort_paging(client, admin):
     assert [a['fid'] for a in r.json['applications']] == ['21']
     r = client.get(base + '?sort=power&dir=desc', headers=admin)
     assert [a['fid'] for a in r.json['applications']] == ['21', '22', '23']  # blank power last
-    r = client.get(base + '?sort=furnace&dir=desc', headers=admin)
-    assert [a['fid'] for a in r.json['applications']] == ['21', '22', '23']  # FC10 > 30 > blank
-    r = client.get(base + '?sort=furnace&dir=asc', headers=admin)
-    assert [a['fid'] for a in r.json['applications']] == ['22', '21', '23']
+    assert client.get(base + '?sort=furnace', headers=admin).json['field'] == 'sort'  # no furnace sort (p2e)
     r = client.get(base + '?sort=name&dir=asc', headers=admin)
     assert [a['fid'] for a in r.json['applications']] == ['23', '22', '21']
     r = client.get(base + '?sort=gems&dir=asc&limit=1&offset=1', headers=admin)
     assert r.json['total'] == 3 and r.json['limit'] == 1 and [a['fid'] for a in r.json['applications']] == ['21']
-    r = client.get(base + '?min_furnace=fc1', headers=admin)
-    assert [a['fid'] for a in r.json['applications']] == ['21']  # FC10 yes, 30 and blank no
-    r = client.get(base + '?min_furnace=20', headers=admin)
-    assert sorted(a['fid'] for a in r.json['applications']) == ['21', '22']
-    assert client.get(base + '?min_furnace=FC11', headers=admin).json['field'] == 'min_furnace'
+    # no furnace filter any more (p2e): an old URL's min_furnace is ignored, even a bad value
+    for qs in ('min_furnace=fc1', 'min_furnace=FC11'):
+        r = client.get(f'{base}?{qs}', headers=admin)
+        assert r.status_code == 200 and r.json['total'] == 3, qs
+    assert all('furnace_level' not in a['profile'] and 'furnace_level' not in a['profile_snapshot']
+               for a in client.get(base, headers=admin).json['applications'])
     assert client.get(base + '?sort=bogus', headers=admin).json['field'] == 'sort'
     assert client.get(base + '?limit=0', headers=admin).json['field'] == 'limit'
     r = client.get('/api/admin/tyrant/rounds/current/applications', headers=admin)
@@ -248,7 +240,9 @@ def test_admin_summary(client, admin):
     assert s['roles'] == {'rally_leader': 1, 'joiner': 1, 'gathering': 1, 'battle_mgmt': 0, 'event_prep': 0}
     assert s['troop_tiers']['infantry'] == {'T10': 1, 'T8': 1, 'none': 1}
     assert s['troop_tiers']['marksman'] == {'T11': 1, 'none': 2}
-    assert s['furnace_levels'] == {'FC10': 1, '30': 1, 'none': 1}  # FC above pre-FC, blanks last
+    assert 'furnace_levels' not in s  # p2e: no furnace stats in Tyrant
+    assert 'min_furnace' not in client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/summary?min_furnace=FC1',
+                                           headers=admin).json['filters']
     s = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/summary?alliance=BBB', headers=admin).json
     assert s['total'] == 1 and s['opening_rush'] == 0 and s['round_total'] == 3
     assert s['alliance_options'] == ['AAA', 'BBB']  # the picker keeps every alliance of the round
@@ -263,7 +257,8 @@ def test_exports_are_formula_safe(client, admin):
     assert head[:4] == ['FID', 'In-Game Name', 'Alliance', 'Discord ID'] and '11:01-11:15 Opening Rush' in head
     by = {row[0]: dict(zip(head, row)) for row in rows[1:]}
     assert by['23']['In-Game Name'] == '\'=HYPERLINK("x")'
-    assert by['21']['Furnace Level'] == 'FC10' and by['22']['Furnace Level'] == '30' and by['21']['Power (M)'] == '900.0'
+    assert not any('furnace' in h.lower() for h in head)  # p2e: no furnace column
+    assert by['21']['Power (M)'] == '900.0'
     assert by['21']['Infantry Camp Level'] == 'FC5' and by['21']['Infantry Tier'] == 'T10'
     assert by['21']['Lancer Camp Level'] == 'FC3' and by['21']['Marksman Camp Level'] == ''
     assert by['21']['Marksman Tier'] == 'T11' and by['21']['Joiner Strength'] == str(5 + 10 + 3 + 9 + 0 + 11)
@@ -334,23 +329,40 @@ def _fids(client, admin, rnd, qs):
     return sorted(a['fid'] for a in r.json['applications'])
 
 
-def test_tyrant_furnace_and_camps_fc_only_but_any_combination(client, admin):
+def test_tyrant_camps_fc_only_but_any_combination(client, admin):
     start_round(client, admin, 'FDT', event=EVENT)
-    # any combination: camps above or below the furnace, T11 in an FC1 camp, T8 in an FC10 camp
+    # any combination: T11 in an FC1 camp, T8 in an FC10 camp
     t = {'infantry': {'furnace_level': 'FC1', 'tier': 11}, 'lancer': {'furnace_level': 'fc10', 'tier': 8},
          'marksman': {'furnace_level': 'FC9', 'tier': 9}}
-    r = put(client, '51', profile={'furnace_level': 'FC2', 'troops': t})
+    r = put(client, '51', profile={'troops': t})
     assert r.status_code == 201, r.json
     assert r.json['profile']['troops']['lancer'] == {'furnace_level': 'FC10', 'tier': 8}  # normalised
-    r = put(client, '51', profile={'furnace_level': '30'})
-    assert r.status_code == 400 and r.json['code'] == 'VALIDATION_ERROR' and r.json['field'] == 'profile.furnace_level'
     r = put(client, '51', profile={'troops': {'infantry': {'furnace_level': '30', 'tier': 11}}})
     assert r.status_code == 400 and r.json['field'] == 'profile.troops.infantry.furnace_level'
-    assert client.get('/api/profile/51').json['furnace_level'] == 'FC2'  # nothing written
-    # admin edits go through the same rule
+    # admin edits go through the same camp rule
     aid = client.get('/api/admin/tyrant/rounds/current/applications', headers=admin).json['applications'][0]['id']
-    r = client.put(f'/api/admin/applications/{aid}', json={'profile': {'furnace_level': '12'}}, headers=admin)
-    assert r.status_code == 400 and r.json['field'] == 'profile.furnace_level'
+    r = client.put(f'/api/admin/applications/{aid}', json={'profile': {'troops': _full('12', 9)}}, headers=admin)
+    assert r.status_code == 400 and r.json['field'] == 'profile.troops.infantry.furnace_level'
+
+
+def test_tyrant_ignores_main_furnace(client, admin):
+    """Owner decision p2e: Tyrant does not ask the main furnace. A furnace sent by an old client is ignored (not
+    validated, not stored), so it neither fails the submit nor changes the shared profile's furnace (Minister's)."""
+    start_round(client, admin, 'FDT', event=EVENT)
+    assert client.put('/api/profile/52', json={'game_name': 'Fu', 'furnace_level': '30'}).status_code in (200, 201)
+    for bad in ('FC11', '31', 0, 'high', 'FC2', None):
+        r = put(client, '52', profile={'furnace_level': bad, 'troops': _full('FC8', 10)})
+        assert r.status_code in (200, 201), (bad, r.json)
+    assert client.get('/api/profile/52').json['furnace_level'] == '30'  # shared profile untouched
+    r = put(client, '53', profile={'furnace_level': 'FC5'})  # new player: furnace not stored either
+    assert r.status_code == 201 and r.json['profile']['furnace_level'] is None
+    # admin edits ignore it too, and tyrant admin responses carry no furnace
+    aid = next(a['id'] for a in client.get('/api/admin/tyrant/rounds/current/applications', headers=admin)
+               .json['applications'] if a['fid'] == '52')
+    r = client.put(f'/api/admin/applications/{aid}', json={'profile': {'furnace_level': 'nope'}}, headers=admin)
+    assert r.status_code == 200 and 'furnace_level' not in r.json['profile']
+    assert 'furnace_level' not in client.get(f'/api/admin/applications/{aid}', headers=admin).json['profile']
+    assert client.get('/api/admin/profiles/52', headers=admin).json['furnace_level'] == '30'
 
 
 def test_minister_keeps_pre_fc_levels(client, admin):
@@ -365,7 +377,7 @@ def test_legacy_pre_fc_values_shown_as_stored(client, admin):
     rnd = _seed_camps(client, admin)
     apps = {a['fid']: a for a in client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/applications',
                                              headers=admin).json['applications']}
-    assert apps['44']['profile']['furnace_level'] == '25'
+    assert 'furnace_level' not in apps['44']['profile']  # p2e: tyrant rows carry no main furnace
     assert apps['44']['profile']['troops']['infantry'] == {'furnace_level': '25', 'tier': 10}
     # resubmitting the legacy camp level is refused: the new rule applies on submit
     r = put(client, '44', profile={'troops': _full('25', 10)})
@@ -385,7 +397,7 @@ def test_admin_camp_and_tier_filters(client, admin):
     assert _fids(client, admin, rnd, 'min_camp=FC1') == ['41', '42', '43']  # legacy pre-FC camps never match
     assert _fids(client, admin, rnd, 'min_tier=10') == ['41', '42', '43', '44']
     assert _fids(client, admin, rnd, 'troop=lancer') == ['41', '42', '43', '44', '45']  # troop alone: no filter
-    assert _fids(client, admin, rnd, 'min_tier=T11&min_furnace=FC10') == ['41', '42']  # combines with others
+    assert _fids(client, admin, rnd, 'min_tier=T11&alliance=abc') == ['41', '42']  # combines with others
     base = f'/api/admin/tyrant/rounds/{rnd["id"]}/applications'
     for qs, field in (('min_camp=25', 'min_camp'), ('min_camp=FC11', 'min_camp'), ('min_tier=12', 'min_tier'),
                       ('min_tier=Tx', 'min_tier'), ('min_tier=0', 'min_tier'), ('troop=archer&min_tier=8', 'troop')):
@@ -448,7 +460,6 @@ def test_column_filters(client, admin):
     assert q('vc=yes') == ['21', '23'] and q('vc=no') == ['22'] and q('vc=any') == ['21', '22', '23']
     assert q('roles=joiner,rally_leader') == ['21', '22'] and q('roles=joiner,gathering&roles_mode=all') == ['22']
     assert q('roles=joiner,rally_leader&roles_mode=all') == []
-    assert q('min_furnace=FC1') == ['21']
     today = __import__('datetime').datetime.now(__import__('datetime').timezone.utc).strftime('%Y-%m-%d')
     assert q(f'submitted_from={today}&submitted_to={today}') == ['21', '22', '23']
     assert q('submitted_to=2000-01-01') == [] and q('days=1') == ['21', '22', '23']

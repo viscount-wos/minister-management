@@ -6,7 +6,6 @@ own URL, so a filtered view is shareable. Bad values -> VALIDATION_ERROR with ``
 
   q              text: FID, in-game name or Discord ID contains (case-insensitive)
   alliance       one tag or a comma list (any of them), case-insensitive
-  min_furnace    furnace code; main furnace at least this (FC5 = FC5 and up; pre-FC codes allowed here)
   min_power, max_power   absolute power (whole numbers; the UI converts from millions)
   min_gems, max_gems     per-player est. max gem spend (blank never matches a bound)
   windows        comma list of window ids: available in ALL of them
@@ -21,17 +20,20 @@ own URL, so a filtered view is shareable. Bad values -> VALIDATION_ERROR with ``
   roles          comma list of role ids; roles_mode any (default: has any of them) | all
   submitted_from, submitted_to   YYYY-MM-DD (UTC, inclusive)
   days           submitted in the last N days (1-3650)
+
+There is no main-furnace filter (owner decision p2e: Tyrant does not ask the furnace; camp levels + tiers are the
+strength signal). An old URL's ``min_furnace`` is ignored like any unknown parameter.
 """
 import re
 from datetime import datetime, timedelta, timezone
 
 from core.errors import validation_error
-from core.furnace import fc_number, furnace_ordinal, validate_fc_level, validate_furnace
+from core.furnace import fc_number, validate_fc_level, validate_furnace
 from events.tyrant import validation as tv
 
 TROOP_FILTERS = tv.TROOP_TYPES + ('all',)
 EXACT_KEYS = tuple(f'{k}_{d}' for k in tv.TROOP_TYPES for d in ('camp', 'tier'))
-FILTER_KEYS = ('q', 'alliance', 'min_furnace', 'min_power', 'max_power', 'min_gems', 'max_gems', 'windows', 'rush',
+FILTER_KEYS = ('q', 'alliance', 'min_power', 'max_power', 'min_gems', 'max_gems', 'windows', 'rush',
                'vc', 'troop', 'min_camp', 'min_tier') + EXACT_KEYS + (
                'roles', 'roles_mode', 'submitted_from', 'submitted_to', 'days')
 _DATE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
@@ -92,8 +94,6 @@ def parse_filters(args, settings):
     alliances = [a.casefold() for a in _csv(get('alliance'))]
     if alliances:
         f['alliance'] = alliances
-    if not _blank(get('min_furnace')):
-        f['min_furnace'] = validate_furnace(get('min_furnace'), 'min_furnace')
     for key, hi in (('min_power', 10 ** 13), ('max_power', 10 ** 13), ('min_gems', tv.MAX_GEMS),
                     ('max_gems', tv.MAX_GEMS)):
         n = _int(get(key), key, 0, hi)
@@ -172,8 +172,6 @@ def matches(app, f, settings):
                 or needle in (prof.get('discord_id') or '').casefold()):
             return False
     if 'alliance' in f and (prof.get('alliance') or '').strip().casefold() not in f['alliance']:
-        return False
-    if 'min_furnace' in f and furnace_ordinal(prof.get('furnace_level')) < furnace_ordinal(f['min_furnace']):
         return False
     power, gems = prof.get('power'), ans.get('gem_spend')
     for key, val, op in (('min_power', power, '>='), ('max_power', power, '<='), ('min_gems', gems, '>='),
