@@ -367,8 +367,9 @@ def run(ad, cases):
             rec(f'{tag}:schedule:{d}', 'schedule', ad.schedule(d))
         rec(f'{tag}:published_days', 'plain', ad.published_days())
         if full:
-            rec(f'{tag}:player_assignments', 'player_assignments',
-                {fid: ad.player_assignments(fid) for fid in all_fids})
+            pa = {fid: ad.player_assignments(fid) for fid in all_fids}
+            pa['__published__'] = ad.published_days()
+            rec(f'{tag}:player_assignments', 'player_assignments', pa)
             rec(f'{tag}:xlsx', 'xlsx', ad.export_xlsx())
         boundary(tag)
 

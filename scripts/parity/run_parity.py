@@ -388,14 +388,35 @@ def check_s7(name, o, n):
     return REGRESSION, [], diff_summary(od, nd)
 
 
+OWN_PUBLISHED = ("a player's own assignments list published days only (documented 1c change; v1.4 also "
+                 "returned draft days)")
+
+
+def _published_only(d):
+    pub = set(d.get('__published__') or [])
+    out = {}
+    for f, v in d.items():
+        if f != '__published__' and isinstance(v, list) and len(v) == 2 and v[0] == 200 and isinstance(v[1], dict):
+            v = [200, {day: s for day, s in v[1].items() if day in pub}]
+        out[f] = v
+    return out
+
+
 def check_player_assignments(o, n):
     od, nd = o['data'], n['data']
     bad = [f for f in od if od[f] != nd.get(f)]
     if not bad:
         return OK, [], []
-    trimmed = _trim_fid(od)
-    if trimmed == nd:
-        return EXPECTED, [(EXPECTED, FID_TRIM[0])], []
+    labels = []
+    if _published_only(od) != od:
+        od = _published_only(od)
+        labels.append((EXPECTED, OWN_PUBLISHED))
+    if od != _trim_fid(od) and _trim_fid(od) == nd:
+        od = _trim_fid(od)
+        labels.append((EXPECTED, FID_TRIM[0]))
+    if od == nd:
+        return EXPECTED, labels, []
+    bad = [f for f in od if od[f] != nd.get(f)]
     if bad == [FID_WS]:
         return REGRESSION, [(REGRESSION, FID_WS_REASON)], []
     return REGRESSION, [], [f'{f}: old={_short(od[f])} new={_short(nd.get(f))}' for f in bad[:4]]
