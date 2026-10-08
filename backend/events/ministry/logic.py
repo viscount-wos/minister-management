@@ -57,8 +57,18 @@ def calculate_points(player, day):
 
 # ---------------------------------------------------------------- days & slots
 
+MINISTRY_WEEKDAYS = ('monday', 'tuesday', 'thursday', 'friday')  # every day that can ever be a ministry day
+
+
 def valid_days(research_day):
     return ['monday', research_day, 'thursday']
+
+
+def active_published_days(settings):
+    """Published days that are active days of the round (week order). Stale entries, e.g. an old
+    research day left over in stored settings, are never served publicly."""
+    valid = valid_days(settings.get('research_day', 'tuesday'))
+    return sort_days_by_week([d for d in settings.get('published_days') or [] if d in valid])
 
 
 def sort_days_by_week(days):
@@ -458,7 +468,7 @@ def heatmap(db, round_id):
 def published_schedule(db, round_row, day):
     settings = round_settings(round_row)
     day = str(day).lower()
-    if day not in settings['published_days']:
+    if day not in active_published_days(settings):
         return {'published': False, 'day': day}
     rows = db.execute(
         'SELECT a.time_slot, p.game_name, p.alliance FROM ministry_assignments a '
@@ -680,7 +690,7 @@ class MinistryEvent(EventSpec):
 
     def public_settings(self, settings):
         s = {k: settings.get(k) for k in mv.DEFAULT_SETTINGS}
-        s['published_days'] = sort_days_by_week(s.get('published_days') or [])
+        s['published_days'] = active_published_days(s)
         return s
 
     def validate_answers(self, answers, round_, existing=None):

@@ -2,11 +2,11 @@
 import json
 import sqlite3
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
 from core.auth import require_admin
 from core.db import begin_immediate, get_db
-from core.errors import conflict, get_json_body, not_found, validation_error
+from core.errors import ApiError, conflict, get_json_body, not_found, validation_error
 from core.validation import is_past, now_iso, validate_closing_time, validate_str
 from events import all_events, get_event
 
@@ -55,6 +55,44 @@ def require_round(round_id):
     if not row:
         raise not_found(f'Round {round_id} not found')
     return row
+
+
+def resolve_round_ref(ref, event=None):
+    """Admin round reference: a numeric id, or ``current`` (the open round of ``?event=``, default ministry)."""
+    if str(ref) == 'current':
+        return require_current_round(event or request.args.get('event') or 'ministry')
+    try:
+        rid = int(ref)
+    except (TypeError, ValueError):
+        raise not_found(f'Round {ref} not found')
+    return require_round(rid)
+
+
+def require_writable(round_row):
+    """Closed rounds are read-only (SPEC: past rounds). Reopen with PUT /api/admin/rounds/<id> {status}."""
+    if round_row['status'] == 'closed':
+        raise ApiError(409, 'ROUND_CLOSED', f'Round {round_row["id"]} is closed and read-only; reopen it first')
+
+
+def paginate(items, key):
+    """Optional ``?limit=&offset=`` paging for admin lists. Always reports ``total``."""
+    out = {'total': len(items)}
+    limit = request.args.get('limit')
+    offset = request.args.get('offset')
+    try:
+        off = int(offset) if offset not in (None, '') else 0
+        lim = int(limit) if limit not in (None, '') else None
+    except ValueError:
+        raise validation_error('limit and offset must be integers', 'limit' if limit else 'offset')
+    if off < 0:
+        raise validation_error('offset must be >= 0', 'offset')
+    if lim is not None and not 1 <= lim <= 1000:
+        raise validation_error('limit must be between 1 and 1000', 'limit')
+    if lim is not None or off:
+        items = items[off:off + lim if lim is not None else None]
+        out.update({'limit': lim, 'offset': off})
+    out[key] = items
+    return out
 
 
 def current_round_row(event):
@@ -124,7 +162,7 @@ def admin_list_rounds(event):
         j = round_to_json(r)
         j['application_count'] = r['application_count']
         out.append(j)
-    return jsonify({'rounds': out})
+    return jsonify(paginate(out, 'rounds'))
 
 
 @bp.route('/api/admin/events/<event>/rounds', methods=['POST'])
@@ -141,20 +179,24 @@ def admin_create_round(event):
     return jsonify(round_to_json(get_round_row(rid))), 201
 
 
-@bp.route('/api/admin/rounds/<int:round_id>', methods=['GET'])
+@bp.route('/api/admin/rounds/<ref>', methods=['GET'])
 @require_admin
-def admin_get_round(round_id):
-    return jsonify(round_to_json(require_round(round_id)))
+def admin_get_round(ref):
+    return jsonify(round_to_json(resolve_round_ref(ref)))
 
 
-@bp.route('/api/admin/rounds/<int:round_id>', methods=['PUT'])
+@bp.route('/api/admin/rounds/<ref>', methods=['PUT'])
 @require_admin
-def admin_update_round(round_id):
+def admin_update_round(ref):
     db = get_db()
     begin_immediate(db)  # read-modify-write of name/status/settings under the write lock (L2)
-    row = require_round(round_id)
+    row = resolve_round_ref(ref)
+    round_id = row['id']
     spec = get_event(row['event'])
     data = get_json_body()
+    if row['status'] == 'closed' and data.get('status') not in ('open', 'draft'):
+        # read-only unless this request reopens it (other fields may change in the same request)
+        require_writable(row)
     name = row['name']
     status = row['status']
     closing = row['closing_time']

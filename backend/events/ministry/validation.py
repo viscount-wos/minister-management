@@ -121,6 +121,9 @@ def validate_settings(incoming, current, valid_days_fn):
             if d not in clean:
                 clean.append(d)
         merged['published_days'] = clean
+    # Keep only active days: switching research_day drops the old research day from published_days.
+    valid = valid_days_fn(merged['research_day'])
+    merged['published_days'] = [d for d in merged.get('published_days') or [] if d in valid]
     return merged
 
 

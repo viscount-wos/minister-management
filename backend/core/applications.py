@@ -8,7 +8,8 @@ from core.db import get_db
 from core.errors import ApiError, get_json_body, not_found, validation_error
 from core.profiles import (find_profile, get_profile_by_id, profile_to_json, public_profile,
                            resolve_fid_for_write, snapshot, upsert_profile, validate_profile_fields)
-from core.rounds import current_round_row, get_round_row, require_current_round, require_round
+from core.rounds import (current_round_row, get_round_row, paginate, require_current_round, require_writable,
+                         resolve_round_ref)
 from core.validation import is_past, now_iso
 from events import get_event
 
@@ -166,10 +167,11 @@ def put_current_application(event, fid):
 
 # ---------------------------------------------------------------- admin routes
 
-@bp.route('/api/admin/rounds/<int:round_id>/applications', methods=['GET'])
+@bp.route('/api/admin/rounds/<ref>/applications', methods=['GET'])
 @require_admin
-def admin_list_applications(round_id):
-    rnd = require_round(round_id)
+def admin_list_applications(ref):
+    rnd = resolve_round_ref(ref)
+    round_id = rnd['id']
     spec = get_event(rnd['event'], need_rounds=False)
     sql = 'SELECT a.*, p.fid FROM applications a JOIN profiles p ON p.id = a.player_id WHERE a.round_id = ?'
     params = [round_id]
@@ -183,7 +185,9 @@ def admin_list_applications(round_id):
         app_json = application_to_json(row, rnd)
         app_json['profile'] = profile_to_json(get_profile_by_id(row['player_id']))
         out.append(spec.decorate_application(app_json, rnd))
-    return jsonify({'round_id': round_id, 'applications': out})
+    body = {'round_id': round_id}
+    body.update(paginate(out, 'applications'))
+    return jsonify(body)
 
 
 @bp.route('/api/admin/applications/<int:app_id>', methods=['GET'])
@@ -209,6 +213,7 @@ def admin_update_application(app_id):
     if not row:
         raise not_found('Application not found')
     rnd = get_round_row(row['round_id'])
+    require_writable(rnd)
     spec = get_event(rnd['event'], need_rounds=False)
     data = get_json_body()
     existing_profile = get_profile_by_id(row['player_id'])
@@ -236,12 +241,13 @@ def admin_delete_application(app_id):
     row = get_application_by_id(app_id)
     if not row:
         raise not_found('Application not found')
+    require_writable(get_round_row(row['round_id']))
     delete_application_row(row)
     return jsonify({'deleted': True, 'id': app_id})
 
 
-@bp.route('/api/admin/rounds/<int:round_id>/export', methods=['GET'])
+@bp.route('/api/admin/rounds/<ref>/export', methods=['GET'])
 @require_admin
-def admin_export_round(round_id):
-    rnd = require_round(round_id)
+def admin_export_round(ref):
+    rnd = resolve_round_ref(ref)
     return get_event(rnd['event'], need_rounds=False).export_round(rnd)

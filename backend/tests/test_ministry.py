@@ -245,6 +245,10 @@ def test_player_own_assignments_and_heatmap(client, admin):
     _assign(client, admin, 'monday')
     _assign(client, admin, 'thursday')
     r = client.get('/api/events/ministry/current/assignments/1').json
+    assert r['assignments'] == {}  # drafts are not public (1c): only published days are listed
+    for d in ('thursday', 'monday'):
+        client.post('/api/admin/ministry/rounds/current/publish', json={'day': d}, headers=admin)
+    r = client.get('/api/events/ministry/current/assignments/1').json
     assert r['assignments'] == {'monday': [{'time_slot': '10:00'}], 'thursday': [{'time_slot': '10:00'}]}
     assert client.get('/api/events/ministry/current/assignments/999').status_code == 404
     h = client.get('/api/events/ministry/current/heatmap').json

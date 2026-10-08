@@ -228,7 +228,8 @@ def admin_list_profiles():
         p = profile_to_json(row)
         p['application_count'] = row['application_count']
         out.append(p)
-    return jsonify({'profiles': out})
+    from core.rounds import paginate
+    return jsonify(paginate(out, 'profiles'))
 
 
 @bp.route('/api/admin/profiles/<fid>', methods=['GET'])
