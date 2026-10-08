@@ -225,7 +225,9 @@ class NewAdapter:
         migrate(db, allow_v14=True)
         self.app = create_app({'DATABASE_PATH': db, 'SECRET_KEY': 'parity-new-secret-not-placeholder',
                                'ADMIN_PASSWORD': ADMIN_PW, 'MINISTER_PASSWORD': MINISTER_PW,
-                               'STATIC_DIR': '/nonexistent', 'TESTING': True})
+                               'STATIC_DIR': '/nonexistent', 'TESTING': True,
+                               # player rate limits would 429 the harness's rapid lookups (not a behaviour change)
+                               'RATE_LIMIT_LOOKUPS_PER_MIN': 0, 'RATE_LIMIT_SUBMITS_PER_MIN': 0})
         self.c = self.app.test_client()
         r = self.c.post('/api/admin/login', json={'password': ADMIN_PW})
         assert r.status_code == 200, r.data
