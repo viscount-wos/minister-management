@@ -14,4 +14,8 @@ services:
     environment:
       - FLASK_ENV=development
       - ADMIN_PASSWORD=admin123
+      # the suite drives hundreds of FID lookups/submissions from one IP: per-IP player limits off
+      # (backend/tests/test_security.py covers them with low limits)
+      - RATE_LIMIT_LOOKUPS_PER_MIN=0
+      - RATE_LIMIT_SUBMITS_PER_MIN=0
     restart: "no"

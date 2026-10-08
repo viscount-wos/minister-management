@@ -3,6 +3,7 @@ import json
 
 from flask import Blueprint, jsonify, request
 
+from core.ratelimit import rate_limited
 from core.auth import require_admin
 from core.db import get_db
 from core.errors import ApiError, get_json_body, not_found, validation_error
@@ -109,6 +110,7 @@ def delete_application_row(app_row):
 # ---------------------------------------------------------------- public routes
 
 @bp.route('/api/events/<event>/current/application/<fid>', methods=['GET'])
+@rate_limited('lookup')
 def get_current_application(event, fid):
     rnd = require_current_round(event)
     prof = find_profile(fid)
@@ -119,6 +121,7 @@ def get_current_application(event, fid):
 
 
 @bp.route('/api/events/<event>/previous-application/<fid>', methods=['GET'])
+@rate_limited('lookup')
 def get_previous_application(event, fid):
     get_event(event)
     prof = find_profile(fid)
@@ -130,6 +133,7 @@ def get_previous_application(event, fid):
 
 
 @bp.route('/api/events/<event>/current/application/<fid>', methods=['PUT'])
+@rate_limited('submit')
 def put_current_application(event, fid):
     """Upsert profile + application in the current round.
 

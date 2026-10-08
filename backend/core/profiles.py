@@ -13,6 +13,7 @@ import json
 
 from flask import Blueprint, jsonify, request
 
+from core.ratelimit import rate_limited
 from core.auth import require_admin
 from core.db import get_db
 from core.errors import ApiError, get_json_body, not_found, validation_error
@@ -180,6 +181,7 @@ def upsert_profile(fid, fields, required=('game_name',), field_prefix='profile.'
 # ---------------------------------------------------------------- routes
 
 @bp.route('/api/profile/<fid>', methods=['GET'])
+@rate_limited('lookup')
 def public_get_profile(fid):
     row = find_profile(fid)
     if not row:
@@ -196,6 +198,7 @@ def _check_body_fid(data, url_fid, stored_fid, field):
 
 
 @bp.route('/api/profile/<fid>', methods=['PUT'])
+@rate_limited('submit')
 def public_put_profile(fid):
     """Players have no login: anyone with the FID may update its profile (same trust model as
     applications). Body: partial profile fields; game_name required when creating."""

@@ -49,6 +49,9 @@ def _config_from_env():
         # Explicit, one-off v1.4 import (H1). Prefer `python -m core.migrate`.
         'MIGRATE_V14': _env_flag('MIGRATE_V14'),
         'TRUSTED_PROXY_HOPS': int(os.getenv('TRUSTED_PROXY_HOPS', '1') or 0),
+        # Public player endpoints, requests per minute per client IP (0 = off). See core/ratelimit.py.
+        'RATE_LIMIT_LOOKUPS_PER_MIN': int(os.getenv('RATE_LIMIT_LOOKUPS_PER_MIN', '30') or 0),
+        'RATE_LIMIT_SUBMITS_PER_MIN': int(os.getenv('RATE_LIMIT_SUBMITS_PER_MIN', '10') or 0),
         'CORS_ORIGINS': [o.strip() for o in os.getenv('CORS_ORIGINS', '').split(',') if o.strip()],
         'STATIC_DIR': STATIC_DIR,
         'JSON_SORT_KEYS': False,
@@ -99,7 +102,7 @@ def _harden_config(cfg):
 
 
 def create_app(config=None):
-    from core import applications, auth, db, profiles, rounds, settings
+    from core import applications, auth, db, profiles, rounds, security, settings
     from core.errors import ApiError, register_error_handlers
     from events import register_defaults
     from events.ministry import routes as ministry_routes
@@ -141,10 +144,15 @@ def create_app(config=None):
         static_dir = app.config['STATIC_DIR']
         if path and os.path.isfile(os.path.join(static_dir, path)):
             return send_from_directory(static_dir, path)
+        if path.startswith('assets/'):
+            # A missing hashed asset (e.g. an old chunk after a deploy) must 404, never get index.html
+            # cached as an immutable script.
+            return jsonify({'error': 'Not found', 'code': 'NOT_FOUND', 'field': None}), 404
         if not os.path.isfile(os.path.join(static_dir, 'index.html')):
             return jsonify({'error': 'Frontend not built', 'code': 'NOT_FOUND', 'field': None}), 404
         return send_from_directory(static_dir, 'index.html')
 
+    security.init_app(app)
     return app
 
 

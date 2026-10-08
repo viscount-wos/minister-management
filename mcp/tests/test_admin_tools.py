@@ -7,7 +7,7 @@ from conftest import BEARER, call, connect, fid
 pytestmark = pytest.mark.anyio
 
 ADMIN_TOOLS = {'list_rounds', 'list_applications', 'get_application_by_id', 'update_application',
-               'start_new_round', 'get_assignments', 'get_tyrant_summary'}
+               'start_new_round', 'get_assignments', 'get_tyrant_summary', 'rename_round'}
 ANSWERS = {'construction_speedups_days': 1, 'general_speedups_days': 0, 'research_speedups_days': 0,
            'troop_training_speedups_days': 0, 'fire_crystals': 0, 'refined_fire_crystals': 0,
            'fire_crystal_shards': 0, 'time_slots_by_day': {'construction': ['10:00'], 'research': [], 'troop': []}}
@@ -99,6 +99,21 @@ async def test_rounds_and_start_new_round(admin, api):
 
         err, data = await call(c, 'start_new_round', {'event': 'tal', 'name': 'x', 'confirm': True})
         assert err and data['code'] == 'EVENT_HAS_NO_ROUNDS'
+
+
+async def test_rename_round(admin, api):
+    old = api.start_round('Imported from previous system')
+    api.start_round('Newer round')   # closes the imported one
+    async with admin() as c:
+        err, data = await call(c, 'rename_round', {'round_id': old['id'], 'name': 'September 2026'})
+        assert not err, data
+        assert data['name'] == 'September 2026' and data['status'] == 'closed'
+        err, data = await call(c, 'rename_round', {'name': 'Renamed current', 'event': 'ministry'})
+        assert not err and data['name'] == 'Renamed current' and data['status'] == 'open'
+        err, data = await call(c, 'get_current_round', {'event': 'ministry'})
+        assert data['name'] == 'Renamed current'
+        err, data = await call(c, 'rename_round', {'round_id': 999999, 'name': 'x'})
+        assert err and data['code'] == 'NOT_FOUND'
 
 
 async def test_applications_list_get_update(admin, api, backend):

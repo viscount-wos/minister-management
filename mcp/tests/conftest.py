@@ -71,7 +71,9 @@ def backend(tmp_path_factory):
     log = tmp / 'backend.log'
     env = {**os.environ, 'FLASK_ENV': 'development', 'ADMIN_PASSWORD': ADMIN_PASSWORD,
            'MINISTER_PASSWORD': 'minister-' + secrets.token_hex(8),
-           'SECRET_KEY': secrets.token_urlsafe(32), 'DATABASE_PATH': str(tmp / 'data' / 'test.db')}
+           'SECRET_KEY': secrets.token_urlsafe(32), 'DATABASE_PATH': str(tmp / 'data' / 'test.db'),
+           # one IP makes every request in this suite: the per-IP player rate limits are off here
+           'RATE_LIMIT_LOOKUPS_PER_MIN': '0', 'RATE_LIMIT_SUBMITS_PER_MIN': '0'}
     code = (f'from app import create_app; create_app({{"STATIC_DIR": "/nonexistent"}})'
             f'.run(host="127.0.0.1", port={port}, debug=False, use_reloader=False)')
     with open(log, 'w') as fh:

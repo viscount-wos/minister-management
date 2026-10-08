@@ -394,6 +394,20 @@ preview of the round that would be closed. Optional closing_time is ISO-8601 (e.
             body['settings'] = settings
         return R.from_api(await api.admin('POST', f'/api/admin/events/{seg(event)}/start-new-round', json=body))
 
+    @server.tool(annotations=_rw('Rename round'), description=f"""{ADMIN} Rename a round (any status,
+closed rounds included: only the label changes, never the round's data). `round_id` is a round id or
+"current" (the current round of `event`). `name` 1-100 characters. Returns the updated round.
+{EVENTS_HELP} {UNTRUSTED} {ERRORS}""")
+    async def rename_round(name: Annotated[str, Field(min_length=1, max_length=100)], ctx: Context,
+                           round_id: Annotated[int | Literal['current'], Field(
+                               description='Round id or "current".')] = 'current',
+                           event: EventKey = 'ministry') -> CallToolResult:
+        if (bad := refused(ctx)) or (bad := R.check_segment('event', event)):
+            return bad
+        params = {'event': event} if round_id == 'current' else None
+        return R.from_api(await api.admin('PATCH', f'/api/admin/rounds/{seg(round_id)}', json={'name': name},
+                                          params=params))
+
     @server.tool(annotations=_ro('Get Frost Dragon Tyrant summary'), description=f"""{ADMIN} Tyrant only:
 summary stats of one round: total players, opening_rush (players available in any rush window), discord_vc,
 per-window counts, alliances (count each), roles (count each), troop_tiers per troop type

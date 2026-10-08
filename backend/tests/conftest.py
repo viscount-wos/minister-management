@@ -25,6 +25,9 @@ def app(db_path):
         'ADMIN_PASSWORD': ADMIN_PW,
         'MINISTER_PASSWORD': MINISTER_PW,
         'STATIC_DIR': '/nonexistent',
+        # Off for the general suite (one IP makes many requests); tests/test_security.py turns them on.
+        'RATE_LIMIT_LOOKUPS_PER_MIN': 0,
+        'RATE_LIMIT_SUBMITS_PER_MIN': 0,
     })
 
 

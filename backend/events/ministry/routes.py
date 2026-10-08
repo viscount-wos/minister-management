@@ -3,6 +3,7 @@ import json
 
 from flask import Blueprint, Response, jsonify
 
+from core.ratelimit import rate_limited
 from core.auth import require_admin
 from core.db import begin_immediate, get_db
 from core.errors import get_json_body, not_found, validation_error
@@ -55,6 +56,7 @@ def public_schedule_day(day):
 
 
 @bp.route('/api/events/ministry/current/assignments/<fid>', methods=['GET'])
+@rate_limited('lookup')
 def public_player_assignments(fid):
     """A player's own assignments in the current round: day + time slot, PUBLISHED days only.
 

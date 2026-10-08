@@ -224,6 +224,24 @@ def admin_update_round(ref):
     return jsonify(out)
 
 
+@bp.route('/api/admin/rounds/<ref>', methods=['PATCH'])
+@require_admin
+def admin_rename_round(ref):
+    """Rename a round: body ``{"name": "..."}`` only. Works on ANY round, closed ones included: the name is a
+    label (e.g. "Imported from previous system" -> "September 2026"), not round data, so history stays intact."""
+    db = get_db()
+    data = get_json_body()
+    unknown = sorted(set(data) - {'name'})
+    if unknown:
+        raise validation_error('Only the name can be changed here; use PUT for other fields', unknown[0])
+    name = validate_str(data.get('name'), 'name', 100, required=True)
+    begin_immediate(db)
+    row = resolve_round_ref(ref)
+    db.execute('UPDATE rounds SET name=?, updated_at=? WHERE id=?', (name, now_iso(), row['id']))
+    db.commit()
+    return jsonify(round_to_json(get_round_row(row['id'])))
+
+
 @bp.route('/api/admin/events/<event>/start-new-round', methods=['POST'])
 @require_admin
 def admin_start_new_round(event):
