@@ -13,9 +13,10 @@ import {
 } from '@dnd-kit/core';
 import { Sparkles, Download, AlertCircle, Globe, EyeOff, Lock, Unlock, Link2 } from 'lucide-react';
 import axios from 'axios';
-import TimezoneSelector from '../TimezoneSelector';
-import { generateAssignmentSlots, getSlotDisplayTime, getSavedTimezone, TimeSlotScheme } from '../../utils/timezone';
-import { activeDaysInOrder } from '../../utils/days';
+import TimezoneSelector from '../../../shared/TimezoneSelector';
+import { useTimezone } from '../../../shared/TimezoneContext';
+import { generateAssignmentSlots, getSlotDisplayTime, TimeSlotScheme } from '../../../shared/timezone';
+import { activeDaysInOrder } from '../../../shared/days';
 
 interface AssignedPlayer {
   id: number;
@@ -253,7 +254,7 @@ export default function AssignmentManagement() {
   const [activePlayer, setActivePlayer] = useState<AssignedPlayer | null>(null);
   const [overSlotId, setOverSlotId] = useState<string | null>(null);
   const [researchDay, setResearchDay] = useState<'tuesday' | 'friday'>('tuesday');
-  const [timezone, setTimezone] = useState(getSavedTimezone);
+  const { timezone, setTimezone } = useTimezone();
   const [publishedDays, setPublishedDays] = useState<string[]>([]);
   const [timeSlotScheme, setTimeSlotScheme] = useState<TimeSlotScheme>('exact_alignment');
 

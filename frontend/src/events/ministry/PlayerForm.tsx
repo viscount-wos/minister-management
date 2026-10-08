@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import axios from 'axios';
-import TimezoneSelector from '../components/TimezoneSelector';
-import { getSavedTimezone, generatePlayerTimeSlots, formatTimeInTimezone, getTimezoneAbbr } from '../utils/timezone';
+import TimezoneSelector from '../../shared/TimezoneSelector';
+import { useTimezone } from '../../shared/TimezoneContext';
+import { generatePlayerTimeSlots, formatTimeInTimezone, getTimezoneAbbr } from '../../shared/timezone';
+import { MINISTRY_PATHS } from './paths';
 
 interface PlayerData {
   fid: string;
@@ -28,7 +30,7 @@ export default function PlayerForm() {
   const [success, setSuccess] = useState(false);
   const [showFireCrystals, setShowFireCrystals] = useState(false);
   const [researchDay, setResearchDay] = useState('tuesday');
-  const [timezone, setTimezone] = useState(getSavedTimezone);
+  const { timezone, setTimezone } = useTimezone();
   const [heatmapData, setHeatmapData] = useState<Record<string, Record<string, number>>>({});
   const [appsClosed, setAppsClosed] = useState(false);
   const [closingChecked, setClosingChecked] = useState(false);
@@ -171,7 +173,7 @@ export default function PlayerForm() {
       await axios.post('/api/player/submit', submitData);
       setSuccess(true);
       setTimeout(() => {
-        navigate('/');
+        navigate(MINISTRY_PATHS.home);
       }, 5000);
     } catch (err: any) {
       setError(err.response?.data?.error || t('ministry:form.submitError'));
@@ -200,7 +202,7 @@ export default function PlayerForm() {
           <h2 className="text-3xl font-bold text-danger mb-4">{t('ministry:home.applicationsClosed')}</h2>
           <p className="text-theme-dim mb-6">{t('ministry:form.applicationsClosedDesc')}</p>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate(MINISTRY_PATHS.home)}
             className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -569,7 +571,7 @@ export default function PlayerForm() {
               <p className="text-warning">{duplicateWarning}</p>
             </div>
             <button
-              onClick={() => navigate('/update')}
+              onClick={() => navigate(MINISTRY_PATHS.update)}
               className="mt-3 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors text-sm"
             >
               {t('ministry:update.title')}
@@ -588,7 +590,7 @@ export default function PlayerForm() {
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-8">
           <button
-            onClick={step === 1 ? () => navigate('/') : handleBack}
+            onClick={step === 1 ? () => navigate(MINISTRY_PATHS.home) : handleBack}
             className="flex items-center gap-2 px-6 py-3 border-2 border-theme-border rounded-lg hover:bg-dark-card-hover font-medium transition-colors text-theme-text"
           >
             <ArrowLeft className="w-5 h-5" />

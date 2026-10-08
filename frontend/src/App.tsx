@@ -1,51 +1,60 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { isRtl } from './i18n/index';
-import Home from './pages/Home';
-import PlayerForm from './pages/PlayerForm';
-import UpdateSubmission from './pages/UpdateSubmission';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import PublishedSchedule from './pages/PublishedSchedule';
-import PlayerGuide from './pages/PlayerGuide';
-import AdminGuide from './pages/AdminGuide';
-import Changelog from './pages/Changelog';
-import LanguageSelector from './components/LanguageSelector';
-import ThemeSelector from './components/ThemeSelector';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './shell/Layout';
+import Home from './shell/Home';
+import Changelog from './shell/Changelog';
+import LegacyRedirect from './shell/LegacyRedirect';
+import { TimezoneProvider } from './shared/TimezoneContext';
+import MinistryHome from './events/ministry/MinistryHome';
+import PlayerForm from './events/ministry/PlayerForm';
+import UpdateSubmission from './events/ministry/UpdateSubmission';
+import PublishedSchedule from './events/ministry/PublishedSchedule';
+import PlayerGuide from './events/ministry/PlayerGuide';
+import AdminLogin from './events/ministry/admin/AdminLogin';
+import AdminDashboard from './events/ministry/admin/AdminDashboard';
+import AdminGuide from './events/ministry/admin/AdminGuide';
+import TyrantPage from './events/tyrant/TyrantPage';
+import SvsPage from './events/svs/SvsPage';
+import TalPage from './events/tal/TalPage';
 
 function App() {
-  const { i18n } = useTranslation();
-
-  // Set document direction for RTL languages
-  document.documentElement.dir = isRtl(i18n.language) ? 'rtl' : 'ltr';
-
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col">
-        {/* Both selectors share one wrapping row so they stack tidily on a
-            phone instead of forcing the header wider than the screen. */}
-        <header className="w-full py-3 px-4 flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
-          <ThemeSelector />
-          <LanguageSelector />
-        </header>
-        <div className="flex-1">
-          <Routes>
+    <TimezoneProvider>
+      <Router>
+        <Routes>
+          <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/submit" element={<PlayerForm />} />
-            <Route path="/update" element={<UpdateSubmission />} />
-            <Route path="/schedule/:day" element={<PublishedSchedule />} />
+            <Route path="/changelog" element={<Changelog />} />
+
+            {/* Ministry */}
+            <Route path="/ministry" element={<MinistryHome />} />
+            <Route path="/ministry/submit" element={<PlayerForm />} />
+            <Route path="/ministry/update" element={<UpdateSubmission />} />
+            <Route path="/ministry/schedule/:day" element={<PublishedSchedule />} />
+            <Route path="/ministry/guide" element={<PlayerGuide />} />
+
+            {/* Other events */}
+            <Route path="/tyrant" element={<TyrantPage />} />
+            <Route path="/svs" element={<SvsPage />} />
+            <Route path="/tal" element={<TalPage />} />
+
+            {/* Admin (unchanged URLs) */}
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/guide" element={<PlayerGuide />} />
             <Route path="/admin/guide" element={<AdminGuide />} />
-            <Route path="/changelog" element={<Changelog />} />
-          </Routes>
-        </div>
-        <footer className="mt-auto pb-4 text-center">
-          <p className="text-xs italic text-theme-dim">compliments of the viscount, you're welcome 😂</p>
-        </footer>
-      </div>
-    </Router>
+
+            {/* v1.x URLs, kept working for bookmarks and shared links */}
+            <Route path="/submit" element={<LegacyRedirect to="/ministry/submit" />} />
+            <Route path="/apply" element={<LegacyRedirect to="/ministry/submit" />} />
+            <Route path="/update" element={<LegacyRedirect to="/ministry/update" />} />
+            <Route path="/schedule/:day" element={<LegacyRedirect to="/ministry/schedule/:day" />} />
+            <Route path="/guide" element={<LegacyRedirect to="/ministry/guide" />} />
+            <Route path="/ministry/admin" element={<LegacyRedirect to="/admin" />} />
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </Router>
+    </TimezoneProvider>
   );
 }
 

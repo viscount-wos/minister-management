@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LogOut, Users, Calendar, HelpCircle, Settings } from 'lucide-react';
-import PlayerManagement from '../components/admin/PlayerManagement';
-import AssignmentManagement from '../components/admin/AssignmentManagement';
-import AdminSettings from '../components/admin/AdminSettings';
+import PlayerManagement from './PlayerManagement';
+import AssignmentManagement from './AssignmentManagement';
+import AdminSettings from './AdminSettings';
+import { MINISTRY_PATHS } from '../paths';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminRole');
-    navigate('/');
+    navigate(MINISTRY_PATHS.home);
   };
 
   if (!isAuthenticated) {

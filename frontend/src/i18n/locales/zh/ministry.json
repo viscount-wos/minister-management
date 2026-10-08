@@ -1,4 +1,8 @@
 {
+  "event": {
+    "name": "部长",
+    "tagline": "为 SVS 备战日预约部长时段并查看日程"
+  },
   "home": {
     "title": "白色废土 部长管理",
     "subtitle": "SVS 州对州 部长分配系统",

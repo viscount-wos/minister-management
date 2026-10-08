@@ -10,5 +10,28 @@
   "save": "Zapisz",
   "close": "Zamknij",
   "yes": "Tak",
-  "no": "Nie"
+  "no": "Nie",
+  "nav": {
+    "home": "Wszystkie wydarzenia"
+  },
+  "header": {
+    "timezone": "Wyświetlana strefa czasowa"
+  },
+  "home": {
+    "title": "Wydarzenia stanu",
+    "subtitle": "Wybierz wydarzenie, aby się zapisać lub sprawdzić harmonogram",
+    "welcome": "Witaj, {{state}}",
+    "status": {
+      "open": "Otwarte",
+      "nextRelease": "Następna wersja",
+      "comingSoon": "Wkrótce"
+    }
+  },
+  "placeholder": {
+    "nextReleaseTitle": "Pojawi się w następnej wersji",
+    "nextReleaseBody": "Ten moduł jest w budowie i pojawi się w następnej wersji.",
+    "comingSoonTitle": "Wkrótce",
+    "comingSoonBody": "To wydarzenie jest jeszcze planowane. Zajrzyj później."
+  },
+  "footer": "z pozdrowieniami od wicehrabiego, nie ma za co 😂"
 }

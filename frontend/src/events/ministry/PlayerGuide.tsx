@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText, Edit, Clock, Palette, Globe, Lightbulb } from 'lucide-react';
+import { MINISTRY_PATHS } from './paths';
 
 export default function PlayerGuide() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function PlayerGuide() {
     <div className="min-h-screen bg-dark-bg py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(MINISTRY_PATHS.home)}
           className="flex items-center gap-2 text-theme-dim hover:text-accent transition-colors mb-6"
         >
           <ArrowLeft className="w-5 h-5" />

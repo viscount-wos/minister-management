@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search, ArrowLeft, Save, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
-import TimezoneSelector from '../components/TimezoneSelector';
-import { getSavedTimezone, generatePlayerTimeSlots, getTimezoneAbbr, formatTimeInTimezone } from '../utils/timezone';
-import { activeDaysInOrder } from '../utils/days';
+import TimezoneSelector from '../../shared/TimezoneSelector';
+import { useTimezone } from '../../shared/TimezoneContext';
+import { generatePlayerTimeSlots, getTimezoneAbbr, formatTimeInTimezone } from '../../shared/timezone';
+import { activeDaysInOrder } from '../../shared/days';
+import { MINISTRY_PATHS } from './paths';
 
 interface PlayerData {
   id?: number;
@@ -38,7 +40,7 @@ export default function UpdateSubmission() {
   const [showFireCrystals, setShowFireCrystals] = useState(false);
   const [activeTimeTab, setActiveTimeTab] = useState<'construction' | 'research' | 'troop'>('construction');
   const [researchDay, setResearchDay] = useState('tuesday');
-  const [timezone, setTimezone] = useState(getSavedTimezone);
+  const { timezone, setTimezone } = useTimezone();
   const [heatmapData, setHeatmapData] = useState<Record<string, Record<string, number>>>({});
   const [playerAssignments, setPlayerAssignments] = useState<Record<string, {time_slot: string}[]> | null>(null);
 
@@ -159,7 +161,7 @@ export default function UpdateSubmission() {
       });
       setSuccess(true);
       setTimeout(() => {
-        navigate('/');
+        navigate(MINISTRY_PATHS.home);
       }, 2000);
     } catch (err: any) {
       setError(err.response?.data?.error || t('ministry:form.updateError'));
@@ -184,7 +186,7 @@ export default function UpdateSubmission() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-4xl w-full">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(MINISTRY_PATHS.home)}
           className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
         >
           <ArrowLeft className="w-5 h-5" />

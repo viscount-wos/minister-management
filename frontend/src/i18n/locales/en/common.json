@@ -10,5 +10,28 @@
   "save": "Save",
   "close": "Close",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "nav": {
+    "home": "All events"
+  },
+  "header": {
+    "timezone": "Display timezone"
+  },
+  "home": {
+    "title": "State Events",
+    "subtitle": "Pick an event to sign up or check your schedule",
+    "welcome": "Welcome, {{state}}",
+    "status": {
+      "open": "Open",
+      "nextRelease": "Next release",
+      "comingSoon": "Coming soon"
+    }
+  },
+  "placeholder": {
+    "nextReleaseTitle": "Coming in the next release",
+    "nextReleaseBody": "This module is being built and will arrive in the next release.",
+    "comingSoonTitle": "Coming soon",
+    "comingSoonBody": "This event is still being planned. Check back later."
+  },
+  "footer": "compliments of the viscount, you're welcome 😂"
 }

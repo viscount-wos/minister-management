@@ -10,5 +10,28 @@
   "save": "Kaydet",
   "close": "Kapat",
   "yes": "Evet",
-  "no": "Hayır"
+  "no": "Hayır",
+  "nav": {
+    "home": "Tüm etkinlikler"
+  },
+  "header": {
+    "timezone": "Görüntülenen saat dilimi"
+  },
+  "home": {
+    "title": "Eyalet Etkinlikleri",
+    "subtitle": "Kayıt olmak veya programını görmek için bir etkinlik seç",
+    "welcome": "Hoş geldiniz, {{state}}",
+    "status": {
+      "open": "Açık",
+      "nextRelease": "Sonraki sürüm",
+      "comingSoon": "Yakında"
+    }
+  },
+  "placeholder": {
+    "nextReleaseTitle": "Sonraki sürümde geliyor",
+    "nextReleaseBody": "Bu modül hazırlanıyor ve sonraki sürümde gelecek.",
+    "comingSoonTitle": "Yakında",
+    "comingSoonBody": "Bu etkinlik hâlâ planlanıyor. Daha sonra tekrar bak."
+  },
+  "footer": "vikontun ikramıdır, rica ederim 😂"
 }

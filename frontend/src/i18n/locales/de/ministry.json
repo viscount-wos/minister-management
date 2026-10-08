@@ -1,4 +1,8 @@
 {
+  "event": {
+    "name": "Ministerium",
+    "tagline": "Buche einen Ministerplatz für die SVS-Vorbereitungstage und sieh dir den Plan an"
+  },
   "home": {
     "title": "Whiteout Survival Ministeriumsverwaltung",
     "subtitle": "SVS Staat-gegen-Staat Ministeriumszuweisungssystem",

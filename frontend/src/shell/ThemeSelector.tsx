@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Palette } from 'lucide-react';
-import { THEMES, ThemeId, applyTheme, getSavedTheme, saveTheme } from '../utils/theme';
+import { THEMES, ThemeId, applyTheme, getSavedTheme, saveTheme } from '../shared/theme';
 
 export default function ThemeSelector() {
   const { t } = useTranslation();

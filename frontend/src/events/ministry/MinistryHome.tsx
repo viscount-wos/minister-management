@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FileText, Edit, Shield, Calendar, HelpCircle, Clock, Sparkles } from 'lucide-react';
 import axios from 'axios';
-import { sortDaysByWeek } from '../utils/days';
+import { sortDaysByWeek } from '../../shared/days';
+import { MINISTRY_PATHS } from './paths';
 
-export default function Home() {
+export default function MinistryHome() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [publishedDays, setPublishedDays] = useState<string[]>([]);
@@ -76,7 +77,7 @@ export default function Home() {
             {publishedDays.map(day => (
               <button
                 key={day}
-                onClick={() => navigate(`/schedule/${day}`)}
+                onClick={() => navigate(MINISTRY_PATHS.schedule(day))}
                 className="w-full bg-accent/10 border-2 border-accent/40 rounded-2xl p-5 hover:bg-accent/20 transition-all duration-300 group"
               >
                 <div className="flex items-center justify-center gap-4">
@@ -98,7 +99,7 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-6">
           {/* Submit New Application */}
           <button
-            onClick={() => !isClosed && navigate('/submit')}
+            onClick={() => !isClosed && navigate(MINISTRY_PATHS.submit)}
             disabled={isClosed}
             className={`bg-dark-card rounded-2xl p-8 border border-theme-border transition-all duration-300 group relative ${
               isClosed
@@ -123,7 +124,7 @@ export default function Home() {
 
           {/* Update Submission */}
           <button
-            onClick={() => navigate('/update')}
+            onClick={() => navigate(MINISTRY_PATHS.update)}
             className="bg-dark-card rounded-2xl p-8 border border-theme-border hover:bg-dark-card-hover transform hover:-translate-y-2 transition-all duration-300 group"
           >
             <div className="flex flex-col items-center text-center">
@@ -161,7 +162,7 @@ export default function Home() {
         {/* Wraps to two rows on a phone rather than overflowing the width */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           <button
-            onClick={() => navigate('/guide')}
+            onClick={() => navigate(MINISTRY_PATHS.guide)}
             className="inline-flex items-center gap-2 text-accent hover:text-accent-dim transition-colors text-sm font-medium"
           >
             <HelpCircle className="w-4 h-4" />

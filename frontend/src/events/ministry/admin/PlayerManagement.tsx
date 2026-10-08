@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Edit2, Trash2, X, Save, AlertCircle, Download, Upload } from 'lucide-react';
 import axios from 'axios';
-import TimezoneSelector from '../TimezoneSelector';
-import { getSavedTimezone, generatePlayerTimeSlots, getTimezoneAbbr } from '../../utils/timezone';
+import TimezoneSelector from '../../../shared/TimezoneSelector';
+import { useTimezone } from '../../../shared/TimezoneContext';
+import { generatePlayerTimeSlots, getTimezoneAbbr } from '../../../shared/timezone';
 
 
 interface Player {
@@ -47,7 +48,7 @@ export default function PlayerManagement() {
   const [importMessage, setImportMessage] = useState('');
   const [activeTimeTab, setActiveTimeTab] = useState<'construction' | 'research' | 'troop'>('construction');
   const [researchDay, setResearchDay] = useState('tuesday');
-  const [timezone, setTimezone] = useState(getSavedTimezone);
+  const { timezone, setTimezone } = useTimezone();
 
   useEffect(() => {
     fetchPlayers();

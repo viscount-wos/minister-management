@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Shield, ArrowLeft, AlertCircle } from 'lucide-react';
 import axios from 'axios';
+import { MINISTRY_PATHS } from '../paths';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-md w-full">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(MINISTRY_PATHS.home)}
           className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
         >
           <ArrowLeft className="w-5 h-5" />

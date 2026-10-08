@@ -1,4 +1,8 @@
 {
+  "event": {
+    "name": "Ministère",
+    "tagline": "Réservez un créneau de ministère pour les jours de préparation SVS et consultez le planning"
+  },
   "home": {
     "title": "Gestion des Ministères Whiteout Survival",
     "subtitle": "Système d'Attribution des Ministères SVS État contre État",

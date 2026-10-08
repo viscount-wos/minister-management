@@ -10,5 +10,28 @@
   "save": "保存",
   "close": "关闭",
   "yes": "是",
-  "no": "否"
+  "no": "否",
+  "nav": {
+    "home": "所有活动"
+  },
+  "header": {
+    "timezone": "显示时区"
+  },
+  "home": {
+    "title": "州活动",
+    "subtitle": "选择一个活动进行报名或查看日程",
+    "welcome": "欢迎，{{state}}",
+    "status": {
+      "open": "开放中",
+      "nextRelease": "下个版本",
+      "comingSoon": "即将推出"
+    }
+  },
+  "placeholder": {
+    "nextReleaseTitle": "将在下个版本推出",
+    "nextReleaseBody": "该模块正在开发中，将在下个版本推出。",
+    "comingSoonTitle": "即将推出",
+    "comingSoonBody": "该活动仍在筹划中，请稍后再来。"
+  },
+  "footer": "子爵敬上，不用谢 😂"
 }

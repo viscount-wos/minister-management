@@ -3,8 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Calendar, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
-import TimezoneSelector from '../components/TimezoneSelector';
-import { getSavedTimezone, getSlotDisplayTime, generateAssignmentSlots } from '../utils/timezone';
+import TimezoneSelector from '../../shared/TimezoneSelector';
+import { useTimezone } from '../../shared/TimezoneContext';
+import { getSlotDisplayTime, generateAssignmentSlots } from '../../shared/timezone';
+import { MINISTRY_PATHS } from './paths';
 
 interface PublishedPlayer {
   game_name: string;
@@ -24,7 +26,7 @@ export default function PublishedSchedule() {
   const { t } = useTranslation();
   const [data, setData] = useState<PublishedData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timezone, setTimezone] = useState(getSavedTimezone);
+  const { timezone, setTimezone } = useTimezone();
   const [appsStillOpen, setAppsStillOpen] = useState(false);
 
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function PublishedSchedule() {
           <h2 className="text-2xl font-bold text-theme-text mb-4">{t('ministry:schedule.noSchedule')}</h2>
           <p className="text-theme-dim mb-6">{t('ministry:schedule.noScheduleDesc')}</p>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate(MINISTRY_PATHS.home)}
             className="flex items-center gap-2 mx-auto text-accent hover:text-accent-dim"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -89,7 +91,7 @@ export default function PublishedSchedule() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-5xl w-full">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(MINISTRY_PATHS.home)}
           className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
         >
           <ArrowLeft className="w-5 h-5" />

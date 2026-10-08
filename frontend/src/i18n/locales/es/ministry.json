@@ -1,4 +1,8 @@
 {
+  "event": {
+    "name": "Ministerio",
+    "tagline": "Reserva un puesto de ministerio para los días de preparación de SVS y consulta el horario"
+  },
   "home": {
     "title": "Gestión de Ministerios de Whiteout Survival",
     "subtitle": "Sistema de Asignación de Ministerios SVS Estado vs Estado",
