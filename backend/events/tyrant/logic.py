@@ -326,6 +326,8 @@ class TyrantEvent(EventSpec):
         return tv.validate_answers(answers, round_settings(round_), existing=existing)
 
     def decorate_application(self, app, round_):
+        # the same joiner_strength the list rows carry, so an admin edit's response can replace a row in place
+        app['joiner_strength'] = joiner_strength(app.get('profile') or {})
         return without_furnace(app)
 
     def export_round(self, round_):

@@ -73,8 +73,9 @@ class EventSpec:
         """Hook after an admin changes round settings. Return extra response fields."""
         return {}
 
-    def on_application_deleted(self, db, round_id, player_id):
-        pass
+    def on_application_deleted(self, db, round_id, player_id) -> dict:
+        """Hook inside the delete's transaction (the caller commits). Returns extra DELETE response fields."""
+        return {}
 
     def export_round(self, round_):
         raise ApiError(400, 'EXPORT_NOT_SUPPORTED', f'Export is not available for {self.key}')

@@ -264,6 +264,37 @@ class SvsEvent(EventSpec):
         app['joiner_strength'] = joiner_strength(app.get('profile') or {})
         return without_furnace(app)
 
+    def on_application_deleted(self, db, round_id, player_id):
+        """Deleting a sign-up also takes the player out of the round's battle plan, in the SAME transaction as the
+        delete (the caller commits), with a +1 plan revision so an open planner gets PLAN_CONFLICT instead of
+        silently re-adding them. Placement semantics are the planner's "Move" (plan._remove_at): a leader card stays
+        with its heroes and no player, a named joiner slot keeps its heroes/ratio, an extra joiner / extra-group entry
+        is removed. Returns {'plan_removed': [where...], 'plan_revision': n} (empty list when not in the plan)."""
+        from core.db import begin_immediate
+        from core.validation import now_iso
+        from events.svs import plan as plan_mod
+        prof = db.execute('SELECT fid FROM profiles WHERE id = ?', (player_id,)).fetchone()
+        begin_immediate(db)  # read-modify-write of the plan under the write lock
+        row = plan_mod.load_row(db, round_id)
+        if not prof or not row:
+            return {'plan_removed': [], 'plan_revision': row['revision'] if row else 0}
+        plan = plan_mod.stored_plan(row)
+        ref = {'fid': prof['fid']}
+        names = plan_mod.people(db, plan_mod.plan_fids(plan), round_id)
+        removed = []
+        while True:  # a player is booked once, but never leave a stray duplicate behind
+            where = plan_mod.find_placement(plan, ref)
+            if not where:
+                break
+            removed.append(plan_mod.where_details(plan, where, names))
+            plan_mod._remove_at(plan, where)
+        if not removed:
+            return {'plan_removed': [], 'plan_revision': row['revision']}
+        revision = row['revision'] + 1
+        db.execute('UPDATE svs_plans SET plan = ?, revision = ?, updated_at = ? WHERE round_id = ?',
+                   (json.dumps(plan, separators=(',', ':')), revision, now_iso(), round_id))
+        return {'plan_removed': removed, 'plan_revision': revision}
+
     def export_round(self, round_):
         from core.db import get_db
         return export_xlsx_response(get_db(), round_)
