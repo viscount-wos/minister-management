@@ -42,6 +42,9 @@ export default function PlayerGuide() {
               <h2 className="text-2xl font-bold text-theme-text">{t('guide:player.submitTitle')}</h2>
             </div>
             <div className="space-y-4 text-theme-dim leading-relaxed">
+              <p className="p-3 bg-accent/10 border border-accent/30 rounded-lg text-accent text-sm">
+                {t('guide:player.roundsNote')}
+              </p>
               <div>
                 <h3 className="text-lg font-semibold text-theme-text mb-2">{t('guide:player.step1Header')}</h3>
                 <ul className="list-disc list-inside space-y-1 ml-2">

@@ -5,8 +5,7 @@ import Changelog from './shell/Changelog';
 import LegacyRedirect from './shell/LegacyRedirect';
 import { TimezoneProvider } from './shared/TimezoneContext';
 import MinistryHome from './events/ministry/MinistryHome';
-import PlayerForm from './events/ministry/PlayerForm';
-import UpdateSubmission from './events/ministry/UpdateSubmission';
+import ApplicationPage from './events/ministry/ApplicationPage';
 import PublishedSchedule from './events/ministry/PublishedSchedule';
 import PlayerGuide from './events/ministry/PlayerGuide';
 import AdminLogin from './events/ministry/admin/AdminLogin';
@@ -27,8 +26,10 @@ function App() {
 
             {/* Ministry */}
             <Route path="/ministry" element={<MinistryHome />} />
-            <Route path="/ministry/submit" element={<PlayerForm />} />
-            <Route path="/ministry/update" element={<UpdateSubmission />} />
+            <Route path="/ministry/apply" element={<ApplicationPage />} />
+            {/* New vs edit is decided by FID on one page now */}
+            <Route path="/ministry/submit" element={<LegacyRedirect to="/ministry/apply" />} />
+            <Route path="/ministry/update" element={<LegacyRedirect to="/ministry/apply" />} />
             <Route path="/ministry/schedule/:day" element={<PublishedSchedule />} />
             <Route path="/ministry/guide" element={<PlayerGuide />} />
 
@@ -43,9 +44,9 @@ function App() {
             <Route path="/admin/guide" element={<AdminGuide />} />
 
             {/* v1.x URLs, kept working for bookmarks and shared links */}
-            <Route path="/submit" element={<LegacyRedirect to="/ministry/submit" />} />
-            <Route path="/apply" element={<LegacyRedirect to="/ministry/submit" />} />
-            <Route path="/update" element={<LegacyRedirect to="/ministry/update" />} />
+            <Route path="/submit" element={<LegacyRedirect to="/ministry/apply" />} />
+            <Route path="/apply" element={<LegacyRedirect to="/ministry/apply" />} />
+            <Route path="/update" element={<LegacyRedirect to="/ministry/apply" />} />
             <Route path="/schedule/:day" element={<LegacyRedirect to="/ministry/schedule/:day" />} />
             <Route path="/guide" element={<LegacyRedirect to="/ministry/guide" />} />
             <Route path="/ministry/admin" element={<LegacyRedirect to="/admin" />} />
