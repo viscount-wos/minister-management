@@ -412,6 +412,11 @@ def test_heroes_view_respects_generation(page: Page, base_url, api, shot):
         page.evaluate("localStorage.removeItem('preferred_language')")
 
 
+def added_name(event: str) -> str:
+    # never 'ministry' in a visible name: test_admin_shell checks the English UI never says "Ministry"
+    return 'Added ' + {'ministry': 'minister'}.get(event, event)
+
+
 @pytest.mark.parametrize('event', ['ministry', 'tyrant', 'svs'])
 def test_add_player_every_event(page: Page, base_url, api, event, shot):
     status, cur = api.call('GET', f'/api/events/{event}/current', ok=None)
@@ -427,7 +432,7 @@ def test_add_player_every_event(page: Page, base_url, api, event, shot):
     page.get_by_test_id('add-fid').fill(fid)
     page.get_by_test_id('add-lookup').click()
     expect(page.get_by_test_id('add-status')).to_have_attribute('data-known', 'false')
-    page.get_by_test_id('add-name').fill(f'Added {event}')
+    page.get_by_test_id('add-name').fill(added_name(event))
     page.get_by_test_id('add-alliance').fill('add')
     if event == 'svs':
         page.get_by_test_id('add-hour-13:00').click()
@@ -456,7 +461,7 @@ def test_add_player_every_event(page: Page, base_url, api, event, shot):
     page.get_by_test_id('add-fid').fill(fid)
     page.get_by_test_id('add-lookup').click()
     expect(page.get_by_test_id('add-status')).to_have_attribute('data-known', 'true')
-    expect(page.get_by_test_id('add-name')).to_have_value(f'Added {event}')
+    expect(page.get_by_test_id('add-name')).to_have_value(added_name(event))
     page.get_by_test_id('add-save').click()
     expect(page.get_by_test_id('add-error')).to_have_text(tr('admin:addPlayer.exists'))
     page.get_by_test_id('add-player-close').click()
