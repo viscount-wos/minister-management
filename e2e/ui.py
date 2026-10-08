@@ -88,6 +88,9 @@ def switch_language(page: Page, code: str) -> None:
 def admin_login(page: Page, base_url: str, password: str) -> None:
     """Log in through the UI (password found by its <label>) and land on the dashboard."""
     go(page, base_url, 'admin_login')
+    # A still-valid token makes /admin skip straight to the dashboard: start logged out.
+    page.evaluate("localStorage.removeItem('adminToken'); localStorage.removeItem('adminRole')")
+    go(page, base_url, 'admin_login')
     page.get_by_label(en('admin:password')).fill(password)
     page.get_by_test_id('admin-login').click()
     page.wait_for_url('**' + ROUTES['admin_dashboard'])

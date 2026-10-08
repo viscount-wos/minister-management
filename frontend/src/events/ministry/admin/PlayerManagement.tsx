@@ -46,7 +46,7 @@ function toRow(app: AdminApplication): Row {
   return {
     app,
     id: app.id,
-    fid: app.fid,
+    fid: String(app.fid ?? ''),
     game_name: p?.game_name ?? '',
     alliance: p?.alliance ?? '',
     avatar_image: p?.avatar_image ?? null,

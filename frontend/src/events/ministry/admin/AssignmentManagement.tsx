@@ -116,7 +116,7 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone, disabled 
             />
           ) : (
             <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold text-accent">
-              {player.game_name.charAt(0).toUpperCase()}
+              {(player.game_name || '?').charAt(0).toUpperCase()}
             </div>
           )}
           {player.stove_lv_content && (
@@ -170,7 +170,7 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
             />
           ) : (
             <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold text-accent">
-              {player.game_name.charAt(0).toUpperCase()}
+              {(player.game_name || '?').charAt(0).toUpperCase()}
             </div>
           )}
           {player.stove_lv_content && (
