@@ -514,13 +514,19 @@ export default function TyrantWizard() {
     </div>
   );
 
-  const setTroop = (kind: TroopType, key: 'furnace_level' | 'tier', v: string) =>
+  const setTroop = (kind: TroopType, key: 'furnace_level' | 'tier', v: string) => {
+    // picking the missing value clears its "required" message (the next missing one shows on Next)
+    if (invalidField === `profile.troops.${kind}.${key}` && v !== '') {
+      setInvalidField(null);
+      setError('');
+    }
     set({
       troops: {
         ...form.troops,
         [kind]: { ...form.troops[kind], [key]: v === '' ? null : key === 'tier' ? Number(v) : v },
       },
     });
+  };
 
   const allWindows = windows.length > 0 && windows.every((w) => form.availability.includes(w.id));
   const yes = (on: boolean) => (on ? <span className="text-success font-bold">✓</span> : <span className="text-theme-dim">—</span>);
@@ -735,7 +741,13 @@ export default function TyrantWizard() {
               required
               value={form.furnace_level}
               invalid={invalidField === 'profile.furnace_level'}
-              onChange={(code) => set({ furnace_level: code })}
+              onChange={(code) => {
+                if (invalidField === 'profile.furnace_level' && code) {
+                  setInvalidField(null);
+                  setError('');
+                }
+                set({ furnace_level: code });
+              }}
             />
             <Field
               id="power-millions"
@@ -782,7 +794,8 @@ export default function TyrantWizard() {
                 return (
                   <div key={kind} className="bg-dark-bg p-4 rounded-lg border border-theme-border" data-testid={`troop-${kind}`}>
                     <h3 className="font-semibold text-lg text-accent mb-3">{t(`tyrant:step4.${kind}`)}</h3>
-                    <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3 sm:gap-4">
+                    {/* items-end: a camp label that wraps to two lines keeps both selects on one baseline */}
+                    <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3 sm:gap-4 items-end">
                       <FurnaceLevelSelect
                         id={`troop-${kind}-furnace`}
                         label={t(`tyrant:step4.camp.${kind}`)}
