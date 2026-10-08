@@ -1,0 +1,14 @@
+{
+  "gameName": "Chief's Game Name",
+  "playerID": "Player ID (FID)",
+  "playerIDOptional": "Player ID (FID) - Optional",
+  "playerIDPlaceholder": "Enter your unique Player ID",
+  "fidRequired": "Player ID (FID) is required",
+  "playerAlreadyExists": "A player with this FID or name already exists. Use the Update page to modify your submission.",
+  "furnaceLevel": "Furnace Lv.",
+  "alliance": "Alliance Tag",
+  "alliancePlaceholder": "3 chars max (e.g. ABC)",
+  "playerInfo": "Player Information",
+  "enterPlayerID": "Please enter a Player ID",
+  "allianceRequired": "Alliance tag is required"
+}

@@ -1,0 +1,37 @@
+{
+  "appTitle": "Ministeriumsverwaltung",
+  "theme": {
+    "title": "Farbschema",
+    "dark": "Ministerium Dunkel",
+    "reading": "Lesemodus",
+    "lowGlare": "Blendarm"
+  },
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "close": "Schließen",
+  "yes": "Ja",
+  "no": "Nein",
+  "nav": {
+    "home": "Alle Events"
+  },
+  "header": {
+    "timezone": "Angezeigte Zeitzone"
+  },
+  "home": {
+    "title": "Staats-Events",
+    "subtitle": "Wähle ein Event, um dich anzumelden oder deinen Plan anzusehen",
+    "welcome": "Willkommen, {{state}}",
+    "status": {
+      "open": "Offen",
+      "nextRelease": "Nächste Version",
+      "comingSoon": "Demnächst"
+    }
+  },
+  "placeholder": {
+    "nextReleaseTitle": "Kommt mit der nächsten Version",
+    "nextReleaseBody": "Dieses Modul wird gerade gebaut und kommt mit der nächsten Version.",
+    "comingSoonTitle": "Demnächst",
+    "comingSoonBody": "Dieses Event ist noch in Planung. Schau später wieder vorbei."
+  },
+  "footer": "mit Empfehlung des Viscount, gern geschehen 😂"
+}

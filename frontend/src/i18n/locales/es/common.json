@@ -1,0 +1,37 @@
+{
+  "appTitle": "Gestión de Ministerios",
+  "theme": {
+    "title": "Tema",
+    "dark": "Ministerio Oscuro",
+    "reading": "Lectura",
+    "lowGlare": "Brillo Suave"
+  },
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "close": "Cerrar",
+  "yes": "Sí",
+  "no": "No",
+  "nav": {
+    "home": "Todos los eventos"
+  },
+  "header": {
+    "timezone": "Zona horaria de visualización"
+  },
+  "home": {
+    "title": "Eventos del estado",
+    "subtitle": "Elige un evento para inscribirte o consultar tu horario",
+    "welcome": "Bienvenido, {{state}}",
+    "status": {
+      "open": "Abierto",
+      "nextRelease": "Próxima versión",
+      "comingSoon": "Próximamente"
+    }
+  },
+  "placeholder": {
+    "nextReleaseTitle": "Llega en la próxima versión",
+    "nextReleaseBody": "Este módulo está en desarrollo y llegará en la próxima versión.",
+    "comingSoonTitle": "Próximamente",
+    "comingSoonBody": "Este evento aún se está planificando. Vuelve más tarde."
+  },
+  "footer": "cortesía del vizconde, de nada 😂"
+}

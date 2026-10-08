@@ -1,0 +1,14 @@
+{
+  "gameName": "족장 게임 이름",
+  "playerID": "플레이어 ID (FID)",
+  "playerIDOptional": "플레이어 ID (FID) - 선택사항",
+  "playerIDPlaceholder": "고유 플레이어 ID를 입력하세요",
+  "fidRequired": "플레이어 ID (FID)는 필수입니다",
+  "playerAlreadyExists": "이 FID 또는 이름을 가진 플레이어가 이미 존재합니다. 제출 내용을 수정하려면 업데이트 페이지를 사용하세요.",
+  "furnaceLevel": "화로 레벨",
+  "alliance": "연맹 태그",
+  "alliancePlaceholder": "최대 3자 (예: ABC)",
+  "playerInfo": "플레이어 정보",
+  "enterPlayerID": "플레이어 ID를 입력하세요",
+  "allianceRequired": "연맹 태그는 필수입니다"
+}

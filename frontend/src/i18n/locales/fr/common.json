@@ -1,0 +1,37 @@
+{
+  "appTitle": "Gestion des Ministères",
+  "theme": {
+    "title": "Thème",
+    "dark": "Ministère Sombre",
+    "reading": "Lecture",
+    "lowGlare": "Éclat Réduit"
+  },
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "close": "Fermer",
+  "yes": "Oui",
+  "no": "Non",
+  "nav": {
+    "home": "Tous les événements"
+  },
+  "header": {
+    "timezone": "Fuseau horaire d'affichage"
+  },
+  "home": {
+    "title": "Événements de l'État",
+    "subtitle": "Choisissez un événement pour vous inscrire ou consulter votre planning",
+    "welcome": "Bienvenue, {{state}}",
+    "status": {
+      "open": "Ouvert",
+      "nextRelease": "Prochaine version",
+      "comingSoon": "Bientôt disponible"
+    }
+  },
+  "placeholder": {
+    "nextReleaseTitle": "Disponible dans la prochaine version",
+    "nextReleaseBody": "Ce module est en cours de développement et arrivera dans la prochaine version.",
+    "comingSoonTitle": "Bientôt disponible",
+    "comingSoonBody": "Cet événement est encore en préparation. Revenez plus tard."
+  },
+  "footer": "avec les compliments du vicomte, de rien 😂"
+}

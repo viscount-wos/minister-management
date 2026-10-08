@@ -1,0 +1,14 @@
+{
+  "gameName": "Nazwa Wodza w grze",
+  "playerID": "ID gracza (FID)",
+  "playerIDOptional": "ID gracza (FID) - opcjonalne",
+  "playerIDPlaceholder": "Wpisz swoje unikalne ID gracza",
+  "fidRequired": "ID gracza (FID) jest wymagane",
+  "playerAlreadyExists": "Gracz o tym FID lub tej nazwie już istnieje. Skorzystaj ze strony aktualizacji, aby zmienić swoje zgłoszenie.",
+  "furnaceLevel": "Poz. pieca",
+  "alliance": "Tag sojuszu",
+  "alliancePlaceholder": "Maks. 3 znaki (np. ABC)",
+  "playerInfo": "Informacje o graczu",
+  "enterPlayerID": "Podaj ID gracza",
+  "allianceRequired": "Tag sojuszu jest wymagany"
+}

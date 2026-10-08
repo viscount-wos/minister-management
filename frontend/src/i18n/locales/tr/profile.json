@@ -1,0 +1,14 @@
+{
+  "gameName": "Şef Oyun Adı",
+  "playerID": "Oyuncu ID (FID)",
+  "playerIDOptional": "Oyuncu ID (FID) - İsteğe Bağlı",
+  "playerIDPlaceholder": "Benzersiz Oyuncu ID'nizi girin",
+  "fidRequired": "Oyuncu ID (FID) gereklidir",
+  "playerAlreadyExists": "Bu FID veya isme sahip bir oyuncu zaten mevcut. Gönderiminizi değiştirmek için güncelleme sayfasını kullanın.",
+  "furnaceLevel": "Ocak Seviyesi",
+  "alliance": "İttifak Etiketi",
+  "alliancePlaceholder": "Maks 3 karakter (ör. ABC)",
+  "playerInfo": "Oyuncu Bilgileri",
+  "enterPlayerID": "Lütfen bir Oyuncu ID girin",
+  "allianceRequired": "İttifak etiketi gereklidir"
+}
