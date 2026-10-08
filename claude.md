@@ -403,6 +403,22 @@ all 9 languages, and `RELEASES` in `frontend/src/shell/Changelog.tsx` must be up
 items to the latest release until it ships; start a new release block once a version is deployed.
 Record the developer-level detail here as well.
 
+- **v2.2.1** (October 2026): Add to rally from the SVS players list (branch p6/svs-add-to-rally). Details in
+  `docs/SPEC.md` "SVS battle planner" -> "Add to rally (players table)".
+  - Backend: `POST /api/admin/svs/rounds/<ref>/plan/place` (`events/svs/routes.py` `admin_place_in_plan`,
+    `events/svs/plan.py` `place_players`): ONE change applied to the STORED plan under BEGIN IMMEDIATE (other leaders'
+    edits are never overwritten), then the same `validate_plan` + `check_double`. Modes `as` = auto|named|extra|leader|
+    group, `move`, `slot`, optional `expected_revision` (409 PLAN_CONFLICT), `fid` (strict: 422 DOUBLE_BOOKED /
+    RALLY_FULL / GROUP_FULL / SLOT_TAKEN) or `fids` (bulk <=100: reported in `result.skipped/overflow/not_found`).
+    Revision bumps only when something changed. Players list rows carry `plan_place`; filter `in_plan=yes|no`
+    (list, summary, exports, MCP); summary `plan: {in, out}`.
+  - Frontend: `events/svs/plan/labels.ts` (group/leader/placement labels shared by the planner and the Players tab),
+    `events/svs/admin/AddToRally.tsx` (fixed popover, keyboard: first choice focused, Esc returns focus; retry ONCE on
+    PLAN_CONFLICT when the player's placement and the target's room are unchanged), SvsPlayers Plan column + row
+    checkboxes + sticky bulk bar + In plan / Not in plan chips; `AdminTabContext.selectTab` (link to Battle plan).
+  - MCP `svs_plan_place` (argument `mode` = the API's `as`), `svs_filters.in_plan`.
+  - i18n `scripts/i18n/v221_add_to_rally.py` (svs:players.*, changelog v221). e2e `test_svs_add_to_rally.py`;
+    backend `tests/test_svs_place.py`.
 - **v2.2.0** (October 2026): SVS sign-up, add player, hero library (branch p4/svs-signup). Details in `docs/SPEC.md`
   "SVS sign-up".
   - `events/svs/` (validation, filters, logic, routes): hours derived from round settings `battle_start` (UTC,

@@ -626,6 +626,29 @@ Owner brief: `catalogue/SVS-battle-setup-brief.md` (incl. its Decisions). Deskto
 - Player search: ARIA combobox over the round's sign-ups (name, FID, alliance), strongest first, shows troop line,
   hours, VC, the "already placed" badge; "Quick add" at the bottom (name + optional FID).
 
+### Add to rally (players table, v2.2.1)
+Owner: "from the players page, it would be great to add to an already defined rally in the players table".
+- Players tab table: a **Plan** column with the planner's wording: "Leader · Rally Caller 01 (Main alliance)",
+  "Joiner 2 · Rally Caller 01 (Main alliance)", "Extra · FrostHeart (Counter alliance)", "Turrets", or "—" (leader =
+  alias, else the leader's name, else "Rally leader N"; labels from `plan/labels.ts`, shared with the planner's
+  "Already with …" badge). Deviation: the group is shown for joiners too (the brief's example omitted it).
+- Filter `in_plan` yes|no as two count chips ("In plan: n", "Not in plan: n", counts for the filtered set) + a pill;
+  same key in the URL, API, exports and MCP.
+- Per row "Add to rally" (icon button → popover, `role=dialog`): the plan's EXISTING leaders grouped by main/counter
+  with "Named n/4 · Extra n/14" (full leaders disabled); choose one, then "As named joiner" / "As extra joiner"
+  (default and focused: named if there is room, else extra; the lead hero stays empty for the planner). Also "Make
+  rally leader in <group>" (a new leader card) and "Add to <extra group>". A placed player sees "Now: …" and the
+  buttons read "Move here …" (the planner's move: a moved leader leaves an empty card). No leaders yet: a message +
+  "Open the Battle plan" (switches tab).
+- Bulk: row checkboxes (+ select page), a sticky bar "N selected · Clear · Add N selected to rally…"; per leader "named
+  places first, then extra" or "all as extra joiners", or an extra group. Already-placed players are skipped and named
+  in the result, players that don't fit are named as "no room left" (never silently dropped).
+- Safety: one server call `POST …/plan/place` applies the change atomically to the stored plan (other edits kept) with
+  the menu's revision as `expected_revision`; on 409 the client re-reads and retries ONCE if the player's placement and
+  the target's room are unchanged, else shows "The plan changed while you were choosing". 422s are shown translated
+  (DOUBLE_BOOKED with where, RALLY_FULL); other 422s show the server message. An open Battle plan tab with an older
+  revision gets the usual conflict banner on its next save; the tab reloads the plan whenever it is opened.
+
 ### Shared plan view (`/svs/plan/<token>`)
 - Phone-first, 9 languages + RTL, noindex (meta + `X-Robots-Tag`), `Referrer-Policy: no-referrer`, no-store,
   rate-limited like the lookups; invalid/rotated/disabled token → friendly "not found" page (one answer for all).
@@ -643,6 +666,6 @@ saves a sample main + counter plan (4 leaders, disguises, split, pet buffs, join
 Refuses the live site. Uses the admin token on every call (admin requests are not throttled).
 
 ### Known gaps / accepted
-- Plan editing over MCP is not offered (read + share only).
+- Plan editing over MCP is limited to `svs_plan_place` (placing players; v2.2.1).
 - No undo history (autosave + revision conflict only).
 

@@ -444,7 +444,9 @@ Player calls are the generic ones with `{event}` = `svs`.
 - **Filters** (one parser `events/svs/filters.py`, list + summary + exports + MCP; same keys in the admin URL; AND):
   `q` (FID/name), `alliance` (comma list), `hours` (comma list: attends ALL), `vc` yes|no|none,
   `troop` + `min_camp` (FC code) + `min_tier` (10/11), exact `<type>_camp` / `<type>_tier` (chips; `none` = blank),
-  `submitted_from`/`submitted_to`, `days`. Bad values → 400 naming the parameter.
+  `submitted_from`/`submitted_to`, `days`, `in_plan` yes|no (placed anywhere in the round's battle plan; v2.2.1).
+  Bad values → 400 naming the parameter. List rows carry `plan_place` (`{position: leader|named_joiner|extra_joiner|
+  extra_group, group_id, group_kind, leader_id, slot}` or null); the summary adds `plan: {in, out}`.
 
 
 ### SVS battle planner (v2.2.0)
@@ -462,6 +464,20 @@ Player calls are the generic ones with `{event}` = `svs`.
   leaders: [{id, group_id, order, player, disguise {pfp_hero, alias}, split, rally {heroes[3], ratio {inf,lan,mks}},
   garrison?, pet_buff, named_joiners[≤4] {player, rally {lead_hero, ratio?}, garrison?}, other_joiner_heroes {rally[≤4],
   garrison[≤4]}, extra_joiners[≤14] {player}}]}`; player = `{fid}` or `{name}`; ratios = integers summing to 100.
+- `POST /api/admin/svs/rounds/{ref}/plan/place` (v2.2.1, "Add to rally") body `{fid | fids: [≤100], as:
+  auto|named|extra|leader|group (default auto), leader_id?, group_id?, slot? (0-3, named), move?: bool,
+  expected_revision?: int}`. Applied atomically to the STORED plan (same validation + double booking as PUT), so other
+  editors' changes are kept. `auto` = named joiner if the leader has a free named slot (of 4), else extra (of 14);
+  `named`/`extra`/`auto` need `leader_id`; `leader` + `group_id` (main/counter) = a NEW leader card, `leader` +
+  `leader_id` = fill an EMPTY card; `group` + `group_id` = an extra group. A player already elsewhere: one `fid` →
+  **422 `DOUBLE_BOOKED`** (details as PUT) unless `move: true` (taken out of the old place first, like the planner's
+  Move here); `fids` → listed in `result.skipped`. No room: `fid` → 422 `RALLY_FULL` (`details {named_used, named_max,
+  extra_used, extra_max, leader_id, position}`) / `GROUP_FULL` / `SLOT_TAKEN`; `fids` → `result.overflow`. 404
+  `LEADER_NOT_FOUND` / `GROUP_NOT_FOUND` / `PLAYER_NOT_FOUND` (no profile; bulk → `result.not_found`), 409
+  `PLAN_CONFLICT` (only when `expected_revision` is stale), 409 `ROUND_CLOSED`, 400 `VALIDATION_ERROR` (`as`, `slot`,
+  `group_id` of the wrong kind, `fids`). → the GET shape (revision +1 only when something changed) + `changed` +
+  `result {placed: [{player, as, group_id, leader_id, slot, from?}], moved, unchanged: [{player, where}], skipped:
+  [{player, reason: already_placed, where}], overflow, not_found}`.
 - `POST /api/admin/svs/rounds/{ref}/plan/share` body `{action: create|rotate|disable}` → `{round_id, share}`. create is
   idempotent; rotate = new 128-bit token (old link dies at once); disable = off. Does not change the revision.
 - `GET /api/svs/plan/{token}` (public, rate-limited like lookups; `X-Robots-Tag: noindex`, `Referrer-Policy:
