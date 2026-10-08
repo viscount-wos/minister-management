@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field } from './fields';
 import TimezoneSelector from './TimezoneSelector';
@@ -22,9 +23,21 @@ interface ProfileFieldsProps {
   /** API field path of the field the server rejected, e.g. 'profile.alliance'. */
   invalidField?: string | null;
   disabled?: boolean;
+  /** false = no timezone select (the ministry wizard picks the timezone on the time steps, as v1.4). */
+  showTimezone?: boolean;
+  /** Shown under the read-only FID, e.g. a "use a different FID" link. */
+  fidHint?: ReactNode;
 }
 
-export default function ProfileFields({ fid, value, onChange, invalidField, disabled }: ProfileFieldsProps) {
+export default function ProfileFields({
+  fid,
+  value,
+  onChange,
+  invalidField,
+  disabled,
+  showTimezone = true,
+  fidHint,
+}: ProfileFieldsProps) {
   const { t } = useTranslation();
   const set = (patch: Partial<ProfileFormValues>) => onChange({ ...value, ...patch });
 
@@ -38,6 +51,7 @@ export default function ProfileFields({ fid, value, onChange, invalidField, disa
         value={fid}
         readOnly
         inputClassName="opacity-75 cursor-not-allowed"
+        hint={fidHint}
       />
       <div className="grid grid-cols-3 gap-4">
         <Field
@@ -69,6 +83,7 @@ export default function ProfileFields({ fid, value, onChange, invalidField, disa
         />
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
+        {showTimezone && (
         <div>
           <label htmlFor="profile-timezone" className="block text-sm font-medium text-theme-text mb-2">
             {t('profile:timezone')}
@@ -80,6 +95,7 @@ export default function ProfileFields({ fid, value, onChange, invalidField, disa
             onChange={(tz) => set({ timezone: tz })}
           />
         </div>
+        )}
         <Field
           id="profile-furnace-level"
           name="furnace_level"

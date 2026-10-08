@@ -95,5 +95,9 @@
     "savedNew": "Votre candidature pour {{round}} a été envoyée.",
     "savedEdit": "Votre candidature pour {{round}} a été mise à jour.",
     "viewMine": "Voir ma candidature"
+  },
+  "wizard": {
+    "progress": "Progression de la candidature",
+    "stepOf": "Étape {{current}} sur {{total}}"
   }
 }

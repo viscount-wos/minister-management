@@ -43,6 +43,9 @@
     "conflict": "有人同时进行了保存，请重试。",
     "network": "无法连接服务器，请检查网络后重试。",
     "invalidField": "请检查此项：{{field}}",
-    "invalidInput": "部分信息无效，请检查后重试。"
+    "invalidInput": "部分信息无效，请检查后重试。",
+    "roundClosed": "本轮已关闭，无法再修改。",
+    "tooManyAttempts": "尝试次数过多，请稍候再试。",
+    "retry": "服务器繁忙，请稍后再试。"
   }
 }

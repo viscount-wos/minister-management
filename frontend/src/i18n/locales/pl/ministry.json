@@ -95,5 +95,9 @@
     "savedNew": "Twoje zgłoszenie do {{round}} zostało wysłane.",
     "savedEdit": "Twoje zgłoszenie do {{round}} zostało zaktualizowane.",
     "viewMine": "Zobacz moje zgłoszenie"
+  },
+  "wizard": {
+    "progress": "Postęp zgłoszenia",
+    "stepOf": "Krok {{current}} z {{total}}"
   }
 }

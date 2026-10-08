@@ -43,6 +43,9 @@
     "conflict": "Jemand hat gleichzeitig gespeichert. Bitte versuche es erneut.",
     "network": "Server nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
     "invalidField": "Bitte prüfe dieses Feld: {{field}}",
-    "invalidInput": "Einige Angaben sind ungültig. Bitte prüfe sie und versuche es erneut."
+    "invalidInput": "Einige Angaben sind ungültig. Bitte prüfe sie und versuche es erneut.",
+    "roundClosed": "Diese Runde ist geschlossen und kann nicht mehr geändert werden.",
+    "tooManyAttempts": "Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.",
+    "retry": "Der Server ist ausgelastet. Bitte versuche es gleich noch einmal."
   }
 }

@@ -95,5 +95,9 @@
     "savedNew": "{{round}} başvurunuz gönderildi.",
     "savedEdit": "{{round}} başvurunuz güncellendi.",
     "viewMine": "Başvurumu görüntüle"
+  },
+  "wizard": {
+    "progress": "Başvuru ilerlemesi",
+    "stepOf": "Adım {{current}} / {{total}}"
   }
 }

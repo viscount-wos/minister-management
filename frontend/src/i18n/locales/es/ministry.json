@@ -95,5 +95,9 @@
     "savedNew": "Tu solicitud para {{round}} se ha enviado.",
     "savedEdit": "Tu solicitud para {{round}} se ha actualizado.",
     "viewMine": "Ver mi solicitud"
+  },
+  "wizard": {
+    "progress": "Progreso de la solicitud",
+    "stepOf": "Paso {{current}} de {{total}}"
   }
 }

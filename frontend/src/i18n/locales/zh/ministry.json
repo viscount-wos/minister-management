@@ -95,5 +95,9 @@
     "savedNew": "你在 {{round}} 的申请已提交。",
     "savedEdit": "你在 {{round}} 的申请已更新。",
     "viewMine": "查看我的申请"
+  },
+  "wizard": {
+    "progress": "申请进度",
+    "stepOf": "第 {{current}} 步，共 {{total}} 步"
   }
 }

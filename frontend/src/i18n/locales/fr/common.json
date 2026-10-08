@@ -43,6 +43,9 @@
     "conflict": "Quelqu'un a enregistré au même moment. Veuillez réessayer.",
     "network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
     "invalidField": "Veuillez vérifier ce champ : {{field}}",
-    "invalidInput": "Certaines informations ne sont pas valides. Vérifiez-les et réessayez."
+    "invalidInput": "Certaines informations ne sont pas valides. Vérifiez-les et réessayez.",
+    "roundClosed": "Cette manche est clôturée et ne peut plus être modifiée.",
+    "tooManyAttempts": "Trop de tentatives. Patientez un instant puis réessayez.",
+    "retry": "Le serveur est occupé. Réessayez dans un instant."
   }
 }

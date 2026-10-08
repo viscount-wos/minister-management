@@ -95,5 +95,9 @@
     "savedNew": "تم إرسال طلبك لـ {{round}}.",
     "savedEdit": "تم تحديث طلبك لـ {{round}}.",
     "viewMine": "عرض طلبي"
+  },
+  "wizard": {
+    "progress": "تقدّم الطلب",
+    "stepOf": "الخطوة {{current}} من {{total}}"
   }
 }

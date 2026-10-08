@@ -95,5 +95,9 @@
     "savedNew": "Your application for {{round}} has been submitted.",
     "savedEdit": "Your application for {{round}} has been updated.",
     "viewMine": "View my application"
+  },
+  "wizard": {
+    "progress": "Application progress",
+    "stepOf": "Step {{current}} of {{total}}"
   }
 }

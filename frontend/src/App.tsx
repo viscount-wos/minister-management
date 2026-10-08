@@ -5,7 +5,7 @@ import Changelog from './shell/Changelog';
 import LegacyRedirect from './shell/LegacyRedirect';
 import { TimezoneProvider } from './shared/TimezoneContext';
 import MinistryHome from './events/ministry/MinistryHome';
-import ApplicationPage from './events/ministry/ApplicationPage';
+import ApplicationWizard from './events/ministry/ApplicationWizard';
 import PublishedSchedule from './events/ministry/PublishedSchedule';
 import PlayerGuide from './events/ministry/PlayerGuide';
 import AdminLogin from './events/ministry/admin/AdminLogin';
@@ -26,8 +26,8 @@ function App() {
 
             {/* Ministry */}
             <Route path="/ministry" element={<MinistryHome />} />
-            <Route path="/ministry/apply" element={<ApplicationPage />} />
-            {/* New vs edit is decided by FID on one page now */}
+            <Route path="/ministry/apply" element={<ApplicationWizard />} />
+            {/* v1.4's new (/submit) and update (/update) pages are one wizard now: the FID decides new vs edit */}
             <Route path="/ministry/submit" element={<LegacyRedirect to="/ministry/apply" />} />
             <Route path="/ministry/update" element={<LegacyRedirect to="/ministry/apply" />} />
             <Route path="/ministry/schedule/:day" element={<PublishedSchedule />} />

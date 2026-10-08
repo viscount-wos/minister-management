@@ -43,6 +43,9 @@
     "conflict": "Biri aynı anda kaydetti. Lütfen tekrar deneyin.",
     "network": "Sunucuya ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
     "invalidField": "Lütfen bu alanı kontrol edin: {{field}}",
-    "invalidInput": "Bazı bilgiler geçersiz. Lütfen kontrol edip tekrar deneyin."
+    "invalidInput": "Bazı bilgiler geçersiz. Lütfen kontrol edip tekrar deneyin.",
+    "roundClosed": "Bu tur kapandı ve artık değiştirilemez.",
+    "tooManyAttempts": "Çok fazla deneme. Lütfen biraz bekleyip tekrar deneyin.",
+    "retry": "Sunucu meşgul. Lütfen birazdan tekrar deneyin."
   }
 }

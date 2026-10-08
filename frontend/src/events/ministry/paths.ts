@@ -5,7 +5,7 @@
 
 export const MINISTRY_PATHS = {
   home: '/ministry',
-  /** FID-first application page: new or edit for the current round. */
+  /** The application wizard (v1.4 steps); step 1's FID decides new or edit for the current round. */
   apply: '/ministry/apply',
   guide: '/ministry/guide',
   schedule: (day: string) => `/ministry/schedule/${day}`,

@@ -43,6 +43,9 @@
     "conflict": "Someone saved at the same moment. Please try again.",
     "network": "Could not reach the server. Check your connection and try again.",
     "invalidField": "Please check this field: {{field}}",
-    "invalidInput": "Some of the information is not valid. Please check it and try again."
+    "invalidInput": "Some of the information is not valid. Please check it and try again.",
+    "roundClosed": "This round is closed and can no longer be changed.",
+    "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
+    "retry": "The server is busy. Please try again in a moment."
   }
 }
