@@ -34,7 +34,9 @@ class EventSpec:
     def public_settings(self, settings):
         return dict(settings)
 
-    def validate_answers(self, answers, round_):
+    def validate_answers(self, answers, round_, existing=None):
+        """Validate/normalise answers. ``existing``: the answers currently stored for this
+        application (None when new), so legacy values can be accepted when re-sent unchanged."""
         if answers is None:
             answers = {}
         if not isinstance(answers, dict):

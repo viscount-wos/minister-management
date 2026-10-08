@@ -4,10 +4,10 @@ import json
 from flask import Blueprint, Response, jsonify
 
 from core.auth import require_admin
-from core.db import get_db
+from core.db import begin_immediate, get_db
 from core.errors import get_json_body, not_found, validation_error
-from core.profiles import get_profile_row
-from core.rounds import require_current_round, require_round
+from core.profiles import find_profile
+from core.rounds import get_round_row, require_current_round, require_round
 from core.validation import now_iso
 from events.ministry import logic
 from events.ministry import validation as mv
@@ -57,7 +57,7 @@ def public_schedule_day(day):
 def public_player_assignments(fid):
     """A player's own assignments in the current round (day + time slot only, as v1.4)."""
     rnd = require_current_round(EVENT)
-    prof = get_profile_row(fid)
+    prof = find_profile(fid)
     db = get_db()
     if not prof or not db.execute('SELECT 1 FROM applications WHERE round_id = ? AND player_id = ?',
                                   (rnd['id'], prof['id'])).fetchone():
@@ -100,6 +100,8 @@ def admin_update_assignments(ref, day):
 
 def _set_published(rnd, day, publish):
     db = get_db()
+    begin_immediate(db)  # read-modify-write of the settings JSON under the write lock (L2)
+    rnd = get_round_row(rnd['id'])
     settings = logic.round_settings(rnd)
     if publish:
         day = mv.validate_day(day, settings['research_day'])

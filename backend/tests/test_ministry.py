@@ -4,7 +4,7 @@ import openpyxl
 import pytest
 
 from events.ministry import logic
-from tests.conftest import apply, prefs, start_round
+from tests.conftest import apply, prefs, profile_id, start_round
 
 
 def answers(c=0, r=0, t=0, g=0, fc=0, rfc=0, shards=0, slots=None):
@@ -146,7 +146,8 @@ def test_no_shared_slot_in_exact_alignment(client, admin):
 
 def test_manual_update_syncs_shared_slot(client, admin):
     start_round(client, admin, 'R', settings={'time_slot_scheme': 'max_slots'})
-    pid = apply(client, '1', answers=answers(c=1), expect=201).json['profile']['id']
+    apply(client, '1', answers=answers(c=1), expect=201)
+    pid = profile_id(client, admin, '1')
     r = client.put('/api/admin/ministry/rounds/current/assignments/monday',
                    json={'assignments': {'23:50+': [{'player_id': pid}]}}, headers=admin)
     assert r.status_code == 200 and r.json['saved'] == 1
@@ -156,7 +157,8 @@ def test_manual_update_syncs_shared_slot(client, admin):
 
 def test_update_assignments_validation(client, admin):
     start_round(client, admin, 'R')
-    pid = apply(client, '1', expect=201).json['profile']['id']
+    apply(client, '1', expect=201)
+    pid = profile_id(client, admin, '1')
     bad = [({'25:00': [{'player_id': pid}]}, 'assignments'),
            ({'10:00': [{'player_id': 999}]}, 'assignments'),
            ({'10:00': [{'player_id': pid}], '11:00': [{'player_id': pid}]}, 'assignments'),
@@ -169,7 +171,8 @@ def test_update_assignments_validation(client, admin):
 
 def test_sticky_assignment_survives_auto_assign(client, admin):
     start_round(client, admin, 'R')
-    low = apply(client, '1', answers=answers(c=1, slots=prefs(['10:00'])), expect=201).json['profile']['id']
+    apply(client, '1', answers=answers(c=1, slots=prefs(['10:00'])), expect=201)
+    low = profile_id(client, admin, '1')
     apply(client, '2', answers=answers(c=9, slots=prefs(['05:00'])), expect=201)
     # admin pins the low scorer to 05:00 (the big player's preferred hour)
     client.put('/api/admin/ministry/rounds/current/assignments/monday',
@@ -198,8 +201,10 @@ def test_scheme_change_remaps_assignments(client, admin):
 
 def test_remap_collision_higher_points_wins(client, admin):
     rnd = start_round(client, admin, 'R', settings={'time_slot_scheme': 'max_slots'})
-    a = apply(client, '1', answers=answers(c=1), expect=201).json['profile']['id']
-    b = apply(client, '2', answers=answers(c=5), expect=201).json['profile']['id']
+    apply(client, '1', answers=answers(c=1), expect=201)
+    a = profile_id(client, admin, '1')
+    apply(client, '2', answers=answers(c=5), expect=201)
+    b = profile_id(client, admin, '2')
     client.put('/api/admin/ministry/rounds/current/assignments/monday',
                json={'assignments': {'23:20': [{'player_id': a}], '23:50+': [{'player_id': b}]}}, headers=admin)
     # exact grid: both 23:20 and 23:50+ are nearest to 23:30 -> higher monday points (b) keeps it

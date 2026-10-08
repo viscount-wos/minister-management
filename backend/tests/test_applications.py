@@ -1,4 +1,4 @@
-from tests.conftest import apply, prefs, start_round
+from tests.conftest import application_id, apply, prefs, start_round
 
 PAST = '2020-01-01T00:00:00Z'
 FUTURE = '2099-01-01T00:00:00Z'
@@ -10,11 +10,12 @@ def test_new_vs_edit(client, admin):
     assert r.status_code == 404 and r.json['code'] == 'NOT_FOUND'  # -> "New application"
     r = apply(client, '42', answers={'research_speedups_days': 3}, expect=201)
     assert r.json['created'] is True and r.json['profile_created'] is True
-    app_id = r.json['application']['id']
+    app_id = application_id(client, admin, '42')
+    assert 'id' not in r.json['application'] and 'player_id' not in r.json['application']  # M6
     r = client.get('/api/events/ministry/current/application/42')
     assert r.status_code == 200 and r.json['answers']['research_speedups_days'] == 3  # -> "Edit"
     r = apply(client, '42', answers={'research_speedups_days': 4}, expect=200)
-    assert r.json['created'] is False and r.json['application']['id'] == app_id
+    assert r.json['created'] is False and application_id(client, admin, '42') == app_id
     assert client.get('/api/events/ministry/current/application/42').json['answers']['research_speedups_days'] == 4
 
 
@@ -172,7 +173,8 @@ def test_admin_list_edit_delete_application(client, admin):
 
 def test_admin_edit_allowed_after_closing(client, admin):
     rnd = start_round(client, admin, 'R1')
-    app_id = apply(client, '1', expect=201).json['application']['id']
+    apply(client, '1', expect=201)
+    app_id = application_id(client, admin, '1')
     client.put(f'/api/admin/rounds/{rnd["id"]}', json={'closing_time': PAST}, headers=admin)
     r = client.put(f'/api/admin/applications/{app_id}', json={'answers': {'fire_crystals': 9}}, headers=admin)
     assert r.status_code == 200

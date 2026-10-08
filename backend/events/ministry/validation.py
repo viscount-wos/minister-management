@@ -37,20 +37,39 @@ def _validate_slot_list(value, field):
             out.append(v)
     if len(out) > 48:
         raise validation_error(f'{field} has too many entries', field)
-    return out
+    return sorted(out)  # HH:MM is zero-padded: lexical = chronological (v1.4 read them back sorted)
 
 
-def validate_answers(answers):
-    """Normalise ministry answers. Missing numbers default to 0 (as v1.4)."""
+def _is_unchanged_fraction(value, stored):
+    """A fractional crystal value imported from v1.4 (e.g. 12.5), re-sent unchanged."""
+    if not isinstance(stored, float) or stored.is_integer() or isinstance(value, bool) or value is None:
+        return False
+    try:
+        return float(value) == stored
+    except (TypeError, ValueError):
+        return False
+
+
+def validate_answers(answers, existing=None):
+    """Normalise ministry answers. Missing numbers default to 0 (as v1.4).
+
+    Crystal counts must be whole numbers, except that a fractional value imported from v1.4
+    (v1.4 accepted e.g. 12.5) is kept when re-sent unchanged (``existing`` = stored answers),
+    so legacy players and admins can still save those applications.
+    """
     if answers is None:
         answers = {}
     if not isinstance(answers, dict):
         raise validation_error('answers must be an object', 'answers')
+    existing = existing if isinstance(existing, dict) else {}
     out = {}
     for f in SPEEDUP_FIELDS:
         out[f] = float(validate_number(answers.get(f), 'answers.' + f, maximum=MAX_VALUE))
     for f in CRYSTAL_FIELDS:
-        out[f] = validate_number(answers.get(f), 'answers.' + f, maximum=MAX_VALUE, integer=True)
+        if _is_unchanged_fraction(answers.get(f), existing.get(f)):
+            out[f] = existing[f]
+        else:
+            out[f] = validate_number(answers.get(f), 'answers.' + f, maximum=MAX_VALUE, integer=True)
     by_day = answers.get('time_slots_by_day')
     legacy_list = answers.get('time_slots')
     if by_day is None and legacy_list is not None:

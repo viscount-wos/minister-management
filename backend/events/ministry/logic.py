@@ -7,7 +7,8 @@ Players here are dicts flattened from (application answers + profile):
 import json
 import logging
 import re
-from datetime import datetime
+import sqlite3
+from datetime import datetime, timezone
 from io import BytesIO
 
 import openpyxl
@@ -183,11 +184,12 @@ def _flatten(r):
         'application_id': d['application_id'],
         'fid': d['fid'],
         'game_name': d['game_name'],
-        'alliance': d.get('alliance') or '',
-        'timezone': d.get('timezone') or '',
-        'avatar_image': d.get('avatar_image') or '',
+        # absent strings are null (v1.4 mixed '' and null; docs/API.md convention is null)
+        'alliance': d.get('alliance') or None,
+        'timezone': d.get('timezone') or None,
+        'avatar_image': d.get('avatar_image') or None,
         'stove_lv': d.get('stove_lv'),
-        'stove_lv_content': d.get('stove_lv_content') or '',
+        'stove_lv_content': d.get('stove_lv_content') or None,
         'created_at': d['applied_at'],
         'updated_at': d['app_updated_at'],
     }
@@ -208,10 +210,10 @@ def card(player, day, prefs=None, sticky=False):
         'game_name': player['game_name'],
         'points': calculate_points(player, day),
         'preferred_times': sorted(prefs) if prefs is not None else [],
-        'avatar_image': player.get('avatar_image') or '',
+        'avatar_image': player.get('avatar_image') or None,
         'stove_lv': player.get('stove_lv'),
-        'stove_lv_content': player.get('stove_lv_content') or '',
-        'alliance': player.get('alliance') or '',
+        'stove_lv_content': player.get('stove_lv_content') or None,
+        'alliance': player.get('alliance') or None,
         'is_sticky': bool(sticky),
     }
 
@@ -412,7 +414,34 @@ def remap_assignments_between_schemes(db, round_id, new_scheme):
             _insert_assignment(db, round_id, pl['row']['player_id'], day, pl['target'], 0, True,
                                pl['row']['is_sticky'])
             kept += 1
+    resync_shared_boundaries(db, round_id, new_scheme)
     return kept
+
+
+def resync_shared_boundaries(db, round_id, scheme):
+    """After a scheme switch (L3), make both sides of each shared 23:50 boundary hold the same player.
+
+    The remap moves each day independently, so e.g. exact->max can fill Tuesday 23:50 (from 00:00)
+    while Monday 23:50+ stays empty. Mirror from the earlier day if its boundary slot is occupied,
+    otherwise from the later day. Caller commits.
+    """
+    if scheme != 'max_slots':
+        return
+    rnd = db.execute('SELECT settings FROM rounds WHERE id = ?', (round_id,)).fetchone()
+    research_day = json.loads(rnd['settings'] or '{}').get('research_day', 'tuesday') if rnd else 'tuesday'
+    for earlier in ('monday', 'thursday'):
+        link = get_shared_slot_link(earlier, scheme, research_day)
+        if not link or link[1] != '23:50+':
+            continue
+        later = link[0]
+
+        def occupied(day, slot):
+            return db.execute('SELECT 1 FROM ministry_assignments WHERE round_id = ? AND day = ? AND time_slot = ?',
+                              (round_id, day, slot)).fetchone() is not None
+        if occupied(earlier, '23:50+'):
+            sync_shared_boundary(db, round_id, earlier, scheme, research_day)
+        elif occupied(later, '23:50'):
+            sync_shared_boundary(db, round_id, later, scheme, research_day)
 
 
 # ---------------------------------------------------------------- heatmap / public
@@ -461,6 +490,23 @@ EXPORT_HEADERS = ['Time Slot', 'FID', 'Alliance', 'Game Name', 'Construction (da
 EXPORT_WIDTHS = [15, 15, 10, 25, 18, 15, 20, 15, 13, 18, 14, 12]
 
 
+FORMULA_TRIGGERS = ('=', '+', '-', '@', '\t', '\r')
+
+
+def _append_safe(ws, row):
+    """Append a row; neutralise user text that a spreadsheet could run as a formula (M5).
+
+    Strings starting with = + - @ TAB or CR are forced to plain text cells with Excel's quote
+    prefix, so the value is shown exactly as typed and never evaluated (also after an edit).
+    """
+    ws.append(row)
+    for cell in ws[ws.max_row]:
+        v = cell.value
+        if isinstance(v, str) and v[:1] in FORMULA_TRIGGERS:
+            cell.data_type = 's'
+            cell.quotePrefix = True
+
+
 def _player_row(slot_label, p, points):
     return [slot_label, p['fid'], p.get('alliance', ''), p['game_name'],
             p['construction_speedups_days'], p['research_speedups_days'], p['troop_training_speedups_days'],
@@ -505,9 +551,10 @@ def build_workbook(db, round_row):
                 continue
             assigned_ids.add(p['id'])
             label = '23:50 (+1d)' if r['time_slot'] == '23:50+' else r['time_slot']
-            ws.append(_player_row(label, p, calculate_points(p, day_key)))
+            _append_safe(ws, _player_row(label, p, calculate_points(p, day_key)))
         unassigned = [p for p in players if p['id'] not in assigned_ids]
-        unassigned.sort(key=lambda p: calculate_points(p, day_key), reverse=True)
+        # points DESC, ties by player id ASC (v1.4's Excel order)
+        unassigned.sort(key=lambda p: (-calculate_points(p, day_key), p['id']))
         if unassigned:
             sep_row = ws.max_row + 2
             ws.append([])
@@ -517,7 +564,7 @@ def build_workbook(db, round_row):
                 c.font = sep_font
             for p in unassigned:
                 pts = calculate_points(p, day_key)
-                ws.append(_player_row('Unassigned', p, pts))
+                _append_safe(ws, _player_row('Unassigned', p, pts))
                 unassigned_summary.append([title, p['fid'], p.get('alliance', ''), p['game_name'], pts])
         for i, w in enumerate(EXPORT_WIDTHS):
             ws.column_dimensions[chr(65 + i)].width = w
@@ -526,7 +573,7 @@ def build_workbook(db, round_row):
     ws.append(['Day', 'FID', 'Alliance', 'Game Name', 'Points'])
     style_header(ws)
     for row in unassigned_summary:
-        ws.append(row)
+        _append_safe(ws, row)
     for i, w in enumerate([28, 15, 10, 25, 12]):
         ws.column_dimensions[chr(65 + i)].width = w
     out = BytesIO()
@@ -548,39 +595,44 @@ def export_json(db, round_row):
         for f in mv.NUMERIC_FIELDS:
             entry[f] = p[f]
         players.append(entry)
-    return {'version': 2, 'exported_at': datetime.now().isoformat(),
+    from core.validation import now_iso
+    return {'version': 2, 'exported_at': now_iso(),
             'round': {'id': round_row['id'], 'name': round_row['name'], 'settings': round_settings(round_row)},
             'players': players}
 
 
 def import_json(db, round_row, data):
     """Upsert profiles + applications in the round from a v1 (v1.4) or v2 export. Admin only."""
-    from core.applications import save_application
+    from core.applications import get_application, save_application
     from core.errors import validation_error
-    from core.profiles import get_profile_row, upsert_profile, validate_profile_fields
-    from core.validation import validate_fid
+    from core.profiles import resolve_fid_for_write, upsert_profile, validate_profile_fields
     from core.errors import ApiError
 
     if not isinstance(data, dict) or not isinstance(data.get('players'), list):
         raise validation_error('Invalid format: expected {players: [...]}', 'players')
     imported = updated = errors = 0
     error_list = []
+    if not db.in_transaction:
+        db.execute('BEGIN')  # one transaction; each entry in its own savepoint (L4)
     for i, p in enumerate(data['players']):
+        db.execute('SAVEPOINT import_entry')
         try:
             if not isinstance(p, dict):
                 raise validation_error('player entry must be an object')
-            fid = validate_fid(p.get('fid'))
+            fid, existing = resolve_fid_for_write(p.get('fid'))
             fields = validate_profile_fields({'game_name': p.get('game_name') or 'Unknown',
                                               'alliance': p.get('alliance') or None,
-                                              'timezone': p.get('timezone') or None}, field_prefix='')
+                                              'timezone': p.get('timezone') or None}, field_prefix='',
+                                             existing=existing)
             answers = {f: p.get(f, 0) for f in mv.NUMERIC_FIELDS}
             if 'time_slots_by_day' in p:
                 answers['time_slots_by_day'] = p['time_slots_by_day']
             elif 'time_slots' in p:
                 answers['time_slots'] = p['time_slots']
-            answers = mv.validate_answers(answers)
-            existed = get_profile_row(fid) is not None
-            profile, _ = upsert_profile(fid, fields, commit=False)
+            prev = get_application(round_row['id'], existing['id']) if existing else None
+            answers = mv.validate_answers(answers, existing=json.loads(prev['answers'] or '{}') if prev else None)
+            existed = existing is not None
+            profile, _ = upsert_profile(fid, fields, commit=False, existing=existing)
             # keep legacy avatar/stove data on brand-new profiles imported from a v1.4 backup
             if not existed and any(p.get(k) for k in ('avatar_image', 'stove_lv', 'stove_lv_content')):
                 db.execute('UPDATE profiles SET avatar_image=?, stove_lv=?, stove_lv_content=? WHERE id=?',
@@ -591,10 +643,18 @@ def import_json(db, round_row, data):
                 imported += 1
             else:
                 updated += 1
-        except ApiError as e:
+            db.execute('RELEASE import_entry')
+        except (ApiError, sqlite3.Error) as e:
+            db.execute('ROLLBACK TO import_entry')
+            db.execute('RELEASE import_entry')
             errors += 1
+            if isinstance(e, ApiError):
+                msg, field = e.message, e.field
+            else:
+                logger.warning('import entry %s failed: %s', i, e)
+                msg, field = 'Database rejected this entry (e.g. duplicate FID)', None
             error_list.append({'index': i, 'fid': p.get('fid') if isinstance(p, dict) else None,
-                               'error': e.message, 'field': e.field})
+                               'error': msg, 'field': field})
     db.commit()
     return {'imported': imported, 'updated': updated, 'errors': errors, 'error_details': error_list[:50]}
 
@@ -623,8 +683,8 @@ class MinistryEvent(EventSpec):
         s['published_days'] = sort_days_by_week(s.get('published_days') or [])
         return s
 
-    def validate_answers(self, answers, round_):
-        return mv.validate_answers(answers)
+    def validate_answers(self, answers, round_, existing=None):
+        return mv.validate_answers(answers, existing=existing)
 
     def decorate_application(self, app, round_):
         rd = round_settings(round_)['research_day']
@@ -646,6 +706,6 @@ class MinistryEvent(EventSpec):
     def export_round(self, round_):
         from core.db import get_db
         data = build_workbook(get_db(), round_)
-        filename = f'ministry_{_slug(round_["name"])}_{datetime.now().strftime("%Y%m%d")}.xlsx'
+        filename = f'ministry_{_slug(round_["name"])}_{datetime.now(timezone.utc).strftime("%Y%m%d")}.xlsx'
         return Response(data, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         headers={'Content-Disposition': f'attachment; filename={filename}'})
