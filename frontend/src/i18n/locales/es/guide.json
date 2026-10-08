@@ -2,9 +2,9 @@
   "player": {
     "linkText": "¿Cómo funciona este sistema? Lee la Guía del Jugador",
     "title": "Guía del Jugador",
-    "subtitle": "Todo lo que necesitas saber para enviar tu solicitud de ministerio.",
+    "subtitle": "Todo lo que necesitas saber para enviar tu solicitud de ministro.",
     "whatIsTitle": "¿Qué es este sistema?",
-    "whatIsBody": "Este sistema automatiza las asignaciones de ministerio de SVS. En lugar de coordinar manualmente con los R4, envías tus aceleradores disponibles y tus horarios preferidos. El sistema luego asigna los puestos de ministerio según tu nivel de contribución y tu disponibilidad, garantizando que los mayores contribuyentes tengan prioridad.",
+    "whatIsBody": "Este sistema automatiza las asignaciones de ministros de SVS. En lugar de coordinar manualmente con los R4, envías tus aceleradores disponibles y tus horarios preferidos. El sistema luego asigna los puestos de ministro según tu nivel de contribución y tu disponibilidad, garantizando que los mayores contribuyentes tengan prioridad.",
     "submitTitle": "Cómo Enviar Tu Solicitud",
     "step1Header": "Paso 1: Información del Jugador",
     "step1Fid": "Ingresa tu ID de Jugador (FID) — este es tu identificador único que se encuentra en tu perfil de juego. Lo necesitarás más adelante para ver tu asignación o hacer actualizaciones.",
@@ -25,7 +25,7 @@
     "heatmapRed": "Alta demanda — competitivo",
     "heatmapTip": "Consejo: Elegir horarios menos competitivos (azules) aumenta tu oportunidad de ser asignado.",
     "updateTitle": "Ver Asignaciones y Actualizar Información",
-    "updateBody1": "En la página del ministerio, pulsa «Inscribirse o actualizar»:",
+    "updateBody1": "En la página de ministros, pulsa «Inscribirse o actualizar»:",
     "updateStep1": "Introduce tu FID en el paso 1 y pulsa «Siguiente».",
     "updateStep2": "Tus asignaciones actuales para los tres días se mostrarán en la parte superior (o \"Ninguna\" si aún no has sido asignado).",
     "updateStep3": "El asistente se abre con tus respuestas guardadas ya rellenadas. Avanza por los pasos y cambia lo que quieras — aceleradores, preferencias de horario, alianza, etc.",
@@ -45,7 +45,7 @@
     "tip3": "Revisa el mapa de calor para encontrar horarios menos competitivos si tienes flexibilidad.",
     "tip4": "Vuelve a «Inscribirse o actualizar» con frecuencia para ver si te han asignado.",
     "tip5": "Si tu disponibilidad cambia, actualiza tu envío de inmediato — no esperes hasta el último minuto.",
-    "roundsNote": "Cada ronda de ministerio es una solicitud nueva. Tu perfil se recuerda, pero las aceleraciones y los horarios empiezan vacíos: pulsa «Usar mis últimas respuestas» para copiarlos de tu ronda anterior."
+    "roundsNote": "Cada ronda de ministros es una solicitud nueva. Tu perfil se recuerda, pero las aceleraciones y los horarios empiezan vacíos: pulsa «Usar mis últimas respuestas» para copiarlos de tu ronda anterior."
   },
   "admin": {
     "linkText": "Guía del Administrador",
@@ -53,7 +53,7 @@
     "title": "Guía del Administrador",
     "subtitle": "Guía completa para gestionar jugadores, asignaciones y publicar calendarios.",
     "overviewTitle": "Descripción General del Sistema",
-    "overviewBody": "El panel de administración tiene tres pestañas principales: Jugadores, Asignaciones y Configuración. La pestaña Jugadores te permite ver, editar, eliminar y exportar/importar datos de jugadores. La pestaña Asignaciones te permite asignar automáticamente los horarios de ministerio, ajustar manualmente con arrastrar y soltar, bloquear asignaciones, publicar calendarios y exportar a Excel. La pestaña Configuración controla las opciones de todo el sistema, incluyendo el número de estado, la hora de cierre de solicitudes, el día de investigación y la visibilidad de los campos de cristales de fuego.",
+    "overviewBody": "El panel de administración tiene tres pestañas principales: Jugadores, Asignaciones y Configuración. La pestaña Jugadores te permite ver, editar, eliminar y exportar/importar datos de jugadores. La pestaña Asignaciones te permite asignar automáticamente los horarios de ministro, ajustar manualmente con arrastrar y soltar, bloquear asignaciones, publicar calendarios y exportar a Excel. La pestaña Configuración controla las opciones de todo el sistema, incluyendo el número de estado, la hora de cierre de solicitudes, el día de investigación y la visibilidad de los campos de cristales de fuego.",
     "playersTitle": "Gestión de Jugadores",
     "playersViewHeader": "Ver Jugadores",
     "playersView1": "Todos los jugadores enviados aparecen en una tabla ordenable con su nombre de juego, alianza, aceleradores y puntos calculados.",

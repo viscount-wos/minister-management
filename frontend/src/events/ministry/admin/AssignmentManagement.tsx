@@ -456,7 +456,7 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
   const handleExport = async () => {
     try {
       const blob = await api.admin.exportRound(round.id);
-      downloadBlob(blob, `ministry_round_${round.id}_assignments.xlsx`);
+      downloadBlob(blob, `minister_round_${round.id}_assignments.xlsx`);
     } catch (err) {
       setError(errorText(t, err, 'admin:exportError'));
     }

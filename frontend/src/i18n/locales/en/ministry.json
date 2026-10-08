@@ -1,12 +1,12 @@
 {
   "event": {
-    "name": "Ministry",
-    "tagline": "Book a ministry slot for the SVS prep days and view the schedule",
-    "adminSubtitle": "Ministry: applications and assignments"
+    "name": "Minister",
+    "tagline": "Book a minister slot for the SVS prep days and view the schedule",
+    "adminSubtitle": "Minister: applications and assignments"
   },
   "home": {
-    "title": "Whiteout Survival Ministry Management",
-    "subtitle": "SVS State vs State Ministry Assignment System",
+    "title": "Whiteout Survival Minister Management",
+    "subtitle": "SVS State vs State Minister Assignment System",
     "adminDesc": "Manage players and assignments",
     "utcNote": "All times stored in UTC — use the timezone selector on forms to convert to your local time",
     "welcome": "Welcome, {{state}}",
@@ -71,22 +71,22 @@
     "backHome": "Back to Home"
   },
   "schedule": {
-    "title": "Ministry Schedule",
+    "title": "Minister Schedule",
     "viewSchedule": "View Published Schedule",
     "noSchedule": "No Schedule Published",
-    "noScheduleDesc": "The ministry schedule has not been published yet. Check back later.",
+    "noScheduleDesc": "The minister schedule has not been published yet. Check back later.",
     "noAssignments": "No assignments found for this day.",
     "unfilled": "— Open —",
     "timesNote": "All times are in UTC unless a timezone is selected above.",
     "disclaimer": "Applications are still open. Assigned times may change until applications close."
   },
   "apply": {
-    "title": "Ministry application",
+    "title": "Minister application",
     "enterFid": "Enter your Player ID (FID) to start or edit your application.",
     "newFor": "New application for {{round}}",
     "editFor": "Edit your application for {{round}}",
     "notOpenTitle": "Applications are not open",
-    "notOpenBody": "There is no open ministry round right now. Check back later.",
+    "notOpenBody": "There is no open minister round right now. Check back later.",
     "closedBody": "New applications for {{round}} are no longer accepted. If you already applied, enter that Player ID to edit it.",
     "closedButEditable": "Applications are closed for new players. You can still update yours.",
     "otherFid": "Use a different Player ID",

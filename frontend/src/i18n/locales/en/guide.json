@@ -2,9 +2,9 @@
   "player": {
     "linkText": "How does this system work? Read the Player Guide",
     "title": "Player Guide",
-    "subtitle": "Everything you need to know about submitting your ministry application.",
+    "subtitle": "Everything you need to know about submitting your minister application.",
     "whatIsTitle": "What is this system?",
-    "whatIsBody": "This system automates SVS ministry assignments. Instead of manually coordinating with R4s, you submit your available speedups and preferred time slots. The system then assigns ministry positions based on your contribution level and availability, ensuring the highest contributors get priority.",
+    "whatIsBody": "This system automates SVS minister assignments. Instead of manually coordinating with R4s, you submit your available speedups and preferred time slots. The system then assigns minister positions based on your contribution level and availability, ensuring the highest contributors get priority.",
     "submitTitle": "How to Submit Your Application",
     "step1Header": "Step 1: Player Information",
     "step1Fid": "Enter your Player ID (FID) — this is your unique identifier found in your game profile. You will need it later to view your assignment or make updates.",
@@ -25,7 +25,7 @@
     "heatmapRed": "High demand — competitive",
     "heatmapTip": "Tip: Choosing less competitive (blue) time slots increases your chance of being assigned.",
     "updateTitle": "Viewing Assignments & Updating Info",
-    "updateBody1": "From the ministry page, click \"Apply or update\":",
+    "updateBody1": "From the minister page, click \"Apply or update\":",
     "updateStep1": "Enter your FID on step 1 and click \"Next\".",
     "updateStep2": "Your current assignments for all three days will be shown at the top (or \"None\" if not yet assigned).",
     "updateStep3": "The wizard opens with your saved answers already filled in. Step through it and change anything — speedups, time preferences, alliance, etc.",
@@ -45,7 +45,7 @@
     "tip3": "Check the heat map to find less competitive slots if you have flexibility.",
     "tip4": "Come back to \"Apply or update\" regularly to check if you have been assigned.",
     "tip5": "If your availability changes, update your submission right away — do not wait until the last minute.",
-    "roundsNote": "Each ministry round is a new application. Your profile is remembered, but speedups and times start blank: click \"Use my last answers\" to copy them from your previous round."
+    "roundsNote": "Each minister round is a new application. Your profile is remembered, but speedups and times start blank: click \"Use my last answers\" to copy them from your previous round."
   },
   "admin": {
     "linkText": "Admin Guide",
@@ -53,7 +53,7 @@
     "title": "Admin Guide",
     "subtitle": "Complete guide to managing players, assignments, and publishing schedules.",
     "overviewTitle": "System Overview",
-    "overviewBody": "The admin dashboard has three main tabs: Players, Assignments, and Settings. The Players tab lets you view, edit, delete, and export/import player data. The Assignments tab lets you auto-assign ministry slots, manually adjust with drag-and-drop, lock assignments, publish schedules, and export to Excel. The Settings tab controls system-wide options including state number, application closing time, research day, and fire crystal field visibility.",
+    "overviewBody": "The admin dashboard has three main tabs: Players, Assignments, and Settings. The Players tab lets you view, edit, delete, and export/import player data. The Assignments tab lets you auto-assign minister slots, manually adjust with drag-and-drop, lock assignments, publish schedules, and export to Excel. The Settings tab controls system-wide options including state number, application closing time, research day, and fire crystal field visibility.",
     "playersTitle": "Player Management",
     "playersViewHeader": "Viewing Players",
     "playersView1": "All submitted players appear in a sortable table with their game name, alliance, speedups, and calculated points.",

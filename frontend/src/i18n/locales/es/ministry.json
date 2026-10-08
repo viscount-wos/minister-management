@@ -1,12 +1,12 @@
 {
   "event": {
-    "name": "Ministerio",
-    "tagline": "Reserva un puesto de ministerio para los días de preparación de SVS y consulta el horario",
-    "adminSubtitle": "Ministerio: solicitudes y asignaciones"
+    "name": "Ministro",
+    "tagline": "Reserva un puesto de ministro para los días de preparación de SVS y consulta el horario",
+    "adminSubtitle": "Ministro: solicitudes y asignaciones"
   },
   "home": {
-    "title": "Gestión de Ministerios de Whiteout Survival",
-    "subtitle": "Sistema de Asignación de Ministerios SVS Estado vs Estado",
+    "title": "Gestión de Ministros de Whiteout Survival",
+    "subtitle": "Sistema de Asignación de Ministros SVS Estado vs Estado",
     "adminDesc": "Gestiona jugadores y asignaciones",
     "utcNote": "Todos los horarios se almacenan en UTC — usa el selector de zona horaria en los formularios para convertirlos a tu hora local",
     "welcome": "Bienvenido, {{state}}",
@@ -71,22 +71,22 @@
     "backHome": "Volver al Inicio"
   },
   "schedule": {
-    "title": "Calendario de Ministerios",
+    "title": "Calendario de Ministros",
     "viewSchedule": "Ver Calendario Publicado",
     "noSchedule": "No Hay Calendario Publicado",
-    "noScheduleDesc": "El calendario de ministerios aún no se ha publicado. Vuelve a consultar más tarde.",
+    "noScheduleDesc": "El calendario de ministros aún no se ha publicado. Vuelve a consultar más tarde.",
     "noAssignments": "No se encontraron asignaciones para este día.",
     "unfilled": "— Libre —",
     "timesNote": "Todos los horarios están en UTC a menos que se seleccione una zona horaria arriba.",
     "disclaimer": "Las solicitudes siguen abiertas. Los horarios asignados pueden cambiar hasta que las solicitudes cierren."
   },
   "apply": {
-    "title": "Solicitud de ministerio",
+    "title": "Solicitud de ministro",
     "enterFid": "Introduce tu ID de jugador (FID) para crear o editar tu solicitud.",
     "newFor": "Nueva solicitud para {{round}}",
     "editFor": "Edita tu solicitud para {{round}}",
     "notOpenTitle": "Las solicitudes no están abiertas",
-    "notOpenBody": "Ahora mismo no hay ninguna ronda de ministerio abierta. Vuelve más tarde.",
+    "notOpenBody": "Ahora mismo no hay ninguna ronda de ministros abierta. Vuelve más tarde.",
     "closedBody": "Ya no se aceptan solicitudes nuevas para {{round}}. Si ya te inscribiste, introduce ese ID de jugador para editarla.",
     "closedButEditable": "Las solicitudes están cerradas para jugadores nuevos. Aún puedes actualizar la tuya.",
     "otherFid": "Usar otro ID de jugador",

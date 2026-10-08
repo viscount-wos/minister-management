@@ -1,12 +1,12 @@
 {
   "event": {
-    "name": "Bakanlık",
-    "tagline": "SVS hazırlık günleri için bakanlık saati ayır ve programı gör",
-    "adminSubtitle": "Bakanlık: başvurular ve atamalar"
+    "name": "Bakan",
+    "tagline": "SVS hazırlık günleri için bakan saati ayır ve programı gör",
+    "adminSubtitle": "Bakan: başvurular ve atamalar"
   },
   "home": {
-    "title": "Whiteout Survival Bakanlık Yönetimi",
-    "subtitle": "SVS Eyalet-Eyalet Bakanlık Atama Sistemi",
+    "title": "Whiteout Survival Bakan Yönetimi",
+    "subtitle": "SVS Eyalet-Eyalet Bakan Atama Sistemi",
     "adminDesc": "Oyuncuları ve atamaları yönetin",
     "utcNote": "Tüm saatler UTC olarak saklanır — yerel saatinize dönüştürmek için formlardaki saat dilimi seçicisini kullanın",
     "welcome": "Hoş geldiniz, {{state}}",
@@ -71,22 +71,22 @@
     "backHome": "Ana Sayfaya Dön"
   },
   "schedule": {
-    "title": "Bakanlık Atama Programı",
+    "title": "Bakan Atama Programı",
     "viewSchedule": "Yayınlanan Programı Görüntüle",
     "noSchedule": "Yayınlanan Program Yok",
-    "noScheduleDesc": "Bakanlık atama programı henüz yayınlanmadı. Daha sonra tekrar kontrol edin.",
+    "noScheduleDesc": "Bakan atama programı henüz yayınlanmadı. Daha sonra tekrar kontrol edin.",
     "noAssignments": "Bu gün için atama bulunamadı.",
     "unfilled": "— Açık —",
     "timesNote": "Yukarıda bir saat dilimi seçilmedikçe tüm saatler UTC'dir.",
     "disclaimer": "Başvurular hâlâ açık. Başvurular kapanana kadar atanan saatler değişebilir."
   },
   "apply": {
-    "title": "Bakanlık başvurusu",
+    "title": "Bakan başvurusu",
     "enterFid": "Başvurunuzu başlatmak veya düzenlemek için oyuncu kimliğinizi (FID) girin.",
     "newFor": "{{round}} için yeni başvuru",
     "editFor": "{{round}} başvurunuzu düzenleyin",
     "notOpenTitle": "Başvurular açık değil",
-    "notOpenBody": "Şu anda açık bir bakanlık turu yok. Daha sonra tekrar bakın.",
+    "notOpenBody": "Şu anda açık bir bakan turu yok. Daha sonra tekrar bakın.",
     "closedBody": "{{round}} için artık yeni başvuru alınmıyor. Zaten başvurduysanız düzenlemek için o oyuncu kimliğini girin.",
     "closedButEditable": "Yeni oyuncular için başvurular kapandı. Kendi başvurunuzu yine de güncelleyebilirsiniz.",
     "otherFid": "Başka bir oyuncu kimliği kullan",

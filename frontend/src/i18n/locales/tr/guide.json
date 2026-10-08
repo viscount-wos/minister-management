@@ -2,9 +2,9 @@
   "player": {
     "linkText": "Bu sistem nasıl çalışır? Oyuncu Rehberini Oku",
     "title": "Oyuncu Rehberi",
-    "subtitle": "Bakanlık başvurunuzu göndermek hakkında bilmeniz gereken her şey.",
+    "subtitle": "Bakan başvurunuzu göndermek hakkında bilmeniz gereken her şey.",
     "whatIsTitle": "Bu sistem nedir?",
-    "whatIsBody": "Bu sistem SVS bakanlık atamalarını otomatikleştirir. R4'lerle manuel koordinasyon yerine, mevcut hızlandırmalarınızı ve tercih ettiğiniz zaman dilimlerini gönderirsiniz. Sistem, katkı düzeyinize ve müsaitliğinize göre bakanlık pozisyonlarını atar ve en yüksek katkıda bulunanlar öncelik alır.",
+    "whatIsBody": "Bu sistem SVS bakan atamalarını otomatikleştirir. R4'lerle manuel koordinasyon yerine, mevcut hızlandırmalarınızı ve tercih ettiğiniz zaman dilimlerini gönderirsiniz. Sistem, katkı düzeyinize ve müsaitliğinize göre bakan pozisyonlarını atar ve en yüksek katkıda bulunanlar öncelik alır.",
     "submitTitle": "Başvuru Nasıl Gönderilir",
     "step1Header": "Adım 1: Oyuncu Bilgileri",
     "step1Fid": "Oyuncu ID'nizi (FID) girin — oyun profilinizde bulunan benzersiz tanımlayıcınızdır. Atama görüntülemek veya güncelleme yapmak için daha sonra ihtiyacınız olacak.",
@@ -25,7 +25,7 @@
     "heatmapRed": "Yüksek talep — rekabetçi",
     "heatmapTip": "İpucu: Daha az rekabetçi (mavi) zaman dilimlerini seçmek atanma şansınızı artırır.",
     "updateTitle": "Atamaları Görüntüleme ve Bilgi Güncelleme",
-    "updateBody1": "Bakanlık sayfasında \"Başvur veya güncelle\"ye tıklayın:",
+    "updateBody1": "Bakan sayfasında \"Başvur veya güncelle\"ye tıklayın:",
     "updateStep1": "1. adımda FID'nizi girip \"İleri\"ye tıklayın.",
     "updateStep2": "Üç günün tamamı için mevcut atamalarınız üstte gösterilir (henüz atanmamışsa \"Yok\").",
     "updateStep3": "Sihirbaz, kayıtlı yanıtlarınız doldurulmuş olarak açılır. Adımları geçin ve istediğinizi değiştirin — hızlandırmalar, zaman tercihleri, ittifak vb.",
@@ -45,7 +45,7 @@
     "tip3": "Esnekliğiniz varsa daha az rekabetçi dilimleri bulmak için ısı haritasını kontrol edin.",
     "tip4": "Atanıp atanmadığınızı görmek için düzenli olarak \"Başvur veya güncelle\"ye dönün.",
     "tip5": "Müsaitliğiniz değişirse, gönderiminizi hemen güncelleyin — son dakikaya bırakmayın.",
-    "roundsNote": "Her bakanlık turu yeni bir başvurudur. Profiliniz hatırlanır, ancak hızlandırmalar ve saatler boş başlar: önceki turunuzdan kopyalamak için \"Son cevaplarımı kullan\"a tıklayın."
+    "roundsNote": "Her bakan turu yeni bir başvurudur. Profiliniz hatırlanır, ancak hızlandırmalar ve saatler boş başlar: önceki turunuzdan kopyalamak için \"Son cevaplarımı kullan\"a tıklayın."
   },
   "admin": {
     "linkText": "Yönetici Rehberi",

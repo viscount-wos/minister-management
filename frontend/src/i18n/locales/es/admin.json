@@ -34,7 +34,7 @@
   "showFireCrystals": "Mostrar campos de Cristales de Fuego",
   "showFireCrystalsDesc": "Cuando está activado, los campos de cristales de fuego se muestran en el formulario de envío del jugador y en las tablas de administración.",
   "timeSlotScheme": "Esquema de Horarios",
-  "timeSlotSchemeDesc": "Elige cómo se generan los horarios de ministerio para el calendario.",
+  "timeSlotSchemeDesc": "Elige cómo se generan los horarios de ministro para el calendario.",
   "schemeExact": "Alineación Exacta",
   "schemeExactDesc": "Los horarios se alinean a la hora — 00:00, 00:30 … 23:30 (48 horarios por día).",
   "schemeMax": "Máximo de Horarios",
@@ -107,7 +107,7 @@
     "startError": "No se pudo iniciar una nueva ronda",
     "name": "Nombre de la ronda",
     "nameRequired": "El nombre de la ronda es obligatorio",
-    "defaultName": "Ministerio {{date}}",
+    "defaultName": "Ministro {{date}}",
     "readOnly": "Es una ronda anterior. Solo se puede consultar.",
     "noRoundsYet": "Aún no hay rondas. Pulsa «Iniciar nueva ronda» para abrir las solicitudes.",
     "loadError": "No se pudieron cargar las rondas",
@@ -115,7 +115,7 @@
     "settingsFor": "Ajustes de {{round}}",
     "settingsDesc": "Estos ajustes solo se aplican a esta ronda. Una ronda nueva empieza con una copia.",
     "publishedDays": "Días con horario publicado",
-    "publishedDaysDesc": "Los jugadores ven el horario de los días publicados en la página del ministerio.",
+    "publishedDaysDesc": "Los jugadores ven el horario de los días publicados en la página de ministros.",
     "remapped": "Esquema de franjas cambiado. {{n}} asignaciones movidas a las nuevas franjas."
   },
   "shell": {

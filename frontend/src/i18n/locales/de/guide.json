@@ -2,9 +2,9 @@
   "player": {
     "linkText": "Wie funktioniert dieses System? Lesen Sie den Spielerleitfaden",
     "title": "Spielerleitfaden",
-    "subtitle": "Alles, was Sie über das Einreichen Ihrer Ministeriumsbewerbung wissen müssen.",
+    "subtitle": "Alles, was Sie über das Einreichen Ihrer Ministerbewerbung wissen müssen.",
     "whatIsTitle": "Was ist dieses System?",
-    "whatIsBody": "Dieses System automatisiert SVS-Ministeriumszuweisungen. Statt sich manuell mit den R4s abzustimmen, reichen Sie Ihre verfügbaren Beschleunigungen und bevorzugten Zeitfenster ein. Das System weist dann Ministeriumsposten basierend auf Ihrem Beitragsniveau und Ihrer Verfügbarkeit zu und stellt sicher, dass die größten Beitragenden Vorrang erhalten.",
+    "whatIsBody": "Dieses System automatisiert SVS-Ministerzuweisungen. Statt sich manuell mit den R4s abzustimmen, reichen Sie Ihre verfügbaren Beschleunigungen und bevorzugten Zeitfenster ein. Das System weist dann Ministerposten basierend auf Ihrem Beitragsniveau und Ihrer Verfügbarkeit zu und stellt sicher, dass die größten Beitragenden Vorrang erhalten.",
     "submitTitle": "So reichen Sie Ihre Bewerbung ein",
     "step1Header": "Schritt 1: Spielerinformationen",
     "step1Fid": "Geben Sie Ihre Spieler-ID (FID) ein — dies ist Ihr eindeutiger Bezeichner, den Sie in Ihrem Spielprofil finden. Sie benötigen ihn später, um Ihre Zuweisung anzusehen oder Änderungen vorzunehmen.",
@@ -25,7 +25,7 @@
     "heatmapRed": "Hohe Nachfrage — umkämpft",
     "heatmapTip": "Tipp: Die Wahl weniger umkämpfter (blauer) Zeitfenster erhöht Ihre Chance auf eine Zuweisung.",
     "updateTitle": "Zuweisungen ansehen & Daten aktualisieren",
-    "updateBody1": "Klicke auf der Ministeriumsseite auf „Bewerben oder ändern“:",
+    "updateBody1": "Klicke auf der Ministerseite auf „Bewerben oder ändern“:",
     "updateStep1": "Gib deine FID in Schritt 1 ein und klicke auf „Weiter“.",
     "updateStep2": "Ihre aktuellen Zuweisungen für alle drei Tage werden oben angezeigt (oder \"Keine\", falls noch nicht zugewiesen).",
     "updateStep3": "Der Assistent öffnet sich mit deinen gespeicherten Angaben. Gehe die Schritte durch und ändere, was du möchtest — Beschleunigungen, Zeitpräferenzen, Allianz usw.",
@@ -45,7 +45,7 @@
     "tip3": "Prüfen Sie die Heatmap, um weniger umkämpfte Zeitfenster zu finden, wenn Sie flexibel sind.",
     "tip4": "Schau regelmäßig unter „Bewerben oder ändern“ nach, ob du eingeteilt wurdest.",
     "tip5": "Wenn sich Ihre Verfügbarkeit ändert, aktualisieren Sie Ihre Einreichung sofort — warten Sie nicht bis zur letzten Minute.",
-    "roundsNote": "Jede Ministeriumsrunde ist eine neue Bewerbung. Dein Profil bleibt gespeichert, aber Beschleuniger und Zeiten beginnen leer: Klicke auf „Meine letzten Antworten übernehmen“, um sie aus deiner letzten Runde zu kopieren."
+    "roundsNote": "Jede Ministerrunde ist eine neue Bewerbung. Dein Profil bleibt gespeichert, aber Beschleuniger und Zeiten beginnen leer: Klicke auf „Meine letzten Antworten übernehmen“, um sie aus deiner letzten Runde zu kopieren."
   },
   "admin": {
     "linkText": "Admin-Leitfaden",
@@ -53,7 +53,7 @@
     "title": "Admin-Leitfaden",
     "subtitle": "Vollständiger Leitfaden zum Verwalten von Spielern, Zuweisungen und Veröffentlichen von Zeitplänen.",
     "overviewTitle": "Systemübersicht",
-    "overviewBody": "Das Admin-Dashboard hat drei Hauptregisterkarten: Spieler, Zuweisungen und Einstellungen. Auf der Registerkarte Spieler können Sie Spielerdaten ansehen, bearbeiten, löschen und exportieren/importieren. Auf der Registerkarte Zuweisungen können Sie Ministeriums-Zeitfenster automatisch zuweisen, manuell per Drag-and-Drop anpassen, Zuweisungen sperren, Zeitpläne veröffentlichen und nach Excel exportieren. Die Registerkarte Einstellungen steuert systemweite Optionen einschließlich Staatsnummer, Bewerbungsschluss, Forschungstag und Sichtbarkeit der Feuerkristall-Felder.",
+    "overviewBody": "Das Admin-Dashboard hat drei Hauptregisterkarten: Spieler, Zuweisungen und Einstellungen. Auf der Registerkarte Spieler können Sie Spielerdaten ansehen, bearbeiten, löschen und exportieren/importieren. Auf der Registerkarte Zuweisungen können Sie Minister-Zeitfenster automatisch zuweisen, manuell per Drag-and-Drop anpassen, Zuweisungen sperren, Zeitpläne veröffentlichen und nach Excel exportieren. Die Registerkarte Einstellungen steuert systemweite Optionen einschließlich Staatsnummer, Bewerbungsschluss, Forschungstag und Sichtbarkeit der Feuerkristall-Felder.",
     "playersTitle": "Spielerverwaltung",
     "playersViewHeader": "Spieler ansehen",
     "playersView1": "Alle eingereichten Spieler erscheinen in einer sortierbaren Tabelle mit ihrem Spielnamen, ihrer Allianz, ihren Beschleunigungen und berechneten Punkten.",
@@ -121,7 +121,7 @@
     "roundsTitle": "Runden",
     "rounds1": "Jedes Tyrann-Event ist eine Runde. Die Rundenauswahl zeigt standardmäßig die aktuelle Runde; wähle eine ältere, um zurückzuschauen.",
     "rounds2": "„Neue Runde starten“ schließt die aktuelle Runde und öffnet eine neue mit dem gewählten Namen (und optionalem Anmeldeschluss). Nichts wird gelöscht.",
-    "rounds3": "Die neue Runde übernimmt die Zeitfenster der vorherigen. Spieler melden sich neu an und können „Meine letzten Antworten verwenden“ drücken.",
+    "rounds3": "Die neue Runde übernimmt die Zeitfenster der vorherigen. Spieler melden sich neu an und können „Meine letzten Antworten übernehmen“ drücken.",
     "rounds4": "Vergangene Runden sind schreibgeschützt: Du kannst sie ansehen und exportieren, aber nicht ändern.",
     "windowsTitle": "Zeitfenster",
     "windowsBody": "Im Tab Einstellungen legst du die Zeitfenster (UTC) fest, die Spieler in dieser Runde wählen können:",

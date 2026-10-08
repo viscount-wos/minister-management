@@ -34,7 +34,7 @@
   "showFireCrystals": "불 수정 필드 표시",
   "showFireCrystalsDesc": "활성화하면 플레이어 제출 양식과 관리자 테이블에 불 수정 입력 필드가 표시됩니다.",
   "timeSlotScheme": "시간대 방식",
-  "timeSlotSchemeDesc": "일정에서 부처 시간대를 생성하는 방식을 선택하세요.",
+  "timeSlotSchemeDesc": "일정에서 장관 시간대를 생성하는 방식을 선택하세요.",
   "schemeExact": "정시 정렬",
   "schemeExactDesc": "시간대가 정시에 맞춰집니다 — 00:00, 00:30 … 23:30 (하루 48개 시간대).",
   "schemeMax": "최대 시간대",

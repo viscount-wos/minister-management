@@ -34,7 +34,7 @@
   "showFireCrystals": "Show Fire Crystal fields",
   "showFireCrystalsDesc": "When enabled, fire crystal input fields are shown on the player submission form and admin tables.",
   "timeSlotScheme": "Time Slot Scheme",
-  "timeSlotSchemeDesc": "Choose how ministry time slots are generated for the schedule.",
+  "timeSlotSchemeDesc": "Choose how minister time slots are generated for the schedule.",
   "schemeExact": "Exact Alignment",
   "schemeExactDesc": "Slots align to the hour — 00:00, 00:30 … 23:30 (48 slots per day).",
   "schemeMax": "Maximum Slots",
@@ -107,7 +107,7 @@
     "startError": "Failed to start a new round",
     "name": "Round name",
     "nameRequired": "Round name is required",
-    "defaultName": "Ministry {{date}}",
+    "defaultName": "Minister {{date}}",
     "readOnly": "This is a past round. It is read-only.",
     "noRoundsYet": "No rounds yet. Click \"Start new round\" to open applications.",
     "loadError": "Failed to load rounds",
@@ -115,7 +115,7 @@
     "settingsFor": "Settings for {{round}}",
     "settingsDesc": "These settings apply only to this round. A new round starts with a copy of them.",
     "publishedDays": "Published schedule days",
-    "publishedDaysDesc": "Players see the schedule of published days on the ministry page.",
+    "publishedDaysDesc": "Players see the schedule of published days on the minister page.",
     "remapped": "Slot scheme changed. {{n}} assignments moved to the new slots."
   },
   "shell": {

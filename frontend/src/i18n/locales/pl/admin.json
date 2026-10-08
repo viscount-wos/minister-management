@@ -34,7 +34,7 @@
   "showFireCrystals": "Pokaż pola Kryształów Ognia",
   "showFireCrystalsDesc": "Po włączeniu pola Kryształów Ognia pojawiają się w formularzu zgłoszeniowym gracza oraz w tabelach administratora.",
   "timeSlotScheme": "Schemat przedziałów czasowych",
-  "timeSlotSchemeDesc": "Wybierz, w jaki sposób generowane są ministerialne przedziały czasowe w harmonogramie.",
+  "timeSlotSchemeDesc": "Wybierz, w jaki sposób generowane są przedziały czasowe ministrów w harmonogramie.",
   "schemeExact": "Dokładne wyrównanie",
   "schemeExactDesc": "Przedziały wyrównane do pełnych godzin — 00:00, 00:30 … 23:30 (48 przedziałów dziennie).",
   "schemeMax": "Maksimum przedziałów",
@@ -107,7 +107,7 @@
     "startError": "Nie udało się rozpocząć nowej rundy",
     "name": "Nazwa rundy",
     "nameRequired": "Nazwa rundy jest wymagana",
-    "defaultName": "Ministerstwo {{date}}",
+    "defaultName": "Minister {{date}}",
     "readOnly": "To poprzednia runda, tylko do odczytu.",
     "noRoundsYet": "Brak rund. Kliknij „Rozpocznij nową rundę”, aby otworzyć zgłoszenia.",
     "loadError": "Nie udało się wczytać rund",
@@ -115,7 +115,7 @@
     "settingsFor": "Ustawienia: {{round}}",
     "settingsDesc": "Te ustawienia dotyczą tylko tej rundy. Nowa runda zaczyna z ich kopią.",
     "publishedDays": "Opublikowane dni harmonogramu",
-    "publishedDaysDesc": "Gracze widzą harmonogram opublikowanych dni na stronie ministerstwa.",
+    "publishedDaysDesc": "Gracze widzą harmonogram opublikowanych dni na stronie ministrów.",
     "remapped": "Zmieniono schemat slotów. Przeniesiono przydziały: {{n}}."
   },
   "shell": {

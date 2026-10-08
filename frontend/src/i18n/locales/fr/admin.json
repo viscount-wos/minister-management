@@ -34,7 +34,7 @@
   "showFireCrystals": "Afficher les champs Cristaux de Feu",
   "showFireCrystalsDesc": "Lorsqu'ils sont activés, les champs de saisie des cristaux de feu apparaissent sur le formulaire de soumission des joueurs et dans les tableaux d'administration.",
   "timeSlotScheme": "Schéma de créneaux horaires",
-  "timeSlotSchemeDesc": "Choisissez comment les créneaux horaires ministériels sont générés pour le planning.",
+  "timeSlotSchemeDesc": "Choisissez comment les créneaux horaires de ministre sont générés pour le planning.",
   "schemeExact": "Alignement exact",
   "schemeExactDesc": "Les créneaux s'alignent sur l'heure — 00:00, 00:30 … 23:30 (48 créneaux par jour).",
   "schemeMax": "Créneaux maximum",
@@ -107,7 +107,7 @@
     "startError": "Impossible de lancer un nouveau tour",
     "name": "Nom du tour",
     "nameRequired": "Le nom du tour est obligatoire",
-    "defaultName": "Ministère {{date}}",
+    "defaultName": "Ministre {{date}}",
     "readOnly": "C'est un tour passé, en lecture seule.",
     "noRoundsYet": "Aucun tour pour l'instant. Cliquez sur « Lancer un nouveau tour » pour ouvrir les candidatures.",
     "loadError": "Impossible de charger les tours",
@@ -115,7 +115,7 @@
     "settingsFor": "Paramètres de {{round}}",
     "settingsDesc": "Ces paramètres ne s'appliquent qu'à ce tour. Un nouveau tour en reprend une copie.",
     "publishedDays": "Jours du planning publiés",
-    "publishedDaysDesc": "Les joueurs voient le planning des jours publiés sur la page du ministère.",
+    "publishedDaysDesc": "Les joueurs voient le planning des jours publiés sur la page des ministres.",
     "remapped": "Schéma de créneaux modifié. {{n}} affectations déplacées vers les nouveaux créneaux."
   },
   "shell": {

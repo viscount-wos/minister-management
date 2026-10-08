@@ -1,12 +1,12 @@
 {
   "event": {
-    "name": "Ministère",
-    "tagline": "Réservez un créneau de ministère pour les jours de préparation SVS et consultez le planning",
-    "adminSubtitle": "Ministère : candidatures et affectations"
+    "name": "Ministre",
+    "tagline": "Réservez un créneau de ministre pour les jours de préparation SVS et consultez le planning",
+    "adminSubtitle": "Ministre : candidatures et affectations"
   },
   "home": {
-    "title": "Gestion des Ministères Whiteout Survival",
-    "subtitle": "Système d'Attribution des Ministères SVS État contre État",
+    "title": "Gestion des Ministres Whiteout Survival",
+    "subtitle": "Système d'Attribution des Ministres SVS État contre État",
     "adminDesc": "Gérer les joueurs et les attributions",
     "utcNote": "Toutes les heures sont enregistrées en UTC — utilisez le sélecteur de fuseau horaire sur les formulaires pour convertir à votre heure locale",
     "welcome": "Bienvenue, {{state}}",
@@ -71,22 +71,22 @@
     "backHome": "Retour à l'accueil"
   },
   "schedule": {
-    "title": "Planning Ministériel",
+    "title": "Planning des Ministres",
     "viewSchedule": "Voir le planning publié",
     "noSchedule": "Aucun planning publié",
-    "noScheduleDesc": "Le planning ministériel n'a pas encore été publié. Revenez plus tard.",
+    "noScheduleDesc": "Le planning des ministres n'a pas encore été publié. Revenez plus tard.",
     "noAssignments": "Aucune attribution trouvée pour ce jour.",
     "unfilled": "— Libre —",
     "timesNote": "Toutes les heures sont en UTC, sauf si un fuseau horaire est sélectionné ci-dessus.",
     "disclaimer": "Les candidatures sont toujours ouvertes. Les heures attribuées peuvent changer jusqu'à la clôture des candidatures."
   },
   "apply": {
-    "title": "Candidature au ministère",
+    "title": "Candidature de ministre",
     "enterFid": "Saisissez votre ID joueur (FID) pour créer ou modifier votre candidature.",
     "newFor": "Nouvelle candidature pour {{round}}",
     "editFor": "Modifier votre candidature pour {{round}}",
     "notOpenTitle": "Les candidatures ne sont pas ouvertes",
-    "notOpenBody": "Aucun tour de ministère n'est ouvert pour le moment. Revenez plus tard.",
+    "notOpenBody": "Aucun tour de ministres n'est ouvert pour le moment. Revenez plus tard.",
     "closedBody": "Les nouvelles candidatures pour {{round}} ne sont plus acceptées. Si vous avez déjà postulé, saisissez cet ID joueur pour la modifier.",
     "closedButEditable": "Les candidatures sont closes pour les nouveaux joueurs. Vous pouvez encore modifier la vôtre.",
     "otherFid": "Utiliser un autre ID joueur",

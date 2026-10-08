@@ -34,7 +34,7 @@
   "showFireCrystals": "Ateş Kristali alanlarını göster",
   "showFireCrystalsDesc": "Etkinleştirildiğinde, oyuncu gönderim formunda ve yönetici tablolarında ateş kristali giriş alanları gösterilir.",
   "timeSlotScheme": "Zaman Dilimi Şeması",
-  "timeSlotSchemeDesc": "Bakanlık zaman dilimlerinin çizelge için nasıl oluşturulacağını seçin.",
+  "timeSlotSchemeDesc": "Bakan zaman dilimlerinin çizelge için nasıl oluşturulacağını seçin.",
   "schemeExact": "Tam Hizalama",
   "schemeExactDesc": "Dilimler saate hizalanır — 00:00, 00:30 … 23:30 (günde 48 dilim).",
   "schemeMax": "Maksimum Dilim",
@@ -107,7 +107,7 @@
     "startError": "Yeni tur başlatılamadı",
     "name": "Tur adı",
     "nameRequired": "Tur adı zorunludur",
-    "defaultName": "Bakanlık {{date}}",
+    "defaultName": "Bakan {{date}}",
     "readOnly": "Bu geçmiş bir tur. Salt okunurdur.",
     "noRoundsYet": "Henüz tur yok. Başvuruları açmak için \"Yeni tur başlat\"a tıklayın.",
     "loadError": "Turlar yüklenemedi",
@@ -115,7 +115,7 @@
     "settingsFor": "{{round}} ayarları",
     "settingsDesc": "Bu ayarlar yalnızca bu tur için geçerlidir. Yeni tur bunların bir kopyasıyla başlar.",
     "publishedDays": "Yayınlanan program günleri",
-    "publishedDaysDesc": "Oyuncular yayınlanan günlerin programını bakanlık sayfasında görür.",
+    "publishedDaysDesc": "Oyuncular yayınlanan günlerin programını bakan sayfasında görür.",
     "remapped": "Zaman dilimi düzeni değişti. {{n}} atama yeni dilimlere taşındı."
   },
   "shell": {

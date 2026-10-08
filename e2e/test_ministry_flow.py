@@ -37,11 +37,11 @@ def test_home_tile_to_ministry_to_apply(page: Page, base_url, shot, api):
     expect(tile).to_contain_text(en('ministry:event.name'))
     expect(tile).to_contain_text(en('common:home.status.open'))
     tile.click()
-    page.wait_for_url('**/ministry')
+    page.wait_for_url('**/minister')
     expect(page.get_by_test_id('current-round')).to_have_text(en('ministry:home.currentRound', round=rnd['name']))
     shot('ministry-home')
     page.get_by_test_id('ministry-apply-tile').click()
-    page.wait_for_url('**/ministry/apply')
+    page.wait_for_url('**/minister/apply')
     # the wizard, on step 1 of 5, asking for the FID first
     ui.expect_step(page, 1)
     for n in range(1, 6):
@@ -397,7 +397,7 @@ def test_admin_assign_publish_export_and_player_sees_schedule(page: Page, base_u
     # player side: published schedule link + page, and their own assignment on wizard step 1
     ui.go(page, base_url, 'ministry')
     page.get_by_test_id('schedule-link-monday').click()
-    page.wait_for_url('**/ministry/schedule/monday')
+    page.wait_for_url('**/minister/schedule/monday')
     expect(page.get_by_text(STATE['name'])).to_be_visible()
     shot('public-schedule')
     assert ui.open_application(page, base_url, fid) == 'edit'
@@ -420,6 +420,6 @@ def test_legacy_update_link_with_fid_opens_edit(page: Page, base_url):
     if not STATE.get('edited'):
         pytest.skip('edit step failed')
     page.goto(f'{base_url}/update?fid={STATE["fid"]}')
-    page.wait_for_url(f'**/ministry/apply?fid={STATE["fid"]}')
+    page.wait_for_url(f'**/minister/apply?fid={STATE["fid"]}')
     expect(page.get_by_test_id('application-heading')).to_have_attribute('data-mode', 'edit')
     ui.expect_step(page, 1)

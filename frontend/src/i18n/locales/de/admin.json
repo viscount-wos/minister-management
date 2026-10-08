@@ -34,7 +34,7 @@
   "showFireCrystals": "Feuerkristall-Felder anzeigen",
   "showFireCrystalsDesc": "Wenn aktiviert, werden Feuerkristall-Eingabefelder im Spieler-Einreichungsformular und in den Admin-Tabellen angezeigt.",
   "timeSlotScheme": "Zeitfenster-Schema",
-  "timeSlotSchemeDesc": "Wählen Sie, wie Ministeriums-Zeitfenster für den Zeitplan generiert werden.",
+  "timeSlotSchemeDesc": "Wählen Sie, wie Minister-Zeitfenster für den Zeitplan generiert werden.",
   "schemeExact": "Exakte Ausrichtung",
   "schemeExactDesc": "Zeitfenster sind auf die Stunde ausgerichtet — 00:00, 00:30 … 23:30 (48 Zeitfenster pro Tag).",
   "schemeMax": "Maximale Zeitfenster",
@@ -107,7 +107,7 @@
     "startError": "Neue Runde konnte nicht gestartet werden",
     "name": "Name der Runde",
     "nameRequired": "Name der Runde ist erforderlich",
-    "defaultName": "Ministerium {{date}}",
+    "defaultName": "Minister {{date}}",
     "readOnly": "Das ist eine vergangene Runde. Sie ist schreibgeschützt.",
     "noRoundsYet": "Noch keine Runden. Klicke auf „Neue Runde starten“, um Bewerbungen zu öffnen.",
     "loadError": "Runden konnten nicht geladen werden",
@@ -115,7 +115,7 @@
     "settingsFor": "Einstellungen für {{round}}",
     "settingsDesc": "Diese Einstellungen gelten nur für diese Runde. Eine neue Runde startet mit einer Kopie davon.",
     "publishedDays": "Veröffentlichte Plantage",
-    "publishedDaysDesc": "Spieler sehen den Plan der veröffentlichten Tage auf der Ministeriumsseite.",
+    "publishedDaysDesc": "Spieler sehen den Plan der veröffentlichten Tage auf der Ministerseite.",
     "remapped": "Slot-Schema geändert. {{n}} Zuweisungen wurden auf die neuen Slots verschoben."
   },
   "shell": {

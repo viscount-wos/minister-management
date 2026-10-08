@@ -1,12 +1,12 @@
 {
   "event": {
-    "name": "Ministerium",
+    "name": "Minister",
     "tagline": "Buche einen Ministerplatz für die SVS-Vorbereitungstage und sieh dir den Plan an",
-    "adminSubtitle": "Ministerium: Bewerbungen und Zuweisungen"
+    "adminSubtitle": "Minister: Bewerbungen und Zuweisungen"
   },
   "home": {
-    "title": "Whiteout Survival Ministeriumsverwaltung",
-    "subtitle": "SVS Staat-gegen-Staat Ministeriumszuweisungssystem",
+    "title": "Whiteout Survival Ministerverwaltung",
+    "subtitle": "SVS Staat-gegen-Staat Ministerzuweisungssystem",
     "adminDesc": "Spieler und Zuweisungen verwalten",
     "utcNote": "Alle Zeiten werden in UTC gespeichert — verwenden Sie die Zeitzonenauswahl in den Formularen, um in Ihre Ortszeit umzurechnen",
     "welcome": "Willkommen, {{state}}",
@@ -71,22 +71,22 @@
     "backHome": "Zurück zur Startseite"
   },
   "schedule": {
-    "title": "Ministeriums-Zeitplan",
+    "title": "Minister-Zeitplan",
     "viewSchedule": "Veröffentlichten Zeitplan ansehen",
     "noSchedule": "Kein Zeitplan veröffentlicht",
-    "noScheduleDesc": "Der Ministeriums-Zeitplan wurde noch nicht veröffentlicht. Schauen Sie später wieder vorbei.",
+    "noScheduleDesc": "Der Minister-Zeitplan wurde noch nicht veröffentlicht. Schauen Sie später wieder vorbei.",
     "noAssignments": "Keine Zuweisungen für diesen Tag gefunden.",
     "unfilled": "— Offen —",
     "timesNote": "Alle Zeiten sind in UTC, sofern oben keine Zeitzone ausgewählt ist.",
     "disclaimer": "Die Bewerbungsphase läuft noch. Zugewiesene Zeiten können sich bis zum Bewerbungsschluss ändern."
   },
   "apply": {
-    "title": "Ministeriumsbewerbung",
+    "title": "Ministerbewerbung",
     "enterFid": "Gib deine Spieler-ID (FID) ein, um deine Bewerbung zu starten oder zu ändern.",
     "newFor": "Neue Bewerbung für {{round}}",
     "editFor": "Bearbeite deine Bewerbung für {{round}}",
     "notOpenTitle": "Bewerbungen sind nicht geöffnet",
-    "notOpenBody": "Derzeit ist keine Ministeriumsrunde geöffnet. Schau später wieder vorbei.",
+    "notOpenBody": "Derzeit ist keine Ministerrunde geöffnet. Schau später wieder vorbei.",
     "closedBody": "Für {{round}} werden keine neuen Bewerbungen mehr angenommen. Wenn du dich schon beworben hast, gib diese Spieler-ID ein, um sie zu ändern.",
     "closedButEditable": "Für neue Spieler sind Bewerbungen geschlossen. Deine kannst du noch ändern.",
     "otherFid": "Andere Spieler-ID verwenden",

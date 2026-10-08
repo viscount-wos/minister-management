@@ -2,9 +2,9 @@
   "player": {
     "linkText": "Comment fonctionne ce système ? Lisez le Guide du Joueur",
     "title": "Guide du Joueur",
-    "subtitle": "Tout ce que vous devez savoir pour soumettre votre candidature ministérielle.",
+    "subtitle": "Tout ce que vous devez savoir pour soumettre votre candidature de ministre.",
     "whatIsTitle": "Qu'est-ce que ce système ?",
-    "whatIsBody": "Ce système automatise les attributions ministérielles SVS. Au lieu de vous coordonner manuellement avec les R4, vous soumettez vos accélérations disponibles et vos créneaux horaires préférés. Le système attribue ensuite les postes ministériels en fonction de votre niveau de contribution et de votre disponibilité, en garantissant la priorité aux plus gros contributeurs.",
+    "whatIsBody": "Ce système automatise les attributions de ministres SVS. Au lieu de vous coordonner manuellement avec les R4, vous soumettez vos accélérations disponibles et vos créneaux horaires préférés. Le système attribue ensuite les postes de ministre en fonction de votre niveau de contribution et de votre disponibilité, en garantissant la priorité aux plus gros contributeurs.",
     "submitTitle": "Comment soumettre votre candidature",
     "step1Header": "Étape 1 : Informations du joueur",
     "step1Fid": "Saisissez votre ID Joueur (FID) — c'est votre identifiant unique que l'on trouve dans votre profil de jeu. Vous en aurez besoin plus tard pour consulter votre attribution ou effectuer des mises à jour.",
@@ -25,7 +25,7 @@
     "heatmapRed": "Forte demande — concurrentiel",
     "heatmapTip": "Astuce : choisir des créneaux horaires moins concurrentiels (bleus) augmente vos chances d'être attribué.",
     "updateTitle": "Consulter les attributions et modifier les infos",
-    "updateBody1": "Sur la page du ministère, cliquez sur « Postuler ou modifier » :",
+    "updateBody1": "Sur la page des ministres, cliquez sur « Postuler ou modifier » :",
     "updateStep1": "Saisissez votre FID à l'étape 1 et cliquez sur « Suivant ».",
     "updateStep2": "Vos attributions actuelles pour les trois jours s'afficheront en haut (ou « Aucune » si vous n'êtes pas encore attribué).",
     "updateStep3": "L'assistant s'ouvre avec vos réponses enregistrées déjà remplies. Parcourez les étapes et modifiez ce que vous voulez — accélérations, préférences horaires, alliance, etc.",
@@ -45,7 +45,7 @@
     "tip3": "Consultez la carte de chaleur pour trouver des créneaux moins concurrentiels si vous avez de la flexibilité.",
     "tip4": "Revenez régulièrement sur « Postuler ou modifier » pour voir si vous avez été affecté.",
     "tip5": "Si votre disponibilité change, modifiez votre soumission immédiatement — n'attendez pas la dernière minute.",
-    "roundsNote": "Chaque tour de ministère est une nouvelle candidature. Votre profil est mémorisé, mais les accélérations et les horaires repartent de zéro : cliquez sur « Utiliser mes dernières réponses » pour les copier depuis votre tour précédent."
+    "roundsNote": "Chaque tour de ministres est une nouvelle candidature. Votre profil est mémorisé, mais les accélérations et les horaires repartent de zéro : cliquez sur « Utiliser mes dernières réponses » pour les copier depuis votre tour précédent."
   },
   "admin": {
     "linkText": "Guide de l'Administrateur",
@@ -53,7 +53,7 @@
     "title": "Guide de l'Administrateur",
     "subtitle": "Guide complet pour gérer les joueurs, les attributions et publier les plannings.",
     "overviewTitle": "Aperçu du système",
-    "overviewBody": "Le tableau de bord d'administration comporte trois onglets principaux : Joueurs, Attributions et Paramètres. L'onglet Joueurs vous permet de consulter, modifier, supprimer et exporter/importer les données des joueurs. L'onglet Attributions vous permet d'attribuer automatiquement les créneaux ministériels, d'ajuster manuellement par glisser-déposer, de verrouiller les attributions, de publier les plannings et d'exporter vers Excel. L'onglet Paramètres contrôle les options générales du système, notamment le numéro d'État, l'heure de clôture des candidatures, le jour de recherche et la visibilité des champs de cristaux de feu.",
+    "overviewBody": "Le tableau de bord d'administration comporte trois onglets principaux : Joueurs, Attributions et Paramètres. L'onglet Joueurs vous permet de consulter, modifier, supprimer et exporter/importer les données des joueurs. L'onglet Attributions vous permet d'attribuer automatiquement les créneaux de ministre, d'ajuster manuellement par glisser-déposer, de verrouiller les attributions, de publier les plannings et d'exporter vers Excel. L'onglet Paramètres contrôle les options générales du système, notamment le numéro d'État, l'heure de clôture des candidatures, le jour de recherche et la visibilité des champs de cristaux de feu.",
     "playersTitle": "Gestion des joueurs",
     "playersViewHeader": "Consulter les joueurs",
     "playersView1": "Tous les joueurs soumis apparaissent dans un tableau triable avec leur nom de jeu, leur alliance, leurs accélérations et leurs points calculés.",

@@ -18,24 +18,31 @@ from playwright.sync_api import Page, expect
 # --- routes ---------------------------------------------------------------
 ROUTES = {
     'home': '/',
-    'ministry': '/ministry',
-    'apply': '/ministry/apply',            # the wizard: step 1 starts with the FID -> new / edit
+    'ministry': '/minister',               # event key 'ministry'; players see "Minister" (owner rule)
+    'apply': '/minister/apply',            # the wizard: step 1 starts with the FID -> new / edit
     'admin_login': '/admin',
     'admin_dashboard': '/admin/dashboard',
-    'player_guide': '/ministry/guide',
+    'player_guide': '/minister/guide',
     'admin_guide': '/admin/guide',
     'changelog': '/changelog',
 }
 
 # Old URL -> where it must land (bookmarks / shared links keep working).
 LEGACY_REDIRECTS = {
-    '/submit': '/ministry/apply',
-    '/apply': '/ministry/apply',
-    '/update': '/ministry/apply',
-    '/ministry/submit': '/ministry/apply',
-    '/ministry/update': '/ministry/apply',
-    '/guide': '/ministry/guide',
-    '/ministry/admin': '/admin',
+    '/submit': '/minister/apply',
+    '/apply': '/minister/apply',
+    '/update': '/minister/apply',
+    '/ministry': '/minister',
+    '/ministry/apply': '/minister/apply',
+    '/ministry/submit': '/minister/apply',
+    '/ministry/update': '/minister/apply',
+    '/minister/submit': '/minister/apply',
+    '/minister/update': '/minister/apply',
+    '/ministry/schedule/monday': '/minister/schedule/monday',
+    '/schedule/monday': '/minister/schedule/monday',
+    '/ministry/guide': '/minister/guide',
+    '/guide': '/minister/guide',
+    '/ministry/admin': '/admin?event=ministry',
 }
 
 # Pages that need no login, checked for raw i18n keys in every language.

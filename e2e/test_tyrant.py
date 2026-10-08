@@ -308,7 +308,7 @@ def test_no_raw_keys_every_step_9_languages(page: Page, base_url, shot):
 
 def test_shared_profile_furnace_dropdown_in_ministry(page: Page, base_url, shot):
     """The profile is shared: the ministry wizard shows the furnace code saved by Tyrant, in the same dropdown."""
-    page.goto(base_url + '/ministry/apply')
+    page.goto(base_url + '/minister/apply')
     page.wait_for_load_state('networkidle')
     page.get_by_test_id('fid-input').fill(FID_A)
     page.get_by_test_id('wizard-next').click()

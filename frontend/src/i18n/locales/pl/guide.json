@@ -2,9 +2,9 @@
   "player": {
     "linkText": "Jak działa ten system? Przeczytaj Poradnik gracza",
     "title": "Poradnik gracza",
-    "subtitle": "Wszystko, co musisz wiedzieć o składaniu zgłoszenia na stanowisko ministerialne.",
+    "subtitle": "Wszystko, co musisz wiedzieć o składaniu zgłoszenia na stanowisko ministra.",
     "whatIsTitle": "Czym jest ten system?",
-    "whatIsBody": "Ten system automatyzuje przydzielanie stanowisk ministerialnych podczas SVS. Zamiast ustalać wszystko ręcznie z R4, zgłaszasz swoje dostępne przyspieszenia i preferowane przedziały czasowe. Następnie system przydziela stanowiska ministerialne na podstawie Twojego wkładu i dostępności, dzięki czemu pierwszeństwo mają gracze o największym wkładzie.",
+    "whatIsBody": "Ten system automatyzuje przydzielanie stanowisk ministrów podczas SVS. Zamiast ustalać wszystko ręcznie z R4, zgłaszasz swoje dostępne przyspieszenia i preferowane przedziały czasowe. Następnie system przydziela stanowiska ministrów na podstawie Twojego wkładu i dostępności, dzięki czemu pierwszeństwo mają gracze o największym wkładzie.",
     "submitTitle": "Jak złożyć zgłoszenie",
     "step1Header": "Krok 1: Informacje o graczu",
     "step1Fid": "Podaj swoje ID gracza (FID) — to unikalny identyfikator, który znajdziesz w swoim profilu w grze. Będzie Ci potrzebny później, aby sprawdzić przydział lub zaktualizować dane.",
@@ -25,7 +25,7 @@
     "heatmapRed": "Duże zainteresowanie — silna konkurencja",
     "heatmapTip": "Wskazówka: wybieranie mniej obleganych (niebieskich) przedziałów czasowych zwiększa Twoją szansę na przydział.",
     "updateTitle": "Sprawdzanie przydziałów i aktualizacja danych",
-    "updateBody1": "Na stronie ministerstwa kliknij „Zgłoś się lub zaktualizuj”:",
+    "updateBody1": "Na stronie ministrów kliknij „Zgłoś się lub zaktualizuj”:",
     "updateStep1": "Wpisz FID w kroku 1 i kliknij „Dalej”.",
     "updateStep2": "Na górze zobaczysz swoje aktualne przydziały na wszystkie trzy dni (albo \"Brak\", jeśli nie masz jeszcze przydziału).",
     "updateStep3": "Kreator otworzy się z wypełnionymi zapisanymi odpowiedziami. Przejdź przez kroki i zmień, co chcesz — przyspieszenia, preferencje czasowe, sojusz itd.",
@@ -45,7 +45,7 @@
     "tip3": "Sprawdź mapę cieplną i wybierz mniej oblegane przedziały czasowe, jeśli masz taką możliwość.",
     "tip4": "Regularnie wracaj do „Zgłoś się lub zaktualizuj”, aby sprawdzić, czy masz przydział.",
     "tip5": "Jeśli Twoja dostępność się zmieni, od razu zaktualizuj zgłoszenie — nie czekaj do ostatniej chwili.",
-    "roundsNote": "Każda runda ministerstwa to nowe zgłoszenie. Profil jest zapamiętany, ale przyspieszenia i godziny zaczynają się puste: kliknij „Użyj moich ostatnich odpowiedzi”, aby skopiować je z poprzedniej rundy."
+    "roundsNote": "Każda runda ministrów to nowe zgłoszenie. Profil jest zapamiętany, ale przyspieszenia i godziny zaczynają się puste: kliknij „Użyj moich ostatnich odpowiedzi”, aby skopiować je z poprzedniej rundy."
   },
   "admin": {
     "linkText": "Poradnik administratora",
@@ -53,7 +53,7 @@
     "title": "Poradnik administratora",
     "subtitle": "Kompletny przewodnik po zarządzaniu graczami, przydziałami i publikowaniu harmonogramów.",
     "overviewTitle": "Przegląd systemu",
-    "overviewBody": "Panel administratora ma trzy główne zakładki: Gracze, Przydziały i Ustawienia. Zakładka Gracze pozwala przeglądać, edytować i usuwać dane graczy oraz je eksportować i importować. Zakładka Przydziały pozwala automatycznie przydzielać stanowiska ministerialne, korygować je ręcznie metodą przeciągnij i upuść, blokować przydziały, publikować harmonogramy i eksportować dane do Excela. Zakładka Ustawienia zawiera opcje obowiązujące w całym systemie: numer stanu, czas zamknięcia zgłoszeń, dzień badań oraz widoczność pól Kryształów Ognia.",
+    "overviewBody": "Panel administratora ma trzy główne zakładki: Gracze, Przydziały i Ustawienia. Zakładka Gracze pozwala przeglądać, edytować i usuwać dane graczy oraz je eksportować i importować. Zakładka Przydziały pozwala automatycznie przydzielać stanowiska ministrów, korygować je ręcznie metodą przeciągnij i upuść, blokować przydziały, publikować harmonogramy i eksportować dane do Excela. Zakładka Ustawienia zawiera opcje obowiązujące w całym systemie: numer stanu, czas zamknięcia zgłoszeń, dzień badań oraz widoczność pól Kryształów Ognia.",
     "playersTitle": "Zarządzanie graczami",
     "playersViewHeader": "Przeglądanie graczy",
     "playersView1": "Wszyscy zgłoszeni gracze pojawiają się w sortowalnej tabeli wraz z nazwą w grze, sojuszem, przyspieszeniami i wyliczonymi punktami.",

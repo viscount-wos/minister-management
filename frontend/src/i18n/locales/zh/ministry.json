@@ -1,12 +1,12 @@
 {
   "event": {
-    "name": "部长",
-    "tagline": "为 SVS 备战日预约部长时段并查看日程",
+    "name": "大臣",
+    "tagline": "为 SVS 备战日预约大臣时段并查看日程",
     "adminSubtitle": "大臣职位：申请与分配"
   },
   "home": {
-    "title": "白色废土 部长管理",
-    "subtitle": "SVS 州对州 部长分配系统",
+    "title": "白色废土 大臣管理",
+    "subtitle": "SVS 州对州 大臣分配系统",
     "adminDesc": "管理玩家和分配",
     "utcNote": "所有时间以 UTC 存储 — 使用表单中的时区选择器转换为您的当地时间",
     "welcome": "欢迎，{{state}}",
@@ -71,22 +71,22 @@
     "backHome": "返回主页"
   },
   "schedule": {
-    "title": "部长分配日程",
+    "title": "大臣分配日程",
     "viewSchedule": "查看已发布日程",
     "noSchedule": "暂无已发布日程",
-    "noScheduleDesc": "部长分配日程尚未发布。请稍后再查看。",
+    "noScheduleDesc": "大臣分配日程尚未发布。请稍后再查看。",
     "noAssignments": "该日暂无分配。",
     "unfilled": "— 空缺 —",
     "timesNote": "除非在上方选择了时区，否则所有时间均为UTC。",
     "disclaimer": "申请仍在进行中。在申请截止前，分配时间可能会发生变化。"
   },
   "apply": {
-    "title": "部长职位申请",
+    "title": "大臣职位申请",
     "enterFid": "输入你的玩家 ID（FID），开始或修改申请。",
     "newFor": "{{round}} 新申请",
     "editFor": "修改你在 {{round}} 的申请",
     "notOpenTitle": "目前未开放申请",
-    "notOpenBody": "目前没有开放的部长轮次，请稍后再来。",
+    "notOpenBody": "目前没有开放的大臣轮次，请稍后再来。",
     "closedBody": "{{round}} 已不再接受新申请。如果你已申请，请输入该玩家 ID 进行修改。",
     "closedButEditable": "新玩家申请已截止，你仍可更新自己的申请。",
     "otherFid": "使用其他玩家 ID",

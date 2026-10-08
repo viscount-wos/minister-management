@@ -17,7 +17,7 @@ from playwright.sync_api import Page, expect
 import ui
 
 ADMIN_EVENTS = {          # event key -> (name key, subtitle key, public page)
-    'ministry': ('ministry:event.name', 'ministry:event.adminSubtitle', '/ministry'),
+    'ministry': ('ministry:event.name', 'ministry:event.adminSubtitle', '/minister'),
     'tyrant': ('tyrant:name', 'tyrant:admin.adminSubtitle', '/tyrant'),
 }
 
@@ -102,7 +102,7 @@ def test_event_page_admin_link_lands_on_that_event(page: Page, base_url, admin_p
     shot('landed-tyrant')
 
     # already logged in: the ministry page's admin tile goes straight to the ministry dashboard
-    page.goto(base_url + '/ministry')
+    page.goto(base_url + '/minister')
     page.get_by_test_id('ministry-admin-tile').click()
     page.wait_for_url('**' + ui.admin_dashboard_url('ministry'))
     expect(page.get_by_test_id('ministry-admin')).to_be_visible()
@@ -187,10 +187,10 @@ def test_guide_button_is_contextual(page: Page, base_url, token, shot):
 
 PAGE_TITLES = [   # path, title parts (i18n keys, most specific first)
     ('/', []),
-    ('/ministry', ['ministry:event.name']),
-    ('/ministry/apply', ['ministry:apply.title']),
-    ('/ministry/guide', ['guide:player.title', 'ministry:event.name']),
-    ('/ministry/schedule/monday', ['ministry:schedule.title']),
+    ('/minister', ['ministry:event.name']),
+    ('/minister/apply', ['ministry:apply.title']),
+    ('/minister/guide', ['guide:player.title', 'ministry:event.name']),
+    ('/minister/schedule/monday', ['ministry:schedule.title']),
     ('/tyrant', ['tyrant:name']),
     ('/tyrant/apply', ['tyrant:apply.title']),
     ('/svs', ['svs:name']),
@@ -261,7 +261,7 @@ def test_no_raw_keys_admin_shell_and_tyrant_guide(page: Page, base_url, token, s
 def test_welcome_hidden_until_state_number_set(page: Page, base_url, api):
     _, s = api.call('GET', '/api/settings/public')
     if s['state_number'] is None:
-        for path in ('/', '/ministry', '/tyrant'):
+        for path in ('/', '/minister', '/tyrant'):
             page.goto(base_url + path)
             page.wait_for_load_state('networkidle')
             expect(page.get_by_test_id('welcome')).to_have_count(0)
@@ -271,3 +271,41 @@ def test_welcome_hidden_until_state_number_set(page: Page, base_url, api):
     page.goto(base_url + '/')
     expect(page.get_by_test_id('welcome')).to_have_text(tr('common:home.welcome', state=s['state_number']))
     assert re.search(r'\b2694\b', ui.visible_text(page)) is None or s['state_number'] == '2694'
+
+
+# ------------------------------------------------------------------ "Minister", never "Ministry"
+
+_MINISTRY = re.compile(r'ministr(y|ies)', re.I)
+
+
+def test_no_ministry_wording_in_english(page: Page, base_url, token, shot):
+    """Owner rule: players and admins see "Minister" (the in-game term), never "Ministry".
+    The event key 'ministry' stays in URLs of the API, test ids and code only."""
+    ui.use_admin_token(page, base_url, token)
+    bad = {}
+
+    def check(where: str) -> None:
+        page.wait_for_load_state('networkidle')
+        found = sorted({m.group(0) for m in _MINISTRY.finditer(ui.visible_text(page))})
+        if found:
+            bad[where] = found
+            shot(f'{where}-MINISTRY')
+
+    for path in ('/', '/minister', '/minister/apply', '/minister/guide', '/minister/schedule/monday',
+                 '/changelog', '/tyrant', ui.admin_guide_url('ministry')):
+        page.goto(base_url + path)
+        check(path)
+    page.goto(base_url + ui.admin_dashboard_url('ministry'))
+    for tab in ('players', 'assignments', 'settings'):
+        page.get_by_test_id(f'tab-{tab}').click()
+        check(f'admin-{tab}')
+    page.get_by_test_id('start-new-round').click()
+    check('admin-start-round-dialog')
+    page.get_by_test_id('cancel-new-round').click()
+    page.evaluate("localStorage.removeItem('adminToken')")
+    page.goto(base_url + '/admin?event=ministry')
+    check('admin-login')
+    assert not bad, f'"Ministry" still visible: {bad}'
+    # the old /ministry URLs redirect to /minister keeping the query string
+    page.goto(base_url + '/ministry/apply?fid=123&x=1')
+    page.wait_for_url('**/minister/apply?fid=123&x=1')

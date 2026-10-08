@@ -25,14 +25,14 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/changelog" element={<Changelog />} />
 
-            {/* Ministry */}
-            <Route path="/ministry" element={<MinistryHome />} />
-            <Route path="/ministry/apply" element={<ApplicationWizard />} />
+            {/* Minister (event key 'ministry'); canonical URLs under /minister */}
+            <Route path="/minister" element={<MinistryHome />} />
+            <Route path="/minister/apply" element={<ApplicationWizard />} />
+            <Route path="/minister/schedule/:day" element={<PublishedSchedule />} />
+            <Route path="/minister/guide" element={<PlayerGuide />} />
             {/* v1.4's new (/submit) and update (/update) pages are one wizard now: the FID decides new vs edit */}
-            <Route path="/ministry/submit" element={<LegacyRedirect to="/ministry/apply" />} />
-            <Route path="/ministry/update" element={<LegacyRedirect to="/ministry/apply" />} />
-            <Route path="/ministry/schedule/:day" element={<PublishedSchedule />} />
-            <Route path="/ministry/guide" element={<PlayerGuide />} />
+            <Route path="/minister/submit" element={<LegacyRedirect to="/minister/apply" />} />
+            <Route path="/minister/update" element={<LegacyRedirect to="/minister/apply" />} />
 
             {/* Other events */}
             <Route path="/tyrant" element={<TyrantPage />} />
@@ -45,13 +45,20 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminShell />} />
             <Route path="/admin/guide" element={<AdminGuidePage />} />
 
-            {/* v1.x URLs, kept working for bookmarks and shared links */}
-            <Route path="/submit" element={<LegacyRedirect to="/ministry/apply" />} />
-            <Route path="/apply" element={<LegacyRedirect to="/ministry/apply" />} />
-            <Route path="/update" element={<LegacyRedirect to="/ministry/apply" />} />
-            <Route path="/schedule/:day" element={<LegacyRedirect to="/ministry/schedule/:day" />} />
-            <Route path="/guide" element={<LegacyRedirect to="/ministry/guide" />} />
-            <Route path="/ministry/admin" element={<LegacyRedirect to="/admin" />} />
+            {/* Older URLs, kept working for bookmarks and shared links (query string and hash kept) */}
+            <Route path="/ministry" element={<LegacyRedirect to="/minister" />} />
+            <Route path="/ministry/apply" element={<LegacyRedirect to="/minister/apply" />} />
+            <Route path="/ministry/submit" element={<LegacyRedirect to="/minister/apply" />} />
+            <Route path="/ministry/update" element={<LegacyRedirect to="/minister/apply" />} />
+            <Route path="/ministry/schedule/:day" element={<LegacyRedirect to="/minister/schedule/:day" />} />
+            <Route path="/ministry/guide" element={<LegacyRedirect to="/minister/guide" />} />
+            <Route path="/ministry/admin" element={<LegacyRedirect to="/admin?event=ministry" />} />
+            <Route path="/minister/admin" element={<LegacyRedirect to="/admin?event=ministry" />} />
+            <Route path="/submit" element={<LegacyRedirect to="/minister/apply" />} />
+            <Route path="/apply" element={<LegacyRedirect to="/minister/apply" />} />
+            <Route path="/update" element={<LegacyRedirect to="/minister/apply" />} />
+            <Route path="/schedule/:day" element={<LegacyRedirect to="/minister/schedule/:day" />} />
+            <Route path="/guide" element={<LegacyRedirect to="/minister/guide" />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

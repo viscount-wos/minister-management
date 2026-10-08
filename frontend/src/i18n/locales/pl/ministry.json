@@ -1,12 +1,12 @@
 {
   "event": {
-    "name": "Ministerstwo",
-    "tagline": "Zarezerwuj miejsce w ministerstwie na dni przygotowań do SVS i sprawdź harmonogram",
-    "adminSubtitle": "Ministerstwo: zgłoszenia i przydziały"
+    "name": "Minister",
+    "tagline": "Zarezerwuj stanowisko ministra na dni przygotowań do SVS i sprawdź harmonogram",
+    "adminSubtitle": "Minister: zgłoszenia i przydziały"
   },
   "home": {
-    "title": "Zarządzanie Ministerstwami Whiteout Survival",
-    "subtitle": "System przydziału stanowisk ministerialnych SVS (Stan kontra Stan)",
+    "title": "Zarządzanie Ministrami Whiteout Survival",
+    "subtitle": "System przydziału stanowisk ministrów SVS (Stan kontra Stan)",
     "adminDesc": "Zarządzaj graczami i przydziałami",
     "utcNote": "Wszystkie godziny są zapisywane w UTC — użyj selektora strefy czasowej w formularzu, aby przeliczyć je na czas lokalny",
     "welcome": "Witaj, {{state}}",
@@ -71,22 +71,22 @@
     "backHome": "Powrót do strony głównej"
   },
   "schedule": {
-    "title": "Harmonogram ministerstw",
+    "title": "Harmonogram ministrów",
     "viewSchedule": "Zobacz opublikowany harmonogram",
     "noSchedule": "Nie opublikowano harmonogramu",
-    "noScheduleDesc": "Harmonogram ministerstw nie został jeszcze opublikowany. Zajrzyj tu później.",
+    "noScheduleDesc": "Harmonogram ministrów nie został jeszcze opublikowany. Zajrzyj tu później.",
     "noAssignments": "Brak przydziałów na ten dzień.",
     "unfilled": "— Wolne —",
     "timesNote": "Wszystkie godziny są podane w UTC, chyba że powyżej wybrano strefę czasową.",
     "disclaimer": "Nabór jest nadal otwarty. Przydzielone godziny mogą się zmienić do czasu zamknięcia naboru."
   },
   "apply": {
-    "title": "Zgłoszenie do ministerstwa",
+    "title": "Zgłoszenie na ministra",
     "enterFid": "Wpisz swoje ID gracza (FID), aby rozpocząć lub edytować zgłoszenie.",
     "newFor": "Nowe zgłoszenie: {{round}}",
     "editFor": "Edytuj swoje zgłoszenie: {{round}}",
     "notOpenTitle": "Zgłoszenia nie są otwarte",
-    "notOpenBody": "Obecnie nie ma otwartej rundy ministerstwa. Zajrzyj później.",
+    "notOpenBody": "Obecnie nie ma otwartej rundy ministrów. Zajrzyj później.",
     "closedBody": "Nowe zgłoszenia do {{round}} nie są już przyjmowane. Jeśli już się zgłosiłeś, wpisz to ID gracza, aby je edytować.",
     "closedButEditable": "Zgłoszenia dla nowych graczy są zamknięte. Nadal możesz zaktualizować swoje.",
     "otherFid": "Użyj innego ID gracza",

@@ -161,7 +161,7 @@ export default function PlayerManagement({
   const handleExportJSON = async () => {
     try {
       const blob = await api.admin.ministry.exportJson(round.id);
-      downloadBlob(blob, `ministry_round_${round.id}_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      downloadBlob(blob, `minister_round_${round.id}_backup_${new Date().toISOString().slice(0, 10)}.json`);
     } catch (err) {
       setError(errorText(t, err, 'admin:exportError'));
     }
