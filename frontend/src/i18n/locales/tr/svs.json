@@ -264,5 +264,73 @@
     "timesNote": "Savaş saatleri oyun saatidir (UTC).",
     "joinersRatioNote": "Kendi oranı gösterilmedikçe katılımcılar liderin birlik oranını kullanır.",
     "localTimes": "senin saatinle {{range}}"
+  },
+  "players": {
+    "col": {
+      "plan": "Plan"
+    },
+    "place": {
+      "leader": "Lider · {{leader}} ({{group}})",
+      "joiner": "Katılımcı {{n}} · {{leader}} ({{group}})",
+      "extra": "Ek · {{leader}} ({{group}})",
+      "group": "{{group}}"
+    },
+    "filter": {
+      "plan": "Savaş planı",
+      "inPlan": "Planda",
+      "notInPlan": "Planda değil"
+    },
+    "add": {
+      "button": "{{name}} oyuncusunu bir ralliye ekle",
+      "title": "Ralliye ekle",
+      "bulkTitle": "Seçili {{n}} oyuncuyu bir ralliye ekle",
+      "now": "Şu an: {{where}}",
+      "loading": "Plan yükleniyor…",
+      "noLeaders": "Savaş planında henüz ralli lideri yok.",
+      "openPlan": "Savaş planını aç",
+      "chooseLeader": "Bir ralli lideri seç",
+      "capacity": "İsimli {{named}}/{{maxNamed}} · Ek {{extra}}/{{maxExtra}}",
+      "full": "Dolu",
+      "hereNow": "şu an burada",
+      "asNamed": "İsimli katılımcı olarak ({{n}}/{{max}})",
+      "asExtra": "Ek katılımcı olarak ({{n}}/{{max}})",
+      "moveNamed": "Buraya isimli katılımcı olarak taşı ({{n}}/{{max}})",
+      "moveExtra": "Buraya ek katılımcı olarak taşı ({{n}}/{{max}})",
+      "namedHint": "Ana kahraman boş kalır: savaş planında seçin.",
+      "bulkAuto": "Ekle: önce isimli yerler, sonra ek ({{free}} yer kaldı)",
+      "bulkExtra": "Hepsi ek katılımcı ({{n}}/{{max}})",
+      "makeLeader": "{{group}} grubunda ralli lideri yap",
+      "moveMakeLeader": "Taşı: {{group}} grubunda ralli lideri yap",
+      "toGroup": "{{group}} grubuna ekle",
+      "moveToGroup": "{{group}} grubuna taşı",
+      "other": "Diğer yerler",
+      "back": "Geri",
+      "close": "Kapat",
+      "saving": "Kaydediliyor…"
+    },
+    "done": {
+      "one": "{{name}} eklendi: {{where}}.",
+      "moved": "{{name}} taşındı: {{where}}.",
+      "unchanged": "{{name}} zaten orada: {{where}}.",
+      "bulk": "{{to}} için {{n}} oyuncu eklendi ({{named}} isimli, {{extra}} ek).",
+      "bulkGroup": "{{to}} için {{n}} oyuncu eklendi.",
+      "none": "Kimse eklenmedi.",
+      "skipped": "Atlandı, zaten planda: {{list}}.",
+      "overflow": "Yer kalmadı: {{list}}."
+    },
+    "err": {
+      "conflict": "Siz seçerken plan değişti. Yeni sayıları kontrol edip tekrar deneyin.",
+      "full": "Orada yer kalmadı.",
+      "gone": "Bu lider veya grup artık planda değil."
+    },
+    "select": {
+      "row": "{{name}} seç",
+      "all": "Bu sayfadaki herkesi seç"
+    },
+    "bulk": {
+      "selected": "{{n}} seçildi",
+      "add": "Seçili {{n}} oyuncuyu ralliye ekle…",
+      "clear": "Seçimi temizle"
+    }
   }
 }

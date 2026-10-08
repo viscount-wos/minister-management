@@ -264,5 +264,73 @@
     "timesNote": "战斗时间为游戏时间（UTC）。",
     "joinersRatioNote": "除非标明专属比例，加入者使用队长的兵种比例。",
     "localTimes": "你的时间 {{range}}"
+  },
+  "players": {
+    "col": {
+      "plan": "计划"
+    },
+    "place": {
+      "leader": "队长 · {{leader}}（{{group}}）",
+      "joiner": "加入者 {{n}} · {{leader}}（{{group}}）",
+      "extra": "额外 · {{leader}}（{{group}}）",
+      "group": "{{group}}"
+    },
+    "filter": {
+      "plan": "作战计划",
+      "inPlan": "已在计划中",
+      "notInPlan": "不在计划中"
+    },
+    "add": {
+      "button": "将 {{name}} 加入集结",
+      "title": "加入集结",
+      "bulkTitle": "将选中的 {{n}} 人加入集结",
+      "now": "当前：{{where}}",
+      "loading": "正在加载计划…",
+      "noLeaders": "作战计划中还没有集结队长。",
+      "openPlan": "打开作战计划",
+      "chooseLeader": "选择集结队长",
+      "capacity": "指定 {{named}}/{{maxNamed}} · 额外 {{extra}}/{{maxExtra}}",
+      "full": "已满",
+      "hereNow": "当前在此",
+      "asNamed": "作为指定加入者（{{n}}/{{max}}）",
+      "asExtra": "作为额外加入者（{{n}}/{{max}}）",
+      "moveNamed": "移到这里作为指定加入者（{{n}}/{{max}}）",
+      "moveExtra": "移到这里作为额外加入者（{{n}}/{{max}}）",
+      "namedHint": "主英雄留空：请在作战计划中选择。",
+      "bulkAuto": "加入：先填指定位置，再填额外位置（剩余 {{free}} 个）",
+      "bulkExtra": "全部作为额外加入者（{{n}}/{{max}}）",
+      "makeLeader": "设为 {{group}} 的集结队长",
+      "moveMakeLeader": "移动：设为 {{group}} 的集结队长",
+      "toGroup": "加入 {{group}}",
+      "moveToGroup": "移到 {{group}}",
+      "other": "其他位置",
+      "back": "返回",
+      "close": "关闭",
+      "saving": "正在保存…"
+    },
+    "done": {
+      "one": "已添加 {{name}}：{{where}}。",
+      "moved": "已移动 {{name}}：{{where}}。",
+      "unchanged": "{{name}} 已经在那里：{{where}}。",
+      "bulk": "已将 {{n}} 人加入 {{to}}（指定 {{named}}，额外 {{extra}}）。",
+      "bulkGroup": "已将 {{n}} 人加入 {{to}}。",
+      "none": "没有添加任何人。",
+      "skipped": "已跳过（已在计划中）：{{list}}。",
+      "overflow": "没有位置：{{list}}。"
+    },
+    "err": {
+      "conflict": "你选择时计划已更改。请查看新的数字后重试。",
+      "full": "那里没有位置了。",
+      "gone": "该队长或分组已不在计划中。"
+    },
+    "select": {
+      "row": "选择 {{name}}",
+      "all": "选择本页全部"
+    },
+    "bulk": {
+      "selected": "已选 {{n}} 人",
+      "add": "将选中的 {{n}} 人加入集结…",
+      "clear": "清除选择"
+    }
   }
 }

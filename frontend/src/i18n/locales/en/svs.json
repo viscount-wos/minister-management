@@ -264,5 +264,73 @@
     "timesNote": "Battle times are game time (UTC).",
     "joinersRatioNote": "Joiners use the leader's troop ratio unless an own ratio is shown.",
     "localTimes": "{{range}} your time"
+  },
+  "players": {
+    "col": {
+      "plan": "Plan"
+    },
+    "place": {
+      "leader": "Leader · {{leader}} ({{group}})",
+      "joiner": "Joiner {{n}} · {{leader}} ({{group}})",
+      "extra": "Extra · {{leader}} ({{group}})",
+      "group": "{{group}}"
+    },
+    "filter": {
+      "plan": "Battle plan",
+      "inPlan": "In plan",
+      "notInPlan": "Not in plan"
+    },
+    "add": {
+      "button": "Add {{name}} to a rally",
+      "title": "Add to rally",
+      "bulkTitle": "Add {{n}} selected to a rally",
+      "now": "Now: {{where}}",
+      "loading": "Loading the plan…",
+      "noLeaders": "The battle plan has no rally leaders yet.",
+      "openPlan": "Open the Battle plan",
+      "chooseLeader": "Choose a rally leader",
+      "capacity": "Named {{named}}/{{maxNamed}} · Extra {{extra}}/{{maxExtra}}",
+      "full": "Full",
+      "hereNow": "here now",
+      "asNamed": "As named joiner ({{n}}/{{max}})",
+      "asExtra": "As extra joiner ({{n}}/{{max}})",
+      "moveNamed": "Move here as named joiner ({{n}}/{{max}})",
+      "moveExtra": "Move here as extra joiner ({{n}}/{{max}})",
+      "namedHint": "The lead hero stays empty: choose it in the Battle plan.",
+      "bulkAuto": "Add them: named places first, then extra ({{free}} places left)",
+      "bulkExtra": "All as extra joiners ({{n}}/{{max}})",
+      "makeLeader": "Make rally leader in {{group}}",
+      "moveMakeLeader": "Move: make rally leader in {{group}}",
+      "toGroup": "Add to {{group}}",
+      "moveToGroup": "Move to {{group}}",
+      "other": "Other places",
+      "back": "Back",
+      "close": "Close",
+      "saving": "Saving…"
+    },
+    "done": {
+      "one": "{{name}} added: {{where}}.",
+      "moved": "{{name}} moved: {{where}}.",
+      "unchanged": "{{name}} is already there: {{where}}.",
+      "bulk": "Added {{n}} to {{to}} ({{named}} named, {{extra}} extra).",
+      "bulkGroup": "Added {{n}} to {{to}}.",
+      "none": "Nobody was added.",
+      "skipped": "Skipped, already in the plan: {{list}}.",
+      "overflow": "No room left for: {{list}}."
+    },
+    "err": {
+      "conflict": "The plan changed while you were choosing. Check the new numbers and try again.",
+      "full": "No room left there.",
+      "gone": "That leader or group is no longer in the plan."
+    },
+    "select": {
+      "row": "Select {{name}}",
+      "all": "Select everyone on this page"
+    },
+    "bulk": {
+      "selected": "{{n}} selected",
+      "add": "Add {{n}} selected to rally…",
+      "clear": "Clear selection"
+    }
   }
 }

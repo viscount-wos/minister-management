@@ -26,6 +26,7 @@ import HeroCard from '../../../shared/heroes/HeroCard';
 import { fetchHeroes, type Hero } from '../../../shared/heroes/api';
 import { battleHours, svsApi, svsTroops, type SvsSettings } from '../api';
 import { planApi } from './api';
+import { groupLabel as groupLabelOf, leaderLabel as leaderLabelOf, makePlayerName, placementLabel as placementLabelOf } from './labels';
 import { PlannerContext, type PlannerCtx, type SignupInfo } from './PlannerContext';
 import { ExtraGroupCard, GroupColumn } from './GroupColumn';
 import Sidebar from './Sidebar';
@@ -264,40 +265,16 @@ export default function SvsPlanner({ round, readOnly: shellReadOnly }: { round: 
   // ------------------------------------------------------------ helpers for the context
   const placed = useMemo(() => (doc ? placements(doc) : new Map<string, Placement>()), [doc]);
 
-  const playerName = useCallback(
-    (ref: PlayerRef | null | undefined) => {
-      if (!ref) return '';
-      if (ref.fid) return signups.get(ref.fid)?.name ?? people[ref.fid]?.game_name ?? ref.name ?? `FID ${ref.fid}`;
-      return ref.name ?? '';
-    },
-    [signups, people],
-  );
+  const playerName = useMemo(() => makePlayerName(people, (fid) => signups.get(fid)?.name), [signups, people]);
 
-  const groupLabel = useCallback((g: PlanGroup) => g.name || t(`svs:plan.defaultName.${g.kind}`), [t]);
+  const groupLabel = useCallback((g: PlanGroup) => groupLabelOf(t, g), [t]);
 
   const leaderLabel = useCallback(
-    (l: Leader) => {
-      if (l.disguise.alias) return l.disguise.alias;
-      if (l.player) return playerName(l.player);
-      const d = docRef.current;
-      const n = d ? leadersOf(d, l.group_id).findIndex((x) => x.id === l.id) + 1 : 0;
-      return t('svs:plan.leaderN', { n });
-    },
+    (l: Leader) => (docRef.current ? leaderLabelOf(t, docRef.current, l, playerName) : l.disguise.alias ?? playerName(l.player)),
     [playerName, t],
   );
 
-  const placementLabel = useCallback(
-    (p: Placement) => {
-      const d = docRef.current!;
-      const g = d.groups.find((x) => x.id === p.groupId);
-      const gl = g ? groupLabel(g) : '';
-      if (p.kind === 'extraGroup') return t('svs:plan.placed.inGroup', { group: gl });
-      const l = d.leaders.find((x) => x.id === p.leaderId);
-      if (p.kind === 'leader') return t('svs:plan.placed.leads', { group: gl });
-      return t('svs:plan.placed.with', { leader: l ? leaderLabel(l) : '?' });
-    },
-    [groupLabel, leaderLabel, t],
-  );
+  const placementLabel = useCallback((p: Placement) => placementLabelOf(t, docRef.current!, p, playerName), [playerName, t]);
 
   const notify = useCallback((msg: string) => {
     setToast(msg);

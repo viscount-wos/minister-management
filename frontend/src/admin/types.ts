@@ -17,6 +17,8 @@ export interface AdminTabContext {
   reloadRounds: (select?: number) => void;
   /** Merge an updated round (settings, closing time, name) into the shell's list. */
   onRoundUpdated: (round: Round) => void;
+  /** Switch to another tab of the same event (e.g. Players -> Battle plan). */
+  selectTab?: (key: string) => void;
 }
 
 export interface AdminTab {

@@ -264,5 +264,73 @@
     "timesNote": "전투 시간은 게임 시간(UTC)입니다.",
     "joinersRatioNote": "개별 비율이 표시되지 않으면 참여자는 리더의 병력 비율을 따릅니다.",
     "localTimes": "내 시간 {{range}}"
+  },
+  "players": {
+    "col": {
+      "plan": "계획"
+    },
+    "place": {
+      "leader": "리더 · {{leader}} ({{group}})",
+      "joiner": "참여자 {{n}} · {{leader}} ({{group}})",
+      "extra": "추가 · {{leader}} ({{group}})",
+      "group": "{{group}}"
+    },
+    "filter": {
+      "plan": "전투 계획",
+      "inPlan": "계획에 있음",
+      "notInPlan": "계획에 없음"
+    },
+    "add": {
+      "button": "{{name}}님을 집결에 추가",
+      "title": "집결에 추가",
+      "bulkTitle": "선택한 {{n}}명을 집결에 추가",
+      "now": "현재: {{where}}",
+      "loading": "계획을 불러오는 중…",
+      "noLeaders": "전투 계획에 아직 집결 리더가 없습니다.",
+      "openPlan": "전투 계획 열기",
+      "chooseLeader": "집결 리더 선택",
+      "capacity": "지정 {{named}}/{{maxNamed}} · 추가 {{extra}}/{{maxExtra}}",
+      "full": "가득 참",
+      "hereNow": "현재 여기",
+      "asNamed": "지정 참여자로 ({{n}}/{{max}})",
+      "asExtra": "추가 참여자로 ({{n}}/{{max}})",
+      "moveNamed": "지정 참여자로 여기로 이동 ({{n}}/{{max}})",
+      "moveExtra": "추가 참여자로 여기로 이동 ({{n}}/{{max}})",
+      "namedHint": "대표 영웅은 비워 둡니다. 전투 계획에서 선택하세요.",
+      "bulkAuto": "추가: 지정 자리 먼저, 그다음 추가 자리 (남은 자리 {{free}})",
+      "bulkExtra": "모두 추가 참여자로 ({{n}}/{{max}})",
+      "makeLeader": "{{group}}의 집결 리더로 지정",
+      "moveMakeLeader": "이동: {{group}}의 집결 리더로 지정",
+      "toGroup": "{{group}}에 추가",
+      "moveToGroup": "{{group}}(으)로 이동",
+      "other": "다른 자리",
+      "back": "뒤로",
+      "close": "닫기",
+      "saving": "저장 중…"
+    },
+    "done": {
+      "one": "{{name}} 추가됨: {{where}}.",
+      "moved": "{{name}} 이동됨: {{where}}.",
+      "unchanged": "{{name}}님은 이미 그곳에 있습니다: {{where}}.",
+      "bulk": "{{to}}에 {{n}}명 추가 (지정 {{named}}, 추가 {{extra}}).",
+      "bulkGroup": "{{to}}에 {{n}}명 추가.",
+      "none": "추가된 사람이 없습니다.",
+      "skipped": "건너뜀, 이미 계획에 있음: {{list}}.",
+      "overflow": "자리가 없음: {{list}}."
+    },
+    "err": {
+      "conflict": "선택하는 동안 계획이 바뀌었습니다. 새 숫자를 확인하고 다시 시도하세요.",
+      "full": "그곳에는 자리가 없습니다.",
+      "gone": "그 리더나 그룹은 더 이상 계획에 없습니다."
+    },
+    "select": {
+      "row": "{{name}} 선택",
+      "all": "이 페이지 모두 선택"
+    },
+    "bulk": {
+      "selected": "{{n}}명 선택됨",
+      "add": "선택한 {{n}}명을 집결에 추가…",
+      "clear": "선택 해제"
+    }
   }
 }
