@@ -121,5 +121,14 @@
   "shell": {
     "eventSwitch": "Evento",
     "backTo": "Volver a {{event}}"
+  },
+  "tapMove": {
+    "move": "Mover",
+    "moveName": "Mover a {{name}}",
+    "picked": "Moviendo a {{name}}: toca \"Mover aquí\" en una franja horaria (o Sin asignar).",
+    "here": "Mover aquí",
+    "swapHere": "Intercambiar aquí",
+    "toUnassigned": "Mover a Sin asignar",
+    "tip": "En el móvil: toca el icono de mover de un jugador y luego \"Mover aquí\" en una franja. Una pulsación larga también inicia el arrastre."
   }
 }

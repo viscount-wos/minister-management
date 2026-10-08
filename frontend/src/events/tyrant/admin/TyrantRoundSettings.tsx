@@ -58,7 +58,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
 
   return (
     <div className="space-y-6">
-      <div className="bg-dark-card rounded-xl border border-theme-border p-6" data-testid="windows-editor">
+      <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6" data-testid="windows-editor">
         <h3 className="text-xl font-semibold text-accent mb-1">{t('tyrant:admin.settings.windows')}</h3>
         <p className="text-theme-dim text-sm mb-4">{t('tyrant:admin.settings.windowsDesc')}</p>
         <div className="space-y-3">
@@ -153,7 +153,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
         )}
       </div>
 
-      <div className="bg-dark-card rounded-xl border border-theme-border p-6" data-testid="closing-editor">
+      <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6" data-testid="closing-editor">
         <label htmlFor="closing-time" className="block text-xl font-semibold text-accent mb-1">
           {t('admin:closingTime')}
         </label>

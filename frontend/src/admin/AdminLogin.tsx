@@ -49,12 +49,12 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-dark-card rounded-2xl p-8 border border-theme-border max-w-md w-full">
+    <div className="min-h-[70vh] flex items-start sm:items-center justify-center p-3 sm:p-4">
+      <div className="bg-dark-card rounded-2xl p-5 sm:p-8 border border-theme-border max-w-md w-full">
         <button
           onClick={() => navigate(fromEvent ? fromEvent.publicPath : '/')}
           data-testid="admin-login-back"
-          className="flex items-center gap-2 text-theme-dim hover:text-theme-text mb-6"
+          className="flex items-center gap-2 min-h-[44px] text-theme-dim hover:text-theme-text mb-4 sm:mb-6"
         >
           <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
           {fromEvent ? t('admin:shell.backTo', { event: t(fromEvent.label) }) : t('common:nav.home')}

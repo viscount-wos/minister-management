@@ -121,5 +121,14 @@
   "shell": {
     "eventSwitch": "Événement",
     "backTo": "Retour à {{event}}"
+  },
+  "tapMove": {
+    "move": "Déplacer",
+    "moveName": "Déplacer {{name}}",
+    "picked": "Déplacement de {{name}} : touchez « Déplacer ici » sur un créneau (ou Non assignés).",
+    "here": "Déplacer ici",
+    "swapHere": "Échanger ici",
+    "toUnassigned": "Déplacer vers Non assignés",
+    "tip": "Sur téléphone : touchez l’icône de déplacement d’un joueur, puis « Déplacer ici » sur un créneau. Un appui long lance aussi le glisser-déposer."
   }
 }

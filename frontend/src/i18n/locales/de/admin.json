@@ -121,5 +121,14 @@
   "shell": {
     "eventSwitch": "Event",
     "backTo": "Zurück zu {{event}}"
+  },
+  "tapMove": {
+    "move": "Verschieben",
+    "moveName": "{{name}} verschieben",
+    "picked": "{{name}} wird verschoben: tippe bei einem Zeitfenster auf „Hierher“ (oder Nicht zugewiesen).",
+    "here": "Hierher",
+    "swapHere": "Hier tauschen",
+    "toUnassigned": "Zu „Nicht zugewiesen“",
+    "tip": "Am Handy: tippe beim Spieler auf das Verschieben-Symbol, dann bei einem Zeitfenster auf „Hierher“. Langes Drücken startet auch das Ziehen."
   }
 }

@@ -101,15 +101,15 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
   const EventIcon = event.icon;
 
   return (
-    <div className="min-h-screen bg-dark-bg py-8 px-4" data-testid="admin-shell" data-event={event.key}>
+    <div className="min-h-screen bg-dark-bg py-3 sm:py-8 px-2 sm:px-4" data-testid="admin-shell" data-event={event.key}>
       <div className="max-w-7xl mx-auto" data-testid={`${event.key}-admin`}>
-        <div className="bg-dark-card rounded-xl border border-theme-border p-6 mb-6">
+        <div className="bg-dark-card rounded-xl border border-theme-border p-3 sm:p-6 mb-4 sm:mb-6">
           <div className="mb-4">
             <AdminEventSwitch current={event.key} hrefFor={ADMIN_PATHS.dashboard} />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-accent" data-testid="admin-title">
+              <h1 className="text-2xl sm:text-3xl font-bold text-accent" data-testid="admin-title">
                 {t('admin:title')}
               </h1>
               <p className="text-theme-dim mt-1 flex items-center gap-2" data-testid="admin-subtitle">
@@ -117,11 +117,11 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
                 {t(event.subtitle)}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <button
                 onClick={() => navigate(ADMIN_PATHS.guide(event.key))}
                 data-testid="admin-guide-link"
-                className="flex items-center gap-2 px-4 py-2 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 transition-colors"
+                className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 transition-colors"
               >
                 <HelpCircle className="w-5 h-5" aria-hidden="true" />
                 {t('guide:admin.linkText')}
@@ -129,7 +129,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
               <button
                 onClick={handleLogout}
                 data-testid="admin-logout"
-                className="flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark transition-colors"
+                className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark transition-colors"
               >
                 <LogOut className="w-5 h-5" aria-hidden="true" />
                 {t('admin:logout')}
@@ -138,8 +138,8 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
           </div>
 
           {/* Round selector: current round by default; past rounds are read-only */}
-          <div className="mt-6 flex flex-wrap items-end gap-4">
-            <div>
+          <div className="mt-4 sm:mt-6 flex flex-wrap items-end gap-3 sm:gap-4">
+            <div className="w-full sm:w-auto min-w-0">
               <label htmlFor="round-select" className="block text-sm font-medium text-theme-text mb-1">
                 {t('admin:round.label')}
               </label>
@@ -149,7 +149,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
                 value={selectedId ?? ''}
                 disabled={!rounds || rounds.length === 0}
                 onChange={(e) => setSelectedId(Number(e.target.value))}
-                className="px-3 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text min-w-[18rem] focus:ring-2 focus:ring-accent focus:border-accent"
+                className="w-full sm:w-auto sm:min-w-[18rem] max-w-full min-h-[44px] px-3 py-2 text-base sm:text-sm bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent"
               >
                 {rounds?.length === 0 && <option value="">{t('admin:round.none')}</option>}
                 {rounds?.map((r) => (
@@ -174,7 +174,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
               onClick={() => setShowStart(true)}
               data-testid="start-new-round"
               disabled={!rounds}
-              className="ms-auto flex items-center gap-2 px-4 py-2 bg-warning/20 text-warning border border-warning/40 rounded-lg hover:bg-warning/30 font-medium transition-colors disabled:opacity-50"
+              className="ms-auto flex items-center gap-2 min-h-[44px] px-4 py-2 bg-warning/20 text-warning border border-warning/40 rounded-lg hover:bg-warning/30 font-medium transition-colors disabled:opacity-50"
             >
               <RefreshCw className="w-4 h-4" aria-hidden="true" />
               {t('admin:round.start')}
@@ -202,7 +202,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
             </div>
           )}
 
-          <div className="flex flex-wrap gap-4 mt-6 border-b border-theme-border" role="tablist">
+          <div className="flex gap-1 sm:gap-4 mt-4 sm:mt-6 border-b border-theme-border overflow-x-auto" role="tablist">
             {event.tabs.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -210,7 +210,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
                 data-testid={`tab-${key}`}
                 role="tab"
                 aria-selected={tab.key === key}
-                className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors border-b-2 ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-2 min-h-[44px] px-3 sm:px-4 py-3 font-medium transition-colors border-b-2 ${
                   tab.key === key ? 'border-accent text-accent' : 'border-transparent text-theme-dim hover:text-theme-text'
                 }`}
               >
@@ -222,7 +222,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
         </div>
 
         {tab.needsRound && !round ? (
-          <div className="bg-dark-card rounded-xl border border-theme-border p-12 text-center text-theme-dim">
+          <div className="bg-dark-card rounded-xl border border-theme-border p-6 sm:p-12 text-center text-theme-dim">
             {t('admin:round.noRoundsYet')}
           </div>
         ) : (

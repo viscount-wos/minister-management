@@ -121,5 +121,14 @@
   "shell": {
     "eventSwitch": "Etkinlik",
     "backTo": "{{event}} sayfasına dön"
+  },
+  "tapMove": {
+    "move": "Taşı",
+    "moveName": "{{name}} taşı",
+    "picked": "{{name}} taşınıyor: bir zaman diliminde (veya Atanmamış) \"Buraya taşı\"ya dokunun.",
+    "here": "Buraya taşı",
+    "swapHere": "Burada değiştir",
+    "toUnassigned": "Atanmamışa taşı",
+    "tip": "Telefonda: oyuncunun taşıma simgesine, sonra bir zaman dilimindeki \"Buraya taşı\"ya dokunun. Uzun basmak da sürüklemeyi başlatır."
   }
 }

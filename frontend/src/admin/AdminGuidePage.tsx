@@ -24,18 +24,18 @@ export default function AdminGuidePage() {
   usePageTitle(t('guide:admin.title'), t(event.label));
 
   return (
-    <div className="min-h-screen bg-dark-bg py-8 px-4" data-testid="admin-guide" data-event={event.key}>
+    <div className="min-h-screen bg-dark-bg py-4 sm:py-8 px-3 sm:px-4" data-testid="admin-guide" data-event={event.key}>
       <div className="max-w-3xl mx-auto">
         <button
           onClick={() => navigate(ADMIN_PATHS.dashboard(event.key))}
           data-testid="guide-back"
-          className="flex items-center gap-2 text-theme-dim hover:text-accent transition-colors mb-6"
+          className="flex items-center gap-2 min-h-[44px] text-theme-dim hover:text-accent transition-colors mb-4 sm:mb-6"
         >
           <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
           {t('guide:admin.backToDashboard')}
         </button>
 
-        <h1 className="text-4xl font-bold text-accent mb-4" data-testid="admin-guide-title">
+        <h1 className="text-3xl sm:text-4xl font-bold text-accent mb-4 break-words" data-testid="admin-guide-title">
           {t('guide:admin.title')}
         </h1>
         <div className="mb-4">

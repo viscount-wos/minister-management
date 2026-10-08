@@ -211,7 +211,7 @@ export default function PlayerManagement({
   const dayName = (key: string) => t(`admin:${key}`).split(' - ')[0];
 
   return (
-    <div className="bg-dark-card rounded-xl border border-theme-border p-6" data-testid="players-panel">
+    <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6" data-testid="players-panel">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-accent">{t('admin:playerManagement')}</h2>
@@ -354,7 +354,7 @@ export default function PlayerManagement({
             aria-modal="true"
             aria-labelledby="edit-player-title"
             data-testid="edit-dialog"
-            className="bg-dark-card rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-theme-border"
+            className="bg-dark-card rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-theme-border"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 id="edit-player-title" className="text-2xl font-bold text-accent">
@@ -446,7 +446,7 @@ export default function PlayerManagement({
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-title"
-            className="bg-dark-card rounded-xl p-6 max-w-md w-full border border-theme-border"
+            className="bg-dark-card rounded-xl p-4 sm:p-6 max-w-md w-full border border-theme-border"
           >
             <h3 id="delete-title" className="text-xl font-bold text-theme-text mb-2">
               {t('admin:confirmDelete')}

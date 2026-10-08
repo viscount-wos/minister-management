@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   useDraggable,
@@ -11,7 +13,7 @@ import {
   DragEndEvent,
   DragStartEvent,
 } from '@dnd-kit/core';
-import { Sparkles, Download, AlertCircle, Globe, EyeOff, Lock, Unlock, Link2 } from 'lucide-react';
+import { Sparkles, Download, AlertCircle, Globe, EyeOff, Lock, Unlock, Link2, Move, X, CornerDownRight } from 'lucide-react';
 import api, { Round, downloadBlob } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
 import TimezoneSelector from '../../../shared/TimezoneSelector';
@@ -46,7 +48,16 @@ const generateTimeSlots = generateAssignmentSlots;
 const PLAYER_CARD_CLASS = 'bg-accent/15 border-accent/40 text-accent';
 
 // Draggable player card
-function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone, disabled }: { player: AssignedPlayer; sourceSlot: string; onToggleLock?: (player: AssignedPlayer, slot: string) => void; timezone?: string; disabled?: boolean }) {
+function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone, disabled, onPickMove, picked }: {
+  player: AssignedPlayer;
+  sourceSlot: string;
+  onToggleLock?: (player: AssignedPlayer, slot: string) => void;
+  timezone?: string;
+  disabled?: boolean;
+  /** Tap-to-move (phones/tablets): pick this card, then tap "Move here" on a slot. */
+  onPickMove?: (player: AssignedPlayer, slot: string) => void;
+  picked?: boolean;
+}) {
   const { t } = useTranslation();
   const [showTooltip, setShowTooltip] = useState(false);
   const dragId = `player-${player.player_id}-${sourceSlot}`;
@@ -72,11 +83,14 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone, disabled 
       {...attributes}
       {...listeners}
       data-testid={`card-${player.fid}`}
-      className={`p-3 border-2 rounded-lg ${disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} hover:shadow-md transition-shadow relative ${
+      // touch-action: manipulation keeps page scrolling on phones; a long press starts a drag (TouchSensor delay).
+      className={`p-3 border-2 rounded-lg touch-manipulation select-none ${disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} hover:shadow-md transition-shadow relative ${
         player.is_sticky ? 'bg-warning/15 border-warning/50 text-accent' : PLAYER_CARD_CLASS
-      }`}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
+      } ${picked ? 'ring-2 ring-accent ring-offset-2 ring-offset-dark-card' : ''}`}
+      data-picked={picked || undefined}
+      // Hover tooltip for mice only: on a phone a tap would leave it stuck open.
+      onPointerEnter={(e) => e.pointerType === 'mouse' && setShowTooltip(true)}
+      onPointerLeave={() => setShowTooltip(false)}
     >
       {/* Tooltip */}
       {showTooltip && !isDragging && (
@@ -118,13 +132,38 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone, disabled 
             {player.fid} • {t('admin:pointsShort', { n: (player.points ?? 0).toLocaleString() })}
           </div>
         </div>
+        {onPickMove && (
+          <button
+            type="button"
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPickMove(player, sourceSlot);
+            }}
+            data-testid={`move-${player.fid}`}
+            aria-pressed={!!picked}
+            className={`lg:hidden flex-shrink-0 inline-flex items-center justify-center w-11 h-11 -my-2 rounded-lg transition-colors ${
+              picked ? 'bg-accent text-dark-bg' : 'text-theme-dim hover:text-accent'
+            }`}
+            title={t('admin:tapMove.move')}
+            aria-label={t('admin:tapMove.moveName', { name: player.game_name })}
+          >
+            <Move className="w-5 h-5" aria-hidden="true" />
+          </button>
+        )}
         {sourceSlot !== 'unassigned' && onToggleLock && (
           <button
-            onPointerDown={(e) => {
+            type="button"
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
               e.stopPropagation();
               onToggleLock(player, sourceSlot);
             }}
-            className={`flex-shrink-0 p-1 rounded transition-colors ${
+            className={`flex-shrink-0 inline-flex items-center justify-center w-11 h-11 -my-2 lg:w-auto lg:h-auto lg:my-0 lg:p-1 rounded transition-colors ${
               player.is_sticky ? 'text-warning hover:text-accent-light' : 'text-theme-dim hover:text-accent opacity-40 hover:opacity-100'
             }`}
             title={player.is_sticky ? t('admin:clickToUnlock') : t('admin:clickToLock')}
@@ -164,20 +203,37 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
 }
 
 // Droppable time slot container
-function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer, sharedNote }: {
+/** "Move here" target shown on every slot while a card is picked for tap-to-move. */
+function MoveHereButton({ onClick, testId, label }: { onClick: () => void; testId: string; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-testid={testId}
+      className="mt-2 w-full min-h-[44px] inline-flex items-center justify-center gap-2 rounded-lg border-2 border-accent/60 bg-accent/10 text-accent text-sm font-semibold hover:bg-accent/20"
+    >
+      <CornerDownRight className="w-4 h-4 rtl:-scale-x-100" aria-hidden="true" />
+      {label}
+    </button>
+  );
+}
+
+function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer, sharedNote, moveHere }: {
   slotId: string;
   displayTime: string;
   children: React.ReactNode;
   isOver: boolean;
   hasPlayer: boolean;
   sharedNote?: string | null;
+  moveHere?: React.ReactNode;
 }) {
   const { setNodeRef } = useDroppable({ id: `slot-${slotId}` });
 
   return (
     <div
       ref={setNodeRef}
-      className={`border-2 border-dashed rounded-lg p-3 min-h-[100px] transition-colors ${
+      data-testid={`slot-box-${slotId}`}
+      className={`border-2 border-dashed rounded-lg p-3 min-h-[88px] transition-colors ${
         sharedNote
           ? 'border-warning/50 bg-warning/10'
           : isOver && !hasPlayer
@@ -189,7 +245,7 @@ function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer, share
     >
       <div className="font-semibold text-theme-dim mb-2">
         {displayTime}
-        {slotId === '23:50+' && <span className="text-xs opacity-60 ml-1">(+1d)</span>}
+        {slotId === '23:50+' && <span className="text-xs opacity-60 ms-1">(+1d)</span>}
       </div>
       {sharedNote && (
         <div className="flex items-start gap-1 text-[11px] leading-tight text-warning mb-2">
@@ -198,6 +254,7 @@ function DroppableSlot({ slotId, displayTime, children, isOver, hasPlayer, share
         </div>
       )}
       {children}
+      {moveHere}
     </div>
   );
 }
@@ -209,7 +266,7 @@ function DroppableUnassigned({ children, isOver }: { children: React.ReactNode; 
   return (
     <div
       ref={setNodeRef}
-      className={`border-2 border-dashed rounded-lg p-4 min-h-[400px] transition-colors ${
+      className={`border-2 border-dashed rounded-lg p-4 min-h-[160px] lg:min-h-[400px] transition-colors ${
         isOver
           ? 'border-accent bg-accent/10'
           : 'border-theme-border bg-dark-bg'
@@ -243,9 +300,15 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
 
   const DAY_TABS = activeDaysInOrder(researchDay);
 
+  // Mouse: drag after 5px. Touch: a long press (250 ms, little movement) starts the
+  // drag, so a normal swipe still scrolls the page. Keyboard: space/enter + arrows.
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+    useSensor(KeyboardSensor),
   );
+  // Tap-to-move fallback (phones/tablets): the picked card, then "Move here".
+  const [picked, setPicked] = useState<{ player: AssignedPlayer; sourceSlot: string } | null>(null);
 
   const timeSlots = generateTimeSlots(timeSlotScheme);
 
@@ -272,6 +335,7 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
   }, [researchDay]);
 
   useEffect(() => {
+    setPicked(null);
     if (DAY_TABS.includes(selectedDay)) fetchAssignments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDay, round.id, timeSlotScheme]);
@@ -362,7 +426,12 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
     } else {
       return;
     }
+    moveTo(movedPlayer, sourceSlot, targetSlot);
+  };
 
+  /** Move (or swap) a player into targetSlot; shared by drag-and-drop and tap-to-move. */
+  const moveTo = (movedPlayer: AssignedPlayer, sourceSlot: string, targetSlot: string) => {
+    setPicked(null);
     // No-op if same slot
     if (sourceSlot === targetSlot) return;
 
@@ -426,6 +495,9 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
     saveAssignments(newAssignments);
   };
 
+  const pickMove = (player: AssignedPlayer, slot: string) =>
+    setPicked((cur) => (cur && cur.player.player_id === player.player_id ? null : { player, sourceSlot: slot }));
+
   const handleToggleLock = (player: AssignedPlayer, slot: string) => {
     const newAssignments = { ...assignments };
     const slotPlayers = newAssignments[slot] || [];
@@ -463,15 +535,15 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
   };
 
   return (
-    <div className="bg-dark-card rounded-xl border border-theme-border p-6">
-      {/* Day Tabs */}
-      <div className="flex gap-4 mb-6 border-b border-theme-border pb-2">
+    <div className="bg-dark-card rounded-xl border border-theme-border p-3 sm:p-6">
+      {/* Day Tabs (scroll sideways on a phone instead of widening the page) */}
+      <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6 border-b border-theme-border pb-2 overflow-x-auto">
         {DAY_TABS.map((day) => (
           <button
             key={day}
             data-testid={`assign-day-${day}`}
             onClick={() => setSelectedDay(day)}
-            className={`px-4 py-2 font-medium rounded-lg transition-colors ${
+            className={`shrink-0 whitespace-nowrap min-h-[44px] px-4 py-2 font-medium rounded-lg transition-colors ${
               selectedDay === day
                 ? 'bg-accent text-dark-bg'
                 : 'text-theme-dim hover:text-theme-text'
@@ -483,13 +555,13 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
         {!readOnly && (
         <button
           onClick={handleAutoAssign}
           data-testid="auto-assign"
           disabled={loading}
-          className="flex items-center gap-2 px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors disabled:opacity-50"
         >
           <Sparkles className="w-5 h-5" />
           {t('admin:autoAssign')}
@@ -498,7 +570,7 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
         <button
           onClick={handleExport}
           data-testid="export-excel"
-          className="flex items-center gap-2 px-6 py-3 bg-success text-dark-bg rounded-lg hover:bg-success-dark font-medium transition-colors"
+          className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-success text-dark-bg rounded-lg hover:bg-success-dark font-medium transition-colors"
         >
           <Download className="w-5 h-5" />
           {t('admin:exportExcel')}
@@ -509,7 +581,7 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
           <button
             onClick={() => setPublished(false)}
             data-testid="unpublish"
-            className="flex items-center gap-2 px-6 py-3 bg-danger/80 text-white rounded-lg hover:bg-danger font-medium transition-colors"
+            className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-danger/80 text-white rounded-lg hover:bg-danger font-medium transition-colors"
           >
             <EyeOff className="w-5 h-5" />
             {t('admin:unpublish')}
@@ -518,7 +590,7 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
           <button
             onClick={() => setPublished(true)}
             data-testid="publish"
-            className="flex items-center gap-2 px-6 py-3 bg-accent/80 text-dark-bg rounded-lg hover:bg-accent font-medium transition-colors"
+            className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-accent/80 text-dark-bg rounded-lg hover:bg-accent font-medium transition-colors"
           >
             <Globe className="w-5 h-5" />
             {t('admin:publish')}
@@ -526,7 +598,7 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
         )}
 
         {/* Timezone Selector */}
-        <TimezoneSelector value={timezone} onChange={setTimezone} />
+        <TimezoneSelector value={timezone} onChange={setTimezone} label={t('common:header.timezone')} />
       </div>
 
       {/* Error Message */}
@@ -534,6 +606,28 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
         <div className="mb-6 p-4 bg-danger/10 border border-danger/30 rounded-lg flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-danger" />
           <p className="text-danger">{error}</p>
+        </div>
+      )}
+
+      {picked && (
+        <div
+          className="lg:hidden sticky top-0 z-30 mb-3 p-3 rounded-lg border border-accent/50 bg-dark-card/95 backdrop-blur flex items-center gap-3"
+          role="status"
+          data-testid="move-banner"
+        >
+          <Move className="w-5 h-5 text-accent shrink-0" aria-hidden="true" />
+          <p className="text-sm text-theme-text flex-1 min-w-0 break-words">
+            {t('admin:tapMove.picked', { name: picked.player.game_name })}
+          </p>
+          <button
+            type="button"
+            onClick={() => setPicked(null)}
+            data-testid="move-cancel"
+            className="shrink-0 inline-flex items-center justify-center gap-1 min-h-[44px] px-3 rounded-lg border border-theme-border text-theme-text text-sm"
+          >
+            <X className="w-4 h-4" aria-hidden="true" />
+            {t('common:cancel')}
+          </button>
         </div>
       )}
 
@@ -552,7 +646,7 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
             {/* Time Slots */}
             <div className="lg:col-span-3">
               <h3 className="text-lg font-semibold mb-4 text-accent">{t('admin:assigned')}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 max-h-[60vh] lg:max-h-[600px] overflow-y-auto overscroll-contain">
                 {timeSlots.map((slot) => {
                   const slotPlayers = assignments[slot] || [];
                   const hasPlayer = slotPlayers.length > 0;
@@ -564,6 +658,15 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
                       isOver={overSlotId === slot}
                       hasPlayer={hasPlayer && activePlayer?.player_id !== slotPlayers[0]?.player_id}
                       sharedNote={sharedBoundary?.slot === slot ? sharedBoundary.note : null}
+                      moveHere={
+                        picked && picked.sourceSlot !== slot ? (
+                          <MoveHereButton
+                            testId={`move-here-${slot}`}
+                            label={hasPlayer ? t('admin:tapMove.swapHere') : t('admin:tapMove.here')}
+                            onClick={() => moveTo(picked.player, picked.sourceSlot, slot)}
+                          />
+                        ) : null
+                      }
                     >
                       <div className="space-y-2">
                         {slotPlayers.slice(0, 1).map((player) => (
@@ -574,6 +677,8 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
                             onToggleLock={readOnly ? undefined : handleToggleLock}
                             timezone={timezone}
                             disabled={readOnly}
+                            onPickMove={readOnly ? undefined : pickMove}
+                            picked={picked?.player.player_id === player.player_id}
                           />
                         ))}
                       </div>
@@ -597,15 +702,24 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
                         sourceSlot="unassigned"
                         timezone={timezone}
                         disabled={readOnly}
+                        onPickMove={readOnly ? undefined : pickMove}
+                        picked={picked?.player.player_id === player.player_id}
                       />
                       {player.preferred_times && player.preferred_times.length > 0 && (
-                        <div className="text-xs text-theme-dim mt-1 pl-2">
+                        <div className="text-xs text-theme-dim mt-1 ps-2">
                           {t('admin:wants')}: {player.preferred_times.join(', ')}
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
+                {picked && picked.sourceSlot !== 'unassigned' && (
+                  <MoveHereButton
+                    testId="move-here-unassigned"
+                    label={t('admin:tapMove.toUnassigned')}
+                    onClick={() => moveTo(picked.player, picked.sourceSlot, 'unassigned')}
+                  />
+                )}
                 {unassignedPlayers.length === 0 && !activePlayer && (
                   <p className="text-theme-dim text-sm text-center mt-8">
                     {t('admin:allAssigned')}
@@ -628,6 +742,7 @@ export default function AssignmentManagement({ round, readOnly, onRoundUpdated }
         <p className="text-sm text-accent">
           <strong>{t('admin:tip')}:</strong> {t('admin:dragToAssign')}. {t('admin:dragTip')}
         </p>
+        <p className="lg:hidden text-sm text-accent mt-2" data-testid="tap-move-tip">{t('admin:tapMove.tip')}</p>
       </div>
     </div>
   );

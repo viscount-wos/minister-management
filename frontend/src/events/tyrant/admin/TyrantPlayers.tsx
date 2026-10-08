@@ -16,7 +16,7 @@ interface Props {
 
 function StatCard({ label, value, testId }: { label: string; value: ReactNode; testId: string }) {
   return (
-    <div className="bg-dark-card rounded-xl border border-theme-border p-5 text-center" data-testid={testId}>
+    <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5 text-center" data-testid={testId}>
       <div className="text-3xl font-bold text-accent" data-testid={`${testId}-value`}>
         {value}
       </div>
@@ -28,7 +28,7 @@ function StatCard({ label, value, testId }: { label: string; value: ReactNode; t
 /** Horizontal bar list: label + count, bar width relative to the round total. */
 function Bars({ title, rows, total, testId }: { title: string; rows: { key: string; label: ReactNode; n: number }[]; total: number; testId: string }) {
   return (
-    <div className="bg-dark-card rounded-xl border border-theme-border p-5" data-testid={testId}>
+    <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5" data-testid={testId}>
       <h3 className="font-semibold text-accent mb-3">{title}</h3>
       <div className="space-y-2">
         {rows.map((r) => (
@@ -210,7 +210,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
               total={summary.total}
               rows={summary.alliances.map((a) => ({ key: a.alliance ?? 'none', n: a.count, label: a.alliance ?? t('tyrant:admin.none') }))}
             />
-            <div className="bg-dark-card rounded-xl border border-theme-border p-5" data-testid="by-troop">
+            <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5" data-testid="by-troop">
               <h3 className="font-semibold text-accent mb-3">{t('tyrant:admin.byTroop')}</h3>
               <div className="space-y-3 text-sm">
                 {TROOP_TYPES.map((k) => (
@@ -231,9 +231,9 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
         </>
       )}
 
-      <div className="bg-dark-card rounded-xl border border-theme-border p-5">
+      <div className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-5">
         <div className="flex flex-wrap items-end gap-3 mb-4">
-          <div className="flex-1 min-w-[14rem]">
+          <div className="flex-1 min-w-[min(14rem,100%)]">
             <label htmlFor="tyrant-search" className="sr-only">
               {t('tyrant:admin.search')}
             </label>

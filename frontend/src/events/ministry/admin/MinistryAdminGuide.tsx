@@ -12,7 +12,7 @@ export default function MinistryAdminGuide() {
 
       <div className="space-y-8">
         {/* Overview */}
-        <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
               <Settings className="w-5 h-5 text-accent" />
@@ -23,7 +23,7 @@ export default function MinistryAdminGuide() {
         </section>
 
         {/* Player Management */}
-        <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
               <Users className="w-5 h-5 text-accent" />
@@ -56,7 +56,7 @@ export default function MinistryAdminGuide() {
         </section>
 
         {/* Export / Import */}
-        <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
               <Download className="w-5 h-5 text-accent" />
@@ -80,7 +80,7 @@ export default function MinistryAdminGuide() {
         </section>
 
         {/* Assignment Management */}
-        <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
               <Calendar className="w-5 h-5 text-accent" />
@@ -122,7 +122,7 @@ export default function MinistryAdminGuide() {
         </section>
 
         {/* Research Day Toggle */}
-        <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
               <Globe className="w-5 h-5 text-accent" />
@@ -133,7 +133,7 @@ export default function MinistryAdminGuide() {
         </section>
 
         {/* Settings Tab */}
-        <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
               <Settings className="w-5 h-5 text-accent" />
@@ -152,7 +152,7 @@ export default function MinistryAdminGuide() {
         </section>
 
         {/* Publishing */}
-        <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-success/20 rounded-full flex items-center justify-center">
               <Calendar className="w-5 h-5 text-success" />
@@ -170,7 +170,7 @@ export default function MinistryAdminGuide() {
         </section>
 
         {/* Excel Export */}
-        <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+        <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
               <FileSpreadsheet className="w-5 h-5 text-accent" />
@@ -188,7 +188,7 @@ export default function MinistryAdminGuide() {
         </section>
 
         {/* Workflow Tips */}
-        <section className="bg-accent/10 border border-accent/30 rounded-xl p-6">
+        <section className="bg-accent/10 border border-accent/30 rounded-xl p-4 sm:p-6">
           <h2 className="text-2xl font-bold text-accent mb-4">{t('guide:admin.workflowTitle')}</h2>
           <ol className="space-y-2 text-theme-dim list-decimal list-inside">
             <li>{t('guide:admin.workflow1')}</li>

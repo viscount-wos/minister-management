@@ -56,7 +56,7 @@ export default function StartNewRoundDialog({ currentRound, onClose, onStarted, 
         aria-modal="true"
         aria-labelledby="new-round-title"
         data-testid="new-round-dialog"
-        className="bg-dark-card rounded-xl p-6 max-w-lg w-full border border-theme-border space-y-4"
+        className="bg-dark-card rounded-xl p-4 sm:p-6 max-w-lg w-full border border-theme-border space-y-4"
       >
         <div className="flex items-center gap-3">
           <AlertTriangle className="w-8 h-8 text-warning shrink-0" aria-hidden="true" />

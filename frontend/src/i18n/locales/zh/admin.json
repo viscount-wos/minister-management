@@ -121,5 +121,14 @@
   "shell": {
     "eventSwitch": "活动",
     "backTo": "返回{{event}}"
+  },
+  "tapMove": {
+    "move": "移动",
+    "moveName": "移动 {{name}}",
+    "picked": "正在移动 {{name}}：点击某个时间段（或未分配）上的“移到这里”。",
+    "here": "移到这里",
+    "swapHere": "在此交换",
+    "toUnassigned": "移到未分配",
+    "tip": "手机上：点击玩家的移动图标，再点击时间段上的“移到这里”。长按也可以开始拖动。"
   }
 }

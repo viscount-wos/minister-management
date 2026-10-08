@@ -13,7 +13,7 @@ export default function AdminEventSwitch({ current, hrefFor }: { current: string
       role="tablist"
       aria-label={t('admin:shell.eventSwitch')}
       data-testid="admin-event-switch"
-      className="inline-flex flex-wrap rounded-lg border border-theme-border bg-dark-bg p-1 gap-1"
+      className="inline-flex max-w-full overflow-x-auto rounded-lg border border-theme-border bg-dark-bg p-1 gap-1"
     >
       {ADMIN_EVENTS.map(({ key, label, icon: Icon }) => (
         <button
@@ -23,7 +23,7 @@ export default function AdminEventSwitch({ current, hrefFor }: { current: string
           aria-selected={current === key}
           data-testid={`admin-event-${key}`}
           onClick={() => current !== key && navigate(hrefFor(key))}
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+          className={`shrink-0 whitespace-nowrap inline-flex items-center gap-2 min-h-[44px] px-3 sm:px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
             current === key ? 'bg-accent text-dark-bg' : 'text-theme-dim hover:text-theme-text hover:bg-dark-card-hover'
           }`}
         >

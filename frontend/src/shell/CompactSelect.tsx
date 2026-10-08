@@ -54,7 +54,7 @@ export default function CompactSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         // 16px text: iOS zooms the page when a smaller control gets focus.
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-base bg-dark-input text-theme-text"
+        className="absolute -inset-px opacity-0 cursor-pointer text-base bg-dark-input text-theme-text"
       >
         {children}
       </select>

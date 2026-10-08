@@ -6,7 +6,7 @@ import { LucideIcon, Settings, RefreshCw, Clock, CalendarClock, BarChart3, Filte
 
 function Section({ icon: Icon, title, children }: { icon: LucideIcon; title: string; children: React.ReactNode }) {
   return (
-    <section className="bg-dark-card rounded-xl border border-theme-border p-6">
+    <section className="bg-dark-card rounded-xl border border-theme-border p-4 sm:p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
           <Icon className="w-5 h-5 text-accent" aria-hidden="true" />
@@ -69,7 +69,7 @@ export default function TyrantAdminGuide() {
           <p>{t('guide:tyrantAdmin.deleteBody')}</p>
         </Section>
 
-        <section className="bg-accent/10 border border-accent/30 rounded-xl p-6">
+        <section className="bg-accent/10 border border-accent/30 rounded-xl p-4 sm:p-6">
           <h2 className="text-2xl font-bold text-accent mb-4">{t('guide:tyrantAdmin.workflowTitle')}</h2>
           <ol className="space-y-2 text-theme-dim list-decimal list-inside">
             {['workflow1', 'workflow2', 'workflow3', 'workflow4', 'workflow5', 'workflow6'].map((key) => (

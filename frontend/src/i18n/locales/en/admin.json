@@ -121,5 +121,14 @@
   "shell": {
     "eventSwitch": "Event",
     "backTo": "Back to {{event}}"
+  },
+  "tapMove": {
+    "move": "Move",
+    "moveName": "Move {{name}}",
+    "picked": "Moving {{name}}: tap \"Move here\" on a time slot (or Unassigned).",
+    "here": "Move here",
+    "swapHere": "Swap here",
+    "toUnassigned": "Move to Unassigned",
+    "tip": "On a phone: tap the move icon on a player, then \"Move here\" on a slot. A long press also starts a drag."
   }
 }

@@ -121,5 +121,14 @@
   "shell": {
     "eventSwitch": "Wydarzenie",
     "backTo": "Wróć do: {{event}}"
+  },
+  "tapMove": {
+    "move": "Przenieś",
+    "moveName": "Przenieś {{name}}",
+    "picked": "Przenoszenie {{name}}: dotknij „Przenieś tutaj” przy przedziale czasowym (lub Nieprzypisani).",
+    "here": "Przenieś tutaj",
+    "swapHere": "Zamień tutaj",
+    "toUnassigned": "Przenieś do nieprzypisanych",
+    "tip": "Na telefonie: dotknij ikonę przenoszenia przy graczu, a potem „Przenieś tutaj” przy przedziale. Długie przytrzymanie też rozpoczyna przeciąganie."
   }
 }
