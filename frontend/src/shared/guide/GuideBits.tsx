@@ -41,6 +41,25 @@ export function GuideSection({
   );
 }
 
+/**
+ * "Label: text" -> the label in bold, so a phone reader can skim the steps. Only a short lead (<= 48 chars) ending
+ * in ": " (or the full-width "：") counts, so times like 05:00 never split.
+ */
+export function LeadText({ text }: { text: string }) {
+  const m = text.match(/^([^:：]{1,48}?)(: |：)([\s\S]+)$/);
+  if (!m) return <>{text}</>;
+  return (
+    <>
+      <strong className="font-semibold text-theme-text">
+        {m[1]}
+        {m[2].trim()}
+      </strong>
+      {m[2] === '：' ? '' : ' '}
+      {m[3]}
+    </>
+  );
+}
+
 /** A bullet list (or numbered steps with `ordered`) of translated keys. */
 export function GuideList({ keys, t, ordered }: { keys: string[]; t: (key: string) => string; ordered?: boolean }) {
   if (ordered) {
@@ -54,7 +73,9 @@ export function GuideList({ keys, t, ordered }: { keys: string[]; t: (key: strin
             >
               {i + 1}
             </span>
-            <span className="min-w-0 pt-0.5">{t(key)}</span>
+            <span className="min-w-0 pt-0.5">
+              <LeadText text={t(key)} />
+            </span>
           </li>
         ))}
       </ol>
@@ -63,7 +84,9 @@ export function GuideList({ keys, t, ordered }: { keys: string[]; t: (key: strin
   return (
     <ul className="list-disc ps-5 space-y-1.5 marker:text-accent">
       {keys.map((key) => (
-        <li key={key}>{t(key)}</li>
+        <li key={key}>
+          <LeadText text={t(key)} />
+        </li>
       ))}
     </ul>
   );
