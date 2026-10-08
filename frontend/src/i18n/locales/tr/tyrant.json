@@ -9,9 +9,7 @@
     "closed": "Kayıtlar kapandı.",
     "applyTile": "Kaydol veya güncelle",
     "applyTileDesc": "Yeni kayıt için veya kaydını düzenlemek için Oyuncu ID'ni gir",
-    "applyTileClosedDesc": "Yeni kayıtlar kapandı. Kendi kaydını hâlâ düzenleyebilirsin.",
-    "adminDesc": "İstatistikler, oyuncular ve dışa aktarma",
-    "utcNote": "Tüm saatler UTC'dir"
+    "applyTileClosedDesc": "Yeni kayıtlar kapandı. Kendi kaydını hâlâ düzenleyebilirsin."
   },
   "apply": {
     "title": "Tiran kaydı",
@@ -46,7 +44,7 @@
   "step2": {
     "title": "Müsaitlik",
     "desc": "Katılabileceğiniz tüm zaman dilimlerini seçin",
-    "utcNote": "Tüm saatler UTC'dir",
+    "utcNote": "Zaman aralıkları oyun saatindedir (UTC).",
     "selectAll": "Tüm Zaman Dilimlerini Seç",
     "openingRush": "Açılış Hücumu",
     "discordVc": "Discord sesli kanalda dinleyebilirim"

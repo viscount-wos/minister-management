@@ -12,7 +12,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Browser, Page, expect
 
 import ui
 
@@ -20,6 +20,51 @@ ARTIFACTS = Path(__file__).parent / 'artifacts'
 RUN_ID = time.strftime('%Y%m%d-%H%M%S')
 
 expect.set_options(timeout=10_000)
+
+# ------------------------------------------------------------------ CSP watch
+# Every browser context in the suite (pytest-playwright's `page`, test_mobile's phones, ad-hoc contexts)
+# reports Content-Security-Policy violations here; the autouse fixture below fails the test that caused one.
+# Two sources: Chromium's console error ("Refused to ... violates the following Content Security Policy
+# directive") and the DOM `securitypolicyviolation` event, re-logged so a wording change can't hide one.
+CSP_VIOLATIONS: list[str] = []
+_CSP_EVENT_JS = """
+document.addEventListener('securitypolicyviolation', (e) => {
+  console.error('Content Security Policy violation (event): ' + e.violatedDirective + ' blocked ' +
+                (e.blockedURI || 'inline') + ' at ' + location.pathname);
+});
+"""
+
+
+def _watch_csp(ctx):
+    def on_console(msg):
+        if 'Content Security Policy' in msg.text:
+            CSP_VIOLATIONS.append(f'{msg.type}: {msg.text}')
+    ctx.on('console', on_console)
+    ctx.add_init_script(_CSP_EVENT_JS)
+    return ctx
+
+
+_orig_new_context = Browser.new_context
+
+
+def _new_context_with_csp_watch(self, *args, **kwargs):
+    return _watch_csp(_orig_new_context(self, *args, **kwargs))
+
+
+Browser.new_context = _new_context_with_csp_watch
+
+
+@pytest.fixture(autouse=True)
+def no_csp_violations(request):
+    """Fails any browser test during which a page reported a CSP violation."""
+    CSP_VIOLATIONS.clear()
+    yield
+    if request.node.get_closest_marker('csp_violations_expected'):
+        CSP_VIOLATIONS.clear()
+        return
+    found, CSP_VIOLATIONS[:] = list(CSP_VIOLATIONS), []
+    if found:
+        pytest.fail('Content Security Policy violations:\n' + '\n'.join(dict.fromkeys(found)), pytrace=False)
 
 
 @pytest.fixture(scope='session')

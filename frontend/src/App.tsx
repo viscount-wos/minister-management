@@ -1,20 +1,23 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './shell/Layout';
 import Home from './shell/Home';
-import Changelog from './shell/Changelog';
 import LegacyRedirect from './shell/LegacyRedirect';
 import { TimezoneProvider } from './shared/TimezoneContext';
-import MinistryHome from './events/ministry/MinistryHome';
-import ApplicationWizard from './events/ministry/ApplicationWizard';
-import PublishedSchedule from './events/ministry/PublishedSchedule';
-import PlayerGuide from './events/ministry/PlayerGuide';
-import AdminLogin from './admin/AdminLogin';
-import AdminShell from './admin/AdminShell';
-import AdminGuidePage from './admin/AdminGuidePage';
-import TyrantPage from './events/tyrant/TyrantPage';
-import TyrantWizard from './events/tyrant/TyrantWizard';
-import SvsPage from './events/svs/SvsPage';
-import TalPage from './events/tal/TalPage';
+import { PAGES } from './pages';
+
+// Lazy pages (./pages.ts): the Suspense fallback lives in Layout, under the header.
+const Changelog = PAGES.changelog.Component;
+const MinistryHome = PAGES.ministryHome.Component;
+const ApplicationWizard = PAGES.ministryApply.Component;
+const PublishedSchedule = PAGES.ministrySchedule.Component;
+const PlayerGuide = PAGES.ministryGuide.Component;
+const AdminLogin = PAGES.adminLogin.Component;
+const AdminShell = PAGES.adminShell.Component;
+const AdminGuidePage = PAGES.adminGuide.Component;
+const TyrantPage = PAGES.tyrantHome.Component;
+const TyrantWizard = PAGES.tyrantApply.Component;
+const SvsPage = PAGES.svs.Component;
+const TalPage = PAGES.tal.Component;
 
 function App() {
   return (

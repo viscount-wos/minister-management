@@ -7,8 +7,6 @@
   "home": {
     "title": "Gestión de Ministros de Whiteout Survival",
     "subtitle": "Sistema de Asignación de Ministros SVS Estado vs Estado",
-    "adminDesc": "Gestiona jugadores y asignaciones",
-    "utcNote": "Todos los horarios se almacenan en UTC — usa el selector de zona horaria en los formularios para convertirlos a tu hora local",
     "welcome": "Bienvenidos, Estado #{{state}}",
     "applicationsClosed": "Las solicitudes ya están cerradas.",
     "applicationsCloseAt": "Las solicitudes cierran: {{time}}",

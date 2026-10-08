@@ -9,6 +9,7 @@
   "cancel": "Cancelar",
   "save": "Guardar",
   "close": "Cerrar",
+  "loading": "Cargando…",
   "yes": "Sí",
   "no": "No",
   "nav": {
@@ -17,6 +18,11 @@
   "header": {
     "timezone": "Zona horaria de visualización",
     "language": "Idioma"
+  },
+  "timesShownIn": "Las horas se muestran en la hora de {{zone}}. Cámbiala con el reloj de arriba.",
+  "fidHelp": {
+    "question": "¿Dónde encuentro mi ID de jugador?",
+    "answer": "En el juego, toca tu foto de perfil (arriba a la izquierda). Tu ID de jugador es el número que aparece debajo de tu nombre."
   },
   "home": {
     "title": "Eventos del estado",
@@ -47,7 +53,8 @@
     "invalidInput": "Parte de la información no es válida. Revísala e inténtalo de nuevo.",
     "roundClosed": "Esta ronda está cerrada y ya no se puede modificar.",
     "tooManyAttempts": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
-    "retry": "El servidor está ocupado. Inténtalo de nuevo en un momento."
+    "retry": "El servidor está ocupado. Inténtalo de nuevo en un momento.",
+    "rateLimited": "Demasiadas solicitudes en poco tiempo. Espera un minuto y vuelve a intentarlo."
   },
   "furnace": {
     "select": "Seleccionar...",

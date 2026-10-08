@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import { Field } from './fields';
+import FidHelp from './FidHelp';
 
 // "Enter your FID" step shared by every event: players never log in, the FID
 // is how they find their profile and their application in the current round.
@@ -57,6 +58,7 @@ export default function FidLookup({ onSubmit, loading, initialFid = '', intro }:
           {loading ? t('ministry:form.loading') : t('profile:continue')}
         </button>
       </div>
+      <FidHelp />
       {error && (
         <p className="mt-3 text-sm text-danger" role="alert" data-testid="fid-error">
           {error}

@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Save, RotateCcw, CheckCircle, AlertCircle } from 'lucide-react';
 import { Round } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
-import { formatDateTime, isoToLocalInput, localInputToIso } from '../../../shared/datetime';
+import { isoToZonedInput, zonedInputToIso } from '../../../shared/datetime';
+import { useFormatDateTime } from '../../../shared/DateTime';
+import { useTimezone } from '../../../shared/TimezoneContext';
+import { timezoneShortLabel } from '../../../shared/timezone';
 import { TyrantSettings, TyrantWindow, tyrantApi } from '../api';
 
 // Per-round settings: the availability windows (tyrantpoll's five by default) and the closing time.
@@ -28,11 +31,15 @@ const nextId = (ws: TyrantWindow[]) => {
 
 export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props) {
   const { t } = useTranslation();
+  const { timezone } = useTimezone();
+  const fmt = useFormatDateTime();
   const [windows, setWindows] = useState<TyrantWindow[]>(round.settings.windows.map((w) => ({ ...w })));
-  const [closing, setClosing] = useState(isoToLocalInput(round.closing_time));
+  const [closing, setClosing] = useState(isoToZonedInput(round.closing_time, timezone));
   const [current, setCurrent] = useState(round);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  // The closing-time input is in the header's display timezone: follow it when it changes.
+  useEffect(() => setClosing(isoToZonedInput(current.closing_time, timezone)), [timezone, current.closing_time]);
 
   const update = (i: number, patch: Partial<TyrantWindow>) =>
     setWindows((ws) => ws.map((w, j) => (j === i ? { ...w, ...patch } : w)));
@@ -44,7 +51,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
       const r = await tyrantApi.admin.updateRound(round.id, body);
       setCurrent(r);
       setWindows(r.settings.windows.map((w) => ({ ...w })));
-      setClosing(isoToLocalInput(r.closing_time));
+      setClosing(isoToZonedInput(r.closing_time, timezone));
       onSaved(r);
       setMsg({ ok: true, text: t('tyrant:admin.settings.saved') });
     } catch (e) {
@@ -158,7 +165,10 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
         <label htmlFor="closing-time" className="block text-xl font-semibold text-accent mb-1">
           {t('admin:closingTime')}
         </label>
-        <p className="text-theme-dim text-sm mb-4">{t('admin:closingTimeDesc')}</p>
+        <p className="text-theme-dim text-sm mb-1">{t('admin:closingTimeDesc')}</p>
+        <p className="text-theme-dim text-xs mb-4" data-testid="closing-time-zone">
+          {t('admin:closingTimeZone', { zone: timezoneShortLabel(timezone) })}
+        </p>
         <div className="flex flex-wrap gap-3">
           <input
             id="closing-time"
@@ -173,7 +183,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
             <>
               <button
                 type="button"
-                onClick={() => save({ closing_time: localInputToIso(closing) })}
+                onClick={() => save({ closing_time: zonedInputToIso(closing, timezone) })}
                 disabled={busy || !closing}
                 data-testid="save-closing-time"
                 className="min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium disabled:opacity-50"
@@ -193,7 +203,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
           )}
         </div>
         <p className="mt-3 text-sm text-theme-dim" data-testid="closing-time-status">
-          {current.closing_time ? `${t('admin:currentClosingTime')}: ${formatDateTime(current.closing_time)}` : t('admin:noClosingTime')}
+          {current.closing_time ? `${t('admin:currentClosingTime')}: ${fmt(current.closing_time)}` : t('admin:noClosingTime')}
         </p>
       </div>
 

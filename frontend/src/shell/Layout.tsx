@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { isRtl } from '../i18n/index';
@@ -14,7 +15,16 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <div className="flex-1">
-        <Outlet />
+        {/* Pages are lazy chunks (src/pages.ts): keep the header while one loads */}
+        <Suspense
+          fallback={
+            <p className="py-16 text-center text-theme-dim" role="status" data-testid="page-loading">
+              {t('common:loading')}
+            </p>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </div>
       <footer className="mt-auto pb-4 text-center">
         <p className="text-xs italic text-theme-dim">{t('common:footer')}</p>

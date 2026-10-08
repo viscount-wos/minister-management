@@ -46,6 +46,8 @@ export function errorText(t: TFunction, err: unknown, fallbackKey = 'common:erro
       return t('common:errors.roundClosed');
     case 'TOO_MANY_ATTEMPTS':
       return t('common:errors.tooManyAttempts');
+    case 'RATE_LIMITED':
+      return t('common:errors.rateLimited');
     case 'RETRY':
       return t('common:errors.retry');
     case 'NOT_FOUND':

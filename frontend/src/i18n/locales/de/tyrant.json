@@ -9,9 +9,7 @@
     "closed": "Die Anmeldung ist geschlossen.",
     "applyTile": "Anmelden oder ändern",
     "applyTileDesc": "Gib deine Spieler-ID ein, um dich anzumelden oder deine Anmeldung zu ändern",
-    "applyTileClosedDesc": "Neue Anmeldungen sind geschlossen. Deine kannst du noch ändern.",
-    "adminDesc": "Statistik, Spieler und Export",
-    "utcNote": "Alle Zeiten in UTC"
+    "applyTileClosedDesc": "Neue Anmeldungen sind geschlossen. Deine kannst du noch ändern."
   },
   "apply": {
     "title": "Tyrannen-Anmeldung",
@@ -46,7 +44,7 @@
   "step2": {
     "title": "Verfügbarkeit",
     "desc": "Wähle alle Zeitfenster, in denen du dabei sein kannst",
-    "utcNote": "Alle Zeiten in UTC",
+    "utcNote": "Die Zeitfenster sind in Spielzeit (UTC).",
     "selectAll": "Alle Zeitfenster wählen",
     "openingRush": "Eröffnungsansturm",
     "discordVc": "Kann im Discord-Sprachkanal zuhören"

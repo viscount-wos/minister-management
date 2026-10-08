@@ -4,7 +4,10 @@ import { Save, X, Check, ToggleLeft, ToggleRight, AlertCircle, Lock } from 'luci
 import api, { MinistrySettings, Round } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
 import { activeDaysInOrder } from '../../../shared/days';
-import { formatDateTime, isoToLocalInput, localInputToIso } from '../../../shared/datetime';
+import { isoToZonedInput, zonedInputToIso } from '../../../shared/datetime';
+import { useFormatDateTime } from '../../../shared/DateTime';
+import { useTimezone } from '../../../shared/TimezoneContext';
+import { timezoneShortLabel } from '../../../shared/timezone';
 
 // Global settings (state number) plus the selected round's own settings:
 // name, closing time, research day, fire crystals, slot scheme, published days.
@@ -19,10 +22,13 @@ const CARD = 'bg-dark-card rounded-xl border border-theme-border p-6';
 
 export default function AdminSettings({ round, readOnly, onRoundUpdated }: AdminSettingsProps) {
   const { t } = useTranslation();
+  const { timezone } = useTimezone();
+  const fmt = useFormatDateTime();
   const [stateNumber, setStateNumber] = useState('');
-  const [roundName, setRoundName] = useState(round?.name ?? '');
-  const [closingLocal, setClosingLocal] = useState(isoToLocalInput(round?.closing_time));
+  const [closingLocal, setClosingLocal] = useState(isoToZonedInput(round?.closing_time, timezone));
   const [message, setMessage] = useState('');
+  // The closing-time input is in the header's display timezone: follow it when it changes.
+  useEffect(() => setClosingLocal(isoToZonedInput(round?.closing_time, timezone)), [timezone, round?.closing_time]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -56,8 +62,7 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
     try {
       const res = await api.admin.updateRound(round.id, body);
       onRoundUpdated(res);
-      setClosingLocal(isoToLocalInput(res.closing_time));
-      setRoundName(res.name);
+      setClosingLocal(isoToZonedInput(res.closing_time, timezone));
       saved(res.remapped !== undefined ? t('admin:round.remapped', { n: res.remapped }) : undefined);
     } catch (err) {
       failed(err);
@@ -138,40 +143,15 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
             )}
           </div>
 
-          {/* Round name */}
-          <div className={CARD}>
-            <h3 className="text-xl font-bold text-accent mb-4">
-              <label htmlFor="round-name">{t('admin:round.name')}</label>
-            </h3>
-            <div className="flex flex-wrap gap-3 items-center">
-              <input
-                id="round-name"
-                data-testid="round-name"
-                value={roundName}
-                maxLength={100}
-                disabled={readOnly}
-                onChange={(e) => setRoundName(e.target.value)}
-                className="px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent w-80 max-w-full disabled:opacity-60"
-              />
-              {!readOnly && (
-                <button
-                  onClick={() => roundName.trim() && updateRound({ name: roundName.trim() })}
-                  data-testid="save-round-name"
-                  className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
-                >
-                  <Save className="w-4 h-4" aria-hidden="true" />
-                  {t('common:save')}
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* Closing time */}
           <div className={CARD}>
             <h3 className="text-xl font-bold text-accent mb-2">
               <label htmlFor="closing-time">{t('admin:closingTime')}</label>
             </h3>
-            <p className="text-theme-dim text-sm mb-4">{t('admin:closingTimeDesc')}</p>
+            <p className="text-theme-dim text-sm mb-1">{t('admin:closingTimeDesc')}</p>
+            <p className="text-theme-dim text-xs mb-4" data-testid="closing-time-zone">
+              {t('admin:closingTimeZone', { zone: timezoneShortLabel(timezone) })}
+            </p>
             <div className="flex flex-wrap gap-3 items-center">
               <input
                 id="closing-time"
@@ -185,7 +165,7 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
               {!readOnly && (
                 <>
                   <button
-                    onClick={() => updateRound({ closing_time: localInputToIso(closingLocal) })}
+                    onClick={() => updateRound({ closing_time: zonedInputToIso(closingLocal, timezone) })}
                     data-testid="save-closing-time"
                     className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
                   >
@@ -206,7 +186,7 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
             <div className="mt-3 text-sm" data-testid="closing-time-status">
               {round.closing_time ? (
                 <p className={round.is_closed_for_new ? 'text-danger' : 'text-success'}>
-                  {t('admin:currentClosingTime')}: {formatDateTime(round.closing_time)}
+                  {t('admin:currentClosingTime')}: {fmt(round.closing_time)}
                   {round.is_closed_for_new && <span className="ms-2 font-medium">({t('ministry:home.applicationsClosed')})</span>}
                 </p>
               ) : (

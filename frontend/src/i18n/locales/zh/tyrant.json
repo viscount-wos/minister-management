@@ -9,9 +9,7 @@
     "closed": "报名已截止。",
     "applyTile": "报名或修改",
     "applyTileDesc": "输入玩家ID开始报名或修改你的报名",
-    "applyTileClosedDesc": "新报名已截止。你仍可修改自己的报名。",
-    "adminDesc": "统计、玩家和导出",
-    "utcNote": "所有时间均为UTC时间"
+    "applyTileClosedDesc": "新报名已截止。你仍可修改自己的报名。"
   },
   "apply": {
     "title": "暴君报名",
@@ -46,7 +44,7 @@
   "step2": {
     "title": "可用时间",
     "desc": "选择所有你能参加的时间段",
-    "utcNote": "所有时间均为UTC时间",
+    "utcNote": "时段时间为游戏时间（UTC）。",
     "selectAll": "选择所有时间段",
     "openingRush": "开场冲锋",
     "discordVc": "可以在Discord语音频道收听"

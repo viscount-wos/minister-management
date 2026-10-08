@@ -27,6 +27,8 @@ import {
 } from './api';
 import { TYRANT_PATHS } from './paths';
 import { usePageTitle } from '../../shared/usePageTitle';
+import { useFormatDateTime } from '../../shared/DateTime';
+import FidHelp from '../../shared/FidHelp';
 
 // The Frost Dragon Tyrant sign-up WIZARD, ported from the live tyrantpoll app
 // (templates/poll.html), same 6 steps in the same order:
@@ -181,6 +183,7 @@ const TimeRange = ({ start, end }: { start: string; end: string }) => (
 export default function TyrantWizard() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const fmt = useFormatDateTime();
   usePageTitle(t('tyrant:apply.title'));
   const [params, setParams] = useSearchParams();
 
@@ -494,7 +497,7 @@ export default function TyrantWizard() {
       <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
       {round.is_closed_for_new
         ? t('tyrant:apply.closedButEditable')
-        : t('tyrant:home.closeAt', { time: new Date(round.closing_time).toLocaleString() })}
+        : t('tyrant:home.closeAt', { time: fmt(round.closing_time) })}
     </p>
   ) : null;
 
@@ -615,6 +618,7 @@ export default function TyrantWizard() {
                   invalid={invalidField === 'fid'}
                   onChange={(e) => setFidInput(e.target.value)}
                 />
+                <FidHelp />
               </form>
             ) : (
               <div className="space-y-4" data-testid="profile-fields">

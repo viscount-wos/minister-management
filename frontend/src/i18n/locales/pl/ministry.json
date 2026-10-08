@@ -7,8 +7,6 @@
   "home": {
     "title": "Zarządzanie Ministrami Whiteout Survival",
     "subtitle": "System przydziału stanowisk ministrów SVS (Stan kontra Stan)",
-    "adminDesc": "Zarządzaj graczami i przydziałami",
-    "utcNote": "Wszystkie godziny są zapisywane w UTC — użyj selektora strefy czasowej w formularzu, aby przeliczyć je na czas lokalny",
     "welcome": "Witamy w Stanie #{{state}}",
     "applicationsClosed": "Nabór wniosków został zamknięty.",
     "applicationsCloseAt": "Nabór wniosków zamyka się: {{time}}",

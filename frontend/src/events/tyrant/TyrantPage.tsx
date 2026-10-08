@@ -7,11 +7,16 @@ import { TyrantSettings, tyrantApi } from './api';
 import { TYRANT_PATHS } from './paths';
 import { usePageTitle } from '../../shared/usePageTitle';
 import Tile, { LinkButton, PageHero } from '../../shared/Tile';
+import { useFormatDateTime } from '../../shared/DateTime';
+import { useTimezone } from '../../shared/TimezoneContext';
+import { timezoneShortLabel } from '../../shared/timezone';
 
 // Frost Dragon Tyrant landing page (same layout as the ministry home).
 export default function TyrantPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const fmt = useFormatDateTime();
+  const { timezone } = useTimezone();
   const [stateNumber, setStateNumber] = useState('');
   const [round, setRound] = useState<Round<TyrantSettings> | null>(null);
   const [noRound, setNoRound] = useState(false);
@@ -57,9 +62,9 @@ export default function TyrantPage() {
             </p>
           )}
           {closingTime && (
-            <div className={`mt-2 flex items-center justify-center gap-2 text-sm font-medium ${isClosed ? 'text-danger' : 'text-success'}`}>
+            <div data-testid="closing-time-banner" className={`mt-2 flex items-center justify-center gap-2 text-sm font-medium ${isClosed ? 'text-danger' : 'text-success'}`}>
               <Clock className="w-4 h-4" aria-hidden="true" />
-              {isClosed ? t('tyrant:home.closed') : t('tyrant:home.closeAt', { time: new Date(closingTime).toLocaleString() })}
+              {isClosed ? t('tyrant:home.closed') : t('tyrant:home.closeAt', { time: fmt(closingTime) })}
             </div>
           )}
         </div>
@@ -76,7 +81,7 @@ export default function TyrantPage() {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
+        <div className="max-w-md mx-auto">
           <Tile
             testId="tyrant-apply-tile"
             onClick={() => !noRound && navigate(TYRANT_PATHS.apply)}
@@ -91,13 +96,6 @@ export default function TyrantPage() {
                   : t('tyrant:home.applyTileDesc')
             }
           />
-          <Tile
-            testId="tyrant-admin-tile"
-            onClick={() => navigate(TYRANT_PATHS.admin)}
-            icon={Shield}
-            title={t('admin:title')}
-            description={t('tyrant:home.adminDesc')}
-          />
         </div>
 
         <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
@@ -109,9 +107,16 @@ export default function TyrantPage() {
           </LinkButton>
         </div>
 
-        <div className="mt-4 text-center text-theme-dim text-sm">
-          <p>{t('tyrant:home.utcNote')}</p>
+        {/* Event Management: a small, muted link for organisers, not a second big card */}
+        <div className="mt-2 flex justify-center">
+          <LinkButton icon={Shield} onClick={() => navigate(TYRANT_PATHS.admin)} testId="tyrant-admin-tile" muted>
+            {t('admin:title')}
+          </LinkButton>
         </div>
+
+        <p className="mt-2 text-center text-theme-dim text-sm" data-testid="times-shown-in">
+          {t('common:timesShownIn', { zone: timezoneShortLabel(timezone) })}
+        </p>
       </div>
     </div>
   );

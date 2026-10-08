@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Search, Trash2, FileSpreadsheet, FileText, ChevronUp, ChevronDown, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import { Round, downloadBlob } from '../../../shared/api';
 import { errorText } from '../../../shared/apiErrors';
+import { useFormatDateTime } from '../../../shared/DateTime';
 import FurnaceLevelSelect from '../../../shared/FurnaceLevelSelect';
 import { useUrlFilters, splitList, joinList } from '../../../shared/filters/useUrlFilters';
 import { CheckboxMenu, ChipButton, FilterPill, FilterPills } from '../../../shared/filters/FilterControls';
@@ -153,6 +154,7 @@ const tierValue = (label: string) => (label === 'none' ? 'none' : label.replace(
 
 export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
   const { t } = useTranslation();
+  const fmt = useFormatDateTime();
   const F = useUrlFilters<UrlKey>(URL_KEYS);
   const v = F.values;
   const windows = round.settings.windows;
@@ -681,7 +683,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                     </td>
                     <td className="px-2 py-2 text-xs text-theme-text">{(a.answers.roles ?? []).map((r) => t(`tyrant:roles.${r}`)).join(', ') || '—'}</td>
                     <td className="px-2 py-2 text-xs text-theme-dim whitespace-nowrap">
-                      {new Date(a.created_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                      {fmt(a.created_at, { withZone: false, weekday: false, isolate: false })}
                     </td>
                     {!readOnly && (
                       <td className="px-2 py-2">

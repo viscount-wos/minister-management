@@ -29,6 +29,8 @@ import MyAssignments from './MyAssignments';
 import WizardSteps from './WizardSteps';
 import { MINISTRY_PATHS } from './paths';
 import { usePageTitle } from '../../shared/usePageTitle';
+import { useFormatDateTime } from '../../shared/DateTime';
+import FidHelp from '../../shared/FidHelp';
 
 // The ministry application WIZARD, restored from v1.4's PlayerForm:
 //   1 Player information (+ speedups)   2 Construction day times
@@ -62,6 +64,7 @@ function ReviewItem({ label, children, testId }: { label: string; children: Reac
 export default function ApplicationWizard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const fmt = useFormatDateTime();
   usePageTitle(t('ministry:apply.title'));
   const [params, setParams] = useSearchParams();
   const { timezone, setTimezone } = useTimezone();
@@ -386,7 +389,7 @@ export default function ApplicationWizard() {
       <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
       {round.is_closed_for_new
         ? t('ministry:apply.closedButEditable')
-        : t('ministry:home.applicationsCloseAt', { time: new Date(round.closing_time).toLocaleString() })}
+        : t('ministry:home.applicationsCloseAt', { time: fmt(round.closing_time) })}
     </p>
   ) : null;
 
@@ -455,6 +458,7 @@ export default function ApplicationWizard() {
                   invalid={invalidField === 'fid'}
                   onChange={(e) => setFidInput(e.target.value)}
                 />
+                <FidHelp />
               </form>
             ) : (
               <div className="space-y-4">

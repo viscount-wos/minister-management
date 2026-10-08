@@ -7,8 +7,6 @@
   "home": {
     "title": "白色废土 大臣管理",
     "subtitle": "SVS 州对州 大臣分配系统",
-    "adminDesc": "管理玩家和分配",
-    "utcNote": "所有时间以 UTC 存储 — 使用表单中的时区选择器转换为您的当地时间",
     "welcome": "欢迎，{{state}}州的各位",
     "applicationsClosed": "申请已关闭。",
     "applicationsCloseAt": "申请截止：{{time}}",

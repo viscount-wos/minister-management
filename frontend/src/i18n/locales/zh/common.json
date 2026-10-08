@@ -9,6 +9,7 @@
   "cancel": "取消",
   "save": "保存",
   "close": "关闭",
+  "loading": "加载中…",
   "yes": "是",
   "no": "否",
   "nav": {
@@ -17,6 +18,11 @@
   "header": {
     "timezone": "显示时区",
     "language": "语言"
+  },
+  "timesShownIn": "时间按 {{zone}} 时间显示。可用顶部的时钟更改。",
+  "fidHelp": {
+    "question": "在哪里找到我的玩家 ID？",
+    "answer": "在游戏中，点击左上角的头像。你名字下方显示的数字就是你的玩家 ID。"
   },
   "home": {
     "title": "州活动",
@@ -47,7 +53,8 @@
     "invalidInput": "部分信息无效，请检查后重试。",
     "roundClosed": "本轮已关闭，无法再修改。",
     "tooManyAttempts": "尝试次数过多，请稍候再试。",
-    "retry": "服务器繁忙，请稍后再试。"
+    "retry": "服务器繁忙，请稍后再试。",
+    "rateLimited": "短时间内请求过多。请等一分钟后再试。"
   },
   "furnace": {
     "select": "请选择...",

@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import api, { EventKey, Round } from '../shared/api';
 import { errorText } from '../shared/apiErrors';
-import { localInputToIso } from '../shared/datetime';
+import { zonedInputToIso } from '../shared/datetime';
+import { useTimezone } from '../shared/TimezoneContext';
+import { timezoneShortLabel } from '../shared/timezone';
 
 // "Start new round" replaces v1.4's "Remove all players": it closes the
 // current round (nothing is deleted) and opens a new one. Settings carry over;
@@ -21,6 +23,7 @@ interface StartNewRoundDialogProps {
 
 export default function StartNewRoundDialog({ currentRound, onClose, onStarted, event = 'ministry', defaultName }: StartNewRoundDialogProps) {
   const { t, i18n } = useTranslation();
+  const { timezone } = useTimezone();
   const [name, setName] = useState(() => defaultName ?? t('admin:round.defaultName', { date: new Date().toLocaleDateString(i18n.language) }));
   const [closing, setClosing] = useState('');
   const [busy, setBusy] = useState(false);
@@ -40,7 +43,7 @@ export default function StartNewRoundDialog({ currentRound, onClose, onStarted, 
     setBusy(true);
     setError('');
     try {
-      const res = await api.admin.startNewRound(event, { name: name.trim(), closing_time: localInputToIso(closing) });
+      const res = await api.admin.startNewRound(event, { name: name.trim(), closing_time: zonedInputToIso(closing, timezone) });
       onStarted(res.round);
     } catch (err) {
       setError(errorText(t, err, 'admin:round.startError'));
@@ -95,6 +98,7 @@ export default function StartNewRoundDialog({ currentRound, onClose, onStarted, 
             onChange={(e) => setClosing(e.target.value)}
             className="px-4 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent"
           />
+          <p className="text-theme-dim text-xs mt-1">{t('admin:closingTimeZone', { zone: timezoneShortLabel(timezone) })}</p>
         </div>
         {error && (
           <p className="text-danger text-sm" role="alert" data-testid="new-round-error">

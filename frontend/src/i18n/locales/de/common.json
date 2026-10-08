@@ -9,6 +9,7 @@
   "cancel": "Abbrechen",
   "save": "Speichern",
   "close": "Schließen",
+  "loading": "Wird geladen…",
   "yes": "Ja",
   "no": "Nein",
   "nav": {
@@ -17,6 +18,11 @@
   "header": {
     "timezone": "Angezeigte Zeitzone",
     "language": "Sprache"
+  },
+  "timesShownIn": "Zeiten werden in der Zeit von {{zone}} angezeigt. Ändern kannst du sie mit der Uhr oben.",
+  "fidHelp": {
+    "question": "Wo finde ich meine Spieler-ID?",
+    "answer": "Tippe im Spiel oben links auf dein Profilbild. Deine Spieler-ID ist die Zahl unter deinem Namen."
   },
   "home": {
     "title": "Staats-Events",
@@ -47,7 +53,8 @@
     "invalidInput": "Einige Angaben sind ungültig. Bitte prüfe sie und versuche es erneut.",
     "roundClosed": "Diese Runde ist geschlossen und kann nicht mehr geändert werden.",
     "tooManyAttempts": "Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.",
-    "retry": "Der Server ist ausgelastet. Bitte versuche es gleich noch einmal."
+    "retry": "Der Server ist ausgelastet. Bitte versuche es gleich noch einmal.",
+    "rateLimited": "Zu viele Anfragen in kurzer Zeit. Bitte warte eine Minute und versuche es erneut."
   },
   "furnace": {
     "select": "Auswählen...",

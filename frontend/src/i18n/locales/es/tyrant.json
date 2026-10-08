@@ -9,9 +9,7 @@
     "closed": "Las inscripciones están cerradas.",
     "applyTile": "Inscribirse o actualizar",
     "applyTileDesc": "Introduce tu ID de jugador para inscribirte o editar tu inscripción",
-    "applyTileClosedDesc": "Ya no se admiten nuevas inscripciones. Aún puedes editar la tuya.",
-    "adminDesc": "Estadísticas, jugadores y exportación",
-    "utcNote": "Todas las horas están en UTC"
+    "applyTileClosedDesc": "Ya no se admiten nuevas inscripciones. Aún puedes editar la tuya."
   },
   "apply": {
     "title": "Inscripción al Tirano",
@@ -46,7 +44,7 @@
   "step2": {
     "title": "Disponibilidad",
     "desc": "Marca todas las franjas en las que puedes participar",
-    "utcNote": "Todas las horas están en UTC",
+    "utcNote": "Las horas de las ventanas son la hora del juego (UTC).",
     "selectAll": "Seleccionar todas las franjas",
     "openingRush": "Ataque inicial",
     "discordVc": "Puedo escuchar en el canal de voz de Discord"

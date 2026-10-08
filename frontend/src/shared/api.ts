@@ -35,6 +35,7 @@ export type ErrorCode =
   | 'ROUND_ALREADY_OPEN'
   | 'ROUND_CLOSED'
   | 'TOO_MANY_ATTEMPTS'
+  | 'RATE_LIMITED'
   | 'RETRY'
   | 'CONFLICT'
   | 'INTERNAL_ERROR'
@@ -404,6 +405,9 @@ export const api = {
     round: (id: number) => request<Round>('GET', `/api/admin/rounds/${id}`, { admin: true }),
     createRound: (event: EventKey, body: { name: string; status?: RoundStatus; closing_time?: string | null; settings?: Partial<MinistrySettings> }) =>
       request<Round>('POST', `/api/admin/events/${event}/rounds`, { admin: true, body }),
+    /** Rename any round, closed ones included (PATCH: only the name changes). */
+    renameRound: (id: number, name: string) =>
+      request<Round>('PATCH', `/api/admin/rounds/${id}`, { admin: true, body: { name } }),
     updateRound: (id: number, body: { name?: string; status?: RoundStatus; closing_time?: string | null; settings?: Partial<MinistrySettings> }) =>
       request<Round>('PUT', `/api/admin/rounds/${id}`, { admin: true, body }),
     startNewRound: (event: EventKey, body: { name: string; closing_time?: string | null; settings?: Partial<MinistrySettings> }) =>

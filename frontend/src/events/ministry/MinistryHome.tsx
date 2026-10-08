@@ -7,10 +7,15 @@ import { activeDaysInOrder, sortDaysByWeek } from '../../shared/days';
 import { MINISTRY_PATHS } from './paths';
 import { usePageTitle } from '../../shared/usePageTitle';
 import Tile, { LinkButton, PageHero } from '../../shared/Tile';
+import { useFormatDateTime } from '../../shared/DateTime';
+import { useTimezone } from '../../shared/TimezoneContext';
+import { timezoneShortLabel } from '../../shared/timezone';
 
 export default function MinistryHome() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const fmt = useFormatDateTime();
+  const { timezone } = useTimezone();
   const [stateNumber, setStateNumber] = useState('');
   const [round, setRound] = useState<Round<MinistrySettings> | null>(null);
   const [noRound, setNoRound] = useState(false);
@@ -62,12 +67,13 @@ export default function MinistryHome() {
           )}
           {closingTime && (
             <div
+              data-testid="closing-time-banner"
               className={`mt-2 flex items-center justify-center gap-2 text-sm font-medium ${isClosed ? 'text-danger' : 'text-success'}`}
             >
               <Clock className="w-4 h-4" aria-hidden="true" />
               {isClosed
                 ? t('ministry:home.applicationsClosed')
-                : t('ministry:home.applicationsCloseAt', { time: new Date(closingTime).toLocaleString() })}
+                : t('ministry:home.applicationsCloseAt', { time: fmt(closingTime) })}
             </div>
           )}
         </div>
@@ -105,7 +111,7 @@ export default function MinistryHome() {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-3 sm:gap-6">
+        <div className="max-w-md mx-auto">
           {/* Apply or edit: one FID-first flow decides "new" vs "edit". */}
           <Tile
             testId="ministry-apply-tile"
@@ -121,13 +127,6 @@ export default function MinistryHome() {
                   : t('ministry:home.applyTileDesc')
             }
           />
-          <Tile
-            testId="ministry-admin-tile"
-            onClick={() => navigate(MINISTRY_PATHS.admin)}
-            icon={Shield}
-            title={t('admin:title')}
-            description={t('ministry:home.adminDesc')}
-          />
         </div>
 
         <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
@@ -139,9 +138,16 @@ export default function MinistryHome() {
           </LinkButton>
         </div>
 
-        <div className="mt-4 text-center text-theme-dim text-sm">
-          <p>{t('ministry:home.utcNote')}</p>
+        {/* Event Management: a small, muted link for organisers, not a second big card */}
+        <div className="mt-2 flex justify-center">
+          <LinkButton icon={Shield} onClick={() => navigate(MINISTRY_PATHS.admin)} testId="ministry-admin-tile" muted>
+            {t('admin:title')}
+          </LinkButton>
         </div>
+
+        <p className="mt-2 text-center text-theme-dim text-sm" data-testid="times-shown-in">
+          {t('common:timesShownIn', { zone: timezoneShortLabel(timezone) })}
+        </p>
       </div>
     </div>
   );

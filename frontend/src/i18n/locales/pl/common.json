@@ -9,6 +9,7 @@
   "cancel": "Anuluj",
   "save": "Zapisz",
   "close": "Zamknij",
+  "loading": "Ładowanie…",
   "yes": "Tak",
   "no": "Nie",
   "nav": {
@@ -17,6 +18,11 @@
   "header": {
     "timezone": "Wyświetlana strefa czasowa",
     "language": "Język"
+  },
+  "timesShownIn": "Godziny są pokazane w czasie: {{zone}}. Zmienisz to zegarem u góry.",
+  "fidHelp": {
+    "question": "Gdzie znajdę moje ID gracza?",
+    "answer": "W grze dotknij swojego zdjęcia profilowego (w lewym górnym rogu). Twoje ID gracza to numer pod Twoją nazwą."
   },
   "home": {
     "title": "Wydarzenia stanu",
@@ -47,7 +53,8 @@
     "invalidInput": "Część danych jest nieprawidłowa. Sprawdź je i spróbuj ponownie.",
     "roundClosed": "Ta runda jest zamknięta i nie można jej już zmienić.",
     "tooManyAttempts": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.",
-    "retry": "Serwer jest zajęty. Spróbuj ponownie za chwilę."
+    "retry": "Serwer jest zajęty. Spróbuj ponownie za chwilę.",
+    "rateLimited": "Zbyt wiele zapytań w krótkim czasie. Odczekaj minutę i spróbuj ponownie."
   },
   "furnace": {
     "select": "Wybierz...",

@@ -9,6 +9,7 @@
   "cancel": "Cancel",
   "save": "Save",
   "close": "Close",
+  "loading": "Loading…",
   "yes": "Yes",
   "no": "No",
   "nav": {
@@ -17,6 +18,11 @@
   "header": {
     "timezone": "Display timezone",
     "language": "Language"
+  },
+  "timesShownIn": "Times are shown in {{zone}} time. Change it with the clock at the top.",
+  "fidHelp": {
+    "question": "Where do I find my player ID?",
+    "answer": "In the game, tap your profile picture (top left). Your player ID is the number shown under your name."
   },
   "home": {
     "title": "State Events",
@@ -47,7 +53,8 @@
     "invalidInput": "Some of the information is not valid. Please check it and try again.",
     "roundClosed": "This round is closed and can no longer be changed.",
     "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
-    "retry": "The server is busy. Please try again in a moment."
+    "retry": "The server is busy. Please try again in a moment.",
+    "rateLimited": "Too many requests in a short time. Please wait a minute and try again."
   },
   "furnace": {
     "select": "Select...",

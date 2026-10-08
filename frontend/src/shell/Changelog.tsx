@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { usePageTitle } from '../shared/usePageTitle';
 
-// Newest first. Each entry maps to a block of translated keys in i18n.ts.
+// Newest first. Each entry maps to a block of keys in locales/<lang>/changelog.json (all 9 languages).
 const RELEASES = [
+  { version: '2.1.0', key: 'v210', items: ['a', 'b', 'c', 'd', 'e'] },
   { version: '2.0.0', key: 'v200', items: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] },
   { version: '1.4.0', key: 'v140', items: ['a', 'b', 'c', 'd', 'e'] },
   { version: '1.3.0', key: 'v130', items: ['a', 'b'] },

@@ -77,7 +77,9 @@ class Phone:
         SHOTS.mkdir(parents=True, exist_ok=True)
         page = self.page
         time.sleep(0.45)        # global 0.2 s colour transition
-        page.add_style_tag(content='[data-testid=wizard-nav]{position:static!important}')
+        # CSSOM, not an injected <style>: the site's CSP (style-src 'self') rightly blocks inline <style> tags
+        page.evaluate("document.querySelectorAll('[data-testid=wizard-nav]')"
+                      ".forEach(e => e.style.setProperty('position', 'static', 'important'))")
         page.screenshot(path=str(SHOTS / f'{slug(self.device)}-{self.lang}-{name}.png'), full_page=True)
         page.evaluate("document.querySelectorAll('style').forEach(s => { if (s.textContent.includes('wizard-nav]{position:static')) s.remove(); })")
 

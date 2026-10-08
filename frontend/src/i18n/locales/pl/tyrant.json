@@ -9,9 +9,7 @@
     "closed": "Zapisy są zamknięte.",
     "applyTile": "Zapisz się lub zmień",
     "applyTileDesc": "Wpisz swoje ID gracza, aby się zapisać lub zmienić zgłoszenie",
-    "applyTileClosedDesc": "Nowe zapisy są zamknięte. Swoje zgłoszenie nadal możesz zmienić.",
-    "adminDesc": "Statystyki, gracze i eksport",
-    "utcNote": "Wszystkie godziny w UTC"
+    "applyTileClosedDesc": "Nowe zapisy są zamknięte. Swoje zgłoszenie nadal możesz zmienić."
   },
   "apply": {
     "title": "Zapisy na Tyrana",
@@ -46,7 +44,7 @@
   "step2": {
     "title": "Dostępność",
     "desc": "Zaznacz wszystkie przedziały, w których możesz grać",
-    "utcNote": "Wszystkie godziny w UTC",
+    "utcNote": "Godziny okien są w czasie gry (UTC).",
     "selectAll": "Zaznacz wszystkie przedziały",
     "openingRush": "Otwierający szturm",
     "discordVc": "Mogę słuchać na kanale głosowym Discord"

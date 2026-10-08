@@ -7,8 +7,6 @@
   "home": {
     "title": "Whiteout Survival Ministerverwaltung",
     "subtitle": "SVS Staat-gegen-Staat Ministerzuweisungssystem",
-    "adminDesc": "Spieler und Zuweisungen verwalten",
-    "utcNote": "Alle Zeiten werden in UTC gespeichert — verwenden Sie die Zeitzonenauswahl in den Formularen, um in Ihre Ortszeit umzurechnen",
     "welcome": "Willkommen, Staat #{{state}}",
     "applicationsClosed": "Die Bewerbungsphase ist jetzt geschlossen.",
     "applicationsCloseAt": "Bewerbungsschluss: {{time}}",

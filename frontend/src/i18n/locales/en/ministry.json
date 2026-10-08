@@ -7,8 +7,6 @@
   "home": {
     "title": "Whiteout Survival Minister Management",
     "subtitle": "SVS State vs State Minister Assignment System",
-    "adminDesc": "Manage players and assignments",
-    "utcNote": "All times stored in UTC — use the timezone selector on forms to convert to your local time",
     "welcome": "Welcome, State #{{state}}",
     "applicationsClosed": "Applications are now closed.",
     "applicationsCloseAt": "Applications close: {{time}}",

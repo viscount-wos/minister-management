@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LogOut, HelpCircle, RefreshCw, Lock, AlertCircle } from 'lucide-react';
+import { LogOut, HelpCircle, RefreshCw, Lock, AlertCircle, Pencil } from 'lucide-react';
 import api, { Round, adminSession, onUnauthorized } from '../shared/api';
 import { errorText } from '../shared/apiErrors';
 import { usePageTitle } from '../shared/usePageTitle';
 import StartNewRoundDialog from './StartNewRoundDialog';
+import RenameRound from './RenameRound';
 import AdminEventSwitch from './AdminEventSwitch';
 import { resolveAdminEvent } from './registry';
 import { ADMIN_PATHS, lastAdminEvent } from './paths';
@@ -44,6 +45,7 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
   const [rounds, setRounds] = useState<Round[] | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showStart, setShowStart] = useState(false);
+  const [renaming, setRenaming] = useState(false);
   const [error, setError] = useState('');
   const hasToken = !!adminSession.token();
 
@@ -148,7 +150,10 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
                 data-testid="round-select"
                 value={selectedId ?? ''}
                 disabled={!rounds || rounds.length === 0}
-                onChange={(e) => setSelectedId(Number(e.target.value))}
+                onChange={(e) => {
+                  setSelectedId(Number(e.target.value));
+                  setRenaming(false);
+                }}
                 className="w-full sm:w-auto sm:min-w-[18rem] max-w-full min-h-[44px] px-3 py-2 text-base sm:text-sm bg-dark-input border border-theme-border rounded-lg text-theme-text focus:ring-2 focus:ring-accent focus:border-accent"
               >
                 {rounds?.length === 0 && <option value="">{t('admin:round.none')}</option>}
@@ -170,6 +175,17 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
                 {t(`admin:round.status.${round.status}`)}
               </span>
             )}
+            {round && !renaming && (
+              <button
+                type="button"
+                onClick={() => setRenaming(true)}
+                data-testid="rename-round"
+                className="flex items-center gap-2 min-h-[44px] px-3 py-2 text-sm text-theme-dim hover:text-accent border border-theme-border rounded-lg transition-colors"
+              >
+                <Pencil className="w-4 h-4" aria-hidden="true" />
+                {t('admin:round.rename')}
+              </button>
+            )}
             <button
               onClick={() => setShowStart(true)}
               data-testid="start-new-round"
@@ -180,6 +196,18 @@ function EventDashboard({ event }: { event: AdminEventModule }) {
               {t('admin:round.start')}
             </button>
           </div>
+
+          {round && renaming && (
+            <RenameRound
+              key={round.id}
+              round={round}
+              onCancel={() => setRenaming(false)}
+              onRenamed={(r) => {
+                onRoundUpdated(r);
+                setRenaming(false);
+              }}
+            />
+          )}
 
           {round && readOnly && (
             <div

@@ -9,6 +9,7 @@
   "cancel": "Annuler",
   "save": "Enregistrer",
   "close": "Fermer",
+  "loading": "Chargement…",
   "yes": "Oui",
   "no": "Non",
   "nav": {
@@ -17,6 +18,11 @@
   "header": {
     "timezone": "Fuseau horaire d'affichage",
     "language": "Langue"
+  },
+  "timesShownIn": "Les heures sont affichées à l’heure de {{zone}}. Changez-la avec l’horloge en haut.",
+  "fidHelp": {
+    "question": "Où trouver mon ID joueur ?",
+    "answer": "Dans le jeu, touchez votre photo de profil (en haut à gauche). Votre ID joueur est le numéro affiché sous votre nom."
   },
   "home": {
     "title": "Événements de l'État",
@@ -47,7 +53,8 @@
     "invalidInput": "Certaines informations ne sont pas valides. Vérifiez-les et réessayez.",
     "roundClosed": "Cette manche est clôturée et ne peut plus être modifiée.",
     "tooManyAttempts": "Trop de tentatives. Patientez un instant puis réessayez.",
-    "retry": "Le serveur est occupé. Réessayez dans un instant."
+    "retry": "Le serveur est occupé. Réessayez dans un instant.",
+    "rateLimited": "Trop de requêtes en peu de temps. Patientez une minute puis réessayez."
   },
   "furnace": {
     "select": "Choisir...",

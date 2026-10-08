@@ -64,6 +64,7 @@ export function LinkButton({
   testId,
   accent,
   flipInRtl,
+  muted,
 }: {
   icon: LucideIcon;
   children: ReactNode;
@@ -71,17 +72,21 @@ export function LinkButton({
   testId?: string;
   accent?: boolean;
   flipInRtl?: boolean;
+  /** Discreet: small and dim (e.g. the organisers' Event Management link on event pages). */
+  muted?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       data-testid={testId}
-      className={`inline-flex items-center gap-2 min-h-[44px] px-2 transition-colors text-sm font-medium ${
-        accent ? 'text-accent hover:text-accent-dim' : 'text-theme-dim hover:text-accent'
+      className={`inline-flex items-center gap-2 min-h-[44px] px-2 transition-colors ${
+        muted
+          ? 'text-xs text-theme-dim hover:text-theme-text'
+          : `text-sm font-medium ${accent ? 'text-accent hover:text-accent-dim' : 'text-theme-dim hover:text-accent'}`
       }`}
     >
-      <Icon className={`w-4 h-4 shrink-0 ${flipInRtl ? 'rtl:rotate-180' : ''}`} aria-hidden="true" />
+      <Icon className={`${muted ? 'w-3.5 h-3.5' : 'w-4 h-4'} shrink-0 ${flipInRtl ? 'rtl:rotate-180' : ''}`} aria-hidden="true" />
       {children}
     </button>
   );

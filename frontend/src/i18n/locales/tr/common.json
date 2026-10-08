@@ -9,6 +9,7 @@
   "cancel": "İptal",
   "save": "Kaydet",
   "close": "Kapat",
+  "loading": "Yükleniyor…",
   "yes": "Evet",
   "no": "Hayır",
   "nav": {
@@ -17,6 +18,11 @@
   "header": {
     "timezone": "Görüntülenen saat dilimi",
     "language": "Dil"
+  },
+  "timesShownIn": "Saatler {{zone}} saatine göre gösterilir. Üstteki saat düğmesiyle değiştirebilirsin.",
+  "fidHelp": {
+    "question": "Oyuncu ID'mi nerede bulurum?",
+    "answer": "Oyunda sol üstteki profil resmine dokun. Oyuncu ID'n, adının altında görünen numaradır."
   },
   "home": {
     "title": "Eyalet Etkinlikleri",
@@ -47,7 +53,8 @@
     "invalidInput": "Bazı bilgiler geçersiz. Lütfen kontrol edip tekrar deneyin.",
     "roundClosed": "Bu tur kapandı ve artık değiştirilemez.",
     "tooManyAttempts": "Çok fazla deneme. Lütfen biraz bekleyip tekrar deneyin.",
-    "retry": "Sunucu meşgul. Lütfen birazdan tekrar deneyin."
+    "retry": "Sunucu meşgul. Lütfen birazdan tekrar deneyin.",
+    "rateLimited": "Kısa sürede çok fazla istek. Lütfen bir dakika bekleyip tekrar dene."
   },
   "furnace": {
     "select": "Seçin...",

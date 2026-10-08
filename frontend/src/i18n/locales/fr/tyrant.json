@@ -9,9 +9,7 @@
     "closed": "Les inscriptions sont closes.",
     "applyTile": "S'inscrire ou modifier",
     "applyTileDesc": "Saisissez votre ID joueur pour vous inscrire ou modifier votre inscription",
-    "applyTileClosedDesc": "Les nouvelles inscriptions sont closes. Vous pouvez encore modifier la vôtre.",
-    "adminDesc": "Stats, joueurs et exports",
-    "utcNote": "Toutes les heures sont en UTC"
+    "applyTileClosedDesc": "Les nouvelles inscriptions sont closes. Vous pouvez encore modifier la vôtre."
   },
   "apply": {
     "title": "Inscription Tyran",
@@ -46,7 +44,7 @@
   "step2": {
     "title": "Disponibilités",
     "desc": "Cochez tous les créneaux où vous pouvez participer",
-    "utcNote": "Toutes les heures sont en UTC",
+    "utcNote": "Les horaires des créneaux sont à l’heure du jeu (UTC).",
     "selectAll": "Tout sélectionner",
     "openingRush": "Assaut d'ouverture",
     "discordVc": "Je peux écouter le vocal Discord"

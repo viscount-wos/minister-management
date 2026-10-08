@@ -9,9 +9,7 @@
     "closed": "Sign-ups are now closed.",
     "applyTile": "Sign up or update",
     "applyTileDesc": "Enter your Player ID to start a new sign-up or edit yours",
-    "applyTileClosedDesc": "New sign-ups are closed. You can still edit yours.",
-    "adminDesc": "Stats, players and exports",
-    "utcNote": "All times are in UTC"
+    "applyTileClosedDesc": "New sign-ups are closed. You can still edit yours."
   },
   "apply": {
     "title": "Tyrant sign-up",
@@ -46,7 +44,7 @@
   "step2": {
     "title": "Availability",
     "desc": "Select all time slots you can attend",
-    "utcNote": "All times are in UTC",
+    "utcNote": "Window times are game time (UTC).",
     "selectAll": "Select All Time Slots",
     "openingRush": "Opening Rush",
     "discordVc": "Can listen in Discord VC"

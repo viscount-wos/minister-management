@@ -9,9 +9,7 @@
     "closed": "신청이 마감되었습니다.",
     "applyTile": "신청 또는 수정",
     "applyTileDesc": "플레이어 ID를 입력해 새로 신청하거나 신청을 수정하세요",
-    "applyTileClosedDesc": "신규 신청은 마감되었습니다. 기존 신청은 수정할 수 있습니다.",
-    "adminDesc": "통계, 플레이어, 내보내기",
-    "utcNote": "모든 시간은 UTC 기준입니다"
+    "applyTileClosedDesc": "신규 신청은 마감되었습니다. 기존 신청은 수정할 수 있습니다."
   },
   "apply": {
     "title": "폭군 신청",
@@ -46,7 +44,7 @@
   "step2": {
     "title": "참여 가능 시간",
     "desc": "참여 가능한 시간대를 모두 선택하세요",
-    "utcNote": "모든 시간은 UTC 기준입니다",
+    "utcNote": "시간대 창은 게임 시간(UTC) 기준입니다.",
     "selectAll": "모든 시간대 선택",
     "openingRush": "오프닝 러시",
     "discordVc": "디스코드 음성 참여 가능"
