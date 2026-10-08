@@ -60,9 +60,9 @@
   "step4": {
     "title": "Niveles de tropas",
     "desc": "Elige el nivel del CAMPAMENTO de cada tropa y su nivel T",
-    "infantry": "🛡 Infantería",
-    "lancer": "🐴 Lanceros",
-    "marksman": "🏹 Tiradores",
+    "infantry": "Infantería",
+    "lancer": "Lanceros",
+    "marksman": "Tiradores",
     "tLevel": "Nivel T",
     "camp": {
       "infantry": "Campamento de infantería (nivel FC)",

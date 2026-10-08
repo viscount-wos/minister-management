@@ -60,9 +60,9 @@
   "step4": {
     "title": "兵种等级",
     "desc": "为每个兵种选择兵营等级和T等级",
-    "infantry": "🛡 步兵",
-    "lancer": "🐴 骑兵",
-    "marksman": "🏹 射手",
+    "infantry": "步兵",
+    "lancer": "骑兵",
+    "marksman": "射手",
     "tLevel": "T等级",
     "camp": {
       "infantry": "步兵营（FC等级）",

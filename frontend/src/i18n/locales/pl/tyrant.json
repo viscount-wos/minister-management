@@ -60,9 +60,9 @@
   "step4": {
     "title": "Poziomy wojsk",
     "desc": "Wybierz poziom OBOZU każdego typu wojsk i poziom T",
-    "infantry": "🛡 Piechota",
-    "lancer": "🐴 Lansjerzy",
-    "marksman": "🏹 Strzelcy",
+    "infantry": "Piechota",
+    "lancer": "Lansjerzy",
+    "marksman": "Strzelcy",
     "tLevel": "Poziom T",
     "camp": {
       "infantry": "Obóz piechoty (poziom FC)",

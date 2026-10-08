@@ -60,9 +60,9 @@
   "step4": {
     "title": "병종 레벨",
     "desc": "병종별 막사 레벨과 T레벨을 선택하세요",
-    "infantry": "🛡 보병",
-    "lancer": "🐴 창병",
-    "marksman": "🏹 궁수",
+    "infantry": "보병",
+    "lancer": "창병",
+    "marksman": "궁수",
     "tLevel": "T-레벨",
     "camp": {
       "infantry": "보병 막사 (FC 레벨)",

@@ -60,9 +60,9 @@
   "step4": {
     "title": "Troop Levels",
     "desc": "Pick each troop CAMP's level and your troop tier",
-    "infantry": "🛡 Infantry",
-    "lancer": "🐴 Lancer",
-    "marksman": "🏹 Marksman",
+    "infantry": "Infantry",
+    "lancer": "Lancer",
+    "marksman": "Marksman",
     "tLevel": "T-Level",
     "camp": {
       "infantry": "Infantry Camp (FC level)",

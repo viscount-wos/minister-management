@@ -29,6 +29,7 @@ import { TYRANT_PATHS } from './paths';
 import { usePageTitle } from '../../shared/usePageTitle';
 import { useFormatDateTime } from '../../shared/DateTime';
 import FidHelp from '../../shared/FidHelp';
+import { TroopIcon } from '../../shared/heroes/HeroCard';
 
 // The Frost Dragon Tyrant sign-up WIZARD, ported from the live tyrantpoll app
 // (templates/poll.html), same 6 steps in the same order:
@@ -774,7 +775,7 @@ export default function TyrantWizard() {
                 const tiers = tier != null && !TIERS.includes(tier) ? [tier, ...TIERS] : TIERS;
                 return (
                   <div key={kind} className="bg-dark-bg p-4 rounded-lg border border-theme-border" data-testid={`troop-${kind}`}>
-                    <h3 className="font-semibold text-lg text-accent mb-3">{t(`tyrant:step4.${kind}`)}</h3>
+                    <h3 className="font-semibold text-lg text-accent mb-3 flex items-center gap-2"><TroopIcon troop={kind} className="w-5 h-5" />{t(`tyrant:step4.${kind}`)}</h3>
                     {/* items-end: a camp label that wraps to two lines keeps both selects on one baseline */}
                     <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3 sm:gap-4 items-end">
                       <FurnaceLevelSelect

@@ -60,9 +60,9 @@
   "step4": {
     "title": "Birlik Seviyeleri",
     "desc": "Her birlik türünün KAMP seviyesini ve T-seviyesini seçin",
-    "infantry": "🛡 Piyade",
-    "lancer": "🐴 Mızrakçı",
-    "marksman": "🏹 Nişancı",
+    "infantry": "Piyade",
+    "lancer": "Mızrakçı",
+    "marksman": "Nişancı",
     "tLevel": "T-Seviye",
     "camp": {
       "infantry": "Piyade Kampı (FC seviyesi)",

@@ -28,6 +28,7 @@ import {
   svsTroops,
 } from './api';
 import { SVS_PATHS } from './paths';
+import { TroopIcon } from '../../shared/heroes/HeroCard';
 
 // The SVS sign-up WIZARD (phone-first, owner brief 2026-10-08): much smaller than Frost Dragon Tyrant's.
 //   1 Player (FID -> name, alliance)  2 Battle hours  3 Troops (camp FC + T10/T11)
@@ -668,7 +669,7 @@ export default function SvsWizard() {
                 const { furnace_level, tier } = form.troops[kind];
                 return (
                   <div key={kind} className="bg-dark-bg p-4 rounded-lg border border-theme-border" data-testid={`troop-${kind}`}>
-                    <h3 className="font-semibold text-lg text-accent mb-3">{t(`tyrant:step4.${kind}`)}</h3>
+                    <h3 className="font-semibold text-lg text-accent mb-3 flex items-center gap-2"><TroopIcon troop={kind} className="w-5 h-5" />{t(`tyrant:step4.${kind}`)}</h3>
                     <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3 sm:gap-4 items-end">
                       <FurnaceLevelSelect
                         id={`troop-${kind}-furnace`}

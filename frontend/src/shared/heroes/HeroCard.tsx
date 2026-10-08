@@ -1,6 +1,8 @@
+import type React from 'react';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Shield, Swords, Crosshair, type LucideIcon } from 'lucide-react';
+import { Shield } from 'lucide-react';
+import { CrossbowIcon, SpearIcon } from './TroopIcons';
 import type { Hero, HeroTroop } from './api';
 
 // Reusable hero card for the SVS planner (drag-and-drop picker comes later): a big picture, the name, a troop icon
@@ -9,7 +11,8 @@ import type { Hero, HeroTroop } from './api';
 // setNodeRef/listeners/attributes) can wrap it without changes; `selected` / `dimmed` / `badge` / `children` cover
 // picker states. Hero art (c) Century Games: pages that show heroes render <HeroCredit /> once.
 
-const TROOP_ICON: Record<HeroTroop, LucideIcon> = { infantry: Shield, lancer: Swords, marksman: Crosshair };
+// Infantry = shield, Lancer = spear, Marksman = crossbow (owner request; lucide has no spear/crossbow).
+const TROOP_ICON: Record<HeroTroop, React.ElementType> = { infantry: Shield, lancer: SpearIcon, marksman: CrossbowIcon };
 
 export function TroopIcon({ troop, className = 'w-4 h-4' }: { troop: HeroTroop; className?: string }) {
   const { t } = useTranslation();

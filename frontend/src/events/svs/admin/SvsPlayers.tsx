@@ -26,6 +26,7 @@ import {
   svsApi,
   svsTroops,
 } from '../api';
+import { TroopIcon } from '../../../shared/heroes/HeroCard';
 
 // SVS admin Players tab (modelled on Frost Dragon Tyrant's, owner's dashboard order): headline stats -> breakdown
 // bars (players per hour, alliances; clickable filters) -> troop camp/tier chips -> filter bar -> table.
@@ -271,7 +272,7 @@ export default function SvsPlayers({ round, readOnly, onChanged }: Props) {
             <div className="grid lg:grid-cols-3 gap-4">
               {TROOP_TYPES.map((k: TroopType) => (
                 <div key={k} data-testid={`by-troop-${k}`} className="space-y-2">
-                  <div className="text-theme-text font-semibold">{t(`tyrant:step4.${k}`)}</div>
+                  <div className="text-theme-text font-semibold flex items-center gap-1.5"><TroopIcon troop={k} className="w-4 h-4" />{t(`tyrant:step4.${k}`)}</div>
                   <div className="text-xs text-theme-dim">{t('tyrant:admin.campRow')}</div>
                   <div className="flex flex-wrap gap-1.5" data-testid={`camp-chips-${k}`}>
                     {Object.entries(summary.camp_levels?.[k] ?? {}).map(([code, n]) => (

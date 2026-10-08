@@ -26,6 +26,7 @@ import {
   parseTroops,
   tyrantApi,
 } from '../api';
+import { TroopIcon } from '../../../shared/heroes/HeroCard';
 
 // Tyrant admin Players tab: filter bar (state in the URL, shared hook), stats + clickable count chips for the
 // FILTERED set, sortable table. Filters are documented in docs/API.md "Frost Dragon Tyrant".
@@ -310,7 +311,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
             <div className="grid lg:grid-cols-3 gap-4">
               {TROOP_TYPES.map((k: TroopType) => (
                 <div key={k} data-testid={`by-troop-${k}`} className="space-y-2">
-                  <div className="text-theme-text font-semibold">{t(`tyrant:step4.${k}`)}</div>
+                  <div className="text-theme-text font-semibold flex items-center gap-1.5"><TroopIcon troop={k} className="w-4 h-4" />{t(`tyrant:step4.${k}`)}</div>
                   <div className="text-xs text-theme-dim">{t('tyrant:admin.campRow')}</div>
                   <div className="flex flex-wrap gap-1.5" data-testid={`camp-chips-${k}`}>
                     {Object.entries(summary.camp_levels?.[k] ?? {}).map(([code, n]) => (

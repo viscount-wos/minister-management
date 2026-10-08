@@ -60,9 +60,9 @@
   "step4": {
     "title": "Truppenstufen",
     "desc": "Wähle für jeden Truppentyp die Stufe des LAGERS und die T-Stufe",
-    "infantry": "🛡 Infanterie",
-    "lancer": "🐴 Lanzenträger",
-    "marksman": "🏹 Schützen",
+    "infantry": "Infanterie",
+    "lancer": "Lanzenträger",
+    "marksman": "Schützen",
     "tLevel": "T-Stufe",
     "camp": {
       "infantry": "Infanterielager (FC-Stufe)",
