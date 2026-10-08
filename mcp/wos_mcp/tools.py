@@ -30,7 +30,7 @@ ERRORS = (
 EVENTS_HELP = 'Event keys: "ministry", "tyrant", "svs" ("tal" has no rounds yet).'
 FID_HELP = 'The player\'s FID (in-game player ID, digits only).'
 MINISTRY_ANSWERS_HELP = (
-    'Ministry answers (send the FULL set; answers are replaced wholesale): '
+    'Minister answers (event key "ministry"; send the FULL set; answers are replaced wholesale): '
     'construction_speedups_days, research_speedups_days, troop_training_speedups_days, '
     'general_speedups_days (numbers 0-99999, decimals allowed); fire_crystals, '
     'refined_fire_crystals, fire_crystal_shards (whole numbers 0-99999); time_slots_by_day: '
@@ -141,7 +141,7 @@ submit_application. 404 NOT_FOUND if there is none. {EVENTS_HELP} {UNTRUSTED} {E
 
     @server.tool(annotations=_rw('Submit application'), description=f"""Create or replace the
 player's application in the event's CURRENT round, and upsert their profile in the same call.
-Ministry requires profile.game_name and profile.alliance (for a new player). After the round's
+Minister (event key 'ministry') requires profile.game_name and profile.alliance (for a new player). After the round's
 closing time a NEW application is refused with 403 APPLICATIONS_CLOSED; existing ones stay editable.
 Returns {{"created", "profile_created", "application", "profile"}}. Confirm the values with the player
 before submitting. {MINISTRY_ANSWERS_HELP} {EVENTS_HELP} {UNTRUSTED} {ERRORS}""")
@@ -158,7 +158,7 @@ before submitting. {MINISTRY_ANSWERS_HELP} {EVENTS_HELP} {UNTRUSTED} {ERRORS}"""
             body['profile'] = prof
         return R.from_api(await api.put(f'/api/events/{seg(event)}/current/application/{seg(fid)}', body))
 
-    @server.tool(annotations=_ro('Get published ministry schedule'), description=f"""Ministry only:
+    @server.tool(annotations=_ro('Get published minister schedule'), description=f"""Minister event (key 'ministry') only:
 the published schedule of the current round. Without `day`, returns which days are published
 ({{"round_id", "published_days"}}). With `day` ("monday", "tuesday"/"friday" (research day, depends on
 the round), "thursday") returns {{"published": false}} or the slot -> [{{game_name, alliance}}] map.
@@ -172,7 +172,7 @@ the round), "thursday") returns {{"published": false}} or the slot -> [{{game_na
             return bad
         return R.from_api(await api.get(f'/api/events/ministry/current/schedule/{seg(day)}'))
 
-    @server.tool(annotations=_ro('Get my ministry assignments'), description=f"""Ministry only: the
+    @server.tool(annotations=_ro('Get my minister assignments'), description=f"""Minister event (key 'ministry') only: the
 player's assigned time slots in the current round, for PUBLISHED days only ({{"round_id",
 "published_days", "assignments": {{"monday": [{{"time_slot": "10:00"}}]}}}}). Slots are UTC.
 404 NOT_FOUND if the player has no application this round. {ERRORS}""")
@@ -316,7 +316,7 @@ optional `alliance` restricts everything to one alliance tag. {UNTRUSTED} {ERROR
         params = {'alliance': alliance} if alliance else None
         return R.from_api(await api.admin('GET', f'/api/admin/tyrant/rounds/{seg(round_id)}/summary', params=params))
 
-    @server.tool(annotations=_ro('Get ministry assignments'), description=f"""{ADMIN} Ministry only:
+    @server.tool(annotations=_ro('Get minister assignments'), description=f"""{ADMIN} Minister event (key 'ministry') only:
 the saved assignments for one day of a round, including unpublished days: occupied slots ->
 player cards (fid, game_name, alliance, points, preferred_times, is_sticky) plus `unassigned`
 players. `day` is "monday", the round's research day ("tuesday" or "friday") or "thursday";

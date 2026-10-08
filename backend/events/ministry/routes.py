@@ -153,7 +153,7 @@ def admin_export(ref):
 def admin_export_json(ref):
     rnd = resolve_round(ref)
     data = logic.export_json(get_db(), rnd)
-    filename = f'ministry_{logic._slug(rnd["name"])}_backup.json'
+    filename = f'minister_{logic._slug(rnd["name"])}_backup.json'
     return Response(json.dumps(data, indent=2), mimetype='application/json',
                     headers={'Content-Disposition': f'attachment; filename={filename}'})
 

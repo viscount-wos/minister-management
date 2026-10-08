@@ -718,6 +718,6 @@ class MinistryEvent(EventSpec):
     def export_round(self, round_):
         from core.db import get_db
         data = build_workbook(get_db(), round_)
-        filename = f'ministry_{_slug(round_["name"])}_{datetime.now(timezone.utc).strftime("%Y%m%d")}.xlsx'
+        filename = f'minister_{_slug(round_["name"])}_{datetime.now(timezone.utc).strftime("%Y%m%d")}.xlsx'
         return Response(data, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         headers={'Content-Disposition': f'attachment; filename={filename}'})

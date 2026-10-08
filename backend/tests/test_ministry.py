@@ -264,7 +264,7 @@ def test_excel_export(client, admin):
         r = client.get(url, headers=admin)
         assert r.status_code == 200
         assert r.mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        assert 'ministry_week_of_13_oct_' in r.headers['Content-Disposition']
+        assert 'minister_week_of_13_oct_' in r.headers['Content-Disposition']
         wb = openpyxl.load_workbook(io.BytesIO(r.data))
         assert wb.sheetnames == ['Monday - Construction', 'Friday - Research', 'Thursday - Troop Training',
                                  'Unassigned']
