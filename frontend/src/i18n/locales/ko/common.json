@@ -47,5 +47,11 @@
     "roundClosed": "이 라운드는 마감되어 더 이상 변경할 수 없습니다.",
     "tooManyAttempts": "시도 횟수가 너무 많습니다. 잠시 후 다시 시도하세요.",
     "retry": "서버가 바쁩니다. 잠시 후 다시 시도하세요."
+  },
+  "furnace": {
+    "select": "선택...",
+    "fireCrystal": "불의 수정",
+    "preFc": "FC 이전",
+    "level": "Lv. {{n}}"
   }
 }

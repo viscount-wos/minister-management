@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field } from './fields';
 import TimezoneSelector from './TimezoneSelector';
+import FurnaceLevelSelect from './FurnaceLevelSelect';
 
 // Persistent profile fields (one profile per FID, shared by every event).
 // They always pre-fill from the stored profile.
@@ -10,7 +11,7 @@ export interface ProfileFormValues {
   game_name: string;
   alliance: string;
   timezone: string;
-  /** '' = not given. Kept as text so the input can be cleared. */
+  /** '' = not given, else a furnace code 'FC1'..'FC10' / '1'..'30' (shared/furnace.ts). */
   furnace_level: string;
 }
 
@@ -96,19 +97,14 @@ export default function ProfileFields({
             />
           </div>
         )}
-        <Field
+        <FurnaceLevelSelect
           id="profile-furnace-level"
-          name="furnace_level"
           testId="profile-furnace-level"
-          type="number"
-          min={1}
-          max={100}
-          step={1}
           disabled={disabled}
           label={`${t('profile:furnaceLevel')} (${t('profile:optional')})`}
           value={value.furnace_level}
           invalid={invalidField === 'profile.furnace_level'}
-          onChange={(e) => set({ furnace_level: e.target.value })}
+          onChange={(code) => set({ furnace_level: code })}
         />
       </div>
     </div>
@@ -117,11 +113,10 @@ export default function ProfileFields({
 
 /** Profile form values -> API body. */
 export function profileToInput(v: ProfileFormValues) {
-  const lvl = parseInt(v.furnace_level, 10);
   return {
     game_name: v.game_name.trim(),
     alliance: v.alliance.trim().toUpperCase(),
     timezone: v.timezone,
-    furnace_level: Number.isFinite(lvl) ? lvl : null,
+    furnace_level: v.furnace_level || null,
   };
 }

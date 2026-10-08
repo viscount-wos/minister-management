@@ -47,5 +47,11 @@
     "roundClosed": "Cette manche est clôturée et ne peut plus être modifiée.",
     "tooManyAttempts": "Trop de tentatives. Patientez un instant puis réessayez.",
     "retry": "Le serveur est occupé. Réessayez dans un instant."
+  },
+  "furnace": {
+    "select": "Choisir...",
+    "fireCrystal": "Cristal de feu",
+    "preFc": "Avant FC",
+    "level": "Niv. {{n}}"
   }
 }

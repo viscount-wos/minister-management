@@ -9,7 +9,7 @@ def test_profile_created_by_application_and_public_get(client, admin):
     assert r.status_code == 200
     p = r.json
     assert p['game_name'] == 'Alice' and p['alliance'] == 'ABC' and p['timezone'] == 'Europe/London'
-    assert p['furnace_level'] == 30 and p['power'] == 123456789 and p['troops'] == {'infantry': 5}
+    assert p['furnace_level'] == '30' and p['power'] == 123456789 and p['troops'] == {'infantry': 5}
 
 
 def test_profile_404(client):

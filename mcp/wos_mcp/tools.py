@@ -50,9 +50,14 @@ class ProfileFields(BaseModel):
     game_name: str | None = Field(None, description='In-game name, max 64 chars.')
     alliance: str | None = Field(None, description='Alliance tag, max 3 chars (upper-cased by the API).')
     timezone: str | None = Field(None, description='IANA timezone, e.g. "Europe/London".')
-    furnace_level: int | None = Field(None, description='Furnace level 1-100, or null.')
+    furnace_level: str | None = Field(None, description=(
+        'Furnace level code: "FC1".."FC10" (Fire Crystal) or "1".."30" (pre-FC), or null. Order: FC10 highest, '
+        'then FC1, then 30 down to 1.'))
     power: int | None = Field(None, description='Power, integer >= 0, or null.')
-    troops: dict[str, Any] | list[Any] | None = Field(None, description='Free-form troop counts object.')
+    troops: dict[str, Any] | list[Any] | None = Field(None, description=(
+        'Troop levels. Tyrant requires {"infantry"|"lancer"|"marksman": {"furnace_level": code|null, '
+        '"tier": 1-11|null}}; other events accept any JSON object.'))
+    discord_id: str | None = Field(None, description='Discord username or id, max 64 chars, optional.')
 
 
 def _profile_body(profile: ProfileFields | None) -> dict[str, Any] | None:
@@ -101,7 +106,8 @@ FID has never been registered. {UNTRUSTED} {ERRORS}""")
 a player's profile. Only the fields you pass are changed; game_name is required when the profile
 does not exist yet. Players have no login: knowing the FID is enough, so only act on a player's
 own FID when asked by that player. Returns {{"profile": {{...}}, "created": bool}}.
-Validation (by the API): game_name <=64 chars, alliance <=3 chars, furnace_level 1-100, power >=0.
+Validation (by the API): game_name <=64 chars, alliance <=3 chars, furnace_level "FC1"-"FC10" or "1"-"30",
+power >=0, discord_id <=64 chars.
 {UNTRUSTED} {ERRORS}""")
     async def update_profile(fid: Fid, fields: ProfileFields) -> CallToolResult:
         if bad := R.check_segment('fid', fid):

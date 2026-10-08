@@ -71,18 +71,18 @@ async def test_profile_create_update_not_found_and_validation(public):
         assert not err and data['created'] is True
         assert data['profile']['alliance'] == 'ABC'  # upper-cased by the API
 
-        err, data = await call(c, 'update_profile', {'fid': f, 'fields': {'furnace_level': 30}})
+        err, data = await call(c, 'update_profile', {'fid': f, 'fields': {'furnace_level': 'FC5'}})
         assert not err and data['created'] is False
-        assert data['profile']['game_name'] == 'Alice' and data['profile']['furnace_level'] == 30
+        assert data['profile']['game_name'] == 'Alice' and data['profile']['furnace_level'] == 'FC5'
 
         err, data = await call(c, 'get_profile', {'fid': f})
-        assert not err and data['fid'] == f and data['furnace_level'] == 30
+        assert not err and data['fid'] == f and data['furnace_level'] == 'FC5'
 
         # API-side validation is surfaced verbatim (code + field).
         err, data = await call(c, 'update_profile', {'fid': f, 'fields': {'alliance': 'TOOLONG'}})
         assert err and data['code'] == 'VALIDATION_ERROR' and data['field'].endswith('alliance')
         assert data['http_status'] == 400
-        err, data = await call(c, 'update_profile', {'fid': f, 'fields': {'furnace_level': 500}})
+        err, data = await call(c, 'update_profile', {'fid': f, 'fields': {'furnace_level': 'FC11'}})
         assert err and data['code'] == 'VALIDATION_ERROR' and data['field'].endswith('furnace_level')
         # Writes need a digits-only FID: enforced by the API, not the MCP server.
         err, data = await call(c, 'update_profile', {'fid': 'abc', 'fields': {'game_name': 'X'}})

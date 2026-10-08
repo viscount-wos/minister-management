@@ -48,7 +48,8 @@ export interface Profile {
   game_name: string;
   alliance: string | null;
   timezone: string | null;
-  furnace_level: number | null;
+  /** 'FC1'..'FC10' or '1'..'30' */
+  furnace_level: string | null;
   power: number | null;
   troops: unknown;
   avatar_image: string | null;
@@ -63,7 +64,7 @@ export interface ProfileInput {
   game_name?: string;
   alliance?: string;
   timezone?: string;
-  furnace_level?: number | null;
+  furnace_level?: string | null;
   power?: number | null;
   troops?: unknown;
 }
@@ -453,3 +454,6 @@ export const api = {
 };
 
 export default api;
+
+/** The raw typed request, for event modules that keep their own endpoint list (events/tyrant/api.ts). */
+export { request as apiRequest };

@@ -522,11 +522,87 @@ def _migration_3(conn, ctx):
     return {'description': 'profiles.discord_id'}
 
 
+# --------------------------------------------------------------------------
+# migration 4: furnace levels become TEXT codes ('FC1'..'FC10', '1'..'30')
+# --------------------------------------------------------------------------
+
+def _furnace_code_v4(value):
+    """Self-contained copy of the furnace rule at migration time: ints 1-30 -> '1'..'30', valid codes kept
+    (upper-cased), anything else -> None."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, float) and value.is_integer():
+        value = int(value)
+    if isinstance(value, int):
+        return str(value) if 1 <= value <= 30 else None
+    if isinstance(value, str):
+        s = value.strip().upper()
+        if s.isdigit() and 1 <= int(s) <= 30 and not s.startswith('0'):
+            return s
+        if s.startswith('FC') and s[2:].isdigit() and 1 <= int(s[2:]) <= 10 and not s[2:].startswith('0'):
+            return s
+    return None
+
+
+def _migration_4(conn, ctx):
+    """profiles.furnace_level INTEGER -> TEXT. SQLite cannot change a column type, and INTEGER affinity would
+    turn '30' back into 30, so the table is rebuilt (FKs are off during migrations; other tables reference
+    `profiles` by name, which stays valid). Troop entries' `furnace_level` get the same conversion."""
+    cols = ('id', 'fid', 'game_name', 'alliance', 'timezone', 'furnace_level', 'power', 'troops', 'avatar_image',
+            'stove_lv', 'stove_lv_content', 'created_at', 'updated_at', 'discord_id')
+    conn.execute('''CREATE TABLE profiles_v4 (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fid TEXT UNIQUE NOT NULL,
+        game_name TEXT NOT NULL,
+        alliance TEXT,
+        timezone TEXT,
+        furnace_level TEXT,
+        power INTEGER,
+        troops TEXT,
+        avatar_image TEXT,
+        stove_lv INTEGER,
+        stove_lv_content TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        discord_id TEXT
+    )''')
+    converted = nulled = 0
+    for row in conn.execute(f'SELECT {", ".join(cols)} FROM profiles').fetchall():
+        d = dict(zip(cols, tuple(row)))
+        old = d['furnace_level']
+        d['furnace_level'] = _furnace_code_v4(old)
+        if old is not None:
+            converted += d['furnace_level'] is not None
+            nulled += d['furnace_level'] is None
+        if d['troops']:
+            try:
+                troops = json.loads(d['troops'])
+            except ValueError:
+                troops = None
+            if isinstance(troops, dict):
+                for entry in troops.values():
+                    if isinstance(entry, dict) and 'furnace_level' in entry:
+                        entry['furnace_level'] = _furnace_code_v4(entry['furnace_level'])
+                d['troops'] = json.dumps(troops)
+        conn.execute(f'INSERT INTO profiles_v4 ({", ".join(cols)}) VALUES ({", ".join("?" * len(cols))})',
+                     tuple(d[c] for c in cols))
+    seq = conn.execute("SELECT seq FROM sqlite_sequence WHERE name = 'profiles'").fetchone()
+    conn.execute('DROP TABLE profiles')
+    conn.execute('ALTER TABLE profiles_v4 RENAME TO profiles')
+    if seq is not None:  # keep AUTOINCREMENT high-water mark (ids are never reused)
+        if conn.execute("SELECT 1 FROM sqlite_sequence WHERE name = 'profiles'").fetchone():
+            conn.execute("UPDATE sqlite_sequence SET seq = MAX(seq, ?) WHERE name = 'profiles'", (seq[0],))
+        else:
+            conn.execute("INSERT INTO sqlite_sequence (name, seq) VALUES ('profiles', ?)", (seq[0],))
+    return {'description': 'profiles.furnace_level as TEXT codes', 'converted': converted, 'nulled': nulled}
+
+
 # (version, function). Append new migrations; never edit applied ones.
 MIGRATIONS = [
     (1, _migration_1),
     (2, _migration_2),
     (3, _migration_3),
+    (4, _migration_4),
 ]
 LATEST_VERSION = MIGRATIONS[-1][0]
 

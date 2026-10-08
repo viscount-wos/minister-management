@@ -6,21 +6,20 @@ Option lists are the ones of the live tyrantpoll app (templates/poll.html):
 - "can listen in Discord VC" (bool);
 - estimated max gem spend: tyrantpoll had a free-text box ("e.g. 10000"); here a whole number of gems;
 - roles: Rally Leader, Joiner, Gathering/Looting, Battle Management, Event Preparation;
-- troops (PROFILE field ``troops``): per troop type a fire-crystal level FC1-FC10 and a tier T8-T11, each optional.
+- troops (PROFILE field ``troops``): per troop type a furnace level and a tier T8-T11, each optional.
 
-Furnace level is the shared profile integer ``furnace_level``: 1-30 are plain furnace levels and FCn is stored
-as 30 + n (FC1 = 31 ... FC10 = 40).
+Furnace levels (profile ``furnace_level`` and each troop's ``furnace_level``) are the shared string codes of
+core/furnace.py: 'FC1'..'FC10' or '1'..'30' (tyrantpoll offered FC1-FC10 only; the owner wants the full list).
 """
 import re
 
 from core.errors import validation_error
+from core.furnace import validate_furnace
 from core.validation import validate_bool, validate_number
 
 ROLES = ('rally_leader', 'joiner', 'gathering', 'battle_mgmt', 'event_prep')
 TROOP_TYPES = ('infantry', 'lancer', 'marksman')
-TROOP_FC_RANGE = (1, 10)
 TROOP_TIER_RANGE = (1, 11)
-FC_OFFSET = 30  # profile furnace_level: FCn = 30 + n
 LANGUAGES = ('en', 'es', 'fr', 'de', 'pl', 'ko', 'zh', 'tr', 'ar')
 MAX_GEMS = 1_000_000_000
 MAX_WINDOWS = 12
@@ -140,7 +139,7 @@ def _troop_level(value, field, lo, hi):
 
 
 def validate_troops(value, field='profile.troops'):
-    """Canonical troop levels: {infantry|lancer|marksman: {fc: 1-10|null, tier: 1-11|null}}."""
+    """Canonical troop levels: {infantry|lancer|marksman: {furnace_level: code|null, tier: 1-11|null}}."""
     if value is None:
         return None
     if not isinstance(value, dict):
@@ -153,17 +152,10 @@ def validate_troops(value, field='profile.troops'):
         entry = value.get(kind)
         f = f'{field}.{kind}'
         if entry is None:
-            out[kind] = {'fc': None, 'tier': None}
+            out[kind] = {'furnace_level': None, 'tier': None}
             continue
-        if not isinstance(entry, dict) or set(entry) - {'fc', 'tier'}:
-            raise validation_error('troop entry must be {fc, tier}', f)
-        out[kind] = {'fc': _troop_level(entry.get('fc'), f + '.fc', *TROOP_FC_RANGE),
+        if not isinstance(entry, dict) or set(entry) - {'furnace_level', 'tier'}:
+            raise validation_error('troop entry must be {furnace_level, tier}', f)
+        out[kind] = {'furnace_level': validate_furnace(entry.get('furnace_level'), f + '.furnace_level'),
                      'tier': _troop_level(entry.get('tier'), f + '.tier', *TROOP_TIER_RANGE)}
     return out
-
-
-def furnace_label(level):
-    """30 -> '30', 35 -> 'FC5'. None -> None."""
-    if level is None:
-        return None
-    return f'FC{level - FC_OFFSET}' if level > FC_OFFSET else str(level)

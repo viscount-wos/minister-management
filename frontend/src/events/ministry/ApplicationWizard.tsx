@@ -10,6 +10,7 @@ import UseLastAnswers from '../../shared/UseLastAnswers';
 import { Field } from '../../shared/fields';
 import TimezoneSelector from '../../shared/TimezoneSelector';
 import { useTimezone } from '../../shared/TimezoneContext';
+import { toFurnaceCode } from '../../shared/furnace';
 import { formatTimeInTimezone } from '../../shared/timezone';
 import {
   AnswersForm,
@@ -140,7 +141,7 @@ export default function ApplicationWizard() {
           game_name: prof?.game_name ?? '',
           alliance: (prof?.alliance ?? '').toUpperCase().slice(0, 3),
           timezone: tz,
-          furnace_level: prof?.furnace_level != null ? String(prof.furnace_level) : '',
+          furnace_level: toFurnaceCode(prof?.furnace_level),
         });
         setStep(1);
         if (app) {
@@ -583,7 +584,7 @@ export default function ApplicationWizard() {
                         {toNumber(answers[key])}
                       </ReviewItem>
                     ))}
-                  {profile.furnace_level.trim() !== '' && (
+                  {profile.furnace_level !== '' && (
                     <ReviewItem label={t('profile:furnaceLevel')} testId="review-furnace-level">
                       {profile.furnace_level}
                     </ReviewItem>

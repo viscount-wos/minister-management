@@ -47,5 +47,11 @@
     "roundClosed": "Esta ronda está cerrada y ya no se puede modificar.",
     "tooManyAttempts": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
     "retry": "El servidor está ocupado. Inténtalo de nuevo en un momento."
+  },
+  "furnace": {
+    "select": "Seleccionar...",
+    "fireCrystal": "Cristal de Fuego",
+    "preFc": "Pre-FC",
+    "level": "Nv. {{n}}"
   }
 }

@@ -14,6 +14,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from core.exports import append_safe, to_csv_bytes
+from core.furnace import FURNACE_LEVELS, furnace_ordinal
 from core.validation import validate_number
 from core.errors import validation_error
 from events import EventSpec
@@ -72,6 +73,8 @@ def _troop(profile, kind, key):
     entry = _troops(profile).get(kind)
     if isinstance(entry, dict):
         v = entry.get(key)
+        if key == 'furnace_level':
+            return v if isinstance(v, str) and v in FURNACE_LEVELS else None
         return v if isinstance(v, int) and not isinstance(v, bool) else None
     return None
 
@@ -95,7 +98,7 @@ def filter_and_sort(apps, q=None, alliance=None, sort='submitted', direction='de
         'name': lambda x: (x['profile'].get('game_name') or '').casefold(),
         'alliance': lambda x: (x['profile'].get('alliance') or '').casefold(),
         'fid': lambda x: (len(x['fid'] or ''), x['fid'] or ''),
-        'furnace': lambda x: x['profile'].get('furnace_level'),
+        'furnace': lambda x: furnace_ordinal(x['profile'].get('furnace_level')) or None,
         'power': lambda x: x['profile'].get('power'),
         'gems': lambda x: x['answers'].get('gem_spend'),
     }[sort]
@@ -127,7 +130,7 @@ def summary(apps, settings):
         for r in ans.get('roles') or []:
             roles[r] += 1
         alliances[(prof.get('alliance') or '').strip().upper() or None] += 1
-        furnace[tv.furnace_label(prof.get('furnace_level')) or 'none'] += 1
+        furnace[prof.get('furnace_level') or 'none'] += 1
         for kind in tv.TROOP_TYPES:
             tier = _troop(prof, kind, 'tier')
             troops[kind][f'T{tier}' if tier else 'none'] += 1
@@ -150,9 +153,7 @@ def _tier_sort(label):
 
 
 def _furnace_sort(label):
-    if label == 'none':
-        return 999
-    return -(int(label[2:]) + tv.FC_OFFSET) if label.startswith('FC') else -int(label)
+    return 999 if label == 'none' else -furnace_ordinal(label)
 
 
 # ---------------------------------------------------------------- exports
@@ -165,7 +166,7 @@ def export_header(settings):
     return (['FID', 'In-Game Name', 'Alliance', 'Discord ID']
             + [_window_label(w) for w in settings['windows']]
             + ['Discord VC', 'Furnace Level', 'Power (M)', 'Est. Max Gem Spend']
-            + [f'{k.capitalize()} {p}' for k in tv.TROOP_TYPES for p in ('FC', 'T-Level')]
+            + [f'{k.capitalize()} {p}' for k in tv.TROOP_TYPES for p in ('Furnace Level', 'T-Level')]
             + [ROLE_LABELS[r] for r in tv.ROLES]
             + ['Language', 'Submitted At (UTC)', 'Updated At (UTC)'])
 
@@ -178,11 +179,11 @@ def export_rows(apps, settings):
         power = prof.get('power')
         row = [a['fid'], prof.get('game_name'), prof.get('alliance'), prof.get('discord_id')]
         row += [yes(w['id'] in avail) for w in settings['windows']]
-        row += [yes(ans.get('discord_vc')), tv.furnace_label(prof.get('furnace_level')),
+        row += [yes(ans.get('discord_vc')), prof.get('furnace_level'),
                 round(power / 1_000_000, 2) if power is not None else None, ans.get('gem_spend')]
         for kind in tv.TROOP_TYPES:
-            fc, tier = _troop(prof, kind, 'fc'), _troop(prof, kind, 'tier')
-            row += [f'FC{fc}' if fc else None, f'T{tier}' if tier else None]
+            fl, tier = _troop(prof, kind, 'furnace_level'), _troop(prof, kind, 'tier')
+            row += [fl, f'T{tier}' if tier else None]
         roles = set(ans.get('roles') or [])
         row += [yes(r in roles) for r in tv.ROLES]
         row += [ans.get('language'), a['created_at'], a['updated_at']]

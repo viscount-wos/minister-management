@@ -47,5 +47,11 @@
     "roundClosed": "本轮已关闭，无法再修改。",
     "tooManyAttempts": "尝试次数过多，请稍候再试。",
     "retry": "服务器繁忙，请稍后再试。"
+  },
+  "furnace": {
+    "select": "请选择...",
+    "fireCrystal": "火晶",
+    "preFc": "火晶之前",
+    "level": "{{n}} 级"
   }
 }

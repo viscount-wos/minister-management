@@ -7,7 +7,8 @@ import openpyxl
 from tests.conftest import start_round
 
 EVENT = 'tyrant'
-TROOPS = {'infantry': {'fc': 5, 'tier': 10}, 'lancer': {'fc': 3, 'tier': 9}, 'marksman': {'fc': None, 'tier': 11}}
+TROOPS = {'infantry': {'furnace_level': 'FC5', 'tier': 10}, 'lancer': {'furnace_level': '28', 'tier': 9},
+          'marksman': {'furnace_level': None, 'tier': 11}}
 
 
 def put(client, fid, profile=None, answers=None):
@@ -36,20 +37,20 @@ def test_default_windows_and_public_round(client, admin):
 
 def test_submit_profile_and_round_split(client, admin):
     start_round(client, admin, 'FDT 1', event=EVENT)
-    r = put(client, '1001', profile={'discord_id': 'alice#1234', 'furnace_level': 35, 'power': 410_500_000,
+    r = put(client, '1001', profile={'discord_id': 'alice#1234', 'furnace_level': 'fc5', 'power': 410_500_000,
                                      'troops': TROOPS},
             answers=good_answers())
     assert r.status_code == 201, r.json
     prof = r.json['profile']
-    assert prof['alliance'] == 'ABC' and prof['discord_id'] == 'alice#1234' and prof['furnace_level'] == 35
-    assert prof['power'] == 410_500_000 and prof['troops']['marksman'] == {'fc': None, 'tier': 11}
+    assert prof['alliance'] == 'ABC' and prof['discord_id'] == 'alice#1234' and prof['furnace_level'] == 'FC5'
+    assert prof['power'] == 410_500_000 and prof['troops']['marksman'] == {'furnace_level': None, 'tier': 11}
     ans = r.json['application']['answers']
     # canonical order (windows order / role list order), not the order sent
     assert ans == {'availability': ['w1', 'w3'], 'discord_vc': True, 'gem_spend': 10000,
                    'roles': ['rally_leader', 'joiner'], 'language': 'en'}
     # profile is shared: visible through the profile endpoint, reusable by other events
     p = client.get('/api/profile/1001').json
-    assert p['discord_id'] == 'alice#1234' and p['troops']['infantry'] == {'fc': 5, 'tier': 10}
+    assert p['discord_id'] == 'alice#1234' and p['troops']['infantry'] == {'furnace_level': 'FC5', 'tier': 10}
 
 
 def test_requires_name_and_alliance(client, admin):
@@ -92,22 +93,26 @@ def test_strict_troop_validation(client, admin):
     start_round(client, admin, 'FDT', event=EVENT)
     cases = [
         ({'troops': {'archer': {}}}, 'profile.troops'),
-        ({'troops': {'infantry': {'fc': 11}}}, 'profile.troops.infantry.fc'),
+        ({'troops': {'infantry': {'furnace_level': 'FC11'}}}, 'profile.troops.infantry.furnace_level'),
+        ({'troops': {'infantry': {'furnace_level': 31}}}, 'profile.troops.infantry.furnace_level'),
         ({'troops': {'infantry': {'tier': 12}}}, 'profile.troops.infantry.tier'),
         ({'troops': {'infantry': {'tier': 'T10'}}}, 'profile.troops.infantry.tier'),
         ({'troops': {'infantry': {'level': 3}}}, 'profile.troops.infantry'),
         ({'troops': [1, 2]}, 'profile.troops'),
-        ({'furnace_level': 101}, 'profile.furnace_level'),
+        ({'furnace_level': 'FC11'}, 'profile.furnace_level'),
+        ({'furnace_level': '31'}, 'profile.furnace_level'),
+        ({'furnace_level': 0}, 'profile.furnace_level'),
         ({'power': -5}, 'profile.power'),
         ({'discord_id': 'x' * 65}, 'profile.discord_id'),
     ]
     for prof, field in cases:
         r = put(client, '8', profile=prof)
         assert r.status_code == 400 and r.json['field'] == field, (prof, r.json)
-    r = put(client, '8', profile={'troops': {'infantry': {'fc': 2}}})
+    r = put(client, '8', profile={'troops': {'infantry': {'furnace_level': 'FC2'}}})
     assert r.status_code == 201
-    assert r.json['profile']['troops'] == {'infantry': {'fc': 2, 'tier': None}, 'lancer': {'fc': None, 'tier': None},
-                                           'marksman': {'fc': None, 'tier': None}}
+    blank = {'furnace_level': None, 'tier': None}
+    assert r.json['profile']['troops'] == {'infantry': {'furnace_level': 'FC2', 'tier': None}, 'lancer': blank,
+                                           'marksman': blank}
 
 
 def test_windows_settings_validation_and_carry_over(client, admin):
@@ -172,11 +177,11 @@ def test_closing_time_blocks_new_only(client, admin):
 
 def _seed(client, admin):
     rnd = start_round(client, admin, 'FDT', event=EVENT)
-    put(client, '21', profile={'game_name': 'Zed', 'alliance': 'AAA', 'furnace_level': 40, 'power': 900_000_000,
+    put(client, '21', profile={'game_name': 'Zed', 'alliance': 'AAA', 'furnace_level': 'FC10', 'power': 900_000_000,
                                'troops': TROOPS, 'discord_id': 'zed'},
         answers=good_answers(availability=['w1', 'w2'], roles=['rally_leader'], gem_spend=50000))
-    put(client, '22', profile={'game_name': 'amy', 'alliance': 'BBB', 'furnace_level': 31, 'power': 100_000_000,
-                               'troops': {'infantry': {'fc': 1, 'tier': 8}}},
+    put(client, '22', profile={'game_name': 'amy', 'alliance': 'BBB', 'furnace_level': '30', 'power': 100_000_000,
+                               'troops': {'infantry': {'furnace_level': 'FC1', 'tier': 8}}},
         answers=good_answers(availability=['w3'], discord_vc=False, roles=['joiner', 'gathering'], gem_spend=None))
     put(client, '23', profile={'game_name': '=HYPERLINK("x")', 'alliance': 'aaa'},
         answers=good_answers(availability=['w1'], roles=[], gem_spend=0))
@@ -199,6 +204,10 @@ def test_admin_list_filter_search_sort_paging(client, admin):
     assert [a['fid'] for a in r.json['applications']] == ['21']
     r = client.get(base + '?sort=power&dir=desc', headers=admin)
     assert [a['fid'] for a in r.json['applications']] == ['21', '22', '23']  # blank power last
+    r = client.get(base + '?sort=furnace&dir=desc', headers=admin)
+    assert [a['fid'] for a in r.json['applications']] == ['21', '22', '23']  # FC10 > 30 > blank
+    r = client.get(base + '?sort=furnace&dir=asc', headers=admin)
+    assert [a['fid'] for a in r.json['applications']] == ['22', '21', '23']
     r = client.get(base + '?sort=name&dir=asc', headers=admin)
     assert [a['fid'] for a in r.json['applications']] == ['23', '22', '21']
     r = client.get(base + '?sort=gems&dir=asc&limit=1&offset=1', headers=admin)
@@ -223,7 +232,7 @@ def test_admin_summary(client, admin):
     assert s['roles'] == {'rally_leader': 1, 'joiner': 1, 'gathering': 1, 'battle_mgmt': 0, 'event_prep': 0}
     assert s['troop_tiers']['infantry'] == {'T10': 1, 'T8': 1, 'none': 1}
     assert s['troop_tiers']['marksman'] == {'T11': 1, 'none': 2}
-    assert s['furnace_levels'] == {'FC10': 1, 'FC1': 1, 'none': 1}
+    assert s['furnace_levels'] == {'FC10': 1, '30': 1, 'none': 1}  # FC above pre-FC, blanks last
     s = client.get(f'/api/admin/tyrant/rounds/{rnd["id"]}/summary?alliance=BBB', headers=admin).json
     assert s['total'] == 1 and s['opening_rush'] == 0
 
@@ -237,8 +246,8 @@ def test_exports_are_formula_safe(client, admin):
     assert head[:4] == ['FID', 'In-Game Name', 'Alliance', 'Discord ID'] and '11:01-11:15 Opening Rush' in head
     by = {row[0]: dict(zip(head, row)) for row in rows[1:]}
     assert by['23']['In-Game Name'] == '\'=HYPERLINK("x")'
-    assert by['21']['Furnace Level'] == 'FC10' and by['21']['Power (M)'] == '900.0'
-    assert by['21']['Infantry FC'] == 'FC5' and by['21']['Infantry T-Level'] == 'T10'
+    assert by['21']['Furnace Level'] == 'FC10' and by['22']['Furnace Level'] == '30' and by['21']['Power (M)'] == '900.0'
+    assert by['21']['Infantry Furnace Level'] == 'FC5' and by['21']['Infantry T-Level'] == 'T10'
     assert by['21']['Rally Leader'] == 'Yes' and by['22']['Rally Leader'] == 'No'
     for url in (f'/api/admin/tyrant/rounds/{rnd["id"]}/export', f'/api/admin/rounds/{rnd["id"]}/export'):
         r = client.get(url, headers=admin)

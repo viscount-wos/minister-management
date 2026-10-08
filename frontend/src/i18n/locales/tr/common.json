@@ -47,5 +47,11 @@
     "roundClosed": "Bu tur kapandı ve artık değiştirilemez.",
     "tooManyAttempts": "Çok fazla deneme. Lütfen biraz bekleyip tekrar deneyin.",
     "retry": "Sunucu meşgul. Lütfen birazdan tekrar deneyin."
+  },
+  "furnace": {
+    "select": "Seçin...",
+    "fireCrystal": "Ateş Kristali",
+    "preFc": "FC öncesi",
+    "level": "Sv. {{n}}"
   }
 }

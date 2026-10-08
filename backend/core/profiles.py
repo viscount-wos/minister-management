@@ -16,6 +16,7 @@ from flask import Blueprint, jsonify, request
 from core.auth import require_admin
 from core.db import get_db
 from core.errors import ApiError, get_json_body, not_found, validation_error
+from core.furnace import validate_furnace
 from core.validation import (now_iso, validate_fid, validate_json_blob, validate_number, validate_str)
 
 bp = Blueprint('profiles', __name__)
@@ -119,8 +120,8 @@ def validate_profile_fields(data, field_prefix='profile.', existing=None):
                 raise
             out[key] = existing[key]
     if 'furnace_level' in data:
-        out['furnace_level'] = validate_number(data['furnace_level'], field_prefix + 'furnace_level',
-                                               minimum=1, maximum=100, integer=True, nullable=True)
+        # canonical code 'FC1'..'FC10' or '1'..'30' (core/furnace.py)
+        out['furnace_level'] = validate_furnace(data['furnace_level'], field_prefix + 'furnace_level')
     if 'power' in data:
         out['power'] = validate_number(data['power'], field_prefix + 'power', maximum=10 ** 13,
                                        integer=True, nullable=True)

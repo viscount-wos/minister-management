@@ -99,7 +99,7 @@ applies across all addresses. A success clears that address. The client address 
 ### GET /api/profile/{fid}
 ```json
 {"fid": "1001", "game_name": "Alice", "alliance": "ABC", "timezone": "Europe/London",
- "furnace_level": 30, "power": 123456789, "troops": {"infantry": 5},
+ "furnace_level": "FC5", "power": 123456789, "troops": {"infantry": 5}, "discord_id": "alice",
  "avatar_image": null, "stove_lv": null, "stove_lv_content": null}
 ```
 404 `NOT_FOUND` if unknown. `avatar_image`/`stove_lv`/`stove_lv_content` are legacy, read-only (pre-Aug-2026 rows).
@@ -146,7 +146,7 @@ Upserts the profile and the player's application in the current round.
 ```json
 // request
 {"profile": {"game_name": "Alice", "alliance": "abc", "timezone": "Europe/London",
-             "furnace_level": 30, "power": 123456789, "troops": {"infantry": 5}},
+             "furnace_level": "FC5", "power": 123456789, "troops": {"infantry": 5}},
  "answers": {"construction_speedups_days": 2, "general_speedups_days": 1.5,
              "fire_crystals": 0, "refined_fire_crystals": 0, "fire_crystal_shards": 0,
              "research_speedups_days": 0, "troop_training_speedups_days": 0,
@@ -159,7 +159,8 @@ Rules:
 - `profile` fields are optional/partial for an existing profile (omitted fields are kept). `profile.fid`, if sent,
   must equal the URL FID.
 - Profile validation: `game_name` ≤64 chars; `alliance` ≤3 chars, upper-cased; `timezone` ≤64; `furnace_level`
-  int 1-100 or null; `power` int ≥0 or null; `troops` JSON object/array or null. A stored legacy value that breaks
+  a code `"FC1"`..`"FC10"` or `"1"`..`"30"` (case-insensitive; ints 1-30 accepted and stored as strings) or null;
+  `discord_id` ≤64 or null; `power` int ≥0 or null; `troops` JSON object/array or null. A stored legacy value that breaks
   these limits (e.g. the v1.4 alliance `love`) is accepted when sent back unchanged and kept as stored.
 - Ministry requires `game_name` and `alliance` (as v1.4).
 - Ministry answers: the 4 speedup fields are numbers 0-99999 (decimals allowed); the 3 crystal fields are whole
@@ -235,7 +236,7 @@ Ministry round settings: `research_day` (`tuesday`|`friday`), `show_fire_crystal
 - `GET /api/admin/profiles?alliance=ABC&q=ali` → `{"profiles": [profile + "application_count"], "total": N}` (q matches FID
   or name, Unicode-case-insensitive, `%`/`_` literal).
 - `GET /api/admin/profiles/{fid}` → profile.
-- `PUT /api/admin/profiles/{fid}` `{game_name?, alliance?, timezone?, furnace_level?, power?, troops?}` → `{"profile": {...}, "created": bool}` (201 when created).
+- `PUT /api/admin/profiles/{fid}` `{game_name?, alliance?, timezone?, furnace_level?, power?, troops?, discord_id?}` → `{"profile": {...}, "created": bool}` (201 when created).
 - `DELETE /api/admin/profiles/{fid}` → `{"deleted": true, "fid": "1001", "applications_deleted": 2}` (cascades applications + assignments in all rounds).
 
 ### Ministry (round-scoped)

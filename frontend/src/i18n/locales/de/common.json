@@ -47,5 +47,11 @@
     "roundClosed": "Diese Runde ist geschlossen und kann nicht mehr geändert werden.",
     "tooManyAttempts": "Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.",
     "retry": "Der Server ist ausgelastet. Bitte versuche es gleich noch einmal."
+  },
+  "furnace": {
+    "select": "Auswählen...",
+    "fireCrystal": "Feuerkristall",
+    "preFc": "Vor FC",
+    "level": "Stufe {{n}}"
   }
 }

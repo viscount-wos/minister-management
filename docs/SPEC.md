@@ -24,7 +24,8 @@ token is rejected.
 
 ## Concepts
 - PROFILE: one per FID, persistent across events: fid, game_name, alliance (<=3 chars, upper), timezone,
-  furnace_level (nullable), power (nullable int), troops (JSON, nullable), legacy avatar_image/stove_lv/stove_lv_content.
+  furnace_level (nullable code, see "Furnace levels"), power (nullable int), troops (JSON, nullable), discord_id
+  (nullable, phase 2), legacy avatar_image/stove_lv/stove_lv_content.
 - EVENT: fixed set of keys: `ministry`, `tyrant`, `svs`, `tal` (tal = Tundra Arms League, "coming soon": no rounds yet).
 - ROUND: one occurrence of an event (e.g. "SVS ministry, week of 13 Oct"). Fields: id, event, name, status
   ('draft'|'open'|'closed'), closing_time (ISO UTC, nullable), settings (JSON, event-specific), created_at.
@@ -224,6 +225,22 @@ Final shape is in docs/API.md. Where it differs from the sketch above:
 - Test ids: `wizard` (data-mode), `wizard-steps` (data-step), `wizard-step-indicator-N` (data-state
   done|current|todo, aria-current), `wizard-step-N`, `wizard-step-title`, `wizard-back`, `wizard-next`,
   `wizard-submit` (data-mode), `slot-<day>-<HH:MM>`, `slot-grid-<day>`, `review-*`, `review-slots-<day>`.
+
+## Furnace levels (owner rule, phase 2; applies to EVERY event)
+- Two kinds: pre-FC furnaces 1-30, Fire Crystal furnaces FC1-FC10 (nothing above FC10). Most players are FC.
+- Stored everywhere as a canonical STRING code: `'FC1'..'FC10'` or `'1'..'30'` (profile `furnace_level`, and each
+  tyrant troop's `furnace_level`). The API normalises `fc5`/`5`/`5.0` to `FC5`/`5` and answers anything else with
+  `VALIDATION_ERROR` + field. `core/furnace.py` (`FURNACE_LEVELS`, `validate_furnace`, `furnace_ordinal`) and
+  `frontend/src/shared/furnace.ts` are the only definitions.
+- Order (dropdowns, admin sorting, stats): FC10, FC9 ... FC1, then 30, 29 ... 1. `furnace_ordinal`: '1'=1 ... '30'=30,
+  'FC1'=31 ... 'FC10'=40, blank/invalid 0.
+- UI: ALWAYS a dropdown, never free text: the one shared `shared/FurnaceLevelSelect.tsx` (empty "Select...", then an
+  optgroup "Fire Crystal" FC10..FC1, then "Pre-FC" Lv. 30..1; group names and "Lv." translated). Used by the ministry
+  wizard (ProfileFields), the Tyrant stats step, the Tyrant per-troop levels and the Tyrant admin filter.
+- Codes are shown as-is in exports, tables and review steps.
+- Migration 4 rebuilds `profiles` with `furnace_level TEXT` (SQLite cannot change a column type and INTEGER affinity
+  would turn '30' back into 30): integers 1-30 become '1'..'30', valid codes are kept, anything else becomes NULL;
+  troop entries' `furnace_level` get the same conversion. Legacy v1.4 `stove_lv*` columns are untouched (display only).
 
 ## MCP server (phase 1b, in front of the API)
 Separate process `mcp/` (Python, official `mcp` SDK, streamable HTTP), talks to the app ONLY via the HTTP API above.
