@@ -175,7 +175,7 @@
     "state2": "La génération de héros de l'État (Ministre → Paramètres, ou SVS → Héros) est la génération de héros la plus récente de votre État. Le planificateur de bataille ne propose que les héros jusqu'à celle-ci. Elle vaut pour tout l'État.",
     "linksTitle": "Liens à partager",
     "links1": "Pour le chat de l'État : les pages /minister, /tyrant et /svs de ce site. Chacune a un guide « Comment ça marche ? » pour les joueurs.",
-    "links2": "Pour les administrateurs : /admin?event=ministry, /admin?event=tyrant ou /admin?event=svs ouvre la Gestion des événements sur cet événement.",
+    "links2": "Pour les administrateurs : /admin ouvre la Gestion des événements sur le dernier événement utilisé. Ajoutez ?event=tyrant ou ?event=svs pour ouvrir cet événement.",
     "links3": "Le plan de bataille SVS a son propre lien secret (Plan de bataille → Partager). Partagez-le seulement dans l'État.",
     "limitsTitle": "Quand le site demande de ralentir",
     "limits1": "Pour éviter les abus, les recherches d'ID et les inscriptions sont limitées par connexion internet (environ 30 recherches et 10 inscriptions par minute).",

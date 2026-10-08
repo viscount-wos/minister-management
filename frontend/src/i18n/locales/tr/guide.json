@@ -175,7 +175,7 @@
     "state2": "Eyalet kahraman nesli (Bakan → Ayarlar veya SVS → Kahramanlar), eyaletinizdeki en yeni kahraman neslidir. Savaş planlayıcı yalnızca bu nesle kadar kahraman önerir. Tüm eyalet için geçerlidir.",
     "linksTitle": "Paylaşılacak bağlantılar",
     "links1": "Eyalet sohbeti için: bu sitedeki /minister, /tyrant ve /svs etkinlik sayfaları. Her birinde oyuncular için \"Nasıl çalışır?\" rehberi var.",
-    "links2": "Yöneticiler için: /admin?event=ministry, /admin?event=tyrant veya /admin?event=svs, Etkinlik Yönetimi'ni o etkinlikte açar.",
+    "links2": "Yöneticiler için: /admin, Etkinlik Yönetimi'ni en son kullandığınız etkinlikte açar. O etkinliği açmak için ?event=tyrant veya ?event=svs ekleyin.",
     "links3": "SVS savaş planının kendi gizli bağlantısı vardır (Savaş planı → Paylaş). Yalnızca eyalet içinde paylaşın.",
     "limitsTitle": "Site \"yavaşlayın\" dediğinde",
     "limits1": "Kötüye kullanımı önlemek için ID sorgulamaları ve kayıtlar internet bağlantısı başına sınırlıdır (dakikada yaklaşık 30 sorgu ve 10 kayıt).",

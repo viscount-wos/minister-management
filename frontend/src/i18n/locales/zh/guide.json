@@ -175,7 +175,7 @@
     "state2": "本州英雄世代（大臣 → 设置，或 SVS → 英雄）是你们州最新的英雄世代。作战计划只提供到这一代为止的英雄。对整个州生效。",
     "linksTitle": "可以分享的链接",
     "links1": "发到州频道：本站的活动页面 /minister、/tyrant 和 /svs。每个页面都有给玩家看的“怎么用？”指南。",
-    "links2": "给管理员：/admin?event=ministry、/admin?event=tyrant 或 /admin?event=svs 会直接打开该活动的活动管理。",
+    "links2": "给管理员：/admin 会打开你上次使用的活动的活动管理。加上 ?event=tyrant 或 ?event=svs 可直接打开该活动。",
     "links3": "SVS 作战计划有自己的秘密链接（作战计划 → 分享）。只在州内分享。",
     "limitsTitle": "网站提示“慢一点”时",
     "limits1": "为了防止滥用，玩家 ID 查询和报名按网络连接限制次数（每分钟约 30 次查询、10 次报名）。",

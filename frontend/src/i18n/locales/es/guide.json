@@ -175,7 +175,7 @@
     "state2": "La generación de héroes del estado (Ministro → Configuración, o SVS → Héroes) es la generación de héroes más nueva de tu estado. El planificador de batalla solo ofrece héroes hasta ella. Vale para todo el estado.",
     "linksTitle": "Enlaces para compartir",
     "links1": "Para el chat del estado: las páginas /minister, /tyrant y /svs de este sitio. Cada una tiene una guía \"¿Cómo funciona?\" para los jugadores.",
-    "links2": "Para administradores: /admin?event=ministry, /admin?event=tyrant o /admin?event=svs abren la Gestión de eventos en ese evento.",
+    "links2": "Para administradores: /admin abre la Gestión de eventos en el último evento que usaste. Añade ?event=tyrant o ?event=svs para abrir ese evento.",
     "links3": "El plan de batalla de SVS tiene su propio enlace secreto (Plan de batalla → Compartir). Compártelo solo dentro del estado.",
     "limitsTitle": "Cuando el sitio pide ir más despacio",
     "limits1": "Para evitar abusos, las búsquedas de ID y las inscripciones tienen un límite por conexión a internet (unas 30 búsquedas y 10 inscripciones por minuto).",

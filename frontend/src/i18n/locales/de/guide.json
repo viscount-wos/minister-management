@@ -175,7 +175,7 @@
     "state2": "Die Heldengeneration des Staates (Minister → Einstellungen oder SVS → Helden) ist die neueste Heldengeneration eures Staates. Der Schlachtplaner bietet nur Helden bis dahin an. Sie gilt für den ganzen Staat.",
     "linksTitle": "Links zum Teilen",
     "links1": "Für den Staats-Chat: die Event-Seiten /minister, /tyrant und /svs dieser Website. Jede hat eine Anleitung „Wie funktioniert das?“ für die Spieler.",
-    "links2": "Für Admins: /admin?event=ministry, /admin?event=tyrant oder /admin?event=svs öffnet die Eventverwaltung bei diesem Event.",
+    "links2": "Für Admins: /admin öffnet die Eventverwaltung beim zuletzt genutzten Event. Hänge ?event=tyrant oder ?event=svs an, um dieses Event zu öffnen.",
     "links3": "Der SVS-Schlachtplan hat einen eigenen geheimen Link (Schlachtplan → Teilen). Teile ihn nur innerhalb des Staates.",
     "limitsTitle": "Wenn die Seite „langsamer“ sagt",
     "limits1": "Gegen Missbrauch sind ID-Abfragen und Anmeldungen pro Internetanschluss begrenzt (etwa 30 Abfragen und 10 Anmeldungen pro Minute).",

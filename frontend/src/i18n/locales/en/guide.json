@@ -175,7 +175,7 @@
     "state2": "State hero generation (Minister → Settings, or SVS → Heroes) is the newest hero generation your state has. The battle planner only offers heroes up to it. It counts for the whole state.",
     "linksTitle": "Links to share",
     "links1": "For state chat: the event pages /minister, /tyrant and /svs on this site. Each has a \"How does it work?\" guide for players.",
-    "links2": "For admins: /admin?event=ministry, /admin?event=tyrant or /admin?event=svs opens Event Management on that event.",
+    "links2": "For admins: /admin opens Event Management on the event you used last. Add ?event=tyrant or ?event=svs to open that event.",
     "links3": "The SVS battle plan has its own secret link (Battle plan → Share). Share it only inside the state.",
     "limitsTitle": "When the site says \"slow down\"",
     "limits1": "To stop abuse, player ID look-ups and sign-ups are limited per internet connection (about 30 look-ups and 10 sign-ups a minute).",

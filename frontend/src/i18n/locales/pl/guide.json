@@ -175,7 +175,7 @@
     "state2": "Generacja bohaterów stanu (Minister → Ustawienia lub SVS → Bohaterowie) to najnowsza generacja bohaterów w Twoim stanie. Planer bitwy proponuje tylko bohaterów do tej generacji. Dotyczy całego stanu.",
     "linksTitle": "Linki do udostępnienia",
     "links1": "Na czat stanu: strony /minister, /tyrant i /svs tej witryny. Każda ma dla graczy poradnik „Jak to działa?”.",
-    "links2": "Dla administratorów: /admin?event=ministry, /admin?event=tyrant lub /admin?event=svs otwiera Zarządzanie wydarzeniami na tym wydarzeniu.",
+    "links2": "Dla administratorów: /admin otwiera Zarządzanie wydarzeniami na ostatnio używanym wydarzeniu. Dodaj ?event=tyrant lub ?event=svs, aby otworzyć to wydarzenie.",
     "links3": "Plan bitwy SVS ma własny tajny link (Plan bitwy → Udostępnij). Udostępniaj go tylko w stanie.",
     "limitsTitle": "Gdy strona prosi, by zwolnić",
     "limits1": "Aby zapobiec nadużyciom, sprawdzanie ID i zapisy mają limit na łącze internetowe (około 30 sprawdzeń i 10 zapisów na minutę).",
