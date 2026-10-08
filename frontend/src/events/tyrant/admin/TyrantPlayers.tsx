@@ -141,7 +141,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
   };
 
   const th = (key: SortKey | null, label: string) => (
-    <th className="px-3 py-3 text-start font-semibold text-theme-dim whitespace-nowrap">
+    <th className="px-2 py-3 text-start font-semibold text-theme-dim whitespace-nowrap">
       {key ? (
         <button
           type="button"
@@ -245,12 +245,12 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t('tyrant:admin.search')}
-                className="w-full ps-9 pe-3 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent"
+                className="w-full ps-9 pe-3 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text placeholder-theme-dim focus:ring-2 focus:ring-accent"
               />
             </div>
           </div>
           <div>
-            <label htmlFor="alliance-filter" className="block text-xs text-theme-dim mb-1">
+            <label htmlFor="alliance-filter" className="block text-sm font-medium text-theme-text mb-2">
               {t('tyrant:admin.allianceFilter')}
             </label>
             <select
@@ -261,7 +261,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                 setAlliance(e.target.value);
                 setPage(0);
               }}
-              className="px-3 py-2 bg-dark-input border border-theme-border rounded-lg text-theme-text"
+              className="px-4 py-3 bg-dark-input border border-theme-border rounded-lg text-theme-text"
             >
               <option value="">{t('tyrant:admin.allAlliances')}</option>
               {allAlliances.map((a) => (
@@ -332,15 +332,15 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                 const avail = new Set(a.answers.availability ?? []);
                 return (
                   <tr key={a.id} className="border-b border-theme-border/50 hover:bg-dark-card-hover" data-testid={`player-row-${a.fid}`}>
-                    <td className="px-3 py-2 font-medium text-theme-text">
+                    <td className="px-2 py-2 font-medium text-theme-text">
                       <bdi>{a.profile.game_name}</bdi>
                     </td>
-                    <td className="px-3 py-2 text-theme-dim">{a.fid}</td>
-                    <td className="px-3 py-2 text-accent font-semibold">{a.profile.alliance}</td>
-                    <td className="px-3 py-2 text-theme-text">
+                    <td className="px-2 py-2 text-theme-dim">{a.fid}</td>
+                    <td className="px-2 py-2 text-accent font-semibold">{a.profile.alliance}</td>
+                    <td className="px-2 py-2 text-theme-text">
                       <bdi>{a.profile.discord_id || '—'}</bdi>
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-2">
                       {a.profile.furnace_level ? (
                         <span className="px-2 py-0.5 rounded bg-accent/20 text-accent text-xs font-semibold" data-testid="furnace-badge">
                           {a.profile.furnace_level}
@@ -349,10 +349,10 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                         '—'
                       )}
                     </td>
-                    <td className="px-3 py-2 text-theme-text">{a.profile.power != null ? `${Math.round(a.profile.power / 1e5) / 10}M` : '—'}</td>
-                    <td className="px-3 py-2 text-theme-text">{a.answers.gem_spend != null ? a.answers.gem_spend.toLocaleString() : '—'}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex flex-wrap gap-1">
+                    <td className="px-2 py-2 text-theme-text">{a.profile.power != null ? `${Math.round(a.profile.power / 1e5) / 10}M` : '—'}</td>
+                    <td className="px-2 py-2 text-theme-text">{a.answers.gem_spend != null ? a.answers.gem_spend.toLocaleString() : '—'}</td>
+                    <td className="px-2 py-2">
+                      <div className="flex flex-wrap gap-1 max-w-[9rem]">
                         {windows.map((w) => (
                           <span
                             key={w.id}
@@ -364,8 +364,8 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                         ))}
                       </div>
                     </td>
-                    <td className="px-3 py-2">{tick(!!a.answers.discord_vc)}</td>
-                    <td className="px-3 py-2 text-xs text-theme-text whitespace-nowrap">
+                    <td className="px-2 py-2">{tick(!!a.answers.discord_vc)}</td>
+                    <td className="px-2 py-2 text-xs text-theme-text whitespace-nowrap">
                       {TROOP_TYPES.map((k) => (
                         <div key={k}>
                           <span className="text-theme-dim">{t(`tyrant:admin.troopShort.${k}`)}</span>{' '}
@@ -375,12 +375,12 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                         </div>
                       ))}
                     </td>
-                    <td className="px-3 py-2 text-xs text-theme-text">
+                    <td className="px-2 py-2 text-xs text-theme-text">
                       {(a.answers.roles ?? []).map((r) => t(`tyrant:roles.${r}`)).join(', ') || '—'}
                     </td>
-                    <td className="px-3 py-2 text-xs text-theme-dim whitespace-nowrap">{new Date(a.created_at).toLocaleString()}</td>
+                    <td className="px-2 py-2 text-xs text-theme-dim whitespace-nowrap">{new Date(a.created_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
                     {!readOnly && (
-                      <td className="px-3 py-2">
+                      <td className="px-2 py-2">
                         <button
                           type="button"
                           onClick={() => remove(a)}

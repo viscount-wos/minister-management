@@ -197,6 +197,7 @@ def _flatten(r):
         # absent strings are null (v1.4 mixed '' and null; docs/API.md convention is null)
         'alliance': d.get('alliance') or None,
         'timezone': d.get('timezone') or None,
+        'furnace_level': d.get('furnace_level') or None,
         'avatar_image': d.get('avatar_image') or None,
         'stove_lv': d.get('stove_lv'),
         'stove_lv_content': d.get('stove_lv_content') or None,
@@ -224,6 +225,7 @@ def card(player, day, prefs=None, sticky=False):
         'stove_lv': player.get('stove_lv'),
         'stove_lv_content': player.get('stove_lv_content') or None,
         'alliance': player.get('alliance') or None,
+        'furnace_level': player.get('furnace_level') or None,
         'is_sticky': bool(sticky),
     }
 

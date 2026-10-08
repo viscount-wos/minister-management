@@ -538,7 +538,7 @@ export default function TyrantWizard() {
     return `${furnace_level || '—'} / ${tier ? `T${tier}` : '—'}`;
   };
 
-  const reviewSections: { step: number; rows: [string, ReactNode, string][] }[] = [
+  const reviewSections: { step: number; rows: [ReactNode, ReactNode, string][] }[] = [
     {
       step: 1,
       rows: [
@@ -551,8 +551,14 @@ export default function TyrantWizard() {
     {
       step: 2,
       rows: [
-        ...windows.map((w): [string, ReactNode, string] => [
-          w.rush ? `${t('tyrant:step2.openingRush')} ${w.start}–${w.end}` : `${w.start}–${w.end}`,
+        ...windows.map((w): [ReactNode, ReactNode, string] => [
+          w.rush ? (
+            <>
+              {t('tyrant:step2.openingRush')} <TimeRange start={w.start} end={w.end} />
+            </>
+          ) : (
+            <TimeRange start={w.start} end={w.end} />
+          ),
           yes(form.availability.includes(w.id)),
           `window-${w.id}`,
         ]),
@@ -569,11 +575,11 @@ export default function TyrantWizard() {
     },
     {
       step: 4,
-      rows: TROOP_TYPES.map((k): [string, ReactNode, string] => [t(`tyrant:step4.${k}`), <bdi dir="ltr">{troopText(k)}</bdi>, `troop-${k}`]),
+      rows: TROOP_TYPES.map((k): [ReactNode, ReactNode, string] => [t(`tyrant:step4.${k}`), <bdi dir="ltr">{troopText(k)}</bdi>, `troop-${k}`]),
     },
     {
       step: 5,
-      rows: ROLES.map((r): [string, ReactNode, string] => [t(`tyrant:roles.${r}`), yes(form.roles.includes(r)), `role-${r}`]),
+      rows: ROLES.map((r): [ReactNode, ReactNode, string] => [t(`tyrant:roles.${r}`), yes(form.roles.includes(r)), `role-${r}`]),
     },
   ];
 

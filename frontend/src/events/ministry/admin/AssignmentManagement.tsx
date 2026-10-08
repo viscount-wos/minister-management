@@ -27,6 +27,8 @@ interface AssignedPlayer {
   points: number;
   time_slot?: string;
   alliance?: string;
+  /** profile furnace code, e.g. 'FC8' */
+  furnace_level?: string | null;
   is_sticky?: boolean;
 }
 
@@ -105,7 +107,13 @@ function DraggablePlayer({ player, sourceSlot, onToggleLock, timezone, disabled 
       )}
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
-          <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
+          <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}
+              {player.furnace_level && (
+                <span className="ms-1 px-1.5 py-0.5 rounded bg-accent/20 text-accent text-[10px] font-semibold align-middle" data-testid="furnace-badge">
+                  {player.furnace_level}
+                </span>
+              )}
+          </div>
           <div className="text-xs opacity-75">
             {player.fid} • {t('admin:pointsShort', { n: (player.points ?? 0).toLocaleString() })}
           </div>
@@ -139,7 +147,13 @@ function PlayerCard({ player }: { player: AssignedPlayer }) {
     >
       <div className="flex items-center gap-2">
         <div className="min-w-0">
-          <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}</div>
+          <div className="font-medium truncate">{player.alliance && <span className="text-accent">[{player.alliance}]</span>} {player.game_name}
+              {player.furnace_level && (
+                <span className="ms-1 px-1.5 py-0.5 rounded bg-accent/20 text-accent text-[10px] font-semibold align-middle" data-testid="furnace-badge">
+                  {player.furnace_level}
+                </span>
+              )}
+          </div>
           <div className="text-xs opacity-75">
             {player.fid} • {t('admin:pointsShort', { n: (player.points ?? 0).toLocaleString() })}
           </div>

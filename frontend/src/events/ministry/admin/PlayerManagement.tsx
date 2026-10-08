@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Edit2, Trash2, X, Save, AlertCircle, Download, Upload } from 'lucide-react';
 import api, { AdminApplication, Round, downloadBlob } from '../../../shared/api';
+import FurnaceLevelSelect from '../../../shared/FurnaceLevelSelect';
+import { toFurnaceCode } from '../../../shared/furnace';
 import { errorText } from '../../../shared/apiErrors';
 import { Field } from '../../../shared/fields';
 import { useTimezone } from '../../../shared/TimezoneContext';
@@ -17,6 +19,7 @@ interface Row {
   fid: string;
   game_name: string;
   alliance: string;
+  furnace_level: string;
   avatar_image: string | null;
   monday_points: number;
   research_points: number;
@@ -31,6 +34,7 @@ interface EditState {
   app: AdminApplication;
   game_name: string;
   alliance: string;
+  furnace_level: string;
   answers: AnswersForm;
 }
 
@@ -49,6 +53,7 @@ function toRow(app: AdminApplication): Row {
     fid: String(app.fid ?? ''),
     game_name: p?.game_name ?? '',
     alliance: p?.alliance ?? '',
+    furnace_level: toFurnaceCode(p?.furnace_level),
     avatar_image: p?.avatar_image ?? null,
     monday_points: app.monday_points ?? 0,
     research_points: app.research_points ?? 0,
@@ -136,13 +141,13 @@ export default function PlayerManagement({
   };
 
   const startEdit = (row: Row) =>
-    setEditing({ app: row.app, game_name: row.game_name, alliance: row.alliance, answers: answersToForm(row.app.answers) });
+    setEditing({ app: row.app, game_name: row.game_name, alliance: row.alliance, furnace_level: row.furnace_level, answers: answersToForm(row.app.answers) });
 
   const handleSaveEdit = async () => {
     if (!editing) return;
     try {
       const updated = await api.admin.updateApplication(editing.app.id, {
-        profile: { game_name: editing.game_name.trim(), alliance: editing.alliance.trim().toUpperCase() },
+        profile: { game_name: editing.game_name.trim(), alliance: editing.alliance.trim().toUpperCase(), furnace_level: editing.furnace_level || null },
         answers: formToAnswers(editing.answers),
       });
       setRows((rs) => rs.map((r) => (r.id === updated.id ? toRow(updated) : r)));
@@ -296,6 +301,11 @@ export default function PlayerManagement({
                 <td className="p-3 text-theme-text">
                   <div className="flex items-center gap-2">
                     {row.alliance && <span className="text-accent font-medium">[{row.alliance}]</span>} {row.game_name}
+                    {row.furnace_level && (
+                      <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent text-xs font-semibold" data-testid="furnace-badge">
+                        {row.furnace_level}
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="p-3 text-sm text-theme-dim">{row.fid}</td>
@@ -374,6 +384,12 @@ export default function PlayerManagement({
                   onChange={(e) => setEditing({ ...editing, alliance: e.target.value.toUpperCase().slice(0, 3) })}
                 />
               </div>
+              <FurnaceLevelSelect
+                id="edit-furnace-level"
+                label={t('profile:furnaceLevel')}
+                value={editing.furnace_level}
+                onChange={(code) => setEditing({ ...editing, furnace_level: code })}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 {[...ADMIN_NUMBER_FIELDS, ...(round.settings.show_fire_crystals ? CRYSTAL_FIELDS : [])].map(({ key, label }) => (
