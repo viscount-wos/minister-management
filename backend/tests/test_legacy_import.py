@@ -65,7 +65,7 @@ def test_migrate_cli_check_then_import_and_verify(tmp_path, capsys):
     assert open(p, 'rb').read() == before  # --check never writes
     assert migrate_cli.main(['--db', p]) == 0
     out = capsys.readouterr().out
-    assert 'counts match' in out and 'schema_version=2' in out
+    assert 'counts match' in out and 'schema_version=3' in out
     assert len(glob.glob(p + '.pre-v2-*.bak')) == 1
     assert migrate_cli.main(['--db', p]) == 0  # second run: no-op, still one backup
     assert len(glob.glob(p + '.pre-v2-*.bak')) == 1
@@ -113,7 +113,7 @@ def test_two_processes_migrating_at_once(tmp_path):
     assert c.execute('SELECT COUNT(*) FROM rounds').fetchone()[0] == 1
     assert c.execute('SELECT COUNT(*) FROM profiles').fetchone()[0] == \
         c.execute('SELECT COUNT(*) FROM legacy_players').fetchone()[0] > 1000
-    assert [r[0] for r in c.execute('SELECT version FROM schema_version ORDER BY version')] == [1, 2]
+    assert [r[0] for r in c.execute('SELECT version FROM schema_version ORDER BY version')] == [1, 2, 3]
     c.close()
     assert len(glob.glob(p + '.pre-v2-*.bak')) == 1 and not glob.glob(p + '*.partial')
 
@@ -314,7 +314,7 @@ def test_ghost_table_written_by_v14_after_import_is_refused(tmp_path):
     core_db.migrate(p, allow_v14=True)
     con = sqlite3.connect(p)  # simulate a DB migrated before the guards existed, then written by v1.4
     con.execute('DROP VIEW players')
-    con.execute('DELETE FROM schema_version WHERE version = 2')
+    con.execute('DELETE FROM schema_version WHERE version >= 2')  # migration 3 is idempotent
     con.execute('CREATE TABLE players (id INTEGER PRIMARY KEY, fid TEXT, game_name TEXT, '
                 'construction_speedups_days REAL)')
     con.execute("INSERT INTO players (fid, game_name) VALUES ('555', 'lost write')")

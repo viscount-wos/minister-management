@@ -103,6 +103,7 @@ def create_app(config=None):
     from core.errors import ApiError, register_error_handlers
     from events import register_defaults
     from events.ministry import routes as ministry_routes
+    from events.tyrant import routes as tyrant_routes
 
     app = Flask(__name__, static_folder=None)
     app.config.update(_config_from_env())
@@ -121,6 +122,7 @@ def create_app(config=None):
     for module in (auth, settings, profiles, rounds, applications):
         app.register_blueprint(module.bp)
     app.register_blueprint(ministry_routes.bp)
+    app.register_blueprint(tyrant_routes.bp)
 
     @app.route('/health', methods=['GET'])
     def health():

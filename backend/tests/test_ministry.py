@@ -278,7 +278,7 @@ def test_excel_export(client, admin):
 
 
 def test_export_unsupported_event(client, admin):
-    rnd = start_round(client, admin, 'T', event='tyrant')
+    rnd = start_round(client, admin, 'S', event='svs')
     r = client.get(f'/api/admin/rounds/{rnd["id"]}/export', headers=admin)
     assert r.status_code == 400 and r.json['code'] == 'EXPORT_NOT_SUPPORTED'
 

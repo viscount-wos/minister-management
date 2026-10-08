@@ -21,10 +21,10 @@ from core.validation import (now_iso, validate_fid, validate_json_blob, validate
 bp = Blueprint('profiles', __name__)
 
 # Fields a player (or admin) may write. Legacy avatar/stove columns are read-only.
-EDITABLE_FIELDS = ('game_name', 'alliance', 'timezone', 'furnace_level', 'power', 'troops')
+EDITABLE_FIELDS = ('game_name', 'alliance', 'timezone', 'furnace_level', 'power', 'troops', 'discord_id')
 # What anyone holding an FID may read (M6: no internal id, no timestamps).
 PUBLIC_FIELDS = ('fid', 'game_name', 'alliance', 'timezone', 'furnace_level', 'power', 'troops',
-                 'avatar_image', 'stove_lv', 'stove_lv_content')
+                 'discord_id', 'avatar_image', 'stove_lv', 'stove_lv_content')
 ADMIN_FIELDS = PUBLIC_FIELDS + ('created_at', 'updated_at')
 LEGACY_GRANDFATHERED = ('game_name', 'alliance', 'timezone')  # unchanged over-long legacy values are kept
 
@@ -126,6 +126,9 @@ def validate_profile_fields(data, field_prefix='profile.', existing=None):
                                        integer=True, nullable=True)
     if 'troops' in data:
         out['troops'] = validate_json_blob(data['troops'], field_prefix + 'troops')
+    if 'discord_id' in data:
+        # Discord username / legacy name#1234 / numeric user id: free text, optional (phase 2).
+        out['discord_id'] = validate_str(data['discord_id'], field_prefix + 'discord_id', 64)
     return out
 
 
@@ -156,16 +159,16 @@ def upsert_profile(fid, fields, required=('game_name',), field_prefix='profile.'
     now = now_iso()
     if existing:
         db.execute('UPDATE profiles SET game_name=?, alliance=?, timezone=?, furnace_level=?, power=?, troops=?, '
-                   'updated_at=? WHERE id=?',
+                   'discord_id=?, updated_at=? WHERE id=?',
                    (merged['game_name'], merged['alliance'], merged['timezone'], merged['furnace_level'],
-                    merged['power'], troops, now, existing['id']))
+                    merged['power'], troops, merged['discord_id'], now, existing['id']))
         pid = existing['id']
         created = False
     else:
         cur = db.execute('INSERT INTO profiles (fid, game_name, alliance, timezone, furnace_level, power, troops, '
-                         'created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                         'discord_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                          (fid, merged['game_name'], merged['alliance'], merged['timezone'], merged['furnace_level'],
-                          merged['power'], troops, now, now))
+                          merged['power'], troops, merged['discord_id'], now, now))
         pid = cur.lastrowid
         created = True
     if commit:

@@ -511,10 +511,22 @@ def _migration_2(conn, ctx):
     return {'description': 'guard views/triggers against v1.4', 'views': created}
 
 
+# --------------------------------------------------------------------------
+# migration 3: profiles.discord_id (phase 2, tyrant)
+# --------------------------------------------------------------------------
+
+def _migration_3(conn, ctx):
+    # Shared profile field (tyrant asks for it; SVS will reuse it). Nullable, free text.
+    if 'discord_id' not in _columns(conn, 'profiles'):
+        conn.execute('ALTER TABLE profiles ADD COLUMN discord_id TEXT')
+    return {'description': 'profiles.discord_id'}
+
+
 # (version, function). Append new migrations; never edit applied ones.
 MIGRATIONS = [
     (1, _migration_1),
     (2, _migration_2),
+    (3, _migration_3),
 ]
 LATEST_VERSION = MIGRATIONS[-1][0]
 

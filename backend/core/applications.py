@@ -150,7 +150,8 @@ def put_current_application(event, fid):
     if existing_app is None and is_past(rnd['closing_time']):
         raise ApiError(403, 'APPLICATIONS_CLOSED', 'Applications are closed')
 
-    fields = validate_profile_fields(data.get('profile'), existing=existing_profile)
+    fields = spec.validate_profile(validate_profile_fields(data.get('profile'), existing=existing_profile),
+                                   existing=existing_profile)
     previous_answers = json.loads(existing_app['answers'] or '{}') if existing_app else None
     answers = spec.validate_answers(data.get('answers'), rnd, existing=previous_answers)
     profile, profile_created = upsert_profile(store_fid, fields, required=spec.required_profile_fields,
@@ -217,7 +218,8 @@ def admin_update_application(app_id):
     spec = get_event(rnd['event'], need_rounds=False)
     data = get_json_body()
     existing_profile = get_profile_by_id(row['player_id'])
-    fields = validate_profile_fields(data.get('profile'), existing=existing_profile)
+    fields = spec.validate_profile(validate_profile_fields(data.get('profile'), existing=existing_profile),
+                                   existing=existing_profile)
     stored = json.loads(row['answers'] or '{}')
     answers = dict(stored)
     if 'answers' in data:

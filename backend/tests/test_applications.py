@@ -57,7 +57,7 @@ def test_previous_ignores_later_rounds_and_other_events(client, admin):
     assert client.get('/api/events/ministry/previous-application/9').status_code == 404
     # other events don't leak in
     start_round(client, admin, 'T1', event='tyrant')
-    apply(client, '9', event='tyrant', answers={'x': 1}, expect=201)
+    apply(client, '9', event='tyrant', answers={'discord_vc': True}, expect=201)
     assert client.get('/api/events/tyrant/previous-application/9').status_code == 404
 
 

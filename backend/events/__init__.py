@@ -1,8 +1,8 @@
 """Event registry. The set of event keys is fixed: ministry, tyrant, svs, tal.
 
 Each event provides an ``EventSpec``. Core modules (rounds, applications) call
-these hooks so they stay event-agnostic. Ministry overrides everything; tyrant
-and svs use the generic spec until their phases land (free-form JSON answers);
+these hooks so they stay event-agnostic. Ministry and tyrant override the hooks;
+svs uses the generic spec until its phase lands (free-form JSON answers);
 tal has no rounds yet ("coming soon").
 """
 from core.errors import ApiError, not_found, validation_error
@@ -33,6 +33,11 @@ class EventSpec:
 
     def public_settings(self, settings):
         return dict(settings)
+
+    def validate_profile(self, fields, existing=None):
+        """Event-specific checks on the (already core-validated) profile fields sent with an
+        application, e.g. tyrant's troop-level structure. Returns the fields to store."""
+        return fields
 
     def validate_answers(self, answers, round_, existing=None):
         """Validate/normalise answers. ``existing``: the answers currently stored for this
@@ -91,6 +96,7 @@ def all_events():
 def register_defaults():
     from events.ministry.logic import MinistryEvent
     register(MinistryEvent())
-    register(GenericEvent('tyrant'))
+    from events.tyrant.logic import TyrantEvent
+    register(TyrantEvent())
     register(GenericEvent('svs'))
     register(GenericEvent('tal', has_rounds=False))

@@ -273,7 +273,7 @@ def test_public_profile_and_application_are_minimal(client, admin):
     start_round(client, admin)
     r = apply(client, '77', expect=201)
     assert set(r.json['profile']) == {'fid', 'game_name', 'alliance', 'timezone', 'furnace_level', 'power', 'troops',
-                                      'avatar_image', 'stove_lv', 'stove_lv_content'}
+                                      'discord_id', 'avatar_image', 'stove_lv', 'stove_lv_content'}
     assert set(r.json['application']) == {'fid', 'event', 'round_id', 'round_name', 'answers', 'updated_at'}
     assert set(client.get('/api/profile/77').json) == set(r.json['profile'])
     assert set(client.get('/api/events/ministry/current/application/77').json) == set(r.json['application'])
