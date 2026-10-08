@@ -111,7 +111,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
                 onClick={() => setWindows((ws) => ws.filter((_, j) => j !== i))}
                 data-testid={`window-remove-${i}`}
                 aria-label={t('tyrant:admin.settings.remove')}
-                className="p-2 text-danger hover:bg-danger/10 rounded-lg disabled:opacity-40"
+                className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-danger hover:bg-danger/10 rounded-lg disabled:opacity-40"
               >
                 <Trash2 className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -125,7 +125,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
               onClick={() => setWindows((ws) => [...ws, { id: nextId(ws), start: '18:00', end: '19:00', rush: false }])}
               disabled={windows.length >= 12}
               data-testid="window-add"
-              className="flex items-center gap-2 px-4 py-2 border border-theme-border rounded-lg text-theme-text hover:bg-dark-card-hover disabled:opacity-40"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 border border-theme-border rounded-lg text-theme-text hover:bg-dark-card-hover disabled:opacity-40"
             >
               <Plus className="w-4 h-4" aria-hidden="true" />
               {t('tyrant:admin.settings.add')}
@@ -134,7 +134,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
               type="button"
               onClick={() => setWindows(DEFAULT_WINDOWS.map((w) => ({ ...w })))}
               data-testid="window-defaults"
-              className="flex items-center gap-2 px-4 py-2 border border-theme-border rounded-lg text-theme-text hover:bg-dark-card-hover"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 border border-theme-border rounded-lg text-theme-text hover:bg-dark-card-hover"
             >
               <RotateCcw className="w-4 h-4" aria-hidden="true" />
               {t('tyrant:admin.settings.resetDefaults')}
@@ -144,7 +144,7 @@ export default function TyrantRoundSettings({ round, readOnly, onSaved }: Props)
               onClick={() => save({ settings: { windows } })}
               disabled={busy}
               data-testid="save-windows"
-              className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium disabled:opacity-50"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium disabled:opacity-50"
             >
               <Save className="w-4 h-4" aria-hidden="true" />
               {t('tyrant:admin.settings.save')}

@@ -115,7 +115,7 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
           <button
             onClick={saveStateNumber}
             data-testid="save-state-number"
-            className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
+            className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
           >
             <Save className="w-4 h-4" aria-hidden="true" />
             {t('common:save')}
@@ -157,7 +157,7 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
                 <button
                   onClick={() => roundName.trim() && updateRound({ name: roundName.trim() })}
                   data-testid="save-round-name"
-                  className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
+                  className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
                 >
                   <Save className="w-4 h-4" aria-hidden="true" />
                   {t('common:save')}
@@ -187,7 +187,7 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
                   <button
                     onClick={() => updateRound({ closing_time: localInputToIso(closingLocal) })}
                     data-testid="save-closing-time"
-                    className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
+                    className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors"
                   >
                     <Save className="w-4 h-4" aria-hidden="true" />
                     {t('common:save')}
@@ -195,7 +195,7 @@ export default function AdminSettings({ round, readOnly, onRoundUpdated }: Admin
                   <button
                     onClick={() => updateRound({ closing_time: null })}
                     data-testid="clear-closing-time"
-                    className="flex items-center gap-2 px-4 py-2 bg-danger/20 text-danger rounded-lg hover:bg-danger/30 font-medium transition-colors"
+                    className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-danger/20 text-danger rounded-lg hover:bg-danger/30 font-medium transition-colors"
                   >
                     <X className="w-4 h-4" aria-hidden="true" />
                     {t('admin:clear')}

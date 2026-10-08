@@ -42,8 +42,11 @@ def admin_password() -> str:
 
 @pytest.fixture(scope='session')
 def browser_context_args(browser_context_args, base_url):
+    # Desktop tests pin an English browser in UTC: the app now auto-detects both
+    # (test_mobile.py covers the detection itself).
     return {**browser_context_args, 'base_url': base_url,
-            'viewport': {'width': 1280, 'height': 900}}
+            'viewport': {'width': 1280, 'height': 900},
+            'locale': 'en-US', 'timezone_id': 'UTC'}
 
 
 @pytest.fixture

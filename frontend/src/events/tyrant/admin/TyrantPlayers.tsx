@@ -287,7 +287,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
             type="button"
             onClick={() => doExport('csv')}
             data-testid="export-csv"
-            className="flex items-center gap-2 px-4 py-2 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 font-medium"
+            className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 font-medium"
           >
             <FileText className="w-4 h-4" aria-hidden="true" />
             {t('tyrant:admin.exportCsv')}
@@ -296,7 +296,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
             type="button"
             onClick={() => doExport('xlsx')}
             data-testid="export-excel"
-            className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-lg hover:bg-success-dark font-medium"
+            className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-success text-white rounded-lg hover:bg-success-dark font-medium"
           >
             <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
             {t('tyrant:admin.exportExcel')}
@@ -386,7 +386,7 @@ export default function TyrantPlayers({ round, readOnly, onChanged }: Props) {
                           onClick={() => remove(a)}
                           data-testid={`delete-${a.fid}`}
                           aria-label={t('admin:delete')}
-                          className="p-2 text-danger hover:bg-danger/10 rounded-lg"
+                          className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-danger hover:bg-danger/10 rounded-lg"
                         >
                           <Trash2 className="w-4 h-4" aria-hidden="true" />
                         </button>

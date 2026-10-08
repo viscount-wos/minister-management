@@ -223,13 +223,13 @@ export default function PlayerManagement({
           <button
             onClick={handleExportJSON}
             data-testid="export-json"
-            className="flex items-center gap-2 px-4 py-2 bg-success text-dark-bg rounded-lg hover:bg-success/80 font-medium transition-colors"
+            className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-success text-dark-bg rounded-lg hover:bg-success/80 font-medium transition-colors"
           >
             <Download className="w-4 h-4" aria-hidden="true" />
             {t('admin:exportJSON')}
           </button>
           {!readOnly && (
-            <label className="flex items-center gap-2 px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors cursor-pointer">
+            <label className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-accent text-dark-bg rounded-lg hover:bg-accent-dim font-medium transition-colors cursor-pointer">
               <Upload className="w-4 h-4" aria-hidden="true" />
               {t('admin:importJSON')}
               <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" data-testid="import-json" />
@@ -321,7 +321,7 @@ export default function PlayerManagement({
                       <button
                         onClick={() => startEdit(row)}
                         data-testid={`edit-${row.fid}`}
-                        className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
+                        className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
                         title={t('admin:edit')}
                         aria-label={t('admin:edit')}
                       >
@@ -330,7 +330,7 @@ export default function PlayerManagement({
                       <button
                         onClick={() => setDeleting(row)}
                         data-testid={`delete-${row.fid}`}
-                        className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors"
+                        className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors"
                         title={t('admin:delete')}
                         aria-label={t('admin:delete')}
                       >

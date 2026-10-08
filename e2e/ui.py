@@ -49,7 +49,7 @@ LEGACY_REDIRECTS = {
 PUBLIC_PAGES = ['home', 'ministry', 'apply', 'admin_login', 'player_guide', 'changelog']
 
 # --- languages ------------------------------------------------------------
-# code -> label on the language-switch button (the native name; same in every UI language)
+# code -> option label in the header's language dropdown (the native name; same in every UI language)
 LANGUAGES = {
     'en': 'English', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch', 'pl': 'Polski',
     'ko': '한국어', 'zh': '中文', 'tr': 'Türkçe', 'ar': 'العربية',
@@ -85,11 +85,17 @@ def go(page: Page, base_url: str, route: str) -> None:
     page.wait_for_load_state('networkidle')
 
 
+LANGUAGE_SELECT = 'language-select'     # header dropdown (native <select>, value = language code)
+THEME_SELECT = 'theme-select'
+TIMEZONE_SELECT = 'header-timezone'
+
+
 def switch_language(page: Page, code: str) -> None:
-    page.get_by_role('button', name=LANGUAGES[code], exact=True).click()
+    """Pick a language in the header dropdown (the choice is remembered in localStorage)."""
+    page.get_by_test_id(LANGUAGE_SELECT).select_option(code)
     page.wait_for_function(
-        "dir => document.documentElement.dir === dir",
-        arg='rtl' if code in RTL_LANGUAGES else 'ltr')
+        "([dir, lang]) => document.documentElement.dir === dir && document.documentElement.lang === lang",
+        arg=['rtl' if code in RTL_LANGUAGES else 'ltr', code])
 
 
 def admin_dashboard_url(event: str) -> str:

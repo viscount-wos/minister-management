@@ -36,8 +36,13 @@ def test_home_loads(page: Page, base_url, shot):
     expect(page.locator('h1').first).to_have_text(ui.en('common:home.title'))
     for key in ('ministry', 'tyrant', 'svs', 'tal'):
         expect(page.get_by_test_id(f'event-tile-{key}')).to_be_visible()
+    # one language dropdown listing all 9 by native name (no wall of pills)
+    select = page.get_by_test_id(ui.LANGUAGE_SELECT)
+    expect(select).to_be_visible()
+    expect(select).to_have_accessible_name(ui.en('common:header.language'))
+    assert select.locator('option').all_inner_texts() == list(ui.LANGUAGES.values())
     for name in ui.LANGUAGES.values():
-        expect(page.get_by_role('button', name=name, exact=True)).to_be_visible()
+        expect(page.get_by_role('button', name=name, exact=True)).to_have_count(0)
     assert page.evaluate('document.documentElement.dir') in ('ltr', '')
     shot('home-en')
 
